@@ -79,7 +79,7 @@ def _doctor() -> int:
         else:
             print(f"[ok]      {package_name}")
 
-    for env_name in ("OPENAI_API_KEY", "REFRAME_AGENT_MODEL"):
+    for env_name in ("OPENCODE_GO_API_KEY",):
         status = "set" if os.getenv(env_name) else "not set"
         print(f"[env]     {env_name}: {status}")
 
@@ -98,4 +98,3 @@ async def _plan_turn(
     )
     print(json.dumps(result.model_dump(mode="json"), indent=2))
     return 0
-

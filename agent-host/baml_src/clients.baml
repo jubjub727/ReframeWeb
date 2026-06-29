@@ -1,9 +1,10 @@
-client<llm> AgentFlowModel {
-  provider openai-responses
+client<llm> ConversationTurnPlanningModel {
+  provider openai-generic
   retry_policy AgentFlowRetry
   options {
-    model env.REFRAME_AGENT_MODEL
-    api_key env.OPENAI_API_KEY
+    base_url "https://opencode.ai/zen/go/v1"
+    model "deepseek-v4-pro"
+    api_key env.OPENCODE_GO_API_KEY
   }
 }
 

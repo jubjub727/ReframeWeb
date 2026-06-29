@@ -37,7 +37,7 @@ function PlanConversationTurn(
   conversation_mode: ConversationMode,
   playback_state: PlaybackState
 ) -> AgentTurnPlan {
-  client AgentFlowModel
+  client ConversationTurnPlanningModel
   prompt #"
     You are planning one turn of the ReframeWeb Agent Host.
 

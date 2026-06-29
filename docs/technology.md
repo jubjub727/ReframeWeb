@@ -24,6 +24,20 @@ into BAML so the host can decide what should happen next.
 
 The current scaffold uses `baml-py` and BAML's generated Python client.
 
+Model calls are intended to go through OpenCode Go using its OpenAI-compatible
+endpoint. The Agent Host reads `OPENCODE_GO_API_KEY` from the environment.
+
+Model use is a BAML choice, not user-selected global configuration and not
+Python-side model routing. Each agentic task should have an explicit model
+assignment in BAML. The current conversation-turn planning flow is assigned to
+`deepseek-v4-pro`.
+
+Current intended OpenCode Go model IDs include:
+
+- `kimi-k2.7-code`
+- `deepseek-v4-pro`
+- `deepseek-v4-flash`
+
 ## Audio Pipeline
 
 The planned audio pipeline uses:

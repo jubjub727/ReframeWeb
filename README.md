@@ -119,8 +119,19 @@ uv run baml generate
 uv run reframe-agent-host doctor
 ```
 
-Set `OPENAI_API_KEY` and `REFRAME_AGENT_MODEL` before running BAML flow calls
-that need a model.
+The Agent Host uses OpenCode Go through its OpenAI-compatible endpoint and reads
+the API key from `OPENCODE_GO_API_KEY`.
+
+Model use is a BAML choice, not user-selected global configuration and not
+Python-side model routing. Each agentic task should have an explicit model
+assignment in BAML. The current conversation-turn planning flow is assigned to
+`deepseek-v4-pro`.
+
+Current intended OpenCode Go model IDs include:
+
+- `kimi-k2.7-code`
+- `deepseek-v4-pro`
+- `deepseek-v4-flash`
 
 ## Development Philosophy
 
