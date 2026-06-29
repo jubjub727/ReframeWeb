@@ -59,6 +59,8 @@ workflow layer, not to preserve the browser as the underlying concept.
 
 ReframeWeb is driven by a small set of deliberate technology choices:
 
+More detail is tracked in [Technology](docs/technology.md).
+
 - **Rust** for Semantic Stores, native CEF/window agentic bindings, Data Lenses,
   Compute Modules, and memory-related runtime components.
 - **CEF** as the embedded rendering and native windowing foundation for Visual
