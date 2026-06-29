@@ -8,9 +8,10 @@ ReframeWeb treats interactive work as a combination of agent-readable semantic
 capabilities, user-visible visual panels, persistent memory, and deterministic
 compute tools.
 
-The project combines native visual panels, React interfaces, Rust-based semantic
-stores, optional support layers, specialized deterministic compute modules, and a
-Python agent host for conversational flow.
+The project starts from the user interaction loop: Python receives audio, BAML
+drives the agentic flow, and the rest of the system is called from there. Native
+visual panels, a transport layer, WebAssembly Stores, Data Lenses, Compute
+Modules, and memory hang off that host-driven flow.
 
 ## Core Premise
 
@@ -19,10 +20,14 @@ and visual interaction as the primary interface. ReframeWeb starts from a
 different assumption: agents and users should share a richer interaction surface
 where semantic capabilities are first-class.
 
-In ReframeWeb, an experience is built around a **Semantic Store**: a guided API
-surface containing resources, functions, schemas, permissions, and usage hints.
-Agents can use the Store directly, while users interact with dynamic **Visual
-Panels** that render useful state and controls.
+In ReframeWeb, the first runtime surface is the **Agent Host**: a Python process
+that receives audio, coordinates BAML, and routes work through native windows,
+transport calls, Stores, Lenses, Compute Modules, and memory.
+
+The shared substrate for those components is a transport layer spec. A
+**Semantic Store** is WebAssembly code that implements that spec, exposing
+resources, functions, schemas, permissions, and usage hints through the transport
+rather than existing as a normal application library.
 
 CEF is used as a rendering and native windowing foundation for Visual Panels. It
 is not the product's central abstraction. The goal is to build a new agent-native
@@ -38,13 +43,19 @@ workflow layer, not to preserve the browser as the underlying concept.
 
 ## Main Components
 
-- **Semantic Store**: A Rust-defined API surface containing resources and
-  functions that agents can discover and call.
+- **Agent Host**: A Python manager that handles conversational flow, audio input,
+  transcription, BAML-driven agent logic, routing, memory coordination, and TTS
+  playback.
+- **BAML Flow**: The first agentic decision layer. Audio is transcribed and
+  passed into BAML so the host can decide what should happen next.
+- **Transport Layer**: A protocol surface, similar in role to HTTP, that will
+  define routing, calls, streaming, and component interaction between Stores,
+  Lenses, Views, and Compute.
+- **Semantic Store**: WebAssembly code that implements the transport layer spec
+  and exposes resources and functions agents can discover and call.
 - **Visual Panel**: A React display surface shown in a native CEF-backed panel
   window. Users can see state and occasionally click or scroll, but required
   functionality should be exposed for agent-driven control.
-- **Agent Host**: A Python manager that handles conversational flow, audio input,
-  transcription, BAML-driven agent logic, and TTS playback.
 - **Data Lens**: An optional Rust support layer between a Store and a Visual
   Panel. It is for cases where behavior needs to differ substantially from the
   original site or application intent, or where the Store lacks a sensible API
@@ -61,15 +72,17 @@ ReframeWeb is driven by a small set of deliberate technology choices:
 
 More detail is tracked in [Technology](docs/technology.md).
 
-- **Rust** for Semantic Stores, native CEF/window agentic bindings, Data Lenses,
-  Compute Modules, and memory-related runtime components.
+- **Rust** for native CEF/window agentic bindings, Data Lenses, Compute Modules,
+  memory-related runtime components, and likely Store implementations compiled
+  to WebAssembly.
 - **CEF** as the embedded rendering and native windowing foundation for Visual
   Panels. CEF is infrastructure here, not the conceptual model of the product.
 - **React** for Visual Panel content, display state, Store-backed data fetching,
   and any user-visible controls.
 - **Python** for the Agent Host, which owns setup, the main agentic flow, audio
-  processing, Store coordination, memory coordination, and TTS playback.
+  processing, transport coordination, memory coordination, and TTS playback.
 - **BAML** for driving the agentic flow logic from the Python Agent Host.
+- **WebAssembly** for Semantic Stores that implement the transport layer spec.
 - **Graph database storage** for memory, including tagged memory nodes,
   descriptions, created/read/modified timestamps, relationships, and recency-aware
   retrieval.
@@ -87,21 +100,35 @@ talking without destroying the underlying work the agent was already performing.
 
 ## Current Status
 
-This repository is at the planning and scaffolding stage. The first milestone is
-to establish the project shape, shared vocabulary, and the first real
-implementation slice:
+This repository is at the planning and scaffolding stage. The first committed
+scaffold starts at the user interaction boundary:
 
-1. The initial Semantic Store foundation.
-2. The initial React Visual Panel foundation.
-3. The first Agent Host command path.
-4. The first memory lookup path.
-5. A clear contract between those pieces.
+1. A `uv`-managed Python Agent Host.
+2. A BAML conversation-turn planner generated into the Python package.
+3. Real dependencies for audio input, wake detection, VAD, transcription, and
+   TTS.
+4. A `doctor` command that verifies the installed host stack.
+
+## Agent Host Setup
+
+```powershell
+cd agent-host
+uv sync
+uv run baml check
+uv run baml generate
+uv run reframe-agent-host doctor
+```
+
+Set `OPENAI_API_KEY` and `REFRAME_AGENT_MODEL` before running BAML flow calls
+that need a model.
 
 ## Development Philosophy
 
 ReframeWeb is being designed around a few working principles:
 
 - Agent-native semantic interfaces should be the primary interaction layer.
+- The first implementation path starts where the user interacts: audio into the
+  Python Agent Host, then BAML-driven agentic flow.
 - Visual Panels are React display outputs for showing useful state and controls.
   Users may click or scroll when they want to, but core functionality should be
   available to the agent rather than requiring manual UI operation.

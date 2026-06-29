@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+agent-host/.venv/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Audio/model artifacts
+*.wav
+*.mp3
+*.flac
+*.onnx
+*.pt
+*.pth
+*.safetensors
+models/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

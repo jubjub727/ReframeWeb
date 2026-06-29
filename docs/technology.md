@@ -4,18 +4,39 @@ This document tracks the core technology choices currently intended for
 ReframeWeb. It should describe the actual project direction rather than a
 temporary or cut-down version of it.
 
-## Rust
+## Python Agent Host
 
-Rust is used for the systems-level parts of ReframeWeb:
+Python is used for the Agent Host, which is the first runtime surface being
+scaffolded.
 
-- Semantic Stores.
-- Native CEF and window agentic bindings.
-- Data Lenses.
-- Compute Modules.
-- Memory-related runtime components.
+The Agent Host owns setup and the main agentic flow. It coordinates processed
+audio from the user's microphone, BAML-driven agent logic, transport calls,
+memory access, native window calls, and TTS playback.
 
-Rust is the default choice when a component needs strong boundaries,
-deterministic behavior, native integration, or predictable performance.
+The project uses `uv` for Python dependency and environment management.
+
+## BAML
+
+BAML is used for the agentic flow logic called from the Python Agent Host.
+
+Spoken prompts are processed through the audio pipeline, transcribed, and passed
+into BAML so the host can decide what should happen next.
+
+The current scaffold uses `baml-py` and BAML's generated Python client.
+
+## Audio Pipeline
+
+The planned audio pipeline uses:
+
+- `sounddevice` for microphone input and audio playback control.
+- `pvporcupine` for trigger word detection, including "Agent do x" and
+  conversation mode toggles such as "conversation on" and "conversation off".
+- `silero-vad` for voice activity detection.
+- `faster-whisper` for speech transcription.
+- `kokoro` for TTS playback using the `af_heart` voice.
+
+Audio playback should be cancellable when the user starts talking, without
+destroying the underlying agent task that was already in progress.
 
 ## CEF
 
@@ -35,14 +56,28 @@ occasional user interaction such as clicking or scrolling. Required
 functionality should be exposed through the agent-driven surface rather than
 depending on manual UI operation.
 
+## Transport Layer
+
+The transport layer is the shared protocol surface between the Agent Host,
+native windows, Visual Panels, WebAssembly Stores, Data Lenses, and Compute
+Modules.
+
+It should play a role closer to HTTP than to an application library: defining
+routing, calls, streaming, structured data exchange, and component interaction.
+
+The first Store should come after this transport layer is specified.
+
 ## Semantic Stores
 
-Semantic Stores are Rust-defined guided API surfaces. They expose resources and
-functions that agents can discover and call.
+Semantic Stores are WebAssembly components that implement the transport layer
+spec. They expose resources and functions that agents can discover and call.
 
 Stores are intended to be the primary way agents interact with an experience.
 They should provide enough structure that agents do not need to rely on visual
 guessing, DOM-style control, or manual UI paths for required functionality.
+
+Stores may be authored in Rust first, but the architectural contract is the
+WebAssembly component implementing the transport layer, not a Rust library.
 
 ## Data Lenses
 
@@ -64,34 +99,18 @@ slow down the agentic flow and make the system harder to use. Agents should
 primarily use the Store directly, with Compute Modules reserved for work that
 benefits from being made deterministic and reusable.
 
-## Python Agent Host
+## Rust
 
-Python is used for the Agent Host.
+Rust is used where ReframeWeb needs strong boundaries, deterministic behavior,
+native integration, predictable performance, or WebAssembly output.
 
-The Agent Host owns setup and the main agentic flow. It coordinates processed
-audio from the user's microphone, BAML-driven agent logic, Store calls, memory
-access, and TTS playback.
+Expected Rust-owned areas include:
 
-## BAML
-
-BAML is used for the agentic flow logic called from the Python Agent Host.
-
-Spoken prompts are processed through the audio pipeline, transcribed, and then
-passed into the BAML-driven flow.
-
-## Audio Pipeline
-
-The planned audio pipeline uses:
-
-- `sounddevice` for microphone input and audio playback control.
-- `pvporcupine` for trigger word detection, including "Agent do x" and
-  conversation mode toggles such as "conversation on" and "conversation off".
-- `silero-vad` for voice activity detection.
-- `faster-whisper` for speech transcription.
-- `kokoro` for TTS playback using the `af_heart` voice.
-
-Audio playback should be cancellable when the user starts talking, without
-destroying the underlying agent task that was already in progress.
+- Native CEF and window agentic bindings.
+- Data Lenses.
+- Compute Modules.
+- Memory-related runtime components.
+- Store implementations compiled to WebAssembly.
 
 ## Memory Graph
 
