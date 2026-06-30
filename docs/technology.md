@@ -43,8 +43,9 @@ Current intended OpenCode Go model IDs include:
 The planned audio pipeline uses:
 
 - `sounddevice` for microphone input and audio playback control.
-- `pvporcupine` for trigger word detection, including "Agent do x" and
-  conversation mode toggles such as "conversation on" and "conversation off".
+- `pocketsphinx` for free local keyphrase spotting and phrase confirmation,
+  including "jarvis do x" and conversation mode triggers such as "conversation
+  on".
 - `silero-vad` for voice activity detection.
 - `faster-whisper` for speech transcription.
 - `kokoro` for TTS playback using the `af_heart` voice.

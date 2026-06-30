@@ -1029,6 +1029,17 @@ wheels = [
 ]
 
 [[package]]
+name = "nvidia-cublas-cu12"
+version = "12.9.2.10"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "nvidia-cuda-nvrtc-cu12" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/20/e2/fc9a0e985249d873150276d5afb02e39a66817fedbf1a385724393e505ed/nvidia_cublas_cu12-12.9.2.10-py3-none-win_amd64.whl", hash = "sha256:623f43027d40d44ceadf0043f002bd25cf353e8f13ce90b9a87057019f560661", size = 553162896, upload-time = "2026-04-08T18:53:10.035Z" },
+]
+
+[[package]]
 name = "nvidia-cuda-cupti"
 version = "13.0.85"
 source = { registry = "https://pypi.org/simple" }
@@ -1047,12 +1058,28 @@ wheels = [
 ]
 
 [[package]]
+name = "nvidia-cuda-nvrtc-cu12"
+version = "12.9.86"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/52/de/823919be3b9d0ccbf1f784035423c5f18f4267fb0123558d58b813c6ec86/nvidia_cuda_nvrtc_cu12-12.9.86-py3-none-win_amd64.whl", hash = "sha256:72972ebdcf504d69462d3bcd67e7b81edd25d0fb85a2c46d3ea3517666636349", size = 76408187, upload-time = "2025-06-05T20:12:27.819Z" },
+]
+
+[[package]]
 name = "nvidia-cuda-runtime"
 version = "13.0.96"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/87/4f/17d7b9b8e285199c58ce28e31b5c5bbaa4d8271af06a89b6405258245de2/nvidia_cuda_runtime-13.0.96-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:ef9bcbe90493a2b9d810e43d249adb3d02e98dd30200d86607d8d02687c43f55", size = 2261060, upload-time = "2025-10-09T08:55:15.78Z" },
     { url = "https://files.pythonhosted.org/packages/2e/24/d1558f3b68b1d26e706813b1d10aa1d785e4698c425af8db8edc3dced472/nvidia_cuda_runtime-13.0.96-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:7f82250d7782aa23b6cfe765ecc7db554bd3c2870c43f3d1821f1d18aebf0548", size = 2243632, upload-time = "2025-10-09T08:55:36.117Z" },
+]
+
+[[package]]
+name = "nvidia-cuda-runtime-cu12"
+version = "12.9.79"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/59/df/e7c3a360be4f7b93cee39271b792669baeb3846c58a4df6dfcf187a7ffab/nvidia_cuda_runtime_cu12-12.9.79-py3-none-win_amd64.whl", hash = "sha256:8e018af8fa02363876860388bd10ccb89eb9ab8fb0aa749aaf58430a9f7c4891", size = 3591604, upload-time = "2025-06-05T20:11:17.036Z" },
 ]
 
 [[package]]
@@ -1226,6 +1253,23 @@ wheels = [
 ]
 
 [[package]]
+name = "pocketsphinx"
+version = "5.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "sounddevice" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/61/e7/13e0e787ff467218de880310d79cba14424f13b87171ac44af0bde1e428c/pocketsphinx-5.1.1.tar.gz", hash = "sha256:675778b309a22dfc9b7d37f7621976bba491d2a5f8c59696bd77fd6d07271355", size = 34158862, upload-time = "2026-06-06T17:33:13.04Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/06/e1/c2820011a5a1c8931f50d9add2af4591a0f531b2d810bc0fe1bf048079ef/pocketsphinx-5.1.1-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:8de78671858278dbe97bf9578ea25a70ac2162d49a3218155c874058ba4554fc", size = 29501688, upload-time = "2026-06-06T17:32:39.47Z" },
+    { url = "https://files.pythonhosted.org/packages/20/9f/74d921c7338dbd7cd40609b0a1b5e7a5e5a2acd23aaa2f6004fb729639cc/pocketsphinx-5.1.1-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:c6741bebbec5a10d08971bd2fdc0a6c1f876ad20a27f73c598e81654612794d6", size = 29130736, upload-time = "2026-06-06T17:32:44.849Z" },
+    { url = "https://files.pythonhosted.org/packages/d1/32/630fb5b204d354fbf408218e8c9019354d33c70d0b647eb52f8d4d0ab86e/pocketsphinx-5.1.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:38ff34e47b35f0caa1b58939806c4ab86c234a13536299c8c929a3cb45761941", size = 29163925, upload-time = "2026-06-06T17:32:49.841Z" },
+    { url = "https://files.pythonhosted.org/packages/17/cc/082f70632d6474052cace9c4cc4b0ce8666eb4b52553187b05d15c0e65d6/pocketsphinx-5.1.1-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:9328118d15c150b88885d79765e663f3c42a3601bb8c15e9ff42f44428b10d61", size = 29138503, upload-time = "2026-06-06T17:32:54.276Z" },
+    { url = "https://files.pythonhosted.org/packages/6a/f5/b29391d051323e95f3408b2400f459f6e86e5b8449bfd38f80eb18bb3e63/pocketsphinx-5.1.1-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:0ffe854397b11546a9f629472367c8b668583a5ebfefbc129a80875e0ec70bee", size = 29166295, upload-time = "2026-06-06T17:33:00.642Z" },
+    { url = "https://files.pythonhosted.org/packages/43/d3/2ba1b70b1995f298bdc2430e78d40bb989fe390f685153c59513692e67bd/pocketsphinx-5.1.1-cp313-cp313-win_amd64.whl", hash = "sha256:2ba7e6789a67119f581b85d156e523cd1876af5d30ebacbf7ed3cd85f61ec382", size = 29038645, upload-time = "2026-06-06T17:33:07.553Z" },
+]
+
+[[package]]
 name = "preshed"
 version = "3.0.13"
 source = { registry = "https://pypi.org/simple" }
@@ -1282,18 +1326,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d8/bc/6d6c7ba8709c85f8f2c390b2b118d6fb08a783676a572271851bf45a7d22/protobuf-7.35.1-cp310-abi3-win32.whl", hash = "sha256:353652e4efd0bca5b5fc2656abf8307ef351f0cf938c9eba09f0e09c20a25c30", size = 428945, upload-time = "2026-06-11T21:55:37.034Z" },
     { url = "https://files.pythonhosted.org/packages/0a/19/8d0cb6f20a1ef7b18f1c8986ad5783f22f84cce39c6ce9a6e645ea55192e/protobuf-7.35.1-cp310-abi3-win_amd64.whl", hash = "sha256:230a75ddfc2de4806e56696ce9640c1cdfdb6543b7cfce98d42a4c0a0e7bdb87", size = 439996, upload-time = "2026-06-11T21:55:38.123Z" },
     { url = "https://files.pythonhosted.org/packages/19/c7/5f7c636ec43e0c545e28d1f1db71990108306f7bdcb89f069ba97e428e7f/protobuf-7.35.1-py3-none-any.whl", hash = "sha256:4bc97768d8fe4ad6743c8a19403e314511ed9f6d13205b687e52421c023ac1b9", size = 171659, upload-time = "2026-06-11T21:55:39.155Z" },
-]
-
-[[package]]
-name = "pvporcupine"
-version = "4.0.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "requests" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b2/37/db209e19c4e1d931d1752bdf05c763f119271bb79661d482bdf5f564f662/pvporcupine-4.0.3.tar.gz", hash = "sha256:87d0e4d743a13c3a15b1fb34a9ced66e14bb1125ae079f2e2c09423364a68386", size = 3643620, upload-time = "2026-06-25T21:58:11.366Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2a/ef/1c4b8e47d8248fe1b615772028265ca65d9ff3ea98022d84cd973d46db87/pvporcupine-4.0.3-py3-none-any.whl", hash = "sha256:92796dbd3cf80a56db1ce20702cbceb151aee34f19ef730591f815eb16f2ebfb", size = 3659883, upload-time = "2026-06-25T21:58:08.805Z" },
 ]
 
 [[package]]
@@ -1505,7 +1537,10 @@ dependencies = [
     { name = "baml-py" },
     { name = "faster-whisper" },
     { name = "kokoro" },
-    { name = "pvporcupine" },
+    { name = "numpy" },
+    { name = "nvidia-cublas-cu12", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'" },
+    { name = "nvidia-cuda-runtime-cu12", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'" },
+    { name = "pocketsphinx" },
     { name = "silero-vad" },
     { name = "sounddevice" },
 ]
@@ -1515,7 +1550,10 @@ requires-dist = [
     { name = "baml-py", specifier = ">=0.223.0" },
     { name = "faster-whisper", specifier = ">=1.2.1" },
     { name = "kokoro", specifier = ">=0.9.4" },
-    { name = "pvporcupine", specifier = ">=4.0.3" },
+    { name = "numpy", specifier = ">=2.0.0" },
+    { name = "nvidia-cublas-cu12", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'", specifier = ">=12.0.0" },
+    { name = "nvidia-cuda-runtime-cu12", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'", specifier = ">=12.0.0" },
+    { name = "pocketsphinx", specifier = ">=5.0.0" },
     { name = "silero-vad", specifier = ">=6.2.1" },
     { name = "sounddevice", specifier = ">=0.5.5" },
 ]
