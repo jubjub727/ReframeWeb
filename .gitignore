@@ -15,6 +15,7 @@ agent-host/.venv/
 !.env.example
 
 # Audio/model artifacts
+.debug-audio/
 *.wav
 *.mp3
 *.flac
