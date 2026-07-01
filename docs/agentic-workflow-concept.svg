@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1500" viewBox="0 0 2200 1500" role="img" aria-labelledby="title desc">
+  <title id="title">Agentic workflow concept</title>
+  <desc id="desc">A conceptual flow chart showing a voice-driven BAML request loop. Task memories live inside the memory graph. The agent selects a task memory, retrieves focused per-task context, validates task completion, and keeps selecting tasks until the original user request is fulfilled.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#263447"/>
+    </marker>
+    <marker id="loopArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b45309"/>
+    </marker>
+    <style>
+      .bg { fill: #f8f5ef; }
+      .title { font: 700 52px "Segoe UI", Arial, sans-serif; fill: #172033; }
+      .subtitle { font: 400 24px "Segoe UI", Arial, sans-serif; fill: #556070; }
+      .section { fill: #fffdf9; stroke: #cbd5e1; stroke-width: 3; }
+      .section-title { font: 700 29px "Segoe UI", Arial, sans-serif; fill: #172033; }
+      .section-note { font: 400 18px "Segoe UI", Arial, sans-serif; fill: #556070; }
+      .node-title { font: 700 24px "Segoe UI", Arial, sans-serif; fill: #172033; }
+      .node-body { font: 400 17px "Segoe UI", Arial, sans-serif; fill: #334155; }
+      .small-title { font: 700 20px "Segoe UI", Arial, sans-serif; fill: #172033; }
+      .small-body { font: 400 15px "Segoe UI", Arial, sans-serif; fill: #334155; }
+      .arrow { fill: none; stroke: #263447; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+      .thin-arrow { fill: none; stroke: #263447; stroke-width: 3.3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+      .loop { fill: none; stroke: #b45309; stroke-width: 4; stroke-dasharray: 14 12; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#loopArrow); }
+      .flow-label { font: 700 17px "Segoe UI", Arial, sans-serif; fill: #0f766e; }
+      .loop-label { font: 700 17px "Segoe UI", Arial, sans-serif; fill: #92400e; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="2200" height="1500"/>
+
+  <text class="title" x="70" y="78">Agentic Workflow Concept</text>
+  <text class="subtitle" x="72" y="118">Voice input enters a BAML request loop that selects task memories from the memory graph.</text>
+  <text class="subtitle" x="72" y="150">Each task builds focused context, validates its output, and the wider loop keeps going until the original request is fulfilled.</text>
+
+  <g transform="translate(70 205)">
+    <rect width="250" height="112" rx="18" fill="#e0faf3" stroke="#0f766e" stroke-width="3"/>
+    <text class="node-title" x="24" y="43">Wake word</text>
+    <text class="node-body" x="24" y="78">Start bounded</text>
+    <text class="node-body" x="24" y="101">audio capture.</text>
+  </g>
+
+  <g transform="translate(375 205)">
+    <rect width="270" height="112" rx="18" fill="#e8f2ff" stroke="#2563eb" stroke-width="3"/>
+    <text class="node-title" x="24" y="43">Speech pipeline</text>
+    <text class="node-body" x="24" y="78">VAD, transcription,</text>
+    <text class="node-body" x="24" y="101">conversation turn.</text>
+  </g>
+
+  <g transform="translate(700 185)">
+    <rect width="340" height="150" rx="20" fill="#f0e8ff" stroke="#7c3aed" stroke-width="3"/>
+    <text class="node-title" x="26" y="46">BAML request loop</text>
+    <text class="node-body" x="26" y="86">Keeps the original prompt</text>
+    <text class="node-body" x="26" y="111">in view while selecting</text>
+    <text class="node-body" x="26" y="136">task memories.</text>
+  </g>
+
+  <path class="arrow" d="M 320 261 L 375 261"/>
+  <path class="arrow" d="M 645 261 L 700 261"/>
+
+  <rect class="section" x="1140" y="165" width="980" height="275" rx="28"/>
+  <text class="section-title" x="1178" y="212">Memory graph</text>
+  <text class="section-note" x="1179" y="244">Tasks are memory records alongside conversation history, preferences,</text>
+  <text class="section-note" x="1179" y="268">prior outcomes, Store knowledge, and interaction traces.</text>
+
+  <g transform="translate(1180 305)">
+    <rect width="220" height="80" rx="16" fill="#fff3d6" stroke="#d97706" stroke-width="3"/>
+    <text class="small-title" x="18" y="34">Task memories</text>
+    <text class="small-body" x="18" y="61">Interfaces + contracts.</text>
+  </g>
+  <g transform="translate(1440 305)">
+    <rect width="200" height="80" rx="16" fill="#e0faf3" stroke="#0f766e" stroke-width="3"/>
+    <text class="small-title" x="18" y="34">Conversation</text>
+    <text class="small-body" x="18" y="61">History memories.</text>
+  </g>
+  <g transform="translate(1680 305)">
+    <rect width="190" height="80" rx="16" fill="#e9fbe8" stroke="#15803d" stroke-width="3"/>
+    <text class="small-title" x="18" y="34">Preferences</text>
+    <text class="small-body" x="18" y="61">User habits.</text>
+  </g>
+  <g transform="translate(1910 305)">
+    <rect width="170" height="80" rx="16" fill="#eef3f7" stroke="#475569" stroke-width="3"/>
+    <text class="small-title" x="18" y="34">Outcomes</text>
+    <text class="small-body" x="18" y="61">Results + traces.</text>
+  </g>
+
+  <g transform="translate(700 385)">
+    <rect width="340" height="100" rx="18" fill="#fff3d6" stroke="#d97706" stroke-width="3"/>
+    <text class="node-title" x="24" y="41">Search task memories</text>
+    <text class="node-body" x="24" y="76">Read all task memories</text>
+    <text class="node-body" x="24" y="98">and their interfaces.</text>
+  </g>
+
+  <g transform="translate(700 535)">
+    <rect width="340" height="100" rx="18" fill="#ffe8ef" stroke="#e11d48" stroke-width="3"/>
+    <text class="node-title" x="24" y="41">Task choice model</text>
+    <text class="node-body" x="24" y="76">Pick the task memory</text>
+    <text class="node-body" x="24" y="98">that best advances the ask.</text>
+  </g>
+
+  <g transform="translate(700 685)">
+    <rect width="340" height="100" rx="18" fill="#eef3f7" stroke="#475569" stroke-width="3"/>
+    <text class="node-title" x="24" y="41">Selected task memory</text>
+    <text class="node-body" x="24" y="76">Provides the interface and</text>
+    <text class="node-body" x="24" y="98">expected output shape.</text>
+  </g>
+
+  <path class="arrow" d="M 870 335 L 870 385"/>
+  <path class="thin-arrow" d="M 1140 345 L 1040 435"/>
+  <text class="flow-label" x="1050" y="374">Task memories + interfaces</text>
+  <path class="arrow" d="M 870 485 L 870 535"/>
+  <path class="arrow" d="M 870 635 L 870 685"/>
+
+  <rect class="section" x="70" y="840" width="2060" height="400" rx="30"/>
+  <text class="section-title" x="110" y="890">Selected task cycle</text>
+  <text class="section-note" x="111" y="918">A task evaluates conversation history, chooses memory-search breadth, executes, and validates before the outer request loop decides what is still needed.</text>
+
+  <rect class="section" x="110" y="955" width="930" height="235" rx="22"/>
+  <text class="section-title" x="142" y="1000">Per-task memory context retrieval</text>
+  <g transform="translate(145 1050)">
+    <rect width="160" height="78" rx="15" fill="#e0faf3" stroke="#0f766e" stroke-width="3"/>
+    <text class="small-title" x="16" y="33">Evaluate</text>
+    <text class="small-title" x="16" y="58">conversation</text>
+  </g>
+  <g transform="translate(350 1050)">
+    <rect width="190" height="78" rx="15" fill="#e8f2ff" stroke="#2563eb" stroke-width="3"/>
+    <text class="small-title" x="16" y="33">Choose search</text>
+    <text class="small-title" x="16" y="58">breadth</text>
+  </g>
+  <g transform="translate(585 1050)">
+    <rect width="170" height="78" rx="15" fill="#e9fbe8" stroke="#15803d" stroke-width="3"/>
+    <text class="small-title" x="16" y="33">Retrieve</text>
+    <text class="small-title" x="16" y="58">candidates</text>
+  </g>
+  <g transform="translate(790 1050)">
+    <rect width="180" height="78" rx="15" fill="#f0e8ff" stroke="#7c3aed" stroke-width="3"/>
+    <text class="small-title" x="16" y="33">Relevance</text>
+    <text class="small-title" x="16" y="58">model</text>
+  </g>
+  <g transform="translate(395 1150)">
+    <rect width="310" height="70" rx="15" fill="#fff3d6" stroke="#d97706" stroke-width="3"/>
+    <text class="small-title" x="18" y="32">Focused task context</text>
+    <text class="small-body" x="18" y="56">Only relevant memories stay loaded.</text>
+  </g>
+
+  <path class="thin-arrow" d="M 305 1089 L 350 1089"/>
+  <path class="thin-arrow" d="M 540 1089 L 585 1089"/>
+  <path class="thin-arrow" d="M 745 1089 L 790 1089"/>
+  <path class="thin-arrow" d="M 880 1128 L 880 1185 L 705 1185"/>
+
+  <rect class="section" x="1110" y="955" width="980" height="235" rx="22"/>
+  <text class="section-title" x="1142" y="1000">Task execution and validation</text>
+  <g transform="translate(1145 1050)">
+    <rect width="250" height="78" rx="15" fill="#eef3f7" stroke="#475569" stroke-width="3"/>
+    <text class="small-title" x="16" y="31">Run task</text>
+    <text class="small-body" x="16" y="55">Store, Panel, Lens,</text>
+    <text class="small-body" x="16" y="72">or Compute Module.</text>
+  </g>
+  <g transform="translate(1430 1050)">
+    <rect width="210" height="78" rx="15" fill="#e8f2ff" stroke="#2563eb" stroke-width="3"/>
+    <text class="small-title" x="16" y="33">Output</text>
+    <text class="small-title" x="16" y="58">description</text>
+  </g>
+  <g transform="translate(1695 1050)">
+    <rect width="230" height="78" rx="15" fill="#ffe8ef" stroke="#e11d48" stroke-width="3"/>
+    <text class="small-title" x="16" y="33">Review task</text>
+    <text class="small-title" x="16" y="58">completion</text>
+  </g>
+  <g transform="translate(1415 1150)">
+    <rect width="260" height="70" rx="15" fill="#fff3d6" stroke="#d97706" stroke-width="3"/>
+    <text class="small-title" x="18" y="32">Task complete?</text>
+    <text class="small-body" x="18" y="56">If no, refine the same task.</text>
+  </g>
+
+  <path class="thin-arrow" d="M 705 1185 L 1080 1185 L 1080 1089 L 1145 1089"/>
+  <text class="flow-label" x="925" y="1162">Focused context</text>
+  <path class="thin-arrow" d="M 1395 1089 L 1430 1089"/>
+  <path class="thin-arrow" d="M 1640 1089 L 1695 1089"/>
+  <path class="thin-arrow" d="M 1810 1128 L 1810 1185 L 1675 1185"/>
+  <path class="loop" d="M 1415 1185 L 1235 1185 L 1235 1128"/>
+  <text class="loop-label" x="1248" y="1166">Refine same task</text>
+
+  <path class="arrow" d="M 870 785 L 870 840"/>
+
+  <g transform="translate(620 1330)">
+    <rect width="510" height="110" rx="20" fill="#fff3d6" stroke="#d97706" stroke-width="3"/>
+    <text class="node-title" x="26" y="43">Original request fulfilled?</text>
+    <text class="node-body" x="26" y="80">Review accumulated task results</text>
+    <text class="node-body" x="26" y="103">against the user's first prompt.</text>
+  </g>
+
+  <g transform="translate(1485 1330)">
+    <rect width="430" height="110" rx="20" fill="#e9fbe8" stroke="#15803d" stroke-width="3"/>
+    <text class="node-title" x="26" y="43">Final response</text>
+    <text class="node-body" x="26" y="80">Answer the user and write useful</text>
+    <text class="node-body" x="26" y="103">memories back to the graph.</text>
+  </g>
+
+  <path class="arrow" d="M 1545 1220 L 1545 1285 L 875 1285 L 875 1330"/>
+  <text class="flow-label" x="1240" y="1265">Completed task result</text>
+  <path class="thin-arrow" d="M 1130 1385 L 1485 1385"/>
+  <text class="flow-label" x="1300" y="1363">Yes</text>
+  <path class="loop" d="M 875 1440 L 875 1470 L 2160 1470 L 2160 585 L 1040 585"/>
+  <text class="loop-label" x="1510" y="1448">No: choose another task memory</text>
+</svg>
