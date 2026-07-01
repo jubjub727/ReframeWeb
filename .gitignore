@@ -13,6 +13,7 @@ agent-host/.venv/
 .env
 .env.*
 !.env.example
+.reframe-memory/
 
 # Audio/model artifacts
 .debug-audio/

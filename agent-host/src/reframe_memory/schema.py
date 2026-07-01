@@ -1,0 +1,15 @@
+from __future__ import annotations
+
+
+SCHEMA_STATEMENTS: tuple[str, ...] = (
+    "DEFINE TABLE IF NOT EXISTS memory_root SCHEMAFULL;",
+    "DEFINE FIELD IF NOT EXISTS name ON TABLE memory_root TYPE string;",
+    "DEFINE FIELD IF NOT EXISTS description ON TABLE memory_root TYPE string;",
+    "DEFINE TABLE IF NOT EXISTS memory_node SCHEMAFULL;",
+    "DEFINE FIELD IF NOT EXISTS tags ON TABLE memory_node TYPE array<string> DEFAULT [];",
+    "DEFINE FIELD OVERWRITE content ON TABLE memory_node FLEXIBLE TYPE object;",
+    "DEFINE FIELD IF NOT EXISTS created_at ON TABLE memory_node TYPE datetime;",
+    "DEFINE FIELD IF NOT EXISTS updated_at ON TABLE memory_node TYPE datetime;",
+    "DEFINE FIELD IF NOT EXISTS read_at ON TABLE memory_node TYPE option<datetime>;",
+    "DEFINE TABLE IF NOT EXISTS contains TYPE RELATION IN memory_root OUT memory_node;",
+)
