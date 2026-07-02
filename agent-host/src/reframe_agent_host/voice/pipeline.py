@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import time
 
-from reframe_agent_host.agent_flow.planning import ConversationPlanner
+from reframe_agent_host.agent_flow.conversation_evaluation import (
+    ConversationEvaluationPlanner,
+)
+from reframe_agent_host.agent_flow.task_choice import TaskChoicePlanner
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
 from reframe_agent_host.voice.turn_capture import VoiceTurnCapture
@@ -20,12 +23,16 @@ class VoiceTurnPipeline:
         self._conversation_mode = config.conversation_mode
         self._transcriber = FasterWhisperTranscriber(config.transcription)
         self._trigger_matcher = TriggerPhraseMatcher(config.triggers)
-        self._planner = ConversationPlanner()
+        self._planner = TaskChoicePlanner(session_id=config.session_id)
+        self._conversation_evaluation = ConversationEvaluationPlanner(
+            session_id=config.session_id,
+        )
         self._processor = VoiceTurnProcessor(
             config,
             self._transcriber,
             self._trigger_matcher,
             self._planner,
+            self._conversation_evaluation,
         )
 
     async def run_once(

@@ -12,4 +12,9 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     "DEFINE FIELD IF NOT EXISTS updated_at ON TABLE memory_node TYPE datetime;",
     "DEFINE FIELD IF NOT EXISTS read_at ON TABLE memory_node TYPE option<datetime>;",
     "DEFINE TABLE IF NOT EXISTS contains TYPE RELATION IN memory_root OUT memory_node;",
+    "DEFINE TABLE IF NOT EXISTS provides_task TYPE RELATION IN memory_node OUT memory_node;",
+    "DEFINE TABLE IF NOT EXISTS has_conversation TYPE RELATION IN memory_node OUT memory_node;",
+    "DEFINE TABLE IF NOT EXISTS has_message TYPE RELATION IN memory_node OUT memory_node;",
+    "DEFINE FIELD IF NOT EXISTS position ON TABLE has_message TYPE int;",
+    "DEFINE TABLE IF NOT EXISTS has_session_memory TYPE RELATION IN memory_node OUT memory_node;",
 )

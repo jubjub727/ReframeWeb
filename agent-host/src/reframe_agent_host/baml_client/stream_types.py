@@ -23,20 +23,95 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
     value: StreamStateValueT
     state: typing_extensions.Literal["Pending", "Incomplete", "Complete"]
 # #########################################################################
-# Generated classes (2)
+# Generated classes (12)
 # #########################################################################
 
-class AgentTurnPlan(BaseModel):
-    mode: typing.Optional[types.ConversationMode] = None
-    heard_user_speech: typing.Optional[str] = None
-    interpreted_intent: typing.Optional[str] = None
-    should_interrupt_playback: typing.Optional[bool] = None
-    actions: typing.List["HostAction"]
-    spoken_response: typing.Optional[str] = None
+class AvailableTask(BaseModel):
+    id: typing.Optional[str] = None
+    name: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    input: typing.Optional[str] = None
+    output: typing.Optional[str] = None
+    prompt: typing.Optional[str] = None
+    provider_id: typing.Optional[str] = None
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
 
-class HostAction(BaseModel):
-    route: typing.Optional[types.HostRoute] = None
+class CandidateMemory(BaseModel):
+    title: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+
+class ConversationEvaluationMemoryContext(BaseModel):
+    title: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    tags: typing.List[str]
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
+
+class ConversationHistory(BaseModel):
+    id: typing.Optional[str] = None
+    name: typing.Optional[str] = None
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
+    messages: typing.List["ConversationHistoryMessage"]
+
+class ConversationHistoryMessage(BaseModel):
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
+    role: typing.Optional[str] = None
+    content: typing.Optional[str] = None
+
+class ConversationMemorySearchHints(BaseModel):
+    tags: typing.Optional["MemoryTagSearch"] = None
+    strings: typing.Optional["MemoryStringSearch"] = None
+
+class MemoryStringSearch(BaseModel):
+    contains: typing.List[str]
+    equals: typing.List[str]
+
+class MemoryTagSearch(BaseModel):
+    any_of: typing.List[str]
+    all_of: typing.List[str]
+    none_of: typing.List[str]
+
+class SelectedTaskContext(BaseModel):
+    id: typing.Optional[str] = None
+    name: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    input: typing.Optional[str] = None
+    output: typing.Optional[str] = None
+    prompt: typing.Optional[str] = None
+    provider_id: typing.Optional[str] = None
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
+
+class SessionMemoryContext(BaseModel):
+    title: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    tags: typing.List[str]
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
+
+class TaskChoiceDecision(BaseModel):
+    selected_task_id: typing.Optional[str] = None
+    confidence: typing.Optional[float] = None
     reason: typing.Optional[str] = None
+    agent_thought: typing.Optional[str] = None
+    candidate_memory: typing.Optional["CandidateMemory"] = None
+
+class TaskChoiceMemoryContext(BaseModel):
+    title: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    tags: typing.List[str]
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
 
 # #########################################################################
 # Generated type aliases (0)

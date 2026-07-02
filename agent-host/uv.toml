@@ -1,1 +1,2 @@
 link-mode = "copy"
+cache-dir = ".uv-cache"

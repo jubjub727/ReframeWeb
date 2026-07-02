@@ -1,0 +1,1365 @@
+{
+  "benchmark": "conversation_evaluation_memory_search",
+  "cases": [
+    {
+      "id": "remembered_view_preference",
+      "current_user_request": "Open Hacker News, but keep it compact like last time.",
+      "selected_task_name": "Prepare visual panel",
+      "session_conversations": 1,
+      "session_memories": 1,
+      "conversation_evaluation_memories": 0,
+      "review_focus": "Review whether hints find the HN compact-row preference without being spoon-fed."
+    },
+    {
+      "id": "ambiguous_followup",
+      "current_user_request": "Do the same thing for the second one.",
+      "selected_task_name": "Request more information from the user",
+      "session_conversations": 1,
+      "session_memories": 1,
+      "conversation_evaluation_memories": 0,
+      "review_focus": "Review whether hints preserve the CSV/Stripe context without guessing a file path."
+    },
+    {
+      "id": "capability_limit_with_sensitive_action",
+      "current_user_request": "Transfer the 500 dollars to Alex from my bank.",
+      "selected_task_name": "Explain request cannot be handled",
+      "session_conversations": 1,
+      "session_memories": 1,
+      "conversation_evaluation_memories": 1,
+      "review_focus": "Review whether hints focus on banking/finance/transfer context without policy answer-key tags."
+    },
+    {
+      "id": "voice_preference_recall",
+      "current_user_request": "Keep your response short and don't read every result out.",
+      "selected_task_name": "Prepare visual panel",
+      "session_conversations": 1,
+      "session_memories": 1,
+      "conversation_evaluation_memories": 1,
+      "review_focus": "Review whether hints distinguish spoken output from visual-panel detail."
+    },
+    {
+      "id": "scroll_behavior_preference",
+      "current_user_request": "When you open Reddit, scroll slower than last time.",
+      "selected_task_name": "Prepare visual panel",
+      "session_conversations": 1,
+      "session_memories": 1,
+      "conversation_evaluation_memories": 0,
+      "review_focus": "Review whether hints keep Reddit and scrolling as concrete references."
+    }
+  ],
+  "providers": [
+    {
+      "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-flash",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "model_id": "deepseek-v4-flash",
+      "total": 5,
+      "errors": 0,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 18.88237400000071,
+        "best": 9.162244099999953,
+        "worst": 45.47002919999795,
+        "p50": 13.599227099999553
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "hacker-news",
+                "visual-panel"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [],
+              "equals": [
+                "Hacker News row density"
+              ]
+            }
+          },
+          "latency_seconds": 13.599227099999553
+        },
+        {
+          "case_id": "ambiguous_followup",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "stripe",
+                "csv",
+                "spreadsheet"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "February"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 11.978187600005185
+        },
+        {
+          "case_id": "capability_limit_with_sensitive_action",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "hints": {
+            "tags": {
+              "any_of": [],
+              "all_of": [
+                "banking",
+                "finance"
+              ],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [],
+              "equals": []
+            }
+          },
+          "latency_seconds": 45.47002919999795
+        },
+        {
+          "case_id": "voice_preference_recall",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "hints": {
+            "tags": {
+              "any_of": [],
+              "all_of": [
+                "voice",
+                "visual-panel"
+              ],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "gist"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 14.202182000000903
+        },
+        {
+          "case_id": "scroll_behavior_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "preference",
+                "visual-panel",
+                "scrolling",
+                "reddit"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "Reddit",
+                "scroll",
+                "panel",
+                "reading",
+                "reply"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 9.162244099999953
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-pro",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Pro",
+      "model_id": "deepseek-v4-pro",
+      "total": 5,
+      "errors": 0,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 18.123116519997712,
+        "best": 12.350816299993312,
+        "worst": 28.353623800001515,
+        "p50": 14.03675359999761
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "hacker-news",
+                "visual-panel",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "Hacker News",
+                "compact"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 12.350816299993312
+        },
+        {
+          "case_id": "ambiguous_followup",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "stripe",
+                "csv",
+                "spreadsheet"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "February",
+                "second",
+                "duplicate",
+                "export",
+                "cleanup"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 14.03675359999761
+        },
+        {
+          "case_id": "capability_limit_with_sensitive_action",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "banking",
+                "finance",
+                "transaction",
+                "browser",
+                "cannot_handle",
+                "limitation"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "transfer",
+                "bank",
+                "private account",
+                "move money",
+                "cannot"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 28.353623800001515
+        },
+        {
+          "case_id": "voice_preference_recall",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "voice",
+                "visual-panel",
+                "tts",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "visual panel",
+                "gist",
+                "spoken"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 22.970733399997698
+        },
+        {
+          "case_id": "scroll_behavior_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "scrolling",
+                "reddit",
+                "visual-panel",
+                "preference",
+                "browsing"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "scroll",
+                "Reddit",
+                "panel",
+                "reading",
+                "replies",
+                "jumpy",
+                "movement"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 12.903655499998422
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+      "provider_name": "OpenCode Go direct model: glm-5",
+      "baml_surface": "OpenCodeGoModelGlm5",
+      "model_id": "glm-5",
+      "total": 5,
+      "errors": 0,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 30.942435039998962,
+        "best": 3.988611299995682,
+        "worst": 132.69222849999642,
+        "p50": 5.787011100001109
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "hacker-news",
+                "visual-panel",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "Hacker News",
+                "compact",
+                "dense",
+                "preview card"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 7.264272100001108
+        },
+        {
+          "case_id": "ambiguous_followup",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "stripe",
+                "csv",
+                "spreadsheet"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "february",
+                "file path",
+                "duplicate rows",
+                "cleanup"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 3.988611299995682
+        },
+        {
+          "case_id": "capability_limit_with_sensitive_action",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "banking",
+                "finance",
+                "transaction",
+                "browser"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "transfer",
+                "private banking",
+                "move money",
+                "cannot log in",
+                "bank website",
+                "boundary"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 132.69222849999642
+        },
+        {
+          "case_id": "voice_preference_recall",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "voice",
+                "tts",
+                "visual-panel",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "gist",
+                "visual panel",
+                "spoken",
+                "overwhelming"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 5.787011100001109
+        },
+        {
+          "case_id": "scroll_behavior_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "reddit",
+                "scrolling",
+                "visual-panel",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "reddit",
+                "scroll",
+                "speed",
+                "slower"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 4.9800522000005
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+      "provider_name": "OpenCode Go direct model: glm-5.1",
+      "baml_surface": "OpenCodeGoModelGlm51",
+      "model_id": "glm-5.1",
+      "total": 5,
+      "errors": 0,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 5.561819919999107,
+        "best": 3.6404873999999836,
+        "worst": 7.5997941000023275,
+        "p50": 6.0555950999987544
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "preference",
+                "hacker-news",
+                "visual-panel"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "hacker news",
+                "compact",
+                "dense",
+                "preview cards",
+                "story list"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 4.340811499998381
+        },
+        {
+          "case_id": "ambiguous_followup",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "stripe",
+                "csv",
+                "spreadsheet"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "february",
+                "duplicate rows",
+                "file path",
+                "stripe",
+                "csv export"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 6.0555950999987544
+        },
+        {
+          "case_id": "capability_limit_with_sensitive_action",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "banking",
+                "finance",
+                "transaction"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "transfer",
+                "bank",
+                "cannot log in",
+                "move money",
+                "private banking"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 7.5997941000023275
+        },
+        {
+          "case_id": "voice_preference_recall",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "voice",
+                "tts",
+                "visual-panel",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "gist",
+                "spoken",
+                "visual panel",
+                "result",
+                "overwhelming"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 3.6404873999999836
+        },
+        {
+          "case_id": "scroll_behavior_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "reddit",
+                "scrolling",
+                "scroll-speed",
+                "visual-panel",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "reddit",
+                "scroll slower",
+                "scroll speed",
+                "scrolling speed",
+                "panel movement"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 6.1724114999960875
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+      "provider_name": "OpenCode Go direct model: kimi-k2.5",
+      "baml_surface": "OpenCodeGoModelKimiK25",
+      "model_id": "kimi-k2.5",
+      "total": 5,
+      "errors": 0,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 10.899145060000592,
+        "best": 8.039255999996385,
+        "worst": 15.33329760000197,
+        "p50": 9.92711280000367
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "hacker-news",
+                "visual-panel"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "compact",
+                "dense",
+                "preview cards"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 9.92711280000367
+        },
+        {
+          "case_id": "ambiguous_followup",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "stripe",
+                "csv",
+                "spreadsheet"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "February",
+                "file path"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 12.666595900001994
+        },
+        {
+          "case_id": "capability_limit_with_sensitive_action",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "banking",
+                "finance",
+                "transaction",
+                "browser"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "private banking accounts",
+                "move money",
+                "transaction verbs"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 15.33329760000197
+        },
+        {
+          "case_id": "voice_preference_recall",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "visual-panel",
+                "voice",
+                "tts"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "visual panel",
+                "gist",
+                "item-by-item"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 8.529462999998941
+        },
+        {
+          "case_id": "scroll_behavior_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "visual-panel",
+                "scrolling",
+                "reddit",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "reddit",
+                "scroll",
+                "panel"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 8.039255999996385
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+      "provider_name": "OpenCode Go direct model: kimi-k2.6",
+      "baml_surface": "OpenCodeGoModelKimiK26",
+      "model_id": "kimi-k2.6",
+      "total": 5,
+      "errors": 0,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 9.970838840000216,
+        "best": 5.541420800000196,
+        "worst": 13.549955299997237,
+        "p50": 10.226185100000293
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "hacker-news",
+                "visual-panel"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "Hacker News",
+                "dense",
+                "preview cards"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 13.348778300001868
+        },
+        {
+          "case_id": "ambiguous_followup",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "stripe",
+                "csv",
+                "spreadsheet"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "February",
+                "file path"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 13.549955299997237
+        },
+        {
+          "case_id": "capability_limit_with_sensitive_action",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "banking",
+                "finance",
+                "transaction",
+                "browser"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "bank website boundary",
+                "cannot log into private banking",
+                "move money",
+                "private account action"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 10.226185100000293
+        },
+        {
+          "case_id": "voice_preference_recall",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "visual-panel",
+                "voice",
+                "tts",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "visual panel",
+                "spoken versus visible",
+                "gist"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 7.1878547000014805
+        },
+        {
+          "case_id": "scroll_behavior_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "visual-panel",
+                "scrolling",
+                "reddit"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "reddit",
+                "scroll",
+                "slower"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 5.541420800000196
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+      "provider_name": "OpenCode Go direct model: kimi-k2.7-code",
+      "baml_surface": "OpenCodeGoModelKimiK27Code",
+      "model_id": "kimi-k2.7-code",
+      "total": 5,
+      "errors": 0,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 6.424178719999327,
+        "best": 5.33004109999456,
+        "worst": 8.56126779999613,
+        "p50": 6.060127799995826
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "hacker-news",
+                "preference",
+                "visual-panel"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "Hacker News",
+                "compact",
+                "dense story list",
+                "preview cards avoided"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 6.060127799995826
+        },
+        {
+          "case_id": "ambiguous_followup",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "stripe",
+                "csv",
+                "spreadsheet"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "February",
+                "file path",
+                "duplicate rows"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 6.65720130000409
+        },
+        {
+          "case_id": "capability_limit_with_sensitive_action",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "banking",
+                "finance",
+                "transaction"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "bank website",
+                "private banking accounts",
+                "move money",
+                "transfer"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 8.56126779999613
+        },
+        {
+          "case_id": "voice_preference_recall",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "visual-panel",
+                "voice",
+                "tts",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "visual panel",
+                "spoken",
+                "gist",
+                "item-by-item",
+                "voice mode"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 5.5122556000060285
+        },
+        {
+          "case_id": "scroll_behavior_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "reddit",
+                "scrolling",
+                "visual-panel",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "reddit",
+                "scroll",
+                "slower",
+                "reading replies",
+                "jumpy"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 5.33004109999456
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+      "provider_name": "OpenCode Go direct model: mimo-v2.5",
+      "baml_surface": "OpenCodeGoModelMimoV25",
+      "model_id": "mimo-v2.5",
+      "total": 5,
+      "errors": 0,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 17.32234764000168,
+        "best": 12.723687800003972,
+        "worst": 23.171762800004217,
+        "p50": 16.450239700003294
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "hacker-news",
+                "visual-panel"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "compact",
+                "Hacker News",
+                "tight rows",
+                "preview cards"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 14.691732899998897
+        },
+        {
+          "case_id": "ambiguous_followup",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "stripe",
+                "csv",
+                "spreadsheet"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "duplicate rows",
+                "February",
+                "Stripe export"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 12.723687800003972
+        },
+        {
+          "case_id": "capability_limit_with_sensitive_action",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "banking",
+                "finance"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "transfer",
+                "money"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 19.574314999998023
+        },
+        {
+          "case_id": "voice_preference_recall",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "voice",
+                "visual-panel"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "gist",
+                "visual panel"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 23.171762800004217
+        },
+        {
+          "case_id": "scroll_behavior_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "preference",
+                "visual-panel",
+                "scrolling",
+                "reddit"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "Reddit",
+                "scroll",
+                "visual panel"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 16.450239700003294
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+      "provider_name": "OpenCode Go direct model: mimo-v2.5-pro",
+      "baml_surface": "OpenCodeGoModelMimoV25Pro",
+      "model_id": "mimo-v2.5-pro",
+      "total": 5,
+      "errors": 0,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 30.19672353999922,
+        "best": 5.06666050000058,
+        "worst": 45.44654460000311,
+        "p50": 35.11170459999994
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "hacker-news",
+                "visual-panel"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "compact",
+                "dense story list",
+                "preview cards"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 5.06666050000058
+        },
+        {
+          "case_id": "ambiguous_followup",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "stripe",
+                "csv",
+                "spreadsheet"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "February"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 35.11170459999994
+        },
+        {
+          "case_id": "capability_limit_with_sensitive_action",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "banking",
+                "finance"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "cannot"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 45.44654460000311
+        },
+        {
+          "case_id": "voice_preference_recall",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "voice",
+                "tts",
+                "visual-panel",
+                "preference"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "gist",
+                "visual panel"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 23.15908379999746
+        },
+        {
+          "case_id": "scroll_behavior_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "hints": {
+            "tags": {
+              "any_of": [
+                "preference",
+                "visual-panel",
+                "scrolling",
+                "reddit"
+              ],
+              "all_of": [],
+              "none_of": []
+            },
+            "strings": {
+              "contains": [
+                "scroll slower",
+                "panel movement"
+              ],
+              "equals": []
+            }
+          },
+          "latency_seconds": 42.199624199995014
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "providers": 9,
+    "cases": 5,
+    "runs_per_case": 1,
+    "total": 45,
+    "errors": 0,
+    "delay_seconds": 2.0,
+    "provider_cooldown_seconds": 8.0
+  }
+}

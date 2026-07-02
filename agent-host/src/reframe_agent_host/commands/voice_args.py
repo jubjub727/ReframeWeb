@@ -126,13 +126,17 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--language", default="en")
     parser.add_argument("--beam-size", type=int, default=1)
     parser.add_argument(
+        "--session-id",
+        help="Active memory_node session id used for conversation and session memory context.",
+    )
+    parser.add_argument(
         "--turns",
         type=int,
         default=1,
         help="Number of voice turns to run. Use 0 to keep listening until Ctrl+C.",
     )
     parser.add_argument(
-        "--no-plan",
+        "--no-task-choice",
         action="store_true",
-        help="Stop after transcription instead of calling BAML.",
+        help="Stop after transcription instead of choosing an initial task with BAML.",
     )

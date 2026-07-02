@@ -103,7 +103,7 @@ This repository is at the planning and scaffolding stage. The first committed
 scaffold starts at the user interaction boundary:
 
 1. A `uv`-managed Python Agent Host.
-2. A BAML conversation-turn planner generated into the Python package.
+2. A BAML task-choice prompt generated into the Python package.
 3. Real dependencies for audio input, wake detection, VAD, transcription, and
    TTS.
 4. A `doctor` command that verifies the installed host stack.
@@ -123,14 +123,20 @@ the API key from `OPENCODE_GO_API_KEY`.
 
 Model use is a BAML choice, not user-selected global configuration and not
 Python-side model routing. Each agentic task should have an explicit model
-assignment in BAML. The current conversation-turn planning flow is assigned to
-`deepseek-v4-pro`.
+assignment through a memory Provider node that points at a BAML surface. The
+current task-choice flow is assigned to `deepseek-v4-flash`.
 
-Current intended OpenCode Go model IDs include:
+Current benchmarked OpenCode Go model IDs include:
 
 - `kimi-k2.7-code`
+- `kimi-k2.6`
+- `kimi-k2.5`
+- `glm-5.1`
+- `glm-5`
 - `deepseek-v4-pro`
 - `deepseek-v4-flash`
+- `mimo-v2.5-pro`
+- `mimo-v2.5`
 
 ## First Voice Pipeline
 

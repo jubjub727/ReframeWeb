@@ -21,8 +21,22 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("doctor", help="Verify the installed Agent Host stack.")
     subparsers.add_parser("audio-devices", help="List available microphone devices.")
+    subparsers.add_parser("memory-setup", help="Apply memory schema and root nodes.")
+    subparsers.add_parser("seed-core-tasks", help="Create the built-in core task memories.")
+    subparsers.add_parser(
+        "seed-opencode-go-providers",
+        help="Create OpenCode Go model provider memories.",
+    )
+    subparsers.add_parser(
+        "list-opencode-go-models",
+        help="List the OpenCode Go model inventory used by BAML providers.",
+    )
     _add_gpu_check_parser(subparsers)
-    _add_plan_turn_parser(subparsers)
+    _add_choose_task_parser(subparsers)
+    _add_benchmark_task_choice_parser(subparsers)
+    _add_benchmark_conversation_evaluation_parser(subparsers)
+    _add_analyze_task_choice_benchmark_parser(subparsers)
+    _add_analyze_conversation_evaluation_benchmark_parser(subparsers)
     _add_debug_wake_audio_parser(subparsers)
     _add_voice_turn_parser(subparsers)
     return parser
@@ -40,22 +54,98 @@ def _add_gpu_check_parser(subparsers) -> None:
     )
 
 
-def _add_plan_turn_parser(subparsers) -> None:
-    plan_turn = subparsers.add_parser(
-        "plan-turn",
-        help="Run the first BAML conversation-turn planner from a transcript.",
+def _add_choose_task_parser(subparsers) -> None:
+    choose_task = subparsers.add_parser(
+        "choose-task",
+        help="Choose the first task for a transcript.",
     )
-    plan_turn.add_argument("transcript")
-    plan_turn.add_argument(
-        "--mode",
-        choices=[mode.value for mode in types.ConversationMode],
-        default=types.ConversationMode.WakeCommand.value,
+    choose_task.add_argument("transcript")
+    choose_task.add_argument(
+        "--session-id",
+        help="Active memory_node session id used for conversation and session memory context.",
     )
-    plan_turn.add_argument(
-        "--playback",
-        choices=[state.value for state in types.PlaybackState],
-        default=types.PlaybackState.Idle.value,
+    choose_task.add_argument(
+        "--client",
+        help="Optional BAML client name to benchmark or test instead of the function default.",
     )
+
+
+def _add_benchmark_task_choice_parser(subparsers) -> None:
+    benchmark = subparsers.add_parser(
+        "benchmark-task-choice",
+        help="Measure task-choice correctness and latency across direct model providers.",
+    )
+    benchmark.add_argument(
+        "--session-id",
+        help="Active memory_node session id used for conversation and session memory context.",
+    )
+    benchmark.add_argument(
+        "--provider-id",
+        action="append",
+        dest="provider_ids",
+        help="Direct model provider memory_node id to test. Repeat to test a subset.",
+    )
+    benchmark.add_argument(
+        "--case-id",
+        action="append",
+        dest="case_ids",
+        help="Benchmark case id to run. Repeat to test a subset.",
+    )
+    benchmark.add_argument("--runs", type=int, default=1)
+    benchmark.add_argument("--warmup-runs", type=int, default=0)
+    benchmark.add_argument("--delay-seconds", type=float, default=2.0)
+    benchmark.add_argument("--provider-cooldown-seconds", type=float, default=8.0)
+    benchmark.add_argument(
+        "--output",
+        help="Path to write benchmark JSON. Defaults to benchmark-results/task-choice-<timestamp>.json.",
+    )
+
+
+def _add_benchmark_conversation_evaluation_parser(subparsers) -> None:
+    benchmark = subparsers.add_parser(
+        "benchmark-conversation-evaluation",
+        help="Record conversation-evaluation memory-search hints across models.",
+    )
+    benchmark.add_argument(
+        "--provider-id",
+        action="append",
+        dest="provider_ids",
+        help="Direct model provider memory_node id to test. Repeat to test a subset.",
+    )
+    benchmark.add_argument(
+        "--case-id",
+        action="append",
+        dest="case_ids",
+        help="Benchmark case id to run. Repeat to test a subset.",
+    )
+    benchmark.add_argument("--runs", type=int, default=1)
+    benchmark.add_argument("--warmup-runs", type=int, default=0)
+    benchmark.add_argument("--delay-seconds", type=float, default=2.0)
+    benchmark.add_argument("--provider-cooldown-seconds", type=float, default=8.0)
+    benchmark.add_argument(
+        "--output",
+        help=(
+            "Path to write benchmark JSON. Defaults to "
+            "benchmark-results/conversation-evaluation-<timestamp>.json."
+        ),
+    )
+
+
+def _add_analyze_task_choice_benchmark_parser(subparsers) -> None:
+    analyze = subparsers.add_parser(
+        "analyze-task-choice-benchmark",
+        help="Summarize failures from a saved task-choice benchmark JSON file.",
+    )
+    analyze.add_argument("path")
+
+
+def _add_analyze_conversation_evaluation_benchmark_parser(subparsers) -> None:
+    analyze = subparsers.add_parser(
+        "analyze-conversation-evaluation-benchmark",
+        aliases=["analyse-conversation-evaluation-benchmark"],
+        help="Show conversation-evaluation replies ordered by latency.",
+    )
+    analyze.add_argument("path")
 
 
 def _add_voice_turn_parser(subparsers) -> None:
@@ -67,11 +157,6 @@ def _add_voice_turn_parser(subparsers) -> None:
         "--mode",
         choices=[mode.value for mode in types.ConversationMode],
         default=types.ConversationMode.WakeCommand.value,
-    )
-    voice_turn.add_argument(
-        "--playback",
-        choices=[state.value for state in types.PlaybackState],
-        default=types.PlaybackState.Idle.value,
     )
     add_voice_turn_args(voice_turn)
 

@@ -1,0 +1,2448 @@
+{
+  "benchmark": "task_choice_lack_of_capability",
+  "cases": [
+    {
+      "id": "desktop_photoshop",
+      "transcript": "Open Photoshop and resize the image on my desktop.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "flight_booking",
+      "transcript": "Book me a flight to Tokyo for tomorrow morning.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "bank_transfer",
+      "transcript": "Log into my bank and transfer 500 dollars to Alex.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "checkout_form",
+      "transcript": "Control the browser and submit the checkout form.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "private_email",
+      "transcript": "Open my private email and summarize everything from today.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "phone_call",
+      "transcript": "Call Sarah and explain that I will be late.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "driver_install",
+      "transcript": "Install the missing GPU driver for me.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "file_organization",
+      "transcript": "Move everything in downloads into the right project folders.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "purchase_item",
+      "transcript": "Buy the cheapest standing desk you can find.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "vpn_deploy",
+      "transcript": "Connect to my work VPN and deploy the latest build.",
+      "expected_task_name": "Explain request cannot be handled"
+    }
+  ],
+  "providers": [
+    {
+      "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-flash",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "model_id": "deepseek-v4-flash",
+      "total": 10,
+      "correct": 10,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 8.489617599999473,
+        "best": 5.391295899997203,
+        "worst": 12.486390999998548,
+        "p50": 8.114526400000614
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requests opening Photoshop and resizing an image on the desktop. The system has no capability to interact with desktop applications or perform image editing tasks. Therefore, it cannot handle this request.",
+          "latency_seconds": 11.062281300000905
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The system does not have the capability to book flights. The request is outside the system's current capabilities, so it should be explained that it cannot be handled.",
+          "latency_seconds": 11.45856609999828
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request involves logging into a bank and transferring money, which requires direct access to banking systems and secure credentials. This is outside the system's current capabilities, and thus cannot be handled.",
+          "latency_seconds": 8.510421800001495
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requests browser control and checkout form submission, which is not supported by the currently available tasks. The only appropriate action is to explain that this request cannot be handled.",
+          "latency_seconds": 7.000561799999559
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The system lacks the ability to access private email accounts or retrieve email data. Therefore, it cannot open or summarize the user's private emails.",
+          "latency_seconds": 12.486390999998548
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request to call Sarah and explain lateness requires telephony capability, which is not available in the current system. The only relevant task is to explain that the request cannot be handled, as the system lacks the functionality to make phone calls.",
+          "latency_seconds": 6.1543138999986695
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request to install a GPU driver requires system-level access and execution, which is outside the system's current capabilities.",
+          "latency_seconds": 8.368404600001668
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request to move files in downloads into project folders requires file system operations, which are not supported by any available task. The only appropriate action is to explain that the request cannot be handled.",
+          "latency_seconds": 7.860648199999559
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The system cannot perform purchasing actions or search for products to buy, so the request is outside its capabilities.",
+          "latency_seconds": 5.391295899997203
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requests connecting to a VPN and deploying a build, which are concrete operational tasks beyond the system's available capabilities. No task exists to perform these actions, so the only appropriate choice is to explain that the request cannot be handled.",
+          "latency_seconds": 6.603291399998852
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-pro",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Pro",
+      "model_id": "deepseek-v4-pro",
+      "total": 10,
+      "correct": 10,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 16.936251629999607,
+        "best": 7.583712399999058,
+        "worst": 24.866486299997632,
+        "p50": 17.666479600000457
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user request requires controlling desktop applications (Photoshop) and manipulating files on the desktop, which is outside the system's capabilities. Therefore, the most appropriate task is to explain that the request cannot be handled.",
+          "latency_seconds": 23.554652999999234
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requested to book a flight to Tokyo, which is beyond the system's capabilities. The system cannot perform flight bookings, so the correct task is to explain that the request cannot be handled.",
+          "latency_seconds": 18.061909000000014
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The user is requesting a banking transaction (log in and transfer funds), which is outside the system's capabilities. The system cannot access bank accounts or perform financial transfers.",
+          "latency_seconds": 13.836295700002665
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user's request is to \"control the browser and submit the checkout form,\" which involves browser automation and form submission. The available tasks only include requesting more information or explaining that a request cannot be handled. Browser control and form submission are not among the available tasks, so the appropriate response is to explain that this request cannot be handled.",
+          "latency_seconds": 7.583712399999058
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requests access to private email, which is outside the system's current capabilities. The most appropriate task is to explain that the request cannot be handled.",
+          "latency_seconds": 9.491308599997865
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request involves making an outbound phone call to convey a message, which is not within the system's current capabilities. Asking for more information would not change this limitation, so the most appropriate step is to explain that the request cannot be handled.",
+          "latency_seconds": 24.866486299997632
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request requires performing a system-level operation (installing a GPU driver) which is outside the agent's capabilities. The agent cannot execute commands on the user's hardware or modify system configurations. Therefore, the appropriate task is to explain that the request cannot be handled.",
+          "latency_seconds": 21.502186099998653
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The system has no capability to access or modify files on the user's local machine. The available tasks do not include file operations, so the request cannot be fulfilled directly.",
+          "latency_seconds": 18.670984999997017
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user request is to buy an item, but the system has no e-commerce or purchasing capabilities, so it cannot perform the requested action. More information would not enable the purchase, so the best choice is to explain the limitation.",
+          "latency_seconds": 14.52393000000302
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requested connecting to a VPN and deploying a build, actions that are outside the system's current capabilities. The available tasks only allow requesting more information or explaining that a request cannot be handled, so the appropriate choice is to explain the limitation.",
+          "latency_seconds": 17.2710502000009
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+      "provider_name": "OpenCode Go direct model: glm-5",
+      "baml_surface": "OpenCodeGoModelGlm5",
+      "model_id": "glm-5",
+      "total": 10,
+      "correct": 8,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.8,
+      "latency_seconds": {
+        "average": 12.368190900000263,
+        "best": 3.933060799998202,
+        "worst": 27.982584599998518,
+        "p50": 9.817751300000964
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.95,
+          "reason": "The user wants to resize an image on their desktop using Photoshop, but hasn't specified which image (if there are multiple) or what dimensions/size to resize it to. This information is needed before the task can be performed.",
+          "latency_seconds": 22.064945699999953
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting to book a flight, but there is no flight booking task available in the system. The available tasks only support requesting more information or explaining that a request cannot be handled. Since flight booking is not among the system's current capabilities, the appropriate task is to explain this limitation.",
+          "latency_seconds": 7.183725400002004
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.97,
+          "reason": "The user is asking me to log into their bank account and perform a financial transaction (transfer $500 to Alex). I cannot access bank accounts, handle banking credentials, or perform financial transactions. This is outside my current capabilities and I should explain this limitation.",
+          "latency_seconds": 10.626748300001054
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The requested behavior (controlling a browser and submitting a checkout form) is outside the system's current capabilities. There are no available tasks that provide browser control or form submission. The only available tasks are requesting more information or explaining limitations, so this request cannot be handled with the given tasks.",
+          "latency_seconds": 4.895384900002682
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The request to open and read the user's private email is outside the system's current capabilities. The system cannot access external email accounts, authenticate with email providers, or retrieve emails from private inboxes.",
+          "latency_seconds": 9.008754300000874
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking to make a phone call to Sarah, which is outside the system's current capabilities. The available tasks do not include any phone call or telephony functionality, so the appropriate task is to explain that the request cannot be handled.",
+          "latency_seconds": 3.933060799998202
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.8,
+          "reason": "Installing GPU drivers requires direct system access, knowledge of hardware/OS, and execution of privileged system operations, which is outside the current capabilities of this assistant.",
+          "latency_seconds": 27.982584599998518
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.85,
+          "reason": "The request is ambiguous \u2014 it's unclear where the downloads folder is, what the project folders are, and what criteria should be used to decide which files go where.",
+          "latency_seconds": 4.030646299997898
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is asking to buy the cheapest standing desk, which requires browsing online stores, comparing prices, and potentially making a purchase. These capabilities are not available among the tasks provided, so I cannot handle this request.",
+          "latency_seconds": 18.445628900000884
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user is asking to connect to a work VPN and deploy a build. These are operational tasks requiring system-level access, VPN client software, and deployment tooling that are outside the capabilities of a conversational assistant. The system cannot perform these actions, so the appropriate response is to explain this limitation.",
+          "latency_seconds": 15.510429800000566
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+      "provider_name": "OpenCode Go direct model: glm-5.1",
+      "baml_surface": "OpenCodeGoModelGlm51",
+      "model_id": "glm-5.1",
+      "total": 10,
+      "correct": 10,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 25.965178069999457,
+        "best": 8.183886999999231,
+        "worst": 56.888390800002526,
+        "p50": 20.171392349999223
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user is asking to open Photoshop and resize an image, which requires desktop application automation and GUI control that is outside the system's current capabilities.",
+          "latency_seconds": 24.22015789999932
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The available tasks do not include any flight booking capability. There are only two tasks available: requesting more information and explaining limitations. Since the user wants to book a flight, which is outside the system's current capabilities, the appropriate task is to explain the request cannot be handled.",
+          "latency_seconds": 8.183886999999231
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "Logging into a bank account and initiating a money transfer requires access to private financial credentials and secure banking systems that the system cannot and should not access. This is outside current capabilities.",
+          "latency_seconds": 13.438980700000684
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking to control a browser and submit a checkout form, but no browser automation or form submission task is available among the available tasks. The only options are requesting more information or explaining the request cannot be handled. Since the capability itself is absent, the appropriate task is to explain that the request cannot be handled.",
+          "latency_seconds": 19.20203290000063
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user wants to access their private email and summarize today's messages. No available task provides email access or integration capabilities, so this request cannot be handled with the system's current functionality.",
+          "latency_seconds": 56.888390800002526
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user is asking the system to make a phone call to Sarah, which is outside the system's current capabilities. There is no task available that can place a call.",
+          "latency_seconds": 21.140751799997815
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The available tasks do not include any that can perform system-level operations like installing GPU drivers. The only available tasks are for requesting information or explaining limitations. Installing GPU drivers requires capabilities (system access, package management, hardware detection) that are not represented among the available tasks.",
+          "latency_seconds": 50.82532629999696
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The system does not have a task available for moving files or accessing the filesystem. Without any file-manipulation capability, the request cannot be completed regardless of additional information.",
+          "latency_seconds": 14.45861469999727
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is asking the system to buy a product, which requires making an actual purchase. This is outside the system's current capabilities as it cannot browse live retail inventory, compare real-time prices, or complete transactions.",
+          "latency_seconds": 41.160698600000615
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "Connecting to a work VPN and deploying a build are system/infrastructure operations that are outside this system's current capabilities. This assistant cannot execute network connections or deployment commands.",
+          "latency_seconds": 10.132939999999508
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+      "provider_name": "OpenCode Go direct model: glm-5.2",
+      "baml_surface": "OpenCodeGoModelGlm52",
+      "model_id": "glm-5.2",
+      "total": 10,
+      "correct": 9,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.9,
+      "latency_seconds": {
+        "average": 26.605509699999676,
+        "best": 10.239877500000148,
+        "worst": 46.95694509999885,
+        "p50": 27.254949750000378
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user is asking to open Photoshop and resize an image on their desktop. The available tasks do not include any desktop automation, application control, or file manipulation capabilities. This request cannot be handled with the current system capabilities.",
+          "latency_seconds": 30.829932499997085
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user wants to book a flight, but there is no flight booking task available among the available tasks. The system does not have the capability to book flights, so the request cannot be handled.",
+          "latency_seconds": 30.744352400000935
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "Logging into a bank and transferring money requires access to banking systems and credentials that this system does not have. This is outside the system's current capabilities, so the appropriate response is to explain the limitation.",
+          "latency_seconds": 10.239877500000148
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting browser automation to submit a checkout form, but no browser control or form submission task is available among the available tasks. The system's current capabilities do not include browser automation, so this request cannot be handled.",
+          "latency_seconds": 10.72232939999958
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user's request requires accessing private email accounts, reading email content, and summarizing it. No available task provides email access or messaging capabilities. The system cannot perform this requested behavior.",
+          "latency_seconds": 37.16441720000148
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The request requires making a phone call, which is outside the system's current capabilities. There is no task available for initiating phone calls or accessing a contact list, so the appropriate task is to explain that the request cannot be handled.",
+          "latency_seconds": 19.28233259999979
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.85,
+          "reason": "To install a GPU driver, key details are needed from the user: the GPU manufacturer/model (e.g., NVIDIA, AMD, Intel), the operating system and version, and whether any specific driver version is desired. Without this information, the request cannot be handled well, so the best next step is to ask the user for these details.",
+          "latency_seconds": 46.95694509999885
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user wants files moved from a Downloads folder into project folders. This requires file system access and manipulation capabilities, which are not represented in the available tasks. There is no task that can perform file operations, so the request cannot be handled with the system's current capabilities.",
+          "latency_seconds": 23.76554709999982
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is asking the system to search for and purchase a standing desk, but there are no available tasks that support web browsing, product searching, or purchasing. The system cannot fulfill this request with its current capabilities, so the appropriate task is to explain that the request cannot be handled.",
+          "latency_seconds": 38.17822519999754
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.92,
+          "reason": "Connecting to a VPN and deploying builds requires system-level access and infrastructure tooling that this assistant does not have. These are operational tasks outside current capabilities, so the appropriate task is to explain the limitation.",
+          "latency_seconds": 18.17113800000152
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:p5s7bul1r3pnrw7e0qld",
+      "provider_name": "OpenCode Go direct model: hy3-preview",
+      "baml_surface": "OpenCodeGoModelHy3Preview",
+      "model_id": "hy3-preview",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 0.9033415700003389,
+        "best": 0.8644750000021304,
+        "worst": 1.0424291999988782,
+        "p50": 0.8878151500011882
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:p5s7bul1r3pnrw7e0qld",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelHy3Preview, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelHy3Preview\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}})",
+          "latency_seconds": 0.9222186000006332
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:p5s7bul1r3pnrw7e0qld",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelHy3Preview, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelHy3Preview\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}})",
+          "latency_seconds": 0.8722108999972988
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:p5s7bul1r3pnrw7e0qld",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelHy3Preview, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelHy3Preview\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}})",
+          "latency_seconds": 0.8984111999998277
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:p5s7bul1r3pnrw7e0qld",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelHy3Preview, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelHy3Preview\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}})",
+          "latency_seconds": 0.8903699000002234
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:p5s7bul1r3pnrw7e0qld",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelHy3Preview, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelHy3Preview\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}})",
+          "latency_seconds": 0.8852604000021529
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:p5s7bul1r3pnrw7e0qld",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelHy3Preview, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelHy3Preview\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}})",
+          "latency_seconds": 0.8969519000020227
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:p5s7bul1r3pnrw7e0qld",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelHy3Preview, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelHy3Preview\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}})",
+          "latency_seconds": 1.0424291999988782
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:p5s7bul1r3pnrw7e0qld",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelHy3Preview, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelHy3Preview\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}})",
+          "latency_seconds": 0.8806117999993148
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:p5s7bul1r3pnrw7e0qld",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelHy3Preview, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelHy3Preview\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}})",
+          "latency_seconds": 0.8644750000021304
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:p5s7bul1r3pnrw7e0qld",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelHy3Preview, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelHy3Preview\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Model hy3-preview is not supported on the lite model list. Use GET /inference/go/openai/v1/models to list available models.\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"model_not_supported\"}})",
+          "latency_seconds": 0.8804768000009062
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+      "provider_name": "OpenCode Go direct model: kimi-k2.5",
+      "baml_surface": "OpenCodeGoModelKimiK25",
+      "model_id": "kimi-k2.5",
+      "total": 10,
+      "correct": 10,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 5.185663949999435,
+        "best": 4.02467649999744,
+        "worst": 8.365312300000369,
+        "p50": 4.846006899999338
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "I cannot open local desktop applications like Photoshop or directly access and modify files on the user's computer. This request requires local system/application control that is outside current capabilities.",
+          "latency_seconds": 4.367591900001571
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "There is no flight-booking capability among the available tasks, so the request cannot be fulfilled regardless of additional details.",
+          "latency_seconds": 5.578941799998574
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The request involves logging into a real bank account and transferring actual money, which is impossible and outside the system's current capabilities. It would also pose serious security and safety risks.",
+          "latency_seconds": 4.576691400001437
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The available tasks do not include any browser automation, web control, or form submission capabilities. The request requires interacting with a checkout form in a browser, which is outside the system's current capabilities.",
+          "latency_seconds": 4.241072699998767
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The system does not have access to private email accounts, email APIs, or inbox reading capabilities. Among the available tasks, the only appropriate response is to explain this limitation.",
+          "latency_seconds": 4.92734019999989
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The system is a text-based AI assistant without telephony or voice-calling capabilities, so placing a phone call to Sarah is impossible.",
+          "latency_seconds": 4.764673599998787
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The system does not have any tasks capable of performing software installations, package management, or hardware driver configuration. The available tasks are limited to requesting information or explaining limitations. Since installing a GPU driver is a system-level operation that requires administrative privileges and specific technical capabilities not present in the available task set, the appropriate response is to explain that this request cannot be handled.",
+          "latency_seconds": 5.387199500000861
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request requires direct access to the user's local file system to move files from the Downloads folder to project folders, which is outside the system's current capabilities. There is no task available that can browse, read, or manipulate local files and directories.",
+          "latency_seconds": 5.623139599996648
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request requires completing a commercial transaction (purchasing a physical product), which is outside the system's capabilities. I cannot browse real-time inventory, process payments, or arrange shipping.",
+          "latency_seconds": 8.365312300000369
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.97,
+          "reason": "The request requires direct network and infrastructure actions (connecting to a work VPN and deploying a build) that are outside the system's current capabilities.",
+          "latency_seconds": 4.02467649999744
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+      "provider_name": "OpenCode Go direct model: kimi-k2.6",
+      "baml_surface": "OpenCodeGoModelKimiK26",
+      "model_id": "kimi-k2.6",
+      "total": 10,
+      "correct": 10,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 6.960003370000777,
+        "best": 3.5464006999973208,
+        "worst": 10.760611900001095,
+        "p50": 6.749681850002162
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The system does not have the capability to open local desktop applications (like Photoshop) or directly manipulate files on the user's computer. The available tasks are limited to conversation, so the appropriate response is to explain this limitation rather than ask for details (e.g., which image, what dimensions) that would imply the task can be completed.",
+          "latency_seconds": 9.611669599999004
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request asks to book a flight, but there are no flight booking tools, travel APIs, or reservation capabilities among the available tasks. Since the behavior is outside the system's current capabilities, the appropriate response is to explain that limitation clearly rather than asking for more details or pretending the booking can proceed.",
+          "latency_seconds": 6.143283100002009
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The request asks the system to log into a bank account and perform a financial transfer ($500 to Alex). This is outside the system's capabilities for both security and functional reasons\u2014automated banking logins and money transfers are not supported, and performing them would pose significant safety and authorization risks.",
+          "latency_seconds": 4.432067200003075
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The request asks to control a browser and submit a checkout form, but no browser automation or web interaction tasks are available. The system can only explain that this capability is unsupported.",
+          "latency_seconds": 7.356080600002315
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The request asks the system to access the user's private email account and read today's messages. This is impossible because the system does not have access to external email services, private inboxes, or the user's credentials. This is a hard capability boundary, not a missing detail.",
+          "latency_seconds": 5.974545200002467
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request asks me to make a phone call, which is impossible because I am a text-based AI assistant without telephony, voice, or outbound calling capabilities.",
+          "latency_seconds": 7.922297600001912
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "There are no available tasks for system administration, command execution, or hardware driver installation. Even with more information (GPU model, OS, etc.), the system cannot perform the installation, so explaining the limitation is the correct path rather than requesting details that cannot lead to completion.",
+          "latency_seconds": 7.719596299997647
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "There are no file system or file management tasks available in the system, so moving files from Downloads into project folders is impossible to perform.",
+          "latency_seconds": 6.133481500000926
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "There are no available tasks for shopping, purchasing products, searching the web, or finding standing desks. The requested behavior is outside the system's current capabilities.",
+          "latency_seconds": 3.5464006999973208
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The request involves direct network and infrastructure actions (connecting to a VPN and deploying a build) that are outside the system's capabilities. I cannot access the user's local network interfaces, establish VPN connections, or execute deployments to their work environment.",
+          "latency_seconds": 10.760611900001095
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+      "provider_name": "OpenCode Go direct model: kimi-k2.7-code",
+      "baml_surface": "OpenCodeGoModelKimiK27Code",
+      "model_id": "kimi-k2.7-code",
+      "total": 10,
+      "correct": 7,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.7,
+      "latency_seconds": {
+        "average": 10.9461740499999,
+        "best": 7.594256500000483,
+        "worst": 17.714158799997676,
+        "p50": 9.519999000001917
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.9,
+          "reason": "The request is missing key details needed to proceed: which specific image file on the desktop, and what dimensions or target size to resize it to. Asking the user for this information is the appropriate next step before any action can be taken.",
+          "latency_seconds": 17.714158799997676
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking to book an actual flight, which is outside the system's available capabilities. There is no flight booking tool or integration, so the request cannot be fulfilled.",
+          "latency_seconds": 9.475016100001085
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request involves logging into a bank account and transferring money, which is outside the system's capabilities and involves sensitive financial operations that should not be performed by an automated agent.",
+          "latency_seconds": 9.56498190000275
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking me to control a browser and submit a checkout form, but none of the available tasks provide browser automation or form submission capabilities. The only relevant option is to explain that this request cannot be handled with the current available tasks.",
+          "latency_seconds": 7.860536199998023
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.98,
+          "reason": "The request requires accessing the user's private email account, which the system cannot do due to lack of email integration or credentials.",
+          "latency_seconds": 9.430832999998529
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The user is asking me to make an actual phone call, which is outside the system's capabilities. An AI assistant cannot dial phone numbers or conduct voice calls.",
+          "latency_seconds": 7.594256500000483
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.9,
+          "reason": "The user wants a GPU driver installed, but the operating system, GPU model, and other context are unknown. More details are needed before providing safe instructions.",
+          "latency_seconds": 11.645373699997435
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.95,
+          "reason": "The request is too vague: it doesn't specify which Downloads folder, where the project folders are, or what sorting/mapping rules to use. Asking the user for these details will make the next action feasible.",
+          "latency_seconds": 13.066094000001613
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking to purchase a physical product (the cheapest standing desk), which requires real-time price comparison, access to e-commerce platforms, and the ability to complete a transaction. These capabilities are not available in the current system.",
+          "latency_seconds": 13.788631200000964
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request requires connecting to a work VPN and deploying a build, which involves external network/system actions I cannot perform.",
+          "latency_seconds": 9.321859100000438
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+      "provider_name": "OpenCode Go direct model: mimo-v2.5",
+      "baml_surface": "OpenCodeGoModelMimoV25",
+      "model_id": "mimo-v2.5",
+      "total": 10,
+      "correct": 10,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 8.912234340000214,
+        "best": 5.043394500000431,
+        "worst": 18.76657459999842,
+        "p50": 6.278729300000123
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The request involves controlling external software (Photoshop) and accessing files on the user's desktop, which is likely outside the system's current capabilities for direct action execution.",
+          "latency_seconds": 12.957460400000855
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "Booking flights requires integration with airline reservation systems, real-time availability checks, and payment processing - capabilities this system does not have. This is clearly outside the system's current capabilities.",
+          "latency_seconds": 6.484613799999352
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.99,
+          "reason": "The user is asking me to log into their bank and perform a financial transaction. This is outside the system's capabilities\u2014I cannot access external websites, authenticate with banking systems, or execute real financial transactions on behalf of users.",
+          "latency_seconds": 5.828389900001639
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The request to control the browser and submit a checkout form requires browser automation capabilities, which are not supported by the current system as evidenced by the absence of a task for performing such actions in the available tasks.",
+          "latency_seconds": 18.76657459999842
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is requesting access to their private email account to read and summarize emails. This requires authentication with their email provider and the ability to access external services, which is outside the system's current capabilities.",
+          "latency_seconds": 6.023256299999048
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requests to call Sarah, but the system cannot perform phone calls directly. This requires explaining the limitation.",
+          "latency_seconds": 6.072844800000894
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "Installing GPU drivers requires system-level operations like running installers, using package managers, or executing privileged commands on the user's machine. The available tasks don't include any capability to perform system administration or software installation tasks. I should explain this limitation and provide helpful guidance on how the user can do this themselves.",
+          "latency_seconds": 12.315452700000606
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The system does not have a task that can perform file\u2011system operations such as moving files from a Downloads folder to project directories. The only available tasks are to request more information or to explain that the request cannot be handled, so the appropriate choice is to explain the limitation.",
+          "latency_seconds": 5.908280899999227
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user wants to purchase a standing desk, which requires browsing e-commerce websites, comparing prices, and making a transaction. The available tasks do not include any shopping, web browsing, or purchasing capabilities. This request is outside the system's current capabilities.",
+          "latency_seconds": 5.043394500000431
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request involves actions that are outside the system's capabilities: connecting to a VPN requires controlling network settings on the user's device, and deploying a build requires access to their specific CI/CD infrastructure and credentials. These are operations that cannot be performed by an AI assistant regardless of additional information provided.",
+          "latency_seconds": 9.722075500001665
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+      "provider_name": "OpenCode Go direct model: mimo-v2.5-pro",
+      "baml_surface": "OpenCodeGoModelMimoV25Pro",
+      "model_id": "mimo-v2.5-pro",
+      "total": 10,
+      "correct": 10,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 21.28854266000053,
+        "best": 6.100943100002041,
+        "worst": 31.77395930000057,
+        "p50": 21.2086783499999
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The request involves opening and using Photoshop to resize an image on the user's desktop, which requires direct computer operation outside the system's current capabilities.",
+          "latency_seconds": 20.438680499999464
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The system does not have flight booking capabilities, as evidenced by the available tasks which only allow requesting information or explaining limitations. Since booking flights is unsupported, this task is the most appropriate.",
+          "latency_seconds": 28.698307900001964
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request involves logging into a bank and performing a financial transfer, which is outside the system's current capabilities and requires secure, dedicated services that this AI cannot provide.",
+          "latency_seconds": 21.978676200000336
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The requested behavior involves controlling a browser and submitting forms, which is outside the system's current capabilities as indicated by the available tasks, which are focused on conversational handling and not external automation.",
+          "latency_seconds": 19.87373630000002
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request to open and summarize private email involves accessing external personal accounts which is not supported by the current system capabilities.",
+          "latency_seconds": 7.472186499999225
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user's request involves making a phone call to Sarah, which is an action that the system cannot perform as it is not equipped with telephony capabilities or access to external communication services, making it outside the system's current capabilities.",
+          "latency_seconds": 27.011952000000747
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.8,
+          "reason": "The request to install a GPU driver is outside the system's current capabilities, as the available tasks only support information gathering or explaining limitations, and there is no task for performing installations.",
+          "latency_seconds": 31.77395930000057
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The request involves moving files between folders, which requires file system operations not supported by the available tasks. The system can only handle requests by asking for more information or explaining limitations, and since no file management task is present, this behavior is outside its current capabilities.",
+          "latency_seconds": 29.871368100000836
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user's request to 'buy the cheapest standing desk' involves performing a physical transaction or purchase, which is outside the system's current capabilities to browse e-commerce sites, make payments, or handle shipping. The task 'Explain request cannot be handled' is appropriate to inform the user of this limitation.",
+          "latency_seconds": 19.6656167000001
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.92,
+          "reason": "Connecting to a VPN and deploying a build are infrastructure/network operations that require specialized tooling, credentials, and system-level access that are outside this system's current capabilities.",
+          "latency_seconds": 6.100943100002041
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:p5sonmwgwvipfot7alcc",
+      "provider_name": "OpenCode Go direct model: mimo-v2-omni",
+      "baml_surface": "OpenCodeGoModelMimoV2Omni",
+      "model_id": "mimo-v2-omni",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 0.9146187699996517,
+        "best": 0.8714295999998285,
+        "worst": 1.057400300000154,
+        "p50": 0.90242815000056
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:p5sonmwgwvipfot7alcc",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Omni, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Omni\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.9240848000008555
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:p5sonmwgwvipfot7alcc",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Omni, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Omni\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 1.057400300000154
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:p5sonmwgwvipfot7alcc",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Omni, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Omni\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.8715984999980719
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:p5sonmwgwvipfot7alcc",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Omni, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Omni\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.9036019000013766
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:p5sonmwgwvipfot7alcc",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Omni, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Omni\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.8804116999999678
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:p5sonmwgwvipfot7alcc",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Omni, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Omni\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.9161361000005854
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:p5sonmwgwvipfot7alcc",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Omni, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Omni\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.8959030999976676
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:p5sonmwgwvipfot7alcc",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Omni, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Omni\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.8714295999998285
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:p5sonmwgwvipfot7alcc",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Omni, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Omni\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.9243672999982664
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:p5sonmwgwvipfot7alcc",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Omni, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Omni\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.9012543999997433
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:qjh1de8jahgffs8hd8f7",
+      "provider_name": "OpenCode Go direct model: mimo-v2-pro",
+      "baml_surface": "OpenCodeGoModelMimoV2Pro",
+      "model_id": "mimo-v2-pro",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 0.9158569300005184,
+        "best": 0.8619332000016584,
+        "worst": 1.1419811000014306,
+        "p50": 0.8944190500005789
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:qjh1de8jahgffs8hd8f7",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Pro, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Pro\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.9127469000013662
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:qjh1de8jahgffs8hd8f7",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Pro, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Pro\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.8991418000005069
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:qjh1de8jahgffs8hd8f7",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Pro, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Pro\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.9023598999992828
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:qjh1de8jahgffs8hd8f7",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Pro, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Pro\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.8818135000001348
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:qjh1de8jahgffs8hd8f7",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Pro, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Pro\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.9076602999994066
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:qjh1de8jahgffs8hd8f7",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Pro, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Pro\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.8896963000006508
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:qjh1de8jahgffs8hd8f7",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Pro, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Pro\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.8864245999975537
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:qjh1de8jahgffs8hd8f7",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Pro, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Pro\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.8619332000016584
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:qjh1de8jahgffs8hd8f7",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Pro, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Pro\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 1.1419811000014306
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:qjh1de8jahgffs8hd8f7",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV2Pro, message=Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}}, status_code=500, detailed_message=LLM client \"OpenCodeGoModelMimoV2Pro\" failed with status code: ServerError (500)\nMessage: Request failed with status code: 500 Internal Server Error. {\"type\":\"error\",\"error\":{\"type\":\"error\",\"message\":\"Internal server error\"}})",
+          "latency_seconds": 0.8748117000031925
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+      "provider_name": "OpenCode Go direct model: minimax-m2.5",
+      "baml_surface": "OpenCodeGoModelMinimaxM25",
+      "model_id": "minimax-m2.5",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 1.1651772500001243,
+        "best": 0.9072264000024006,
+        "worst": 2.7393984999980603,
+        "p50": 0.9503271499997936
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM25, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM25\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9072264000024006
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM25, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM25\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9122155999975803
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM25, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM25\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 2.7393984999980603
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM25, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM25\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9080031000012241
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM25, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM25\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9231214999999793
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM25, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM25\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 1.0032667000014044
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM25, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM25\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 1.373232599999028
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM25, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM25\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9666461999986495
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM25, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM25\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9340081000009377
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM25, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM25\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9846538000019791
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+      "provider_name": "OpenCode Go direct model: minimax-m2.7",
+      "baml_surface": "OpenCodeGoModelMinimaxM27",
+      "model_id": "minimax-m2.7",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 0.9197148200004449,
+        "best": 0.8681596999995236,
+        "worst": 1.0690732000002754,
+        "p50": 0.8981492500006425
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM27, message=Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM27\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}})",
+          "latency_seconds": 0.9171084000008705
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM27, message=Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM27\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}})",
+          "latency_seconds": 0.8961625999982061
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM27, message=Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM27\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}})",
+          "latency_seconds": 0.899644500001159
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM27, message=Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM27\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}})",
+          "latency_seconds": 0.8972604000009596
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM27, message=Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM27\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}})",
+          "latency_seconds": 0.8990381000003254
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM27, message=Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM27\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}})",
+          "latency_seconds": 0.987533200001053
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM27, message=Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM27\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}})",
+          "latency_seconds": 1.0690732000002754
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM27, message=Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM27\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}})",
+          "latency_seconds": 0.8866353000012168
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM27, message=Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM27\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}})",
+          "latency_seconds": 0.8681596999995236
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM27, message=Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM27\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Error from provider (Console Go): Upstream request failed\"}})",
+          "latency_seconds": 0.8765328000008594
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+      "provider_name": "OpenCode Go direct model: minimax-m3",
+      "baml_surface": "OpenCodeGoModelMinimaxM3",
+      "model_id": "minimax-m3",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 1.0740885200008052,
+        "best": 0.8944407000017236,
+        "worst": 1.7221678999994765,
+        "p50": 0.92105575000096
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM3, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM3\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9193995000023278
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM3, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM3\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 1.6047394999986864
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM3, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM3\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.8944407000017236
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM3, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM3\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 1.0410167000009096
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM3, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM3\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9009365000019898
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM3, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM3\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 1.7221678999994765
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM3, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM3\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.894578299998102
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM3, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM3\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9227119999995921
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM3, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM3\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9405538000028173
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMinimaxM3, message=Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}, status_code=400, detailed_message=LLM client \"OpenCodeGoModelMinimaxM3\" failed with status code: Unspecified error code: 400\nMessage: Request failed with status code: 400 Bad Request. {\"error\":{\"message\":\"Error from provider (Console Go): Upstream request failed\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}})",
+          "latency_seconds": 0.9003403000024264
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+      "provider_name": "OpenCode Go direct model: qwen3.5-plus",
+      "baml_surface": "OpenCodeGoModelQwen35Plus",
+      "model_id": "qwen3.5-plus",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 1.1299101599997812,
+        "best": 0.9331896000003326,
+        "worst": 1.376009100000374,
+        "p50": 1.0748694499998237
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3347095999997691
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9331896000003326
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0671873999999661
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0825514999996813
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0116096999990987
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3267520999979752
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0295145000018238
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9755741000008129
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.162003999997978
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.376009100000374
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+      "provider_name": "OpenCode Go direct model: qwen3.6-plus",
+      "baml_surface": "OpenCodeGoModelQwen36Plus",
+      "model_id": "qwen3.6-plus",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 1.2078196200000093,
+        "best": 0.9163124000006064,
+        "worst": 1.3916642000003776,
+        "p50": 1.2608509499987122
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3672597000004316
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9163124000006064
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9290276000028825
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3916642000003776
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.32688010000129
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.196044799999072
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3256570999983524
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.133761199998844
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.165866499999538
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3257225999986986
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+      "provider_name": "OpenCode Go direct model: qwen3.7-max",
+      "baml_surface": "OpenCodeGoModelQwen37Max",
+      "model_id": "qwen3.7-max",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 1.183879750000051,
+        "best": 0.9136242000022321,
+        "worst": 1.4669604000009713,
+        "p50": 1.1950258499982738
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.105369699998846
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9136242000022321
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.4669604000009713
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3031372000004922
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.2208728999976302
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.1691787999989174
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0760741000012786
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.2510150000016438
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9609653999978036
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3715998000006948
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:owyujidlviust8peg5e2",
+      "provider_name": "OpenCode Go direct model: qwen3.7-plus",
+      "baml_surface": "OpenCodeGoModelQwen37Plus",
+      "model_id": "qwen3.7-plus",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 1.1907889400004934,
+        "best": 0.9476190999994287,
+        "worst": 1.3671673999997438,
+        "p50": 1.2164151500001026
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.2067105999994965
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.2494148000005225
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.2007241000028444
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.2261197000007087
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3671673999997438
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3109751000010874
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.254601200002071
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9476190999994287
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0539668999990681
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.090590499999962
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "providers": 20,
+    "cases": 10,
+    "runs_per_case": 1,
+    "total": 200,
+    "correct": 94,
+    "errors": 100,
+    "accuracy": 0.47,
+    "delay_seconds": 2.0,
+    "provider_cooldown_seconds": 15.0
+  }
+}

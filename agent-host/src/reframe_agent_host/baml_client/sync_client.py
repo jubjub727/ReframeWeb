@@ -94,21 +94,35 @@ class BamlSyncClient:
     def parse_stream(self):
       return self.__llm_stream_parser
 
-    def PlanConversationTurn(self, transcript: str,conversation_mode: types.ConversationMode,playback_state: types.PlaybackState,
+    def ChooseInitialTask(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],available_tasks: typing.List["types.AvailableTask"],task_choice_memories: typing.List["types.TaskChoiceMemoryContext"],
         baml_options: BamlCallOptions = {},
-    ) -> types.AgentTurnPlan:
+    ) -> types.TaskChoiceDecision:
         # Check if on_tick is provided
         if 'on_tick' in baml_options:
-            __stream__ = self.stream.PlanConversationTurn(transcript=transcript,conversation_mode=conversation_mode,playback_state=playback_state,
+            __stream__ = self.stream.ChooseInitialTask(current_user_request=current_user_request,session_conversations=session_conversations,session_memories=session_memories,available_tasks=available_tasks,task_choice_memories=task_choice_memories,
                 baml_options=baml_options)
             return __stream__.get_final_response()
         else:
             # Original non-streaming code
-            __result__ = self.__options.merge_options(baml_options).call_function_sync(function_name="PlanConversationTurn", args={
-                "transcript": transcript,"conversation_mode": conversation_mode,"playback_state": playback_state,
+            __result__ = self.__options.merge_options(baml_options).call_function_sync(function_name="ChooseInitialTask", args={
+                "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"available_tasks": available_tasks,"task_choice_memories": task_choice_memories,
             })
-            return typing.cast(types.AgentTurnPlan, __result__.cast_to(types, types, stream_types, False, __runtime__))
-    
+            return typing.cast(types.TaskChoiceDecision, __result__.cast_to(types, types, stream_types, False, __runtime__))
+    def EvaluateConversationForMemorySearch(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,conversation_evaluation_memories: typing.List["types.ConversationEvaluationMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> types.ConversationMemorySearchHints:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            __stream__ = self.stream.EvaluateConversationForMemorySearch(current_user_request=current_user_request,session_conversations=session_conversations,session_memories=session_memories,selected_task=selected_task,conversation_evaluation_memories=conversation_evaluation_memories,
+                baml_options=baml_options)
+            return __stream__.get_final_response()
+        else:
+            # Original non-streaming code
+            __result__ = self.__options.merge_options(baml_options).call_function_sync(function_name="EvaluateConversationForMemorySearch", args={
+                "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"conversation_evaluation_memories": conversation_evaluation_memories,
+            })
+            return typing.cast(types.ConversationMemorySearchHints, __result__.cast_to(types, types, stream_types, False, __runtime__))
+
 
 
 class BamlStreamClient:
@@ -117,19 +131,31 @@ class BamlStreamClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
-    def PlanConversationTurn(self, transcript: str,conversation_mode: types.ConversationMode,playback_state: types.PlaybackState,
+    def ChooseInitialTask(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],available_tasks: typing.List["types.AvailableTask"],task_choice_memories: typing.List["types.TaskChoiceMemoryContext"],
         baml_options: BamlCallOptions = {},
-    ) -> baml_py.BamlSyncStream[stream_types.AgentTurnPlan, types.AgentTurnPlan]:
-        __ctx__, __result__ = self.__options.merge_options(baml_options).create_sync_stream(function_name="PlanConversationTurn", args={
-            "transcript": transcript,"conversation_mode": conversation_mode,"playback_state": playback_state,
+    ) -> baml_py.BamlSyncStream[stream_types.TaskChoiceDecision, types.TaskChoiceDecision]:
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_sync_stream(function_name="ChooseInitialTask", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"available_tasks": available_tasks,"task_choice_memories": task_choice_memories,
         })
-        return baml_py.BamlSyncStream[stream_types.AgentTurnPlan, types.AgentTurnPlan](
+        return baml_py.BamlSyncStream[stream_types.TaskChoiceDecision, types.TaskChoiceDecision](
           __result__,
-          lambda x: typing.cast(stream_types.AgentTurnPlan, x.cast_to(types, types, stream_types, True, __runtime__)),
-          lambda x: typing.cast(types.AgentTurnPlan, x.cast_to(types, types, stream_types, False, __runtime__)),
+          lambda x: typing.cast(stream_types.TaskChoiceDecision, x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(types.TaskChoiceDecision, x.cast_to(types, types, stream_types, False, __runtime__)),
           __ctx__,
         )
-    
+    def EvaluateConversationForMemorySearch(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,conversation_evaluation_memories: typing.List["types.ConversationEvaluationMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlSyncStream[stream_types.ConversationMemorySearchHints, types.ConversationMemorySearchHints]:
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_sync_stream(function_name="EvaluateConversationForMemorySearch", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"conversation_evaluation_memories": conversation_evaluation_memories,
+        })
+        return baml_py.BamlSyncStream[stream_types.ConversationMemorySearchHints, types.ConversationMemorySearchHints](
+          __result__,
+          lambda x: typing.cast(stream_types.ConversationMemorySearchHints, x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(types.ConversationMemorySearchHints, x.cast_to(types, types, stream_types, False, __runtime__)),
+          __ctx__,
+        )
+
 
 class BamlHttpRequestClient:
     __options: DoNotUseDirectlyCallManager
@@ -137,14 +163,21 @@ class BamlHttpRequestClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
-    def PlanConversationTurn(self, transcript: str,conversation_mode: types.ConversationMode,playback_state: types.PlaybackState,
+    def ChooseInitialTask(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],available_tasks: typing.List["types.AvailableTask"],task_choice_memories: typing.List["types.TaskChoiceMemoryContext"],
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
-        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="PlanConversationTurn", args={
-            "transcript": transcript,"conversation_mode": conversation_mode,"playback_state": playback_state,
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ChooseInitialTask", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"available_tasks": available_tasks,"task_choice_memories": task_choice_memories,
         }, mode="request")
         return __result__
-    
+    def EvaluateConversationForMemorySearch(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,conversation_evaluation_memories: typing.List["types.ConversationEvaluationMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="EvaluateConversationForMemorySearch", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"conversation_evaluation_memories": conversation_evaluation_memories,
+        }, mode="request")
+        return __result__
+
 
 class BamlHttpStreamRequestClient:
     __options: DoNotUseDirectlyCallManager
@@ -152,13 +185,20 @@ class BamlHttpStreamRequestClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
-    def PlanConversationTurn(self, transcript: str,conversation_mode: types.ConversationMode,playback_state: types.PlaybackState,
+    def ChooseInitialTask(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],available_tasks: typing.List["types.AvailableTask"],task_choice_memories: typing.List["types.TaskChoiceMemoryContext"],
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
-        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="PlanConversationTurn", args={
-            "transcript": transcript,"conversation_mode": conversation_mode,"playback_state": playback_state,
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="ChooseInitialTask", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"available_tasks": available_tasks,"task_choice_memories": task_choice_memories,
         }, mode="stream")
         return __result__
-    
+    def EvaluateConversationForMemorySearch(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,conversation_evaluation_memories: typing.List["types.ConversationEvaluationMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="EvaluateConversationForMemorySearch", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"conversation_evaluation_memories": conversation_evaluation_memories,
+        }, mode="stream")
+        return __result__
+
 
 b = BamlSyncClient(DoNotUseDirectlyCallManager({}))

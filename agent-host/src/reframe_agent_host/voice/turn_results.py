@@ -29,7 +29,8 @@ def mode_switch_turn_result(
         ignored=False,
         utterance=None,
         transcript=None,
-        plan=None,
+        task_choice=None,
+        memory_search_hints=None,
         timings=mode_switch_timings(
             model_prepare_seconds,
             capture,
@@ -45,7 +46,8 @@ def transcribed_turn_result(
     transcript: Transcript,
     trigger_detection: TriggerPhraseDetection | None,
     routed_transcript: str,
-    plan: types.AgentTurnPlan | None,
+    task_choice: types.TaskChoiceDecision | None,
+    memory_search_hints: types.ConversationMemorySearchHints | None,
     timings: dict[str, float | None],
 ) -> VoiceTurnResult:
     return VoiceTurnResult(
@@ -57,15 +59,18 @@ def transcribed_turn_result(
         ignored=False,
         utterance=capture.utterance,
         transcript=transcript,
-        plan=plan,
+        task_choice=task_choice,
+        memory_search_hints=memory_search_hints,
         timings=turn_timings(
             config,
             model_prepare_seconds=timings["model_prepare_seconds"],
             capture=capture,
             total_started_at=timings["total_started_at"],
             post_vad_transcript_seconds=timings["post_vad_transcript_seconds"],
-            post_vad_plan_seconds=timings["post_vad_plan_seconds"],
+            post_vad_task_choice_seconds=timings["post_vad_task_choice_seconds"],
+            post_vad_memory_search_seconds=timings["post_vad_memory_search_seconds"],
             transcription_seconds=timings["transcription_seconds"],
-            planning_seconds=timings["planning_seconds"],
+            task_choice_seconds=timings["task_choice_seconds"],
+            memory_search_seconds=timings["memory_search_seconds"],
         ),
     )

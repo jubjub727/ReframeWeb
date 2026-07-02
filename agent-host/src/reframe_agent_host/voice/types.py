@@ -25,8 +25,8 @@ class VoicePipelineConfig:
     triggers: TriggerPhraseConfig
     transcription: WhisperTranscriberConfig
     conversation_mode: types.ConversationMode
-    playback_state: types.PlaybackState
-    plan_enabled: bool = True
+    task_choice_enabled: bool = True
+    session_id: str | None = None
     listen_timeout_seconds: float = 0.0
     post_activation_command_window_ms: int = 700
     debug_audio_dir: str | None = None
@@ -43,11 +43,14 @@ class VoiceTurnTimings:
     speech_capture_wall_seconds: float | None
     vad_endpoint_delay_estimate_seconds: float
     post_vad_transcript_seconds: float | None
-    post_vad_plan_seconds: float | None
+    post_vad_task_choice_seconds: float | None
+    post_vad_memory_search_seconds: float | None
     estimated_user_stop_to_transcript_seconds: float | None
-    estimated_user_stop_to_plan_seconds: float | None
+    estimated_user_stop_to_task_choice_seconds: float | None
+    estimated_user_stop_to_memory_search_seconds: float | None
     transcription_seconds: float | None
-    planning_seconds: float | None
+    task_choice_seconds: float | None
+    memory_search_seconds: float | None
     total_seconds: float
 
     def to_dict(self) -> dict[str, float | None]:
@@ -61,15 +64,20 @@ class VoiceTurnTimings:
                 self.vad_endpoint_delay_estimate_seconds
             ),
             "post_vad_transcript_seconds": self.post_vad_transcript_seconds,
-            "post_vad_plan_seconds": self.post_vad_plan_seconds,
+            "post_vad_task_choice_seconds": self.post_vad_task_choice_seconds,
+            "post_vad_memory_search_seconds": self.post_vad_memory_search_seconds,
             "estimated_user_stop_to_transcript_seconds": (
                 self.estimated_user_stop_to_transcript_seconds
             ),
-            "estimated_user_stop_to_plan_seconds": (
-                self.estimated_user_stop_to_plan_seconds
+            "estimated_user_stop_to_task_choice_seconds": (
+                self.estimated_user_stop_to_task_choice_seconds
+            ),
+            "estimated_user_stop_to_memory_search_seconds": (
+                self.estimated_user_stop_to_memory_search_seconds
             ),
             "transcription_seconds": self.transcription_seconds,
-            "planning_seconds": self.planning_seconds,
+            "task_choice_seconds": self.task_choice_seconds,
+            "memory_search_seconds": self.memory_search_seconds,
             "total_seconds": self.total_seconds,
         }
 
@@ -84,7 +92,8 @@ class VoiceTurnResult:
     ignored: bool
     utterance: DetectedUtterance | None
     transcript: Transcript | None
-    plan: types.AgentTurnPlan | None
+    task_choice: types.TaskChoiceDecision | None
+    memory_search_hints: types.ConversationMemorySearchHints | None
     timings: VoiceTurnTimings
 
     def to_dict(self) -> dict[str, object]:
@@ -129,7 +138,16 @@ class VoiceTurnResult:
                 if self.transcript is not None
                 else None
             ),
-            "plan": self.plan.model_dump(mode="json") if self.plan is not None else None,
+            "task_choice": (
+                self.task_choice.model_dump(mode="json")
+                if self.task_choice is not None
+                else None
+            ),
+            "memory_search_hints": (
+                self.memory_search_hints.model_dump(mode="json")
+                if self.memory_search_hints is not None
+                else None
+            ),
             "timings": self.timings.to_dict(),
         }
 

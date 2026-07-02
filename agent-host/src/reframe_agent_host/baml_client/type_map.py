@@ -16,17 +16,43 @@ from . import stream_types
 
 type_map = {
 
-    "types.AgentTurnPlan": types.AgentTurnPlan,
-    "stream_types.AgentTurnPlan": stream_types.AgentTurnPlan,
+    "types.AvailableTask": types.AvailableTask,
+    "stream_types.AvailableTask": stream_types.AvailableTask,
 
-    "types.HostAction": types.HostAction,
-    "stream_types.HostAction": stream_types.HostAction,
+    "types.CandidateMemory": types.CandidateMemory,
+    "stream_types.CandidateMemory": stream_types.CandidateMemory,
+
+    "types.ConversationEvaluationMemoryContext": types.ConversationEvaluationMemoryContext,
+    "stream_types.ConversationEvaluationMemoryContext": stream_types.ConversationEvaluationMemoryContext,
+
+    "types.ConversationHistory": types.ConversationHistory,
+    "stream_types.ConversationHistory": stream_types.ConversationHistory,
+
+    "types.ConversationHistoryMessage": types.ConversationHistoryMessage,
+    "stream_types.ConversationHistoryMessage": stream_types.ConversationHistoryMessage,
+
+    "types.ConversationMemorySearchHints": types.ConversationMemorySearchHints,
+    "stream_types.ConversationMemorySearchHints": stream_types.ConversationMemorySearchHints,
+
+    "types.MemoryStringSearch": types.MemoryStringSearch,
+    "stream_types.MemoryStringSearch": stream_types.MemoryStringSearch,
+
+    "types.MemoryTagSearch": types.MemoryTagSearch,
+    "stream_types.MemoryTagSearch": stream_types.MemoryTagSearch,
+
+    "types.SelectedTaskContext": types.SelectedTaskContext,
+    "stream_types.SelectedTaskContext": stream_types.SelectedTaskContext,
+
+    "types.SessionMemoryContext": types.SessionMemoryContext,
+    "stream_types.SessionMemoryContext": stream_types.SessionMemoryContext,
+
+    "types.TaskChoiceDecision": types.TaskChoiceDecision,
+    "stream_types.TaskChoiceDecision": stream_types.TaskChoiceDecision,
+
+    "types.TaskChoiceMemoryContext": types.TaskChoiceMemoryContext,
+    "stream_types.TaskChoiceMemoryContext": stream_types.TaskChoiceMemoryContext,
 
 
     "types.ConversationMode": types.ConversationMode,
-
-    "types.HostRoute": types.HostRoute,
-
-    "types.PlaybackState": types.PlaybackState,
 
 }

@@ -23,13 +23,19 @@ class LlmResponseParser:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
-    def PlanConversationTurn(
+    def ChooseInitialTask(
         self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> types.AgentTurnPlan:
-        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="PlanConversationTurn", llm_response=llm_response, mode="request")
-        return typing.cast(types.AgentTurnPlan, __result__)
+    ) -> types.TaskChoiceDecision:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ChooseInitialTask", llm_response=llm_response, mode="request")
+        return typing.cast(types.TaskChoiceDecision, __result__)
 
-    
+    def EvaluateConversationForMemorySearch(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> types.ConversationMemorySearchHints:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateConversationForMemorySearch", llm_response=llm_response, mode="request")
+        return typing.cast(types.ConversationMemorySearchHints, __result__)
+
+
 
 class LlmStreamParser:
     __options: DoNotUseDirectlyCallManager
@@ -37,10 +43,16 @@ class LlmStreamParser:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
-    def PlanConversationTurn(
+    def ChooseInitialTask(
         self, llm_response: str, baml_options: BamlCallOptions = {},
-    ) -> stream_types.AgentTurnPlan:
-        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="PlanConversationTurn", llm_response=llm_response, mode="stream")
-        return typing.cast(stream_types.AgentTurnPlan, __result__)
+    ) -> stream_types.TaskChoiceDecision:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ChooseInitialTask", llm_response=llm_response, mode="stream")
+        return typing.cast(stream_types.TaskChoiceDecision, __result__)
+
+    def EvaluateConversationForMemorySearch(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> stream_types.ConversationMemorySearchHints:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateConversationForMemorySearch", llm_response=llm_response, mode="stream")
+        return typing.cast(stream_types.ConversationMemorySearchHints, __result__)
 
     

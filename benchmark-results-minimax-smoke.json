@@ -1,0 +1,55 @@
+{
+  "benchmark": "task_choice_lack_of_capability",
+  "cases": [
+    {
+      "id": "desktop_photoshop",
+      "transcript": "Open Photoshop and resize the image on my desktop.",
+      "expected_task_name": "Explain request cannot be handled"
+    }
+  ],
+  "providers": [
+    {
+      "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+      "provider_name": "OpenCode Go direct model: minimax-m2.5",
+      "baml_surface": "OpenCodeGoModelMinimaxM25",
+      "model_id": "minimax-m2.5",
+      "total": 1,
+      "correct": 1,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 9.117949300001783,
+        "best": 9.117949300001783,
+        "worst": 9.117949300001783,
+        "p50": 9.117949300001783
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user's request requires opening an external desktop application (Photoshop) and performing image editing operations, which are capabilities outside the system's current scope. The system appears designed for task routing and conversation management, not for executing desktop application commands or file system operations.",
+          "latency_seconds": 9.117949300001783
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "providers": 1,
+    "cases": 1,
+    "runs_per_case": 1,
+    "total": 1,
+    "correct": 1,
+    "errors": 0,
+    "accuracy": 1.0,
+    "delay_seconds": 0.0,
+    "provider_cooldown_seconds": 0.0
+  }
+}

@@ -1,0 +1,2361 @@
+{
+  "benchmark": "task_choice_lack_of_capability",
+  "cases": [
+    {
+      "id": "desktop_photoshop",
+      "transcript": "Open Photoshop and resize the image on my desktop.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "flight_booking",
+      "transcript": "Book me a flight to Tokyo for tomorrow morning.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "bank_transfer",
+      "transcript": "Log into my bank and transfer 500 dollars to Alex.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "checkout_form",
+      "transcript": "Control the browser and submit the checkout form.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "private_email",
+      "transcript": "Open my private email and summarize everything from today.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "phone_call",
+      "transcript": "Call Sarah and explain that I will be late.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "driver_install",
+      "transcript": "Install the missing GPU driver for me.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "file_organization",
+      "transcript": "Move everything in downloads into the right project folders.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "purchase_item",
+      "transcript": "Buy the cheapest standing desk you can find.",
+      "expected_task_name": "Explain request cannot be handled"
+    },
+    {
+      "id": "vpn_deploy",
+      "transcript": "Connect to my work VPN and deploy the latest build.",
+      "expected_task_name": "Explain request cannot be handled"
+    }
+  ],
+  "providers": [
+    {
+      "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-flash",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "model_id": "deepseek-v4-flash",
+      "total": 10,
+      "correct": 10,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 8.456257900000129,
+        "best": 5.044857900000352,
+        "worst": 22.338671099998464,
+        "p50": 6.6012233500005095
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requests opening a desktop application (Photoshop) and performing image manipulation, which requires capabilities beyond what the system can provide. The request is unambiguous, so asking for more information would not help; the system cannot execute these actions. The appropriate task is to explain that the request cannot be handled.",
+          "latency_seconds": 6.793936300000496
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requests a flight booking to Tokyo, which is not within the system's current capabilities. The 'Explain request cannot be handled' task is the appropriate choice to communicate this limitation.",
+          "latency_seconds": 6.197568600000523
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requests a bank login and money transfer, which is outside the system's current capabilities. No amount of additional information would enable this action, so it is best to explain it cannot be handled.",
+          "latency_seconds": 8.664034800000081
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The user requests to control a browser and submit a checkout form, which is an action outside the system's current capabilities. The available tasks only allow requesting more information or explaining that a request cannot be handled. Therefore, the correct choice is to explain that the request cannot be handled.",
+          "latency_seconds": 5.044857900000352
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request to open a private email and summarize today's messages requires direct access to the user's email account, which is not supported by the current system capabilities. Neither available task can fulfill this, so the appropriate action is to explain that the request cannot be handled.",
+          "latency_seconds": 5.669293800001469
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requests to call Sarah, but making phone calls is outside the system's current capabilities. Therefore, the request cannot be handled.",
+          "latency_seconds": 6.408510400000523
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requests installation of a GPU driver, which is a system-level operation that requires administrative privileges and direct hardware access. The system does not have the capability to perform such installations. Therefore, the only appropriate action is to explain that this request cannot be handled.",
+          "latency_seconds": 5.634522699998342
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user request asks to move files in downloads to project folders, which is an action-based request that the system cannot perform. The system lacks capabilities for file operations, so the request cannot be handled.",
+          "latency_seconds": 22.338671099998464
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requests to purchase a physical product (a standing desk), which is outside the system's current capabilities. The system cannot complete purchases or browse e-commerce listings, so the request cannot be handled.",
+          "latency_seconds": 7.7287851000000956
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The user request involves connecting to a work VPN and deploying a build, which are actions outside the system's current capabilities. No available task can perform these actions, so the appropriate choice is to explain that the request cannot be handled.",
+          "latency_seconds": 10.082398300000932
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-pro",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Pro",
+      "model_id": "deepseek-v4-pro",
+      "total": 10,
+      "correct": 9,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.9,
+      "latency_seconds": {
+        "average": 19.80799055999996,
+        "best": 13.367717099998117,
+        "worst": 29.26319770000191,
+        "p50": 20.444271749998734
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The system cannot open or control desktop applications such as Photoshop, so it must explain that the request cannot be handled.",
+          "latency_seconds": 17.358079499997984
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The available tasks do not include a flight booking capability, so the request is outside the system's current capabilities. The appropriate task is to explain this to the user.",
+          "latency_seconds": 20.82491139999911
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request involves logging into a bank and transferring money, which is a financial action that the system likely cannot perform due to lack of banking integrations and security restrictions.",
+          "latency_seconds": 14.072599200000695
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.99,
+          "reason": "The available tasks only include 'Request more information' and 'Explain request cannot be handled'. There is no task for browser control or form submission, so the system cannot perform the requested action. The appropriate response is to explain the limitation.",
+          "latency_seconds": 21.00247060000038
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user requested to open private email and summarize today's messages. This action is outside the system's capabilities because it cannot access private email accounts.",
+          "latency_seconds": 20.063632099998358
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user wants to make a phone call, but the system's available tasks do not include telephony or messaging capabilities, so the request cannot be handled.",
+          "latency_seconds": 13.367717099998117
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The user's request to install a GPU driver is an action outside the system's capabilities. The available tasks do not include performing system installations, so the appropriate response is to explain the limitation.",
+          "latency_seconds": 29.26319770000191
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request asks to move files in the downloads folder, but no file management task is available among the provided tasks. The system cannot perform file operations.",
+          "latency_seconds": 22.199425900002097
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The system does not have the capability to make purchases, so the request cannot be handled. Requesting more information would be misleading because even with more details, the purchase cannot be completed.",
+          "latency_seconds": 23.987138000000414
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.9,
+          "reason": "The user request lacks essential details such as VPN server, credentials, the specific build to deploy, and the target environment. Requesting more information is the appropriate first step.",
+          "latency_seconds": 15.940734100000554
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+      "provider_name": "OpenCode Go direct model: glm-5",
+      "baml_surface": "OpenCodeGoModelGlm5",
+      "model_id": "glm-5",
+      "total": 10,
+      "correct": 9,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.9,
+      "latency_seconds": {
+        "average": 8.520383409999704,
+        "best": 4.756956199998967,
+        "worst": 17.203740400000243,
+        "p50": 7.016752300000007
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user is requesting to open Photoshop and resize an image on their desktop. The available tasks do not include any capability to open applications, interact with the user's desktop, or perform image editing operations. This is a capability limitation, not a missing information issue, so the appropriate task is to explain the request cannot be handled.",
+          "latency_seconds": 6.769565099999454
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting to book a flight, but there are no available tasks that can handle flight booking. The only available tasks are requesting more information and explaining that a request cannot be handled. Since no flight booking capability exists, the appropriate response is to explain that this request cannot be handled.",
+          "latency_seconds": 4.756956199998967
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is requesting to log into their bank and perform a financial transaction (transferring $500 to Alex). This is outside the system's current capabilities - it cannot access banking systems, store or use banking credentials, or initiate financial transfers. This is not a case of needing more information; rather, the requested behavior is fundamentally unsupported.",
+          "latency_seconds": 7.102398299997731
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting browser automation and form submission, but there is no browser control or form submission task available in the available tasks. The system does not currently have the capability to control a browser or submit checkout forms, so the request cannot be handled.",
+          "latency_seconds": 6.931106300002284
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is asking to open their private email and summarize today's messages. This requires access to an external email account, which is outside the system's current capabilities. There are no tasks available that can access, read, or summarize email content. The request is clear in what it wants, so requesting more information would not help \u2014 the limitation is capability, not clarity.",
+          "latency_seconds": 5.285704399997485
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting to make a phone call to Sarah, but there is no task available in the system that can actually place phone calls. The available tasks only support requesting more information or explaining that a request cannot be handled. Since the core capability (making a phone call) is not available, the appropriate task is to explain that this request cannot be handled.",
+          "latency_seconds": 17.203740400000243
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user is asking the system to install a GPU driver, which is a system-level operation requiring direct access to their machine, administrative privileges, and the ability to download and execute installer files. This is outside the capabilities of a conversational AI assistant.",
+          "latency_seconds": 11.453991700000188
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.85,
+          "reason": "The request is ambiguous \u2014 'the right project folders' is not defined. The system needs to know which project folders exist, where they are located, and how files in the downloads folder should be matched to specific projects before any file moving can occur.",
+          "latency_seconds": 11.957954199999222
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is asking the system to purchase a standing desk, which requires the ability to browse products, compare prices, and complete a transaction. Neither available task provides shopping or purchasing capabilities, so this request cannot be handled with the current system.",
+          "latency_seconds": 6.571396100000129
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is asking to connect to a work VPN and deploy a build, which are system-level operations outside the current capabilities of this assistant. There are no available tasks that can perform VPN connections or software deployments, so this request cannot be handled with the system's current capabilities.",
+          "latency_seconds": 7.171021400001337
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+      "provider_name": "OpenCode Go direct model: glm-5.1",
+      "baml_surface": "OpenCodeGoModelGlm51",
+      "model_id": "glm-5.1",
+      "total": 10,
+      "correct": 9,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.9,
+      "latency_seconds": {
+        "average": 12.308146490000217,
+        "best": 5.1303789999983564,
+        "worst": 35.6171897000022,
+        "p50": 9.306693450000239
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user's request involves opening Photoshop and resizing an image, which requires desktop GUI automation capabilities. The available tasks do not include any that can perform desktop application control or image manipulation. The only available tasks are for requesting more information or explaining limitations, so the appropriate choice is to explain that this request cannot be handled with the current capabilities.",
+          "latency_seconds": 8.08522449999873
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user is requesting to book a flight, but there is no flight booking task available among the available tasks. The only available tasks are 'Request more information' and 'Explain request cannot be handled.' Since there is no capability to actually book a flight, the system cannot fulfill this request and should explain this limitation to the user.",
+          "latency_seconds": 35.6171897000022
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is requesting that the system log into their bank account and perform a financial transaction (transferring $500 to Alex). This requires accessing banking systems, handling sensitive financial credentials, and executing monetary transfers\u2014all of which are outside the system's current capabilities. This is not a case where additional information would make the request feasible; even with bank details and credentials, the system cannot access external banking platforms or perform financial transactions.",
+          "latency_seconds": 7.02685080000083
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting browser control to submit a checkout form, but none of the available tasks provide browser automation or control capabilities. The only available tasks are requesting more information and explaining limitations. Since browser control is fundamentally outside the system's current available task set, the appropriate response is to explain that the request cannot be handled.",
+          "latency_seconds": 10.671305300002132
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking the system to access their private email and summarize today's messages. The system does not have the capability to access or read private email accounts, making this request impossible to fulfill with current capabilities.",
+          "latency_seconds": 5.1303789999983564
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user is asking to make a phone call to Sarah, but there is no available task that can perform phone calls. The system's current capabilities do not include making outgoing phone calls, so this request cannot be handled with the available tasks.",
+          "latency_seconds": 9.695693500001653
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user is asking me to install a GPU driver, which requires direct access to their operating system and administrative privileges. As an AI assistant, I cannot install software or drivers on the user's machine. This is outside the system's current capabilities.",
+          "latency_seconds": 17.62002239999856
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.82,
+          "reason": "The request is ambiguous about how to determine which files belong in which project folders. The user needs to clarify the mapping rules (e.g., by filename pattern, file type, project name convention) before the task can be handled.",
+          "latency_seconds": 12.176551699998527
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is asking the system to buy a standing desk, which requires the ability to browse products, compare prices, and make a purchase. Neither available task provides product search or purchasing capabilities. Since this request is outside the system's current capabilities, the appropriate task is to explain that the request cannot be handled.",
+          "latency_seconds": 8.14055460000236
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking to connect to a work VPN and deploy a build. These are system administration and infrastructure operations that require direct access to VPN client software, network infrastructure, deployment tools, and servers. This is outside the current system's capabilities as an AI assistant - I cannot actually establish VPN connections or perform software deployments.",
+          "latency_seconds": 8.917693399998825
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+      "provider_name": "OpenCode Go direct model: glm-5.2",
+      "baml_surface": "OpenCodeGoModelGlm52",
+      "model_id": "glm-5.2",
+      "total": 10,
+      "correct": 9,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.9,
+      "latency_seconds": {
+        "average": 32.59702631999935,
+        "best": 4.579903199999535,
+        "worst": 242.48200859999997,
+        "p50": 8.500798700000814
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user is requesting to open Photoshop and resize an image on their desktop. This requires desktop automation capabilities - launching and controlling a desktop application (Photoshop) and manipulating local files. The available tasks do not include any desktop automation or file manipulation capabilities, only asking for more information or explaining limitations. Since there are no tasks available that could perform this action, the request cannot be handled with the system's current capabilities.",
+          "latency_seconds": 11.634143299997959
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting to book a flight, but there is no task available that can handle flight booking. The only available tasks are for requesting more information or explaining that a request cannot be handled. Since flight booking is outside the system's current capabilities, the appropriate task is to explain that the request cannot be handled.",
+          "latency_seconds": 6.752263200000016
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is requesting to log into their bank account and transfer money, which is outside the system's current capabilities. The system cannot access bank accounts, authenticate with financial institutions, or perform financial transactions. This is not a case of missing information but rather an unsupported capability that cannot be fulfilled.",
+          "latency_seconds": 8.991314800001419
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting browser automation to submit a checkout form, but none of the available tasks provide browser control capabilities. The available tasks only allow requesting more information or explaining limitations. Since the request is clear and doesn't need clarification, the appropriate task is to explain that this request cannot be handled with the current system capabilities.",
+          "latency_seconds": 6.640345299998444
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking to access their private email account and summarize today's messages. This requires accessing an external email service, which is outside the system's current capabilities. The system cannot log into, read, or retrieve content from the user's private email account.",
+          "latency_seconds": 4.579903199999535
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting to make a phone call to Sarah. There is no available task that can perform phone calls or external communication actions. The system's current capabilities do not include making outbound calls, so this request cannot be handled and the user should be informed of this limitation.",
+          "latency_seconds": 7.393376399999397
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.85,
+          "reason": "The user is requesting a GPU driver installation, which is a system-level operation requiring administrative access, hardware interaction, and software installation capabilities. None of the available tasks can perform this action. The system lacks any task for installing drivers, executing system commands, or managing hardware. This is outside the current capabilities of the available tasks.",
+          "latency_seconds": 242.48200859999997
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.85,
+          "reason": "The request is ambiguous. 'The right project folders' implies a mapping between downloaded files and destination folders, but no mapping rules or folder structure have been provided. The system needs to know what project folders exist and how to determine which files belong to which folder before it can proceed.",
+          "latency_seconds": 12.302449299997534
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.92,
+          "reason": "The user is asking the assistant to purchase a standing desk, which requires making a transaction, processing payment, and arranging shipping. These are capabilities the system does not have, so the request cannot be handled as stated.",
+          "latency_seconds": 8.01028260000021
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:lztmmlprk7f6izyciin0",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.88,
+          "reason": "The user is asking the assistant to connect to a work VPN and deploy a build. These are infrastructure and system-level operations that require network configuration, authentication credentials, and deployment tooling access \u2014 capabilities that an AI assistant cannot perform directly. This is outside the system's current capabilities, so explaining the limitation is the appropriate response.",
+          "latency_seconds": 17.184176499999012
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+      "provider_name": "OpenCode Go direct model: kimi-k2.5",
+      "baml_surface": "OpenCodeGoModelKimiK25",
+      "model_id": "kimi-k2.5",
+      "total": 10,
+      "correct": 9,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.9,
+      "latency_seconds": {
+        "average": 6.986242389999825,
+        "best": 4.188821800002188,
+        "worst": 22.695912399998633,
+        "p50": 4.752582500001154
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The only available tasks are conversational; there are no capabilities to open applications like Photoshop or perform file/image manipulation on the desktop. The user should be informed that this action cannot be handled.",
+          "latency_seconds": 4.188821800002188
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "There is no available task capable of booking flights. The only available options are to request more information or explain that the request cannot be handled. Since the core issue is the absence of flight-booking capability, not missing details, the correct task is to explain the limitation.",
+          "latency_seconds": 4.23198179999963
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request requires logging into a bank account and transferring money, which involves secure financial authentication and banking integrations that the system does not support. This is impossible to fulfill, so the limitation should be explained.",
+          "latency_seconds": 4.569270799998776
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is requesting browser automation and form submission, but there are no tasks available that provide browser control, DOM interaction, or form submission capabilities. Among the two available options, explaining the limitation is more appropriate than asking for more information, since additional details would not enable an unsupported capability.",
+          "latency_seconds": 4.929642999999487
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The request requires accessing the user's private email account and reading today's messages, but no email access capability or integration is available among the system's tasks. The only appropriate response is to explain that this behavior cannot be handled.",
+          "latency_seconds": 4.774413700000878
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The user is asking the system to place a phone call to Sarah, which is impossible because the system has no telephony or outbound calling capabilities.",
+          "latency_seconds": 4.34016789999805
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.95,
+          "reason": "Installing a GPU driver requires specific details that the user has not provided, such as the GPU manufacturer/model, operating system, and current symptoms or error messages. Without this information, the request cannot be handled well regardless of system capabilities.",
+          "latency_seconds": 9.316068399999494
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "None of the available tasks support file system operations, folder management, or moving files. The only available tasks are conversational, so the appropriate next step is to explain that the request cannot be handled with the current capabilities.",
+          "latency_seconds": 6.085392799999681
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.98,
+          "reason": "The system does not have capabilities to browse live product listings, compare real-time prices across retailers, or execute purchases on behalf of the user. The requested behavior (buying a standing desk) is outside current capabilities, so the appropriate response is to explain this limitation clearly.",
+          "latency_seconds": 4.73075130000143
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request requires system-level operations including VPN network connection and build deployment capabilities that are outside the current system's available tools and access permissions. These actions require direct OS integration, network interface control, and deployment infrastructure access.",
+          "latency_seconds": 22.695912399998633
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+      "provider_name": "OpenCode Go direct model: kimi-k2.6",
+      "baml_surface": "OpenCodeGoModelKimiK26",
+      "model_id": "kimi-k2.6",
+      "total": 10,
+      "correct": 10,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 8.810905849999836,
+        "best": 3.7830987999986974,
+        "worst": 19.358159100000194,
+        "p50": 7.669468600000982
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The available tasks list contains only two communication/meta-tasks and no tasks capable of launching external applications (Photoshop) or performing image manipulation (resizing). Since there are no execution tasks for opening programs or editing images, the requested behavior is impossible with the system's current capabilities.",
+          "latency_seconds": 19.358159100000194
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user asked to book a flight, but no flight-booking capability exists among the available tasks. The only available options are requesting more information or explaining that the request cannot be handled. Because the core action (booking a flight) is unsupported regardless of additional details, the correct step is to explain the limitation.",
+          "latency_seconds": 6.355732599997282
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The request involves logging into an external banking system and executing a real financial transaction, which is impossible, unsafe, and outside the system's capabilities.",
+          "latency_seconds": 7.797922300000209
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The available tasks do not include any browser control, automation, or form submission capabilities. Because the requested behavior is fundamentally outside the system's current capabilities, the appropriate action is to explain that it cannot be handled rather than ask for more information.",
+          "latency_seconds": 13.546804199999315
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The system has no available tasks for accessing email accounts, retrieving messages, or interfacing with external email providers. Because no email integration capability exists, the request is impossible to fulfill.",
+          "latency_seconds": 7.546893000002456
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The user is asking the system to make a real-world phone call to a specific person (Sarah), which is outside the capabilities of a text-based conversational AI. The system cannot dial numbers or speak over the phone, so the request cannot be handled.",
+          "latency_seconds": 5.712094200000138
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "There is no available task for system administration, package management, or hardware driver installation. The request requires capabilities that are outside the current system's scope, so the limitation should be explained rather than requesting more information.",
+          "latency_seconds": 9.680462100001023
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request requires file system access to move files from a downloads directory to project folders, but none of the available tasks provide file management, directory browsing, or automation capabilities. Since the core capability is missing, the appropriate response is to explain the limitation rather than ask for clarification.",
+          "latency_seconds": 7.792044199999509
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user wants to buy a standing desk, but the available tasks do not include any shopping, purchasing, web search, or product lookup capabilities. The request is outside the system's current capabilities, so I should explain this limitation rather than ask for more information or pretend I can complete the purchase.",
+          "latency_seconds": 3.7830987999986974
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The request requires connecting to a work VPN and deploying software builds, which involves OS-level network access and external infrastructure interaction that is outside the system's current capabilities. No additional information from the user would enable this.",
+          "latency_seconds": 6.5358479999995325
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+      "provider_name": "OpenCode Go direct model: kimi-k2.7-code",
+      "baml_surface": "OpenCodeGoModelKimiK27Code",
+      "model_id": "kimi-k2.7-code",
+      "total": 10,
+      "correct": 10,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 10.099429090000195,
+        "best": 7.624549799998931,
+        "worst": 14.019376800002647,
+        "p50": 10.046622500000012
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking to open Photoshop and resize an image, which requires application control and image manipulation capabilities. The available tasks only support requesting more information or explaining limitations, with no task available to perform the actual requested behavior.",
+          "latency_seconds": 11.98068670000066
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request is to book a flight, but no flight-booking capability is available among the system's tasks, so the appropriate next step is to explain that this cannot be handled.",
+          "latency_seconds": 9.894475499997498
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request requires logging into a real bank account and executing a financial transfer, which is outside the system's capabilities. The appropriate response is to explain that this cannot be done.",
+          "latency_seconds": 10.198769500002527
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The available tasks only include requesting more information or explaining that a request cannot be handled. There is no browser control or form submission task available, so the request is outside current capabilities.",
+          "latency_seconds": 11.077873300000647
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request asks the system to access the user's private email account, which is outside the system's current capabilities and raises privacy/security concerns. The appropriate response is to explain that this cannot be handled.",
+          "latency_seconds": 8.532142500000191
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking me to make a phone call to Sarah, which is outside the system's current capabilities. I cannot dial numbers or speak to people over the phone.",
+          "latency_seconds": 7.624549799998931
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The available tasks do not include any capability to install system drivers, run shell commands, or perform OS/hardware administration. Therefore the request cannot be fulfilled and should be declined rather than asking for more information.",
+          "latency_seconds": 10.472714899999119
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The request requires moving files between folders on the user's system, but there is no available file-system/file-management capability. The appropriate next step is to explain that the request cannot be handled with the current capabilities.",
+          "latency_seconds": 14.019376800002647
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request asks to purchase a physical product, but there are no available tasks or capabilities for shopping, comparing prices, or completing transactions.",
+          "latency_seconds": 8.657750700000179
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The requested actions\u2014connecting to a work VPN and deploying a build\u2014require network/infrastructure and deployment capabilities that are not represented among the available tasks. The only relevant option is to explain that the request cannot be handled.",
+          "latency_seconds": 8.535951199999545
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+      "provider_name": "OpenCode Go direct model: mimo-v2.5",
+      "baml_surface": "OpenCodeGoModelMimoV25",
+      "model_id": "mimo-v2.5",
+      "total": 10,
+      "correct": 9,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.9,
+      "latency_seconds": {
+        "average": 14.728808030000073,
+        "best": 7.356850700001814,
+        "worst": 21.281462000002648,
+        "p50": 14.515188850000413
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "\u7528\u6237\u8bf7\u6c42'\u6253\u5f00Photoshop\u5e76\u8c03\u6574\u56fe\u7247\u5927\u5c0f'\u6d89\u53ca\u63a7\u5236\u7528\u6237\u8ba1\u7b97\u673a\u4e0a\u7684\u5e94\u7528\u7a0b\u5e8f\u548c\u6587\u4ef6\u7cfb\u7edf\uff0c\u8fd9\u5b8c\u5168\u8d85\u51fa\u4e86\u6211\u4f5c\u4e3a\u8bed\u8a00\u6a21\u578b\u7684\u80fd\u529b\u8303\u56f4\u3002\u6211\u65e0\u6cd5\u542f\u52a8\u3001\u64cd\u4f5c\u6216\u4e0e\u7528\u6237\u7684\u56fe\u5f62\u754c\u9762\u3001\u6587\u4ef6\u7ba1\u7406\u5668\u6216\u7b2c\u4e09\u65b9\u8f6f\u4ef6\uff08\u5982Photoshop\uff09\u8fdb\u884c\u4ea4\u4e92\u3002",
+          "latency_seconds": 13.061833199997636
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.85,
+          "reason": "The user's request to book a flight to Tokyo for tomorrow morning is incomplete for proper processing. It lacks essential details such as the departure city, specific morning time, number of passengers, and other preferences, making it necessary to gather more information before the request can be handled effectively.",
+          "latency_seconds": 20.314141099999688
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user's request involves logging into a bank and transferring money, which are actions I cannot perform due to my lack of capabilities in accessing real banking systems or executing financial transactions.",
+          "latency_seconds": 16.569078500000614
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The request requires controlling a browser and submitting a form, which involves physical interaction with software. As a text-based AI model, I cannot perform such actions or access external systems directly.",
+          "latency_seconds": 9.780418599999393
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user's request to access and read their private email is beyond my capabilities. I cannot connect to external email services or access personal data.",
+          "latency_seconds": 7.356850700001814
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user request involves making a phone call, which requires external actions and access to communication systems. As a text-based AI model without integration with phone services or contact databases, this is outside the system's current capabilities.",
+          "latency_seconds": 15.524317899999005
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user request to install a GPU driver requires direct system access and administrative privileges, which is impossible for me to perform as an AI assistant. It falls outside my current capabilities.",
+          "latency_seconds": 14.369600599999103
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user request involves direct file system manipulation, which is not supported by the current capabilities of the AI assistant, as it lacks access to modify or manage files.",
+          "latency_seconds": 21.281462000002648
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user's request to 'buy the cheapest standing desk' involves purchasing a physical product, which is impossible for an AI language model to execute. I lack the capability to interact with e-commerce platforms, handle payments, or perform real-world transactions, making this request outside the system's current capabilities.",
+          "latency_seconds": 14.45881019999797
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request involves connecting to a VPN and deploying software, which are system-level operations that cannot be performed by an AI assistant. This is outside the current capabilities of the system.",
+          "latency_seconds": 14.571567500002857
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+      "provider_name": "OpenCode Go direct model: mimo-v2.5-pro",
+      "baml_surface": "OpenCodeGoModelMimoV25Pro",
+      "model_id": "mimo-v2.5-pro",
+      "total": 10,
+      "correct": 9,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.9,
+      "latency_seconds": {
+        "average": 14.907420380000257,
+        "best": 7.787762899999507,
+        "worst": 35.75391710000258,
+        "p50": 11.200268549999237
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting to open a specific desktop application (Photoshop) and perform an action on a local file (an image on their desktop). As a text-based assistant, I cannot directly interact with the user's computer, launch applications, or access their file system. Therefore, this request falls outside my current capabilities.",
+          "latency_seconds": 11.24311149999994
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.9,
+          "reason": "The user's request to book a flight to Tokyo for tomorrow morning requires additional details such as departure city, airline preferences, budget, and passenger information to proceed effectively. The 'Request more information from the user' task is the appropriate choice to gather necessary input before handling the booking.",
+          "latency_seconds": 9.010874600000534
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is requesting direct bank login and fund transfer, which requires handling sensitive credentials and performing financial transactions - actions that are outside the system's capabilities due to security, privacy, and functional limitations.",
+          "latency_seconds": 11.157425599998533
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The request involves controlling a browser and submitting a form, which requires direct browser automation capabilities. As an AI text-based assistant, I do not have built-in tools for browser control, and this behavior is outside the system's current capabilities as defined by the available tasks.",
+          "latency_seconds": 25.437845299999026
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user's request requires accessing external email accounts and retrieving real-time data from the internet, which are capabilities outside this system's current limitations. The request cannot be fulfilled without fundamental changes to what this system can do.",
+          "latency_seconds": 9.584816499998851
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The request to 'call Sarah' is a specific action that the assistant cannot perform, as it lacks the capability to make phone calls or send messages through telephony systems. Therefore, the appropriate response is to explain this limitation.",
+          "latency_seconds": 8.132422500002576
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking me to directly install a GPU driver on their computer. As an AI assistant, I cannot access their system, execute commands, or install software on their machine. This is a physical action that requires direct administrative access to their hardware/OS, which is outside my capabilities. I should explain this limitation while offering to help guide them through the process.",
+          "latency_seconds": 19.10065349999786
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "I don't have access to the user's file system or the ability to move files between folders on their computer. This request requires capabilities outside my current system.",
+          "latency_seconds": 7.787762899999507
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user's request to 'buy the cheapest standing desk' involves a transactional action (purchasing) that is outside the capabilities of an AI assistant, which can only provide information or advice, not execute real-world transactions.",
+          "latency_seconds": 35.75391710000258
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The request to connect to a VPN and deploy a build involves interacting with corporate networks and systems that I do not have access to, nor the capability to perform. This falls outside the system's current functionalities.",
+          "latency_seconds": 11.865374300003168
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+      "provider_name": "OpenCode Go direct model: minimax-m2.5",
+      "baml_surface": "OpenCodeGoModelMinimaxM25",
+      "model_id": "minimax-m2.5",
+      "total": 10,
+      "correct": 10,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 13.139489449999747,
+        "best": 8.849072400000296,
+        "worst": 19.600261299998238,
+        "p50": 11.219965399997818
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting to open Photoshop and resize an image on their desktop. This requires desktop application control and file system manipulation capabilities. Based on the available tasks, there is no task that can execute such actions (no 'perform action' or 'execute task' capability is listed). The only available tasks are to either request more information or explain inability. Since the system lacks the capability to control desktop applications or manipulate local files, the appropriate response is to explain this limitation.",
+          "latency_seconds": 19.600261299998238
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is requesting a flight booking to Tokyo for tomorrow morning. The available tasks only include 'Request more information' and 'Explain request cannot be handled'. There is no task available to actually book flights, as this would require integration with flight booking systems, payment processing, and real-time airline data which are not supported by the current system capabilities.",
+          "latency_seconds": 14.689488500000152
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The user is requesting to log into their bank account and transfer money, which is a financial transaction operation that is outside the system's capabilities. The system cannot access bank accounts, perform transfers, or handle sensitive financial operations. This request must be declined clearly and directly.",
+          "latency_seconds": 8.849072400000296
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is requesting browser control and form submission capabilities. Based on the available system description and tasks, this assistant is designed for text-based conversation and task routing only. There are no browser automation, web interaction, or form submission capabilities available in the current system. The system cannot control browsers or interact with web pages, so this request cannot be handled with current capabilities.",
+          "latency_seconds": 9.63045190000048
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request requires accessing the user's private email account, which is outside the system's current capabilities. I have no ability to authenticate with or access external email services on the user's behalf.",
+          "latency_seconds": 10.134666099998867
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting a phone call to Sarah, which appears to be outside the system's current capabilities. The available tasks do not include any functionality for making phone calls or sending communications to third parties. While the request is clear and specific, there is no task that can actually perform the requested behavior of calling Sarah.",
+          "latency_seconds": 11.5484183999979
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "Installing a GPU driver requires administrator privileges, access to the user's specific hardware/OS information, and the ability to execute system-level commands on the user's machine. This is outside the current system's capabilities as the assistant cannot access the user's hardware, run installation commands, or modify system files.",
+          "latency_seconds": 10.185834700001578
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting a file system operation (moving files from downloads to project folders), but the available tasks are limited to memory node operations (requesting information or explaining limitations). There is no task available that can perform actual file system operations. The system cannot handle this request with its current capabilities.",
+          "latency_seconds": 19.08265830000164
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request to 'buy' a standing desk requires e-commerce capabilities (product search, price comparison, purchase execution, payment processing, order fulfillment) that are not available in this system's current capabilities. This system appears to be a conversational/memory-focused assistant without shopping or transaction capabilities.",
+          "latency_seconds": 10.891512399997737
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:hw8kyxw4mc24xek6y1l1",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The request requires capabilities that are outside the system's current functionality. Connecting to a work VPN requires VPN client software, specific credentials, and network access that cannot be provided through this interface. Similarly, deploying builds requires access to CI/CD systems, deployment targets, authentication credentials, and the ability to execute commands on those systems. These are privileged infrastructure operations that cannot be performed by a general AI assistant regardless of what information is provided. The limitation is not about missing information but rather fundamental capability constraints.",
+          "latency_seconds": 16.782530500000576
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+      "provider_name": "OpenCode Go direct model: minimax-m2.7",
+      "baml_surface": "OpenCodeGoModelMinimaxM27",
+      "model_id": "minimax-m2.7",
+      "total": 10,
+      "correct": 7,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.7,
+      "latency_seconds": {
+        "average": 14.181050230000618,
+        "best": 9.465908499998477,
+        "worst": 25.73159189999933,
+        "p50": 11.509471100001974
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user's request requires desktop interaction capabilities (opening Photoshop, accessing desktop files, and performing image editing operations) that are outside the system's current text-based interaction capabilities. The request is clear in its intent, so asking for more information is unnecessary. The appropriate response is to explain this limitation directly.",
+          "latency_seconds": 10.65240100000301
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking to book a flight to Tokyo for tomorrow morning. Reviewing the available tasks, there is no task capable of actually booking flights, accessing airline systems, or processing travel reservations. The only available tasks are for requesting more information or explaining why a request cannot be handled. Since flight booking functionality is not among the available capabilities, I must select the 'Explain request cannot be handled' task to inform the user that this request is outside the system's current capabilities.",
+          "latency_seconds": 12.366541200000938
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The request to log into a bank account and transfer money is outside the system's current capabilities. This assistant cannot access banking systems, authenticate to financial institutions, or perform financial transactions. Even if the user provided credentials, the system lacks the integration and authorization to execute banking operations.",
+          "latency_seconds": 10.349890200002847
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The user is requesting browser control and checkout form submission. However, neither of the available tasks provide browser automation capabilities. The only available tasks are for requesting user information or explaining inability to handle requests. Since this specific browser automation task is not in the available task set, the appropriate response is to explain that this capability is not available.",
+          "latency_seconds": 9.465908499998477
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user's request to open and summarize their private email requires email access capabilities that are not available in the system. No available task provides email integration or access functionality, and this falls outside the system's current capabilities. The request is not possible to fulfill as described.",
+          "latency_seconds": 10.179258699998172
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The user is requesting a phone call to Sarah, but there is no indication in the available tasks or system capabilities that making phone calls or sending SMS messages is a supported functionality. The system appears to be a text-based assistant without phone call capabilities, so the request cannot be handled as described.",
+          "latency_seconds": 10.251413000001776
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.9,
+          "reason": "The request to install a GPU driver requires important information that the user hasn't provided, such as what GPU they have (NVIDIA, AMD, Intel, etc.) and what operating system they're using. Without this information, neither installation instructions nor proper guidance can be provided. Even if the system cannot execute commands directly, we still need clarification on the hardware and OS details to give useful advice.",
+          "latency_seconds": 21.043701700000383
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.95,
+          "reason": "The request requires clarification about the file system structure. The system needs to know which downloads folder and what the 'right project folders' are, as well as the mapping/categorization logic for moving files.",
+          "latency_seconds": 13.754151799999818
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 1.0,
+          "reason": "The user is asking to buy a product (standing desk), which requires e-commerce capabilities, payment processing, and transaction systems that are outside this system's current capabilities. This is a clear limitation that requires explaining why the request cannot be handled.",
+          "latency_seconds": 18.01564430000144
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:2oy1o2o01ds16hned8oj",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.9,
+          "reason": "The request requires specific information that we don't have: VPN client type and credentials, deployment system access, project details, and deployment target. We cannot meaningfully attempt these actions without this information.",
+          "latency_seconds": 25.73159189999933
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+      "provider_name": "OpenCode Go direct model: minimax-m3",
+      "baml_surface": "OpenCodeGoModelMinimaxM3",
+      "model_id": "minimax-m3",
+      "total": 10,
+      "correct": 6,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 0.6,
+      "latency_seconds": {
+        "average": 5.367923479999445,
+        "best": 3.621876200002589,
+        "worst": 9.792603599998984,
+        "p50": 5.086871299998165
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.92,
+          "reason": "The request to open Photoshop and resize an image lacks critical details: which specific image file on the desktop, and what target dimensions or percentage for resizing. Need to ask the user for this information before proceeding.",
+          "latency_seconds": 4.134205800000927
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.92,
+          "reason": "The request to book a flight is missing critical information: departure city, preferred airline, number of passengers, budget, exact time, return date, etc. Need to ask the user for these details before proceeding.",
+          "latency_seconds": 5.512589999998454
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking the assistant to log into their bank and perform a financial transfer. This involves accessing external systems, handling credentials, and executing real financial transactions, which are outside the system's current capabilities. The appropriate response is to explain that this cannot be handled.",
+          "latency_seconds": 4.554226299998845
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.92,
+          "reason": "The user is asking me to control a browser and submit a checkout form. As an AI assistant, I do not have the capability to control a web browser, interact with web pages, or submit forms. This is outside the system's current capabilities, so the appropriate response is to explain that the request cannot be handled.",
+          "latency_seconds": 4.9961569999977655
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking me to access their private email and summarize today's messages. I do not have the ability to access external systems like email accounts, nor do I have their credentials. This request is outside the system's current capabilities and should be explained as such.",
+          "latency_seconds": 3.8584514999965904
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.95,
+          "reason": "The user is asking to make a phone call to Sarah, which is a capability the system does not have. I cannot place phone calls or contact people by phone, so this request cannot be handled and I should explain the limitation.",
+          "latency_seconds": 5.187729000001127
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.9,
+          "reason": "The request to 'install the missing GPU driver' lacks critical information needed to proceed: the operating system, the GPU model, how they determined a driver is missing, and what method/source they want to use for installation. I need to ask the user for these details before I can help effectively.",
+          "latency_seconds": 5.177585599998565
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:oklqu0mhxgpkm7bf1z8s",
+          "selected_task_name": "Request more information from the user",
+          "correct": false,
+          "confidence": 0.9,
+          "reason": "The user's request is ambiguous: 'everything in downloads' and 'right project folders' lack specifics about which files to move and the destination folders. I need to ask the user to clarify which files they want moved and where each should go before taking action.",
+          "latency_seconds": 6.843809800000599
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.9,
+          "reason": "The system has no capability to browse retailers, compare prices, or make purchases on behalf of the user, so the request to buy a standing desk cannot be fulfilled.",
+          "latency_seconds": 3.621876200002589
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:x7djoyq3qay4uhscv9gy",
+          "expected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "expected_task_name": "Explain request cannot be handled",
+          "selected_task_id": "memory_node:bypojkmho2ntzpdpbwfb",
+          "selected_task_name": "Explain request cannot be handled",
+          "correct": true,
+          "confidence": 0.88,
+          "reason": "The user is asking the assistant to connect to their work VPN and deploy a build. These actions require network access, VPN credentials, infrastructure access, and deployment tools that an AI assistant does not have. This request is outside the system's current capabilities.",
+          "latency_seconds": 9.792603599998984
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+      "provider_name": "OpenCode Go direct model: qwen3.5-plus",
+      "baml_surface": "OpenCodeGoModelQwen35Plus",
+      "model_id": "qwen3.5-plus",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 1.1600807599996188,
+        "best": 0.8817185000007157,
+        "worst": 1.3561045999995258,
+        "p50": 1.2326169999996637
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9532542999986617
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3561045999995258
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.1413813999970444
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3196906999983185
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.8963350000012724
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.2495042999980797
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3034965000006196
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.283592600000702
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.2157297000012477
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:tm6c3s5m1u5n2zl32g84",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen35Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen35Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.8817185000007157
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+      "provider_name": "OpenCode Go direct model: qwen3.6-plus",
+      "baml_surface": "OpenCodeGoModelQwen36Plus",
+      "model_id": "qwen3.6-plus",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 1.2053998100000172,
+        "best": 0.8631926999987627,
+        "worst": 1.4340932999984943,
+        "p50": 1.2285910999999032
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.1628450999996858
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.2815465000021504
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.399779800001852
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.8631926999987627
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.4130143000002136
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3042510999985097
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0722299000008206
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.4340932999984943
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.175635699997656
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:5zo2i5ovkvsl7q7vda4t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen36Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen36Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9474097000020265
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+      "provider_name": "OpenCode Go direct model: qwen3.7-max",
+      "baml_surface": "OpenCodeGoModelQwen37Max",
+      "model_id": "qwen3.7-max",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 1.1451622199998384,
+        "best": 0.9388512000004994,
+        "worst": 1.3549726999990526,
+        "p50": 1.1278485500006354
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3519034999990254
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.1608788000012282
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0335511999983282
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0372777999982645
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.2571953000006033
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3549726999990526
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9388512000004994
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9780479000000923
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.244125500001246
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:8cxdmapv00baxaxjradq",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Max, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Max\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0948183000000427
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:owyujidlviust8peg5e2",
+      "provider_name": "OpenCode Go direct model: qwen3.7-plus",
+      "baml_surface": "OpenCodeGoModelQwen37Plus",
+      "model_id": "qwen3.7-plus",
+      "total": 10,
+      "correct": 0,
+      "errors": 10,
+      "warmup_errors": 0,
+      "accuracy": 0.0,
+      "latency_seconds": {
+        "average": 1.1716827599997486,
+        "best": 0.9689317000011215,
+        "worst": 1.3978994999997667,
+        "p50": 1.1211865000004764
+      },
+      "case_results": [
+        {
+          "case_id": "desktop_photoshop",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 0.9689317000011215
+        },
+        {
+          "case_id": "flight_booking",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0843101999998908
+        },
+        {
+          "case_id": "bank_transfer",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0936576999993122
+        },
+        {
+          "case_id": "checkout_form",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.2203005999981542
+        },
+        {
+          "case_id": "private_email",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3444415999983903
+        },
+        {
+          "case_id": "phone_call",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.3978994999997667
+        },
+        {
+          "case_id": "driver_install",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.008602099998825
+        },
+        {
+          "case_id": "file_organization",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.396523999999772
+        },
+        {
+          "case_id": "purchase_item",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.1487153000016406
+        },
+        {
+          "case_id": "vpn_deploy",
+          "run_index": 0,
+          "provider_id": "memory_node:owyujidlviust8peg5e2",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelQwen37Plus, message=Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}}, status_code=503, detailed_message=LLM client \"OpenCodeGoModelQwen37Plus\" failed with status code: ServiceUnavailable (503)\nMessage: Request failed with status code: 503 Service Unavailable. {\"error\":{\"message\":\"Error from provider (Console Go): Inference is temporarily unavailable\",\"type\":\"server_error\",\"param\":null,\"code\":\"failover_exhausted\"}})",
+          "latency_seconds": 1.0534449000006134
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "providers": 17,
+    "cases": 10,
+    "runs_per_case": 1,
+    "total": 170,
+    "correct": 116,
+    "errors": 40,
+    "accuracy": 0.6823529411764706,
+    "delay_seconds": 2.0,
+    "provider_cooldown_seconds": 8.0
+  }
+}

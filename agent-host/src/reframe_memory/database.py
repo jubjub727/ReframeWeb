@@ -33,11 +33,58 @@ class MemoryDatabase:
         for statement in SCHEMA_STATEMENTS:
             await self.query(statement)
 
+    async def ensure_roots(self) -> None:
+        await self.providers.ensure_root()
+        await self.tasks.ensure_root()
+        await self.sessions.ensure_root()
+        await self.conversations.ensure_root()
+        await self.session_memories.ensure_root()
+        await self.task_choice_memories.ensure_root()
+        await self.conversation_evaluation_memories.ensure_root()
+
     @property
     def tasks(self) -> "TaskMemory":
         from reframe_memory.tasks import TaskMemory
 
         return TaskMemory(self)
+
+    @property
+    def providers(self) -> "ProviderMemory":
+        from reframe_memory.providers import ProviderMemory
+
+        return ProviderMemory(self)
+
+    @property
+    def sessions(self) -> "SessionStore":
+        from reframe_memory.sessions import SessionStore
+
+        return SessionStore(self)
+
+    @property
+    def conversations(self) -> "ConversationMemory":
+        from reframe_memory.conversations import ConversationMemory
+
+        return ConversationMemory(self)
+
+    @property
+    def session_memories(self) -> "SessionMemoryStore":
+        from reframe_memory.session_memories import SessionMemoryStore
+
+        return SessionMemoryStore(self)
+
+    @property
+    def task_choice_memories(self) -> "TaskChoiceMemoryStore":
+        from reframe_memory.task_choice_memories import TaskChoiceMemoryStore
+
+        return TaskChoiceMemoryStore(self)
+
+    @property
+    def conversation_evaluation_memories(self) -> "ConversationEvaluationMemoryStore":
+        from reframe_memory.conversation_evaluation_memories import (
+            ConversationEvaluationMemoryStore,
+        )
+
+        return ConversationEvaluationMemoryStore(self)
 
 
 async def open_memory_database(config: MemoryConfig | None = None) -> MemoryDatabase:

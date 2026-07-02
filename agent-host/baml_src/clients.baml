@@ -1,9 +1,19 @@
-client<llm> ConversationTurnPlanningModel {
+client<llm> TaskChoiceModel {
   provider openai-generic
   retry_policy AgentFlowRetry
   options {
     base_url "https://opencode.ai/zen/go/v1"
-    model "deepseek-v4-pro"
+    model "deepseek-v4-flash"
+    api_key env.OPENCODE_GO_API_KEY
+  }
+}
+
+client<llm> ConversationEvaluationModel {
+  provider openai-generic
+  retry_policy AgentFlowRetry
+  options {
+    base_url "https://opencode.ai/zen/go/v1"
+    model "glm-5.1"
     api_key env.OPENCODE_GO_API_KEY
   }
 }

@@ -29,14 +29,20 @@ endpoint. The Agent Host reads `OPENCODE_GO_API_KEY` from the environment.
 
 Model use is a BAML choice, not user-selected global configuration and not
 Python-side model routing. Each agentic task should have an explicit model
-assignment in BAML. The current conversation-turn planning flow is assigned to
-`deepseek-v4-pro`.
+assignment through a memory Provider node that points at a BAML surface. The
+current task-choice flow is assigned to `deepseek-v4-flash`.
 
-Current intended OpenCode Go model IDs include:
+Current benchmarked OpenCode Go model IDs include:
 
 - `kimi-k2.7-code`
+- `kimi-k2.6`
+- `kimi-k2.5`
+- `glm-5.1`
+- `glm-5`
 - `deepseek-v4-pro`
 - `deepseek-v4-flash`
+- `mimo-v2.5-pro`
+- `mimo-v2.5`
 
 ## Audio Pipeline
 

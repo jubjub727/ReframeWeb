@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import time
 
-from reframe_agent_host.agent_flow.planning import ConversationPlanner
+from reframe_agent_host.agent_flow.conversation_evaluation import (
+    ConversationEvaluationPlanner,
+)
+from reframe_agent_host.agent_flow.task_choice import TaskChoicePlanner
 from reframe_agent_host.baml_client import types
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
@@ -24,12 +27,14 @@ class VoiceTurnProcessor:
         config: VoicePipelineConfig,
         transcriber: FasterWhisperTranscriber,
         trigger_matcher: TriggerPhraseMatcher,
-        planner: ConversationPlanner,
+        planner: TaskChoicePlanner,
+        conversation_evaluation: ConversationEvaluationPlanner,
     ) -> None:
         self._config = config
         self._transcriber = transcriber
         self._trigger_matcher = trigger_matcher
         self._planner = planner
+        self._conversation_evaluation = conversation_evaluation
 
     async def process(
         self,
@@ -82,9 +87,20 @@ class VoiceTurnProcessor:
                 f"{trigger_detection.kind} {trigger_detection.phrase!r}",
             )
 
-        plan, planning_seconds, post_vad_plan_seconds = await self._maybe_plan(
+        task_choice, task_choice_seconds, post_vad_task_choice_seconds = (
+            await self._maybe_choose_task(
+                routed_transcript,
+                post_vad_started_at,
+                on_event,
+            )
+        )
+        (
+            memory_search_hints,
+            memory_search_seconds,
+            post_vad_memory_search_seconds,
+        ) = await self._maybe_evaluate_memory_search(
             routed_transcript,
-            conversation_mode,
+            task_choice,
             post_vad_started_at,
             on_event,
         )
@@ -96,14 +112,17 @@ class VoiceTurnProcessor:
             transcript=transcript,
             trigger_detection=trigger_detection,
             routed_transcript=routed_transcript,
-            plan=plan,
+            task_choice=task_choice,
+            memory_search_hints=memory_search_hints,
             timings={
                 "model_prepare_seconds": model_prepare_seconds,
                 "total_started_at": total_started_at,
                 "post_vad_transcript_seconds": post_vad_transcript_seconds,
-                "post_vad_plan_seconds": post_vad_plan_seconds,
+                "post_vad_task_choice_seconds": post_vad_task_choice_seconds,
+                "post_vad_memory_search_seconds": post_vad_memory_search_seconds,
                 "transcription_seconds": transcription_seconds,
-                "planning_seconds": planning_seconds,
+                "task_choice_seconds": task_choice_seconds,
+                "memory_search_seconds": memory_search_seconds,
             },
         )
 
@@ -116,29 +135,68 @@ class VoiceTurnProcessor:
             capture.keyphrase_detection.phrase,
         )
 
-    async def _maybe_plan(
+    async def _maybe_choose_task(
         self,
         routed_transcript: str,
-        conversation_mode: types.ConversationMode,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
     ):
-        if not self._config.plan_enabled:
+        if not self._config.task_choice_enabled:
             return None, None, None
         if not routed_transcript:
-            self._emit(on_event, "planning", "skipped empty transcript")
+            self._emit(on_event, "task-choice", "skipped empty transcript")
             return None, None, None
 
-        self._emit(on_event, "planning", "sending transcript to BAML")
-        planning_started_at = time.perf_counter()
-        plan = await self._planner.plan(
-            transcript=routed_transcript,
-            conversation_mode=conversation_mode,
-            playback_state=self._config.playback_state,
+        self._emit(on_event, "task-choice", "choosing initial task with BAML")
+        task_choice_started_at = time.perf_counter()
+        task_choice = await self._planner.choose_initial_task(
+            current_user_request=routed_transcript,
         )
-        planning_seconds = time.perf_counter() - planning_started_at
-        self._emit(on_event, "planned", f"{plan.interpreted_intent} ({planning_seconds:.3f}s)")
-        return plan, planning_seconds, time.perf_counter() - post_vad_started_at
+        task_choice_seconds = time.perf_counter() - task_choice_started_at
+        self._emit(
+            on_event,
+            "task-chosen",
+            f"{task_choice.selected_task_id} ({task_choice_seconds:.3f}s)",
+        )
+        return (
+            task_choice,
+            task_choice_seconds,
+            time.perf_counter() - post_vad_started_at,
+        )
+
+    async def _maybe_evaluate_memory_search(
+        self,
+        routed_transcript: str,
+        task_choice: types.TaskChoiceDecision | None,
+        post_vad_started_at: float,
+        on_event: VoicePipelineEventHandler | None,
+    ):
+        if not self._config.task_choice_enabled:
+            return None, None, None
+        if task_choice is None or not routed_transcript:
+            return None, None, None
+
+        self._emit(
+            on_event,
+            "memory-search",
+            "evaluating conversation memory search hints with BAML",
+        )
+        memory_search_started_at = time.perf_counter()
+        hints = await self._conversation_evaluation.evaluate_for_memory_search(
+            current_user_request=routed_transcript,
+            selected_task_id=task_choice.selected_task_id,
+        )
+        memory_search_seconds = time.perf_counter() - memory_search_started_at
+        self._emit(
+            on_event,
+            "memory-search-hints",
+            f"{hints.model_dump(mode='json')} ({memory_search_seconds:.3f}s)",
+        )
+        return (
+            hints,
+            memory_search_seconds,
+            time.perf_counter() - post_vad_started_at,
+        )
 
     def _emit(
         self,

@@ -37,41 +37,103 @@ def get_checks(checks: typing.Dict[CheckName, Check]) -> typing.List[Check]:
 def all_succeeded(checks: typing.Dict[CheckName, Check]) -> bool:
     return all(check.status == "succeeded" for check in get_checks(checks))
 # #########################################################################
-# Generated enums (3)
+# Generated enums (1)
 # #########################################################################
 
 class ConversationMode(str, Enum):
     WakeCommand = "WakeCommand"
     ContinuousConversation = "ContinuousConversation"
 
-class HostRoute(str, Enum):
-    ContinueListening = "ContinueListening"
-    CancelSpeech = "CancelSpeech"
-    SpeakToUser = "SpeakToUser"
-    UseNativeWindow = "UseNativeWindow"
-    UseTransport = "UseTransport"
-    UpdateMemory = "UpdateMemory"
-
-class PlaybackState(str, Enum):
-    Idle = "Idle"
-    Speaking = "Speaking"
-    Interrupted = "Interrupted"
-
 # #########################################################################
-# Generated classes (2)
+# Generated classes (12)
 # #########################################################################
 
-class AgentTurnPlan(BaseModel):
-    mode: ConversationMode
-    heard_user_speech: str
-    interpreted_intent: str
-    should_interrupt_playback: bool
-    actions: typing.List["HostAction"]
-    spoken_response: str
+class AvailableTask(BaseModel):
+    id: str
+    name: str
+    description: str
+    input: str
+    output: str
+    prompt: str
+    provider_id: str
+    created_at: str
+    updated_at: str
+    read_at: str
 
-class HostAction(BaseModel):
-    route: HostRoute
+class CandidateMemory(BaseModel):
+    title: str
+    description: str
+
+class ConversationEvaluationMemoryContext(BaseModel):
+    title: str
+    description: str
+    tags: typing.List[str]
+    created_at: str
+    updated_at: str
+    read_at: str
+
+class ConversationHistory(BaseModel):
+    id: str
+    name: str
+    created_at: str
+    updated_at: str
+    read_at: str
+    messages: typing.List["ConversationHistoryMessage"]
+
+class ConversationHistoryMessage(BaseModel):
+    created_at: str
+    updated_at: str
+    read_at: str
+    role: str
+    content: str
+
+class ConversationMemorySearchHints(BaseModel):
+    tags: "MemoryTagSearch"
+    strings: "MemoryStringSearch"
+
+class MemoryStringSearch(BaseModel):
+    contains: typing.List[str]
+    equals: typing.List[str]
+
+class MemoryTagSearch(BaseModel):
+    any_of: typing.List[str]
+    all_of: typing.List[str]
+    none_of: typing.List[str]
+
+class SelectedTaskContext(BaseModel):
+    id: str
+    name: str
+    description: str
+    input: str
+    output: str
+    prompt: str
+    provider_id: str
+    created_at: str
+    updated_at: str
+    read_at: str
+
+class SessionMemoryContext(BaseModel):
+    title: str
+    description: str
+    tags: typing.List[str]
+    created_at: str
+    updated_at: str
+    read_at: str
+
+class TaskChoiceDecision(BaseModel):
+    selected_task_id: str
+    confidence: float
     reason: str
+    agent_thought: typing.Optional[str] = None
+    candidate_memory: typing.Optional["CandidateMemory"] = None
+
+class TaskChoiceMemoryContext(BaseModel):
+    title: str
+    description: str
+    tags: typing.List[str]
+    created_at: str
+    updated_at: str
+    read_at: str
 
 # #########################################################################
 # Generated type aliases (0)

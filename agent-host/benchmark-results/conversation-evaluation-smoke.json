@@ -1,0 +1,241 @@
+{
+  "benchmark": "conversation_evaluation_memory_search",
+  "cases": [
+    {
+      "id": "remembered_view_preference",
+      "current_user_request": "Open Hacker News, but keep it compact like last time.",
+      "selected_task_name": "Prepare visual panel",
+      "session_conversations": 1,
+      "session_memories": 1,
+      "conversation_evaluation_memories": 1,
+      "review_focus": "Look for compact/news/view preference hints."
+    }
+  ],
+  "providers": [
+    {
+      "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-flash",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "model_id": "deepseek-v4-flash",
+      "total": 1,
+      "errors": 1,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 0.034258200001204386,
+        "best": 0.034258200001204386,
+        "worst": 0.034258200001204386,
+        "p50": 0.034258200001204386
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelDeepseekV4Flash, message=reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) }, status_code=503, detailed_message=LLM client \"OpenCodeGoModelDeepseekV4Flash\" failed with status code: ServiceUnavailable (503)\nMessage: reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) })",
+          "latency_seconds": 0.034258200001204386
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-pro",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Pro",
+      "model_id": "deepseek-v4-pro",
+      "total": 1,
+      "errors": 1,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 0.026422100003401283,
+        "best": 0.026422100003401283,
+        "worst": 0.026422100003401283,
+        "p50": 0.026422100003401283
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:h4x1d68gqm5ai3mwcspk",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelDeepseekV4Pro, message=reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) }, status_code=503, detailed_message=LLM client \"OpenCodeGoModelDeepseekV4Pro\" failed with status code: ServiceUnavailable (503)\nMessage: reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) })",
+          "latency_seconds": 0.026422100003401283
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+      "provider_name": "OpenCode Go direct model: glm-5",
+      "baml_surface": "OpenCodeGoModelGlm5",
+      "model_id": "glm-5",
+      "total": 1,
+      "errors": 1,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 0.01472539999667788,
+        "best": 0.01472539999667788,
+        "worst": 0.01472539999667788,
+        "p50": 0.01472539999667788
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:8ycjl7lz7csypby7zn8f",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelGlm5, message=reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) }, status_code=503, detailed_message=LLM client \"OpenCodeGoModelGlm5\" failed with status code: ServiceUnavailable (503)\nMessage: reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) })",
+          "latency_seconds": 0.01472539999667788
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+      "provider_name": "OpenCode Go direct model: glm-5.1",
+      "baml_surface": "OpenCodeGoModelGlm51",
+      "model_id": "glm-5.1",
+      "total": 1,
+      "errors": 1,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 0.015341300000727642,
+        "best": 0.015341300000727642,
+        "worst": 0.015341300000727642,
+        "p50": 0.015341300000727642
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:i3k7jie2n7eesctm1jh7",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelGlm51, message=reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) }, status_code=503, detailed_message=LLM client \"OpenCodeGoModelGlm51\" failed with status code: ServiceUnavailable (503)\nMessage: reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) })",
+          "latency_seconds": 0.015341300000727642
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+      "provider_name": "OpenCode Go direct model: kimi-k2.5",
+      "baml_surface": "OpenCodeGoModelKimiK25",
+      "model_id": "kimi-k2.5",
+      "total": 1,
+      "errors": 1,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 0.04608619999635266,
+        "best": 0.04608619999635266,
+        "worst": 0.04608619999635266,
+        "p50": 0.04608619999635266
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:ujan2wrqz3i61t6mapxl",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelKimiK25, message=reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) }, status_code=503, detailed_message=LLM client \"OpenCodeGoModelKimiK25\" failed with status code: ServiceUnavailable (503)\nMessage: reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) })",
+          "latency_seconds": 0.04608619999635266
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+      "provider_name": "OpenCode Go direct model: kimi-k2.6",
+      "baml_surface": "OpenCodeGoModelKimiK26",
+      "model_id": "kimi-k2.6",
+      "total": 1,
+      "errors": 1,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 0.015761800001200754,
+        "best": 0.015761800001200754,
+        "worst": 0.015761800001200754,
+        "p50": 0.015761800001200754
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:ws3xjfoi9aht4l4v04ve",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelKimiK26, message=reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) }, status_code=503, detailed_message=LLM client \"OpenCodeGoModelKimiK26\" failed with status code: ServiceUnavailable (503)\nMessage: reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) })",
+          "latency_seconds": 0.015761800001200754
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+      "provider_name": "OpenCode Go direct model: kimi-k2.7-code",
+      "baml_surface": "OpenCodeGoModelKimiK27Code",
+      "model_id": "kimi-k2.7-code",
+      "total": 1,
+      "errors": 1,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 0.0021187000020290725,
+        "best": 0.0021187000020290725,
+        "worst": 0.0021187000020290725,
+        "p50": 0.0021187000020290725
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:u0v7ccmkakwfm6gx9kp9",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelKimiK27Code, message=reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) }, status_code=503, detailed_message=LLM client \"OpenCodeGoModelKimiK27Code\" failed with status code: ServiceUnavailable (503)\nMessage: reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) })",
+          "latency_seconds": 0.0021187000020290725
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+      "provider_name": "OpenCode Go direct model: mimo-v2.5",
+      "baml_surface": "OpenCodeGoModelMimoV25",
+      "model_id": "mimo-v2.5",
+      "total": 1,
+      "errors": 1,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 0.013353700000152458,
+        "best": 0.013353700000152458,
+        "worst": 0.013353700000152458,
+        "p50": 0.013353700000152458
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:k0yssl2h09x580g69mg5",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV25, message=reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) }, status_code=503, detailed_message=LLM client \"OpenCodeGoModelMimoV25\" failed with status code: ServiceUnavailable (503)\nMessage: reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) })",
+          "latency_seconds": 0.013353700000152458
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+      "provider_name": "OpenCode Go direct model: mimo-v2.5-pro",
+      "baml_surface": "OpenCodeGoModelMimoV25Pro",
+      "model_id": "mimo-v2.5-pro",
+      "total": 1,
+      "errors": 1,
+      "warmup_errors": 0,
+      "latency_seconds": {
+        "average": 0.015712500004156027,
+        "best": 0.015712500004156027,
+        "worst": 0.015712500004156027,
+        "p50": 0.015712500004156027
+      },
+      "case_results": [
+        {
+          "case_id": "remembered_view_preference",
+          "run_index": 0,
+          "provider_id": "memory_node:09l8nul5vn3k2tuii6g9",
+          "error": "BamlClientHttpError(client_name=OpenCodeGoModelMimoV25Pro, message=reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) }, status_code=503, detailed_message=LLM client \"OpenCodeGoModelMimoV25Pro\" failed with status code: ServiceUnavailable (503)\nMessage: reqwest::Error { kind: Request, url: \"https://opencode.ai/zen/go/v1/chat/completions\", source: hyper_util::client::legacy::Error(Connect, ConnectError(\"tcp connect error\", 172.65.90.22:443, Os { code: 10013, kind: PermissionDenied, message: \"An attempt was made to access a socket in a way forbidden by its access permissions.\" })) })",
+          "latency_seconds": 0.015712500004156027
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "providers": 9,
+    "cases": 1,
+    "runs_per_case": 1,
+    "total": 9,
+    "errors": 9,
+    "delay_seconds": 0.0,
+    "provider_cooldown_seconds": 0.0
+  }
+}
