@@ -26,6 +26,11 @@ agent-host/.venv/
 *.safetensors
 models/
 
+# Tool and agent configs (local only)
+.tools/
+.claude/
+.agents/
+
 # OS/editor noise
 .DS_Store
 Thumbs.db
