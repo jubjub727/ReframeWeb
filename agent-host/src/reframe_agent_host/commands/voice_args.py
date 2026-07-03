@@ -142,6 +142,13 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
         help="Active memory_node session id used for conversation and session memory context.",
     )
     parser.add_argument(
+        "--conversation-id",
+        help=(
+            "Active memory_node conversation id used to record this voice turn. "
+            "Created automatically when omitted."
+        ),
+    )
+    parser.add_argument(
         "--turns",
         type=int,
         default=1,

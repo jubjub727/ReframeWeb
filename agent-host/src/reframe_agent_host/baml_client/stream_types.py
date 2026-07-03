@@ -68,6 +68,7 @@ class ConversationHistoryMessage(BaseModel):
 class ConversationMemorySearchHints(BaseModel):
     tags: typing.Optional["MemoryTagSearch"] = None
     strings: typing.Optional["MemoryStringSearch"] = None
+    candidate_memory: typing.Optional["CandidateMemory"] = None
 
 class MemoryStringSearch(BaseModel):
     contains: typing.List[str]

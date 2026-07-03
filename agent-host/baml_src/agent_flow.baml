@@ -84,14 +84,15 @@ class MemoryStringSearch {
   equals string[]
 }
 
-class ConversationMemorySearchHints {
-  tags MemoryTagSearch
-  strings MemoryStringSearch
-}
-
 class CandidateMemory {
   title string
   description string
+}
+
+class ConversationMemorySearchHints {
+  tags MemoryTagSearch
+  strings MemoryStringSearch
+  candidate_memory CandidateMemory?
 }
 
 class TaskChoiceDecision {
@@ -143,10 +144,12 @@ function ChooseInitialTask(
 
     Conversation history:
     {% for conversation in session_conversations %}
-    Conversation {{ conversation.id }}: {{ conversation.name }}
-    created_at: {{ conversation.created_at }}
-    updated_at: {{ conversation.updated_at }}
-    read_at: {{ conversation.read_at }}
+    Conversation:
+      id: {{ conversation.id }}
+      name: {{ conversation.name }}
+      created_at: {{ conversation.created_at }}
+      updated_at: {{ conversation.updated_at }}
+      read_at: {{ conversation.read_at }}
     {% for message in conversation.messages %}
     [{{ message.role }}] created_at={{ message.created_at }} updated_at={{ message.updated_at }} read_at={{ message.read_at }} {{ message.content }}
     {% endfor %}
@@ -214,8 +217,12 @@ function EvaluateConversationForMemorySearch(
     - strings.equals: exact text values. Each value is checked for exact
       equality against searchable memory content.
 
+    Optional outputs available in this step:
+    - candidate_memory: a vague remembered observation that could be useful to
+      preserve.
+
     Rules:
-    - Return only search hints.
+    - Return only search hints and optional candidate_memory.
     - Use tags.any_of for useful alternatives where any matching tag may help.
     - Use tags.all_of only when every listed tag must be present.
     - Use tags.none_of only for clear exclusions.
@@ -225,6 +232,7 @@ function EvaluateConversationForMemorySearch(
       memory value as a whole.
     - Prefer a small set of high-signal hints over broad keyword stuffing.
     - Return empty arrays when no useful search hint is available.
+    - Use optional outputs only when they are useful.
 
     {{ _.role("user") }}
 
@@ -233,10 +241,12 @@ function EvaluateConversationForMemorySearch(
 
     Conversation history for the current session:
     {% for conversation in session_conversations %}
-    Conversation {{ conversation.id }}: {{ conversation.name }}
-    created_at: {{ conversation.created_at }}
-    updated_at: {{ conversation.updated_at }}
-    read_at: {{ conversation.read_at }}
+    Conversation:
+      id: {{ conversation.id }}
+      name: {{ conversation.name }}
+      created_at: {{ conversation.created_at }}
+      updated_at: {{ conversation.updated_at }}
+      read_at: {{ conversation.read_at }}
     {% for message in conversation.messages %}
     [{{ message.role }}] created_at={{ message.created_at }} updated_at={{ message.updated_at }} read_at={{ message.read_at }} {{ message.content }}
     {% endfor %}
@@ -274,7 +284,7 @@ function EvaluateConversationForMemorySearch(
       {{ memory.description }}
     {% endfor %}
 
-    Return only the memory search hints.
+    Return only the memory search hints and optional candidate memory.
     {{ ctx.output_format }}
   "#
 }

@@ -19,6 +19,7 @@ from reframe_agent_host.voice.types import (
     VoicePipelineEventHandler,
     VoiceTurnResult,
 )
+from reframe_memory import ConversationMessage, open_memory_database
 
 
 class VoiceTurnProcessor:
@@ -94,6 +95,11 @@ class VoiceTurnProcessor:
                 on_event,
             )
         )
+        await self._record_current_turn_context(
+            routed_transcript,
+            task_choice,
+            on_event,
+        )
         (
             memory_search_hints,
             memory_search_seconds,
@@ -162,6 +168,44 @@ class VoiceTurnProcessor:
             task_choice,
             task_choice_seconds,
             time.perf_counter() - post_vad_started_at,
+        )
+
+    async def _record_current_turn_context(
+        self,
+        routed_transcript: str,
+        task_choice: types.TaskChoiceDecision | None,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> None:
+        if self._config.conversation_id is None or not routed_transcript:
+            return
+
+        database = await open_memory_database()
+        try:
+            await database.apply_schema()
+            await database.ensure_roots()
+            await database.conversations.add_message(
+                self._config.conversation_id,
+                ConversationMessage(
+                    role="human",
+                    content=routed_transcript,
+                ),
+            )
+            thought = (task_choice.agent_thought or "").strip() if task_choice else ""
+            if thought:
+                await database.conversations.add_message(
+                    self._config.conversation_id,
+                    ConversationMessage(
+                        role="agent_thought",
+                        content=thought,
+                    ),
+                )
+        finally:
+            await database.close()
+
+        self._emit(
+            on_event,
+            "conversation-context",
+            f"recorded current turn in {self._config.conversation_id}",
         )
 
     async def _maybe_evaluate_memory_search(

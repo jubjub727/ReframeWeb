@@ -137,6 +137,9 @@ class ConversationMemory:
             """,
             {"node_id": node["id"], "position": message_position},
         )
+        await self.database.query(
+            f"UPDATE {conversation_record_id} SET updated_at = time::now();",
+        )
         return conversation_message_node_from_record(node)
 
     async def messages_for(
@@ -251,8 +254,11 @@ def _parse_conversation(content: Mapping[str, Any]) -> Conversation:
 
 def _parse_conversation_message(content: Mapping[str, Any]) -> ConversationMessage:
     role = str(content["role"])
-    if role not in ("human", "agent"):
-        msg = f"conversation message role must be human or agent, got {role!r}"
+    if role not in ("human", "agent", "agent_thought"):
+        msg = (
+            "conversation message role must be human, agent, or agent_thought, "
+            f"got {role!r}"
+        )
         raise ValueError(msg)
 
     return ConversationMessage(role=role, content=str(content["content"]))

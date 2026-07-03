@@ -61,7 +61,7 @@ class Conversation:
 
 @dataclass(frozen=True)
 class ConversationMessage:
-    role: Literal["human", "agent"]
+    role: Literal["human", "agent", "agent_thought"]
     content: str
 
 

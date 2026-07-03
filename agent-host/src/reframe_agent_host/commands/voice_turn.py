@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 import json
 import sys
 
@@ -15,6 +16,7 @@ from reframe_agent_host.speech.transcription import (
 from reframe_agent_host.speech.triggers import TriggerPhraseConfig
 from reframe_agent_host.voice.activity import VoiceActivityConfig
 from reframe_agent_host.voice.pipeline import VoicePipelineConfig, VoiceTurnPipeline
+from reframe_memory import Conversation, Session, open_memory_database
 
 
 async def run_voice_turn(args: argparse.Namespace) -> int:
@@ -22,7 +24,8 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
         print("[error] --turns must be 0 or greater", file=sys.stderr)
         return 2
 
-    pipeline = VoiceTurnPipeline(_voice_pipeline_config(args))
+    config = await _prepared_voice_pipeline_config(args)
+    pipeline = VoiceTurnPipeline(config)
     results = []
     turn_index = 0
     try:
@@ -33,7 +36,7 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
 
             result = await pipeline.run_once(on_event=TimedEventPrinter())
             results.append(result)
-            print(json.dumps(result.to_dict(), indent=2))
+            print(json.dumps(_result_payload(result, config), indent=2))
     except KeyboardInterrupt:
         print("\nInterrupted.", file=sys.stderr)
         if results:
@@ -53,6 +56,62 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
     return 0
 
 
+async def _prepared_voice_pipeline_config(args: argparse.Namespace) -> VoicePipelineConfig:
+    if not args.no_task_choice:
+        await _ensure_voice_memory_context(args)
+    return _voice_pipeline_config(args)
+
+
+async def _ensure_voice_memory_context(args: argparse.Namespace) -> None:
+    if args.conversation_id is not None and args.session_id is None:
+        print(
+            "[error] --conversation-id requires --session-id",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+
+    if args.session_id is not None and args.conversation_id is not None:
+        return
+
+    database = await open_memory_database()
+    try:
+        await database.apply_schema()
+        await database.ensure_roots()
+
+        if args.session_id is None:
+            session = await database.sessions.create(
+                Session(name=_timestamped_name("Voice session")),
+                tags=("voice",),
+            )
+            args.session_id = session.id
+
+        if args.conversation_id is None:
+            conversation = await database.conversations.create(
+                args.session_id,
+                Conversation(name=_timestamped_name("Voice conversation")),
+                tags=("voice",),
+            )
+            args.conversation_id = conversation.id
+    finally:
+        await database.close()
+
+    print(
+        f"[memory] session_id={args.session_id} conversation_id={args.conversation_id}",
+        file=sys.stderr,
+    )
+
+
+def _timestamped_name(prefix: str) -> str:
+    return f"{prefix} {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
+
+def _result_payload(result, config: VoicePipelineConfig) -> dict[str, object]:
+    payload = result.to_dict()
+    payload["session_id"] = config.session_id
+    payload["conversation_id"] = config.conversation_id
+    return payload
+
+
 def _voice_pipeline_config(args: argparse.Namespace) -> VoicePipelineConfig:
     return VoicePipelineConfig(
         audio=_audio_config(args),
@@ -66,6 +125,7 @@ def _voice_pipeline_config(args: argparse.Namespace) -> VoicePipelineConfig:
         conversation_mode=types.ConversationMode(args.mode),
         task_choice_enabled=not args.no_task_choice,
         session_id=args.session_id,
+        conversation_id=args.conversation_id,
         listen_timeout_seconds=args.listen_timeout_seconds,
         post_activation_command_window_ms=args.post_activation_command_window_ms,
         debug_audio_dir=args.debug_audio_dir,

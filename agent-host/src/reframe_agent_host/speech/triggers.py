@@ -7,8 +7,26 @@ from typing import Literal
 
 TriggerKind = Literal["wake_command", "conversation_on"]
 
-CONFIRMED_PREFIX_ALIASES: dict[str, tuple[str, ...]] = {
-    "jarvis": ("travis",),
+TRIGGER_PREFIX_ALIASES: dict[str, tuple[str, ...]] = {
+    "jarvis": (
+        "java",
+        "java's",
+        "javas",
+        "javis",
+        "jar vice",
+        "jar vis",
+        "jar viss",
+        "jarvice",
+        "jarviss",
+        "jarvis's",
+        "jarvus",
+        "jervis",
+        "jervus",
+        "jervais",
+        "charvis",
+        "garvis",
+        "travis",
+    ),
     "conversation on": (
         "conversation one",
         "conservation on",
@@ -33,11 +51,13 @@ class TriggerPhraseDetection:
 class TriggerPhraseMatcher:
     def __init__(self, config: TriggerPhraseConfig) -> None:
         self._trigger_patterns = tuple(
-            ("wake_command", *_compile_prefix_pattern(word))
+            ("wake_command", phrase, pattern)
             for word in config.trigger_words
+            for phrase, pattern in _compile_prefix_patterns(word)
         ) + tuple(
-            ("conversation_on", *_compile_prefix_pattern(phrase))
+            ("conversation_on", phrase, pattern)
             for phrase in config.conversation_on_phrases
+            for phrase, pattern in _compile_prefix_patterns(phrase)
         )
 
     def match(self, transcript: str) -> TriggerPhraseDetection | None:
@@ -58,20 +78,29 @@ class TriggerPhraseMatcher:
         kind: TriggerKind,
         phrase: str,
     ) -> TriggerPhraseDetection | None:
-        for candidate in _confirmed_prefixes(phrase):
-            matched_phrase, pattern = _compile_prefix_pattern(candidate)
+        normalized = _normalize_phrase(phrase)
+        for candidate in _prefix_candidates(normalized):
+            pattern = _compile_prefix_pattern(candidate)
             match = pattern.match(transcript)
             if match:
                 return TriggerPhraseDetection(
                     kind=kind,
-                    phrase=matched_phrase,
+                    phrase=normalized,
                     routed_transcript=_clean_remainder(match.group("remainder")),
                 )
         return None
 
 
-def _compile_prefix_pattern(phrase: str) -> tuple[str, re.Pattern[str]]:
-    normalized = " ".join(phrase.lower().split())
+def _compile_prefix_patterns(phrase: str) -> tuple[tuple[str, re.Pattern[str]], ...]:
+    normalized = _normalize_phrase(phrase)
+    return tuple(
+        (normalized, _compile_prefix_pattern(candidate))
+        for candidate in _prefix_candidates(normalized)
+    )
+
+
+def _compile_prefix_pattern(phrase: str) -> re.Pattern[str]:
+    normalized = _normalize_phrase(phrase)
     if not normalized:
         raise ValueError("Trigger phrases cannot be empty.")
 
@@ -82,12 +111,15 @@ def _compile_prefix_pattern(phrase: str) -> tuple[str, re.Pattern[str]]:
         rf"(?P<remainder>[\s,.;:!?-]*(?:.*))$",
         re.IGNORECASE,
     )
-    return normalized, pattern
+    return pattern
 
 
-def _confirmed_prefixes(phrase: str) -> tuple[str, ...]:
-    normalized = " ".join(phrase.lower().split())
-    return (normalized, *CONFIRMED_PREFIX_ALIASES.get(normalized, ()))
+def _prefix_candidates(normalized_phrase: str) -> tuple[str, ...]:
+    return (normalized_phrase, *TRIGGER_PREFIX_ALIASES.get(normalized_phrase, ()))
+
+
+def _normalize_phrase(phrase: str) -> str:
+    return " ".join(phrase.lower().split())
 
 
 def _clean_remainder(value: str) -> str:

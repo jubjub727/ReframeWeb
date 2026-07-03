@@ -73,6 +73,24 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(detection)
         self.assertEqual(detection.routed_transcript, "do this")
 
+    def test_wake_keyword_aliases_are_removed_from_routed_transcript(self):
+        matcher = TriggerPhraseMatcher(TriggerPhraseConfig())
+
+        cases = (
+            "Java, do this.",
+            "Travis, do this.",
+            "Jervis, do this.",
+            "Jar vice, do this.",
+            "Jar vis, do this.",
+        )
+        for transcript in cases:
+            with self.subTest(transcript=transcript):
+                detection = matcher.match(transcript)
+
+                self.assertIsNotNone(detection)
+                self.assertEqual(detection.phrase, "jarvis")
+                self.assertEqual(detection.routed_transcript, "do this")
+
     async def test_task_choice_receives_routed_transcript(self):
         planner = RecordingPlanner()
         conversation_evaluation = RecordingConversationEvaluation()

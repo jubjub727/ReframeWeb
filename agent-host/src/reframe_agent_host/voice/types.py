@@ -27,6 +27,7 @@ class VoicePipelineConfig:
     conversation_mode: types.ConversationMode
     task_choice_enabled: bool = True
     session_id: str | None = None
+    conversation_id: str | None = None
     listen_timeout_seconds: float = 0.0
     post_activation_command_window_ms: int = 700
     debug_audio_dir: str | None = None

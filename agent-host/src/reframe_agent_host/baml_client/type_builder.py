@@ -434,7 +434,7 @@ class ConversationMemorySearchHintsAst:
     def __init__(self, tb: type_builder.TypeBuilder):
         _tb = tb._tb # type: ignore (we know how to use this private attribute)
         self._bldr = _tb.class_("ConversationMemorySearchHints")
-        self._properties: typing.Set[str] = set([  "tags",  "strings",  ])
+        self._properties: typing.Set[str] = set([  "tags",  "strings",  "candidate_memory",  ])
         self._props = ConversationMemorySearchHintsProperties(self._bldr, self._properties)
 
     def type(self) -> baml_py.FieldType:
@@ -469,6 +469,10 @@ class ConversationMemorySearchHintsProperties:
     @property
     def strings(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("strings"))
+
+    @property
+    def candidate_memory(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("candidate_memory"))
 
 
 

@@ -78,7 +78,16 @@ def _print_case_analysis(analysis: ConversationEvaluationCaseAnalysis) -> None:
 
 
 def _print_reply_table(replies: tuple[ConversationEvaluationReply, ...]) -> None:
-    headers = ("#", "latency", "model", "tags", "contains", "equals", "error")
+    headers = (
+        "#",
+        "latency",
+        "model",
+        "tags",
+        "contains",
+        "equals",
+        "candidate_memory",
+        "error",
+    )
     rows = [
         (
             str(rank),
@@ -87,6 +96,7 @@ def _print_reply_table(replies: tuple[ConversationEvaluationReply, ...]) -> None
             _tag_summary(reply),
             _string_summary(reply, "contains"),
             _string_summary(reply, "equals"),
+            _candidate_summary(reply),
             _error_summary(reply),
         )
         for rank, reply in enumerate(replies, start=1)
@@ -131,6 +141,17 @@ def _error_summary(reply: ConversationEvaluationReply) -> str:
     if reply.error is None:
         return ""
     return " ".join(reply.error.split())
+
+
+def _candidate_summary(reply: ConversationEvaluationReply) -> str:
+    candidate = (reply.hints or {}).get("candidate_memory")
+    if not isinstance(candidate, dict):
+        return ""
+    title = str(candidate.get("title") or "").strip()
+    description = str(candidate.get("description") or "").strip()
+    if title and description:
+        return f"{title}: {description}"
+    return title or description
 
 
 def _string_list(value: object) -> list[str]:
