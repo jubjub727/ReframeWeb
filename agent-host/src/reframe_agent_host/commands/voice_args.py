@@ -72,10 +72,22 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
         help="Input gain applied only to local keyphrase detection.",
     )
     parser.add_argument(
+        "--wake-threshold",
+        type=float,
+        default=1e-30,
+        help="PocketSphinx KWS threshold used to confirm wake-keyword candidates.",
+    )
+    parser.add_argument(
         "--wake-carry-ms",
         type=int,
         default=2000,
         help="Recent audio replayed after wake detection to avoid clipping commands.",
+    )
+    parser.add_argument(
+        "--wake-replay-pre-ms",
+        type=int,
+        default=80,
+        help="Audio kept before the detected wake phrase ends when replaying into VAD.",
     )
     parser.add_argument(
         "--vad",

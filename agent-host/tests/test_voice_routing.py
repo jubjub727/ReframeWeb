@@ -14,9 +14,12 @@ from reframe_agent_host.voice.types import CaptureResult, VoicePipelineConfig
 
 
 class StubTranscriber:
+    def __init__(self, text="jarvis do this"):
+        self.text = text
+
     def transcribe(self, _samples, _sample_rate):
         return Transcript(
-            text="jarvis do this",
+            text=self.text,
             language="en",
             duration_seconds=1.0,
             segments=[],

@@ -21,6 +21,14 @@ def decoder_config():
     return config
 
 
+def keyphrase_decoder_config(phrase: str, threshold: float):
+    config = decoder_config()
+    config.set_string("lm", None)
+    config["keyphrase"] = phrase
+    config["kws_threshold"] = threshold
+    return config
+
+
 def phrase_grammar(phrases: tuple[str, ...]) -> str:
     alternatives = " | ".join(sorted(phrases, key=len, reverse=True))
     return f"#JSGF V1.0; grammar reframewake; public <phrase> = {alternatives};"
@@ -63,7 +71,10 @@ def normalize_phrase(value: str) -> str:
     return " ".join(words)
 
 
-def phrase_end_sample(segments: tuple[object, ...], phrase: str) -> int | None:
+def phrase_sample_span(
+    segments: tuple[object, ...],
+    phrase: str,
+) -> tuple[int, int] | None:
     phrase_words = phrase.split()
     if not phrase_words:
         return None
@@ -81,8 +92,9 @@ def phrase_end_sample(segments: tuple[object, ...], phrase: str) -> int | None:
 
     for index in range(len(word_values) - len(phrase_words) + 1):
         if word_values[index : index + len(phrase_words)] == phrase_words:
+            start_frame = int(getattr(words[index], "start_frame"))
             end_frame = int(getattr(words[index + len(phrase_words) - 1], "end_frame"))
-            return (end_frame + 1) * 160
+            return start_frame * 160, (end_frame + 1) * 160
     return None
 
 

@@ -17,6 +17,7 @@ agent-host/.venv/
 
 # Audio/model artifacts
 .debug-audio/
+.debug-wake*/
 *.wav
 *.mp3
 *.flac

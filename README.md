@@ -191,6 +191,10 @@ Useful tuning flags:
   "conversation".
 - `--wake-gain 1.0` to tune local phrase detector gain without changing the
   audio sent to Whisper.
+- `--wake-threshold 1e-30` to tune local PocketSphinx KWS confirmation for
+  wake-keyword candidates.
+- `--wake-replay-pre-ms 80` keeps only a small prefix before the detected wake
+  phrase ends when replaying command audio into VAD.
 - `--debug-audio-dir .debug-audio` to opt in to saving local WAV clips and JSON
   sidecars for missed wake timeouts and detected keyphrases.
 - `--debug-audio-seconds 8` to tune how much rolling microphone audio is kept

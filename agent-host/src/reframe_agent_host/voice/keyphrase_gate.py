@@ -55,7 +55,10 @@ class VoiceKeyphraseGate:
         emit("keyphrase", f"detected {detection.phrase!r} as {detection.hypstr!r}")
         state.keyphrase_detection = detection
         state.keyphrase_wait_seconds = time.perf_counter() - listen_started_at
-        replay_frames = list(state.keyphrase_carry_frames)
+        replay_frames = state.keyphrase_spotter.replay_frames_for_detection(
+            detection,
+            self._config.keyphrases.replay_pre_ms,
+        )
         state.close_spotters()
         return KeyphraseGateResult(
             detection,
@@ -81,6 +84,7 @@ class VoiceKeyphraseGate:
             ),
             gain=self._config.keyphrases.gain,
             max_buffer_ms=self._config.keyphrases.conversation_on_confirm_window_ms,
+            kws_threshold=self._config.keyphrases.kws_threshold,
         )
 
     def _phrases(self) -> tuple[str, ...]:

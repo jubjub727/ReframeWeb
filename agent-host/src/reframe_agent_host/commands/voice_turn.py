@@ -109,7 +109,9 @@ def _keyphrase_config(args: argparse.Namespace) -> KeyphraseSpotterConfig:
         conversation_on_confirm_window_ms=args.conversation_on_confirm_window_ms,
         check_interval_ms=args.wake_check_ms,
         carry_ms=args.wake_carry_ms,
+        replay_pre_ms=args.wake_replay_pre_ms,
         gain=args.wake_gain,
+        kws_threshold=args.wake_threshold,
     )
 
 

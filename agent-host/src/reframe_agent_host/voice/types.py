@@ -106,6 +106,9 @@ class VoiceTurnResult:
                     "phrase": self.keyphrase_detection.phrase,
                     "hypstr": self.keyphrase_detection.hypstr,
                     "confirmed": self.keyphrase_detection.confirmed,
+                    "phrase_start_sample": (
+                        self.keyphrase_detection.phrase_start_sample
+                    ),
                     "phrase_end_sample": (
                         self.keyphrase_detection.phrase_end_sample
                     ),

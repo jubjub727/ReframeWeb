@@ -7,10 +7,11 @@ from reframe_agent_host.keyphrases.types import KeyphraseDetection, KeyphraseKin
 from reframe_agent_host.keyphrases.pocketsphinx_helpers import (
     decoder_config,
     float_samples_to_int16,
+    keyphrase_decoder_config,
     matched_phrase,
     normalize_phrase,
     phrase_grammar,
-    phrase_end_sample,
+    phrase_sample_span,
 )
 
 
@@ -21,6 +22,7 @@ class PocketSphinxPhraseSpotter:
         check_interval_frames: int = 4,
         gain: float = 4.0,
         max_buffer_ms: int = 2_000,
+        kws_threshold: float = 1e-30,
     ) -> None:
         from pocketsphinx import Decoder
 
@@ -36,6 +38,7 @@ class PocketSphinxPhraseSpotter:
 
         self._check_interval_frames = max(1, check_interval_frames)
         self._gain = gain
+        self._kws_threshold = kws_threshold
         self._buffer_samples = 0
         self._buffer_start_sample = 0
         self._processed_samples = 0
@@ -86,6 +89,10 @@ class PocketSphinxPhraseSpotter:
         match = matched_phrase(hypstr, self._phrase_aliases)
         if match is None:
             return None
+        phrase_span = self._confirmed_phrase_span(match)
+        if phrase_span is None:
+            return None
+        phrase_start_sample, phrase_end_sample = phrase_span
 
         self._detection_emitted = True
         return KeyphraseDetection(
@@ -93,7 +100,8 @@ class PocketSphinxPhraseSpotter:
             phrase=match.phrase,
             hypstr=hypstr,
             confirmed=True,
-            phrase_end_sample=self._phrase_end_sample(match.matched_phrase),
+            phrase_start_sample=phrase_start_sample,
+            phrase_end_sample=phrase_end_sample,
         )
 
     def close(self) -> None:
@@ -118,11 +126,69 @@ class PocketSphinxPhraseSpotter:
             self._buffer_start_sample += extra_samples
             break
 
-    def _phrase_end_sample(self, matched_phrase: str) -> int | None:
-        absolute_sample = phrase_end_sample(tuple(self._decoder.seg()), matched_phrase)
-        if absolute_sample is None:
-            return None
-        return max(0, absolute_sample - self._buffer_start_sample)
+    def replay_frames_for_detection(
+        self,
+        detection: KeyphraseDetection,
+        pre_roll_ms: int,
+    ) -> list[np.ndarray]:
+        boundary_sample = detection.phrase_end_sample
+        if boundary_sample is None:
+            boundary_sample = detection.phrase_start_sample
+        if boundary_sample is None:
+            return list(self._frames)
+        pre_roll_samples = max(0, int(16_000 * pre_roll_ms / 1000))
+        start_sample = max(0, boundary_sample - pre_roll_samples)
+        return trim_frames_from_sample(self._frames, start_sample)
+
+    def _phrase_sample_span(self, matched_phrase: str) -> tuple[int | None, int | None]:
+        span = phrase_sample_span(tuple(self._decoder.seg()), matched_phrase)
+        if span is None:
+            return None, None
+        start_sample, end_sample = span
+        return (
+            max(0, start_sample - self._buffer_start_sample),
+            max(0, end_sample - self._buffer_start_sample),
+        )
+
+    def _confirmed_phrase_span(
+        self,
+        match,
+    ) -> tuple[int | None, int | None] | None:
+        if match.kind != "wake_command":
+            return self._phrase_sample_span(match.matched_phrase) or (None, None)
+        return (
+            self._keyword_spotted(match.matched_phrase)
+            or self._keyword_spotted(match.phrase)
+        )
+
+    def _keyword_spotted(self, phrase: str) -> tuple[int | None, int | None] | None:
+        from pocketsphinx import Decoder
+
+        decoder = Decoder(keyphrase_decoder_config(phrase, self._kws_threshold))
+        decoder.start_utt()
+        ended = False
+        try:
+            for frame in self._frames:
+                pcm = float_samples_to_int16(frame, gain=self._gain)
+                decoder.process_raw(pcm.tobytes(), False, False)
+                hypothesis = decoder.hyp()
+                if hypothesis is not None and contains_keyphrase(
+                    str(hypothesis.hypstr),
+                    phrase,
+                ):
+                    return phrase_sample_span(tuple(decoder.seg()), phrase) or (
+                        None,
+                        None,
+                    )
+            decoder.end_utt()
+            ended = True
+            hypothesis = decoder.hyp()
+            if hypothesis is None or not contains_keyphrase(str(hypothesis.hypstr), phrase):
+                return None
+            return phrase_sample_span(tuple(decoder.seg()), phrase) or (None, None)
+        finally:
+            if not ended:
+                decoder.end_utt()
 
 
 class PocketSphinxPhraseConfirmationSpotter(PocketSphinxPhraseSpotter):
@@ -133,10 +199,34 @@ class PocketSphinxPhraseConfirmationSpotter(PocketSphinxPhraseSpotter):
         check_interval_frames: int = 4,
         gain: float = 4.0,
         max_buffer_ms: int = 2_000,
+        kws_threshold: float = 1e-30,
     ) -> None:
         super().__init__(
             {phrase: kind for phrase in phrases},
             check_interval_frames=check_interval_frames,
             gain=gain,
             max_buffer_ms=max_buffer_ms,
+            kws_threshold=kws_threshold,
         )
+
+
+def contains_keyphrase(hypstr: str, phrase: str) -> bool:
+    return normalize_phrase(hypstr) == normalize_phrase(phrase)
+
+
+def trim_frames_from_sample(
+    frames: list[np.ndarray],
+    start_sample: int,
+) -> list[np.ndarray]:
+    remaining_skip = max(0, start_sample)
+    trimmed: list[np.ndarray] = []
+    for frame in frames:
+        mono_frame = np.asarray(frame, dtype=np.float32).reshape(-1)
+        if remaining_skip >= len(mono_frame):
+            remaining_skip -= len(mono_frame)
+            continue
+        if remaining_skip > 0:
+            mono_frame = mono_frame[remaining_skip:]
+            remaining_skip = 0
+        trimmed.append(mono_frame.copy())
+    return trimmed

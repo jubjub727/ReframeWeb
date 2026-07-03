@@ -38,6 +38,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_analyze_task_choice_benchmark_parser(subparsers)
     _add_analyze_conversation_evaluation_benchmark_parser(subparsers)
     _add_debug_wake_audio_parser(subparsers)
+    _add_record_wake_audio_parser(subparsers)
     _add_voice_turn_parser(subparsers)
     return parser
 
@@ -174,6 +175,31 @@ def _add_debug_wake_audio_parser(subparsers) -> None:
         default=["conversation on"],
     )
     parser.add_argument("--wake-gain", type=float, default=1.0)
+    parser.add_argument("--wake-threshold", type=float, default=1e-30)
     parser.add_argument("--window-ms", type=int, default=2000)
     parser.add_argument("--chunk-ms", type=int, default=32)
     parser.add_argument("--check-ms", type=int, default=160)
+
+
+def _add_record_wake_audio_parser(subparsers) -> None:
+    parser = subparsers.add_parser(
+        "record-wake-audio",
+        help="Record labeled microphone clips for wake detection debugging.",
+    )
+    parser.add_argument(
+        "--case",
+        action="append",
+        default=None,
+        help="Labeled test case in label:spoken text form. Can be repeated.",
+    )
+    parser.add_argument("--output-dir", default=".debug-wake-tests")
+    parser.add_argument("--seconds", type=float, default=3.0)
+    parser.add_argument("--countdown-seconds", type=float, default=1.0)
+    parser.add_argument("--no-prompt", action="store_true")
+    parser.add_argument("--device", help="Input device index or name.")
+    parser.add_argument("--sample-rate", type=int, default=16_000)
+    parser.add_argument("--input-sample-rate", type=int, default=0)
+    parser.add_argument("--input-gain", type=float, default=1.0)
+    parser.add_argument("--input-channels", type=int, default=0)
+    parser.add_argument("--input-channel", type=int, default=0)
+    parser.add_argument("--chunk-ms", type=int, default=32)

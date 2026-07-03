@@ -24,6 +24,7 @@ from reframe_agent_host.commands.task_choice import (
 )
 from reframe_agent_host.commands.voice_turn import run_voice_turn
 from reframe_agent_host.commands.debug_wake_audio import run_debug_wake_audio
+from reframe_agent_host.commands.record_wake_audio import run_record_wake_audio
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -120,6 +121,9 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     if args.command == "debug-wake-audio":
         raise SystemExit(run_debug_wake_audio(args))
+
+    if args.command == "record-wake-audio":
+        raise SystemExit(run_record_wake_audio(args))
 
     if args.command == "voice-turn":
         raise SystemExit(asyncio.run(run_voice_turn(args)))

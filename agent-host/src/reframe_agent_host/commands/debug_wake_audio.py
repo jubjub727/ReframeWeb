@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import glob
 import json
 from pathlib import Path
 
@@ -20,11 +21,20 @@ def run_debug_wake_audio(args: argparse.Namespace) -> int:
             args.window_ms,
             args.chunk_ms,
             args.check_ms,
+            args.wake_threshold,
         )
-        for path in args.wav
+        for path in _expanded_wav_paths(args.wav)
     ]
     print(json.dumps(results, indent=2))
     return 0 if any(result["detections"] for result in results) else 1
+
+
+def _expanded_wav_paths(paths: list[str]) -> list[str]:
+    expanded: list[str] = []
+    for path in paths:
+        matches = sorted(glob.glob(path))
+        expanded.extend(matches or [path])
+    return expanded
 
 
 def _analyze_file(
@@ -35,6 +45,7 @@ def _analyze_file(
     window_ms: int,
     chunk_ms: int,
     check_ms: int,
+    wake_threshold: float,
 ) -> dict[str, object]:
     samples, sample_rate = read_mono_wav(path)
     if sample_rate != 16_000:
@@ -45,6 +56,7 @@ def _analyze_file(
         check_interval_frames=max(1, round(check_ms / chunk_ms)),
         gain=gain,
         max_buffer_ms=window_ms,
+        kws_threshold=wake_threshold,
     )
     detections = []
     hypotheses = []
@@ -61,6 +73,7 @@ def _analyze_file(
                     "kind": detection.kind,
                     "phrase": detection.phrase,
                     "hypstr": detection.hypstr,
+                    "phrase_start_sample": detection.phrase_start_sample,
                     "phrase_end_sample": detection.phrase_end_sample,
                 }
             )
