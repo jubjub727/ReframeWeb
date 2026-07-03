@@ -11,6 +11,7 @@ from reframe_agent_host.voice.activity import DetectedUtterance, VoiceActivityCo
 from reframe_agent_host.voice.microphone import AudioInputConfig
 from reframe_agent_host.voice.turn_processor import VoiceTurnProcessor
 from reframe_agent_host.voice.types import CaptureResult, VoicePipelineConfig
+from reframe_memory import RetrievedMemoryContext
 
 
 class StubTranscriber:
@@ -64,6 +65,48 @@ class RecordingConversationEvaluation:
         )
 
 
+class RecordingSearchDepth:
+    def __init__(self):
+        self.current_user_request = None
+        self.selected_task_id = None
+        self.memory_search_hints = None
+
+    async def evaluate_search_depths(
+        self,
+        current_user_request,
+        selected_task_id,
+        memory_search_hints,
+    ):
+        self.current_user_request = current_user_request
+        self.selected_task_id = selected_task_id
+        self.memory_search_hints = memory_search_hints
+        return types.SearchDepthDecision(
+            depths={
+                "task_catalog": types.SearchDepthTimestamps(
+                    created_after="2026-01-01T00:00:00Z",
+                    read_after="2026-01-01T00:00:00Z",
+                    updated_after="2026-01-01T00:00:00Z",
+                ),
+                "past_conversation_context": types.SearchDepthTimestamps(
+                    created_after="2026-07-01T00:00:00Z",
+                    read_after="2026-07-01T00:00:00Z",
+                    updated_after="2026-07-01T00:00:00Z",
+                ),
+            }
+        )
+
+
+class RecordingMemoryRetrieval:
+    def __init__(self):
+        self.memory_search_hints = None
+        self.search_depths = None
+
+    async def retrieve(self, memory_search_hints, search_depths):
+        self.memory_search_hints = memory_search_hints
+        self.search_depths = search_depths
+        return RetrievedMemoryContext()
+
+
 class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
     def test_wake_keyword_is_removed_from_routed_transcript(self):
         matcher = TriggerPhraseMatcher(TriggerPhraseConfig())
@@ -94,12 +137,16 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
     async def test_task_choice_receives_routed_transcript(self):
         planner = RecordingPlanner()
         conversation_evaluation = RecordingConversationEvaluation()
+        search_depth = RecordingSearchDepth()
+        memory_retrieval = RecordingMemoryRetrieval()
         processor = VoiceTurnProcessor(
             config=_voice_config(),
             transcriber=StubTranscriber(),
             trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
             planner=planner,
             conversation_evaluation=conversation_evaluation,
+            search_depth=search_depth,
+            memory_retrieval=memory_retrieval,
         )
 
         result = await processor.process(
@@ -119,6 +166,18 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             "task:needs_more_information",
         )
         self.assertEqual(result.memory_search_hints.strings.contains, ["do this"])
+        self.assertEqual(search_depth.current_user_request, "do this")
+        self.assertEqual(search_depth.selected_task_id, "task:needs_more_information")
+        self.assertEqual(
+            result.search_depths.depths["task_catalog"].created_after,
+            "2026-01-01T00:00:00Z",
+        )
+        self.assertIs(memory_retrieval.memory_search_hints, result.memory_search_hints)
+        self.assertIs(memory_retrieval.search_depths, result.search_depths)
+        self.assertEqual(
+            result.retrieved_memories.to_dict(),
+            RetrievedMemoryContext().to_dict(),
+        )
 
 
 def _voice_config():

@@ -23,7 +23,7 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
     value: StreamStateValueT
     state: typing_extensions.Literal["Pending", "Incomplete", "Complete"]
 # #########################################################################
-# Generated classes (12)
+# Generated classes (16)
 # #########################################################################
 
 class AvailableTask(BaseModel):
@@ -78,6 +78,29 @@ class MemoryTagSearch(BaseModel):
     any_of: typing.List[str]
     all_of: typing.List[str]
     none_of: typing.List[str]
+
+class SearchDepthDecision(BaseModel):
+    depths: typing.Dict[str, "SearchDepthTimestamps"]
+    candidate_memory: typing.Optional["CandidateMemory"] = None
+
+class SearchDepthDomain(BaseModel):
+    id: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    searches: typing.Optional[str] = None
+    hydrates: typing.Optional[str] = None
+
+class SearchDepthMemoryContext(BaseModel):
+    title: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    tags: typing.List[str]
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
+
+class SearchDepthTimestamps(BaseModel):
+    created_after: typing.Optional[str] = None
+    read_after: typing.Optional[str] = None
+    updated_after: typing.Optional[str] = None
 
 class SelectedTaskContext(BaseModel):
     id: typing.Optional[str] = None

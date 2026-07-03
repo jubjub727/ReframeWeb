@@ -20,6 +20,7 @@ class ConversationEvaluationReply:
     model_id: str
     provider_name: str
     baml_surface: str
+    reasoning_effort: str | None
     run_index: int
     latency_seconds: float
     hints: dict[str, Any] | None
@@ -91,6 +92,9 @@ def _reply_from_result(
         model_id=str(provider.get("model_id") or provider.get("provider_id")),
         provider_name=str(provider.get("provider_name", "")),
         baml_surface=str(provider.get("baml_surface", "")),
+        reasoning_effort=_optional_str(
+            result.get("reasoning_effort") or provider.get("reasoning_effort")
+        ),
         run_index=int(result.get("run_index", 0)),
         latency_seconds=float(result.get("latency_seconds", 0.0)),
         hints=_optional_dict(result.get("hints")),

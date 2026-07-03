@@ -5,6 +5,8 @@ import time
 from reframe_agent_host.agent_flow.conversation_evaluation import (
     ConversationEvaluationPlanner,
 )
+from reframe_agent_host.agent_flow.memory_retrieval import MemoryRetrievalPlanner
+from reframe_agent_host.agent_flow.search_depth import SearchDepthPlanner
 from reframe_agent_host.agent_flow.task_choice import TaskChoicePlanner
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
@@ -27,12 +29,16 @@ class VoiceTurnPipeline:
         self._conversation_evaluation = ConversationEvaluationPlanner(
             session_id=config.session_id,
         )
+        self._search_depth = SearchDepthPlanner(session_id=config.session_id)
+        self._memory_retrieval = MemoryRetrievalPlanner(session_id=config.session_id)
         self._processor = VoiceTurnProcessor(
             config,
             self._transcriber,
             self._trigger_matcher,
             self._planner,
             self._conversation_evaluation,
+            self._search_depth,
+            self._memory_retrieval,
         )
 
     async def run_once(

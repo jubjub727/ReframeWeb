@@ -99,14 +99,27 @@ talking without destroying the underlying work the agent was already performing.
 
 ## Current Status
 
-This repository is at the planning and scaffolding stage. The first committed
-scaffold starts at the user interaction boundary:
+This repository now contains a working Agent Host prototype. The native
+CEF/React Visual Panel layer, Semantic Store runtime, Data Lens runtime, and
+Compute Module runtime are still future-facing architecture, but the Python
+voice loop and graph-backed memory flow are active code.
 
-1. A `uv`-managed Python Agent Host.
-2. A BAML task-choice prompt generated into the Python package.
-3. Real dependencies for audio input, wake detection, VAD, transcription, and
-   TTS.
-4. A `doctor` command that verifies the installed host stack.
+Implemented pieces include:
+
+1. A `uv`-managed Python Agent Host with CLI commands for setup, checks, voice
+   turns, memory seeding, and benchmarks.
+2. Local wake/phrase detection, VAD, GPU-backed Whisper transcription, and
+   turn recording into the memory graph.
+3. BAML stages for task choice, conversation memory-search hint generation, and
+   per-domain search-depth selection.
+4. A SurrealDB-backed memory graph with roots for providers, tasks, sessions,
+   conversations, session memories, task-choice memories, conversation
+   evaluation memories, and search-depth memories.
+5. Graph-based memory retrieval that starts from existing roots and relations,
+   applies search hints and timestamp breadth to candidate nodes, and hydrates
+   parent wrappers needed to explain valid child matches.
+6. Benchmark harnesses for task choice, conversation evaluation, and control
+   flow/search-depth behavior.
 
 ## Agent Host Setup
 
@@ -124,7 +137,8 @@ the API key from `OPENCODE_GO_API_KEY`.
 Model use is a BAML choice, not user-selected global configuration and not
 Python-side model routing. Each agentic task should have an explicit model
 assignment through a memory Provider node that points at a BAML surface. The
-current task-choice flow is assigned to `deepseek-v4-flash`.
+current task-choice flow uses `kimi-k2.5` with high reasoning effort. The
+conversation-evaluation and search-depth flows use `glm-5.1`.
 
 Current benchmarked OpenCode Go model IDs include:
 
@@ -163,10 +177,27 @@ cd agent-host
 ```
 
 `voice-turn` listens for one utterance, detects the speech boundary, transcribes
-it with GPU-backed `faster-whisper`, sends the transcript to the BAML
-conversation planner, and prints a JSON result with per-stage timings. Live
-stderr events also show the delta since the previous event and total elapsed
-time.
+it with GPU-backed `faster-whisper`, records the current turn when session and
+conversation IDs are available, sends the transcript through the BAML control
+flow, retrieves graph memory context, and prints concise per-stage summaries and
+latencies. When memory retrieval runs, the CLI prints the retrieved memories
+directly instead of dumping the full turn result as JSON.
+
+The current BAML control-flow path is:
+
+1. Choose an initial task from the task catalog.
+2. Generate memory search hints from the conversation and selected task.
+3. Choose timestamp breadth for each search domain.
+4. Retrieve memories from the graph.
+
+Memory retrieval is relation-first rather than table-wide. The task catalog is
+searched from the task root. Past conversation context is searched through
+session, conversation, message, and session-memory relations. Search hints are
+alternatives, so any positive tag or string hint can match a candidate. Timestamp
+breadth is restrictive: candidate nodes must pass `created_at`, `updated_at`,
+and, when present, `read_at` cutoffs. Parent wrappers are included when a valid
+child match needs them for context. Current-session memories are always included
+in the retrieved memory output for the active session.
 
 By default, `WakeCommand` mode is wake-gated locally with a rolling PocketSphinx
 phrase recognizer. It does not require an account, network call, or paid
@@ -177,8 +208,8 @@ this is a test", the trigger audio is trimmed away and the remaining command
 audio is sent through VAD and GPU Whisper.
 
 ```powershell
-uv run reframe-agent-host voice-turn --device 1 --no-plan
-.\reframe-agent-host.cmd voice-turn --device 1 --no-plan
+uv run reframe-agent-host voice-turn --device 1 --no-task-choice
+.\reframe-agent-host.cmd voice-turn --device 1 --no-task-choice
 ```
 
 Useful tuning flags:

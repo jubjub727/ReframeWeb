@@ -35,7 +35,13 @@ class LlmResponseParser:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateConversationForMemorySearch", llm_response=llm_response, mode="request")
         return typing.cast(types.ConversationMemorySearchHints, __result__)
 
+    def EvaluateSearchDepths(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> types.SearchDepthDecision:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateSearchDepths", llm_response=llm_response, mode="request")
+        return typing.cast(types.SearchDepthDecision, __result__)
 
+    
 
 class LlmStreamParser:
     __options: DoNotUseDirectlyCallManager
@@ -54,5 +60,11 @@ class LlmStreamParser:
     ) -> stream_types.ConversationMemorySearchHints:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateConversationForMemorySearch", llm_response=llm_response, mode="stream")
         return typing.cast(stream_types.ConversationMemorySearchHints, __result__)
+
+    def EvaluateSearchDepths(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> stream_types.SearchDepthDecision:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateSearchDepths", llm_response=llm_response, mode="stream")
+        return typing.cast(stream_types.SearchDepthDecision, __result__)
 
     

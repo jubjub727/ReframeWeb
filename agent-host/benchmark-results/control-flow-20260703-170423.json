@@ -1,0 +1,1365 @@
+{
+  "benchmark": "control_flow_search_depth",
+  "cases": [
+    {
+      "id": "hacker_news_compact_panel",
+      "current_timestamp": "2026-07-03T15:00:00Z",
+      "current_user_request": "Open Hacker News, but keep it compact like last time.",
+      "expected_task_id": "benchmark_task:visual_panel",
+      "available_tasks": 3,
+      "session": {
+        "id": "benchmark_session:hacker_news_panel",
+        "name": "Hacker News visual panel session",
+        "created_at": "2026-07-02T10:00:00Z",
+        "updated_at": "2026-07-02T10:00:08Z",
+        "read_at": "NONE",
+        "conversations": 1,
+        "memories": 1
+      },
+      "task_choice_memories": 2,
+      "conversation_evaluation_memories": 1,
+      "search_depth_memories": 2
+    },
+    {
+      "id": "reddit_slow_scroll",
+      "current_timestamp": "2026-07-03T15:00:00Z",
+      "current_user_request": "Open the Reddit thread from earlier this week and scroll slower this time.",
+      "expected_task_id": "benchmark_task:visual_panel",
+      "available_tasks": 3,
+      "session": {
+        "id": "benchmark_session:reddit_motion",
+        "name": "Reddit visual panel session",
+        "created_at": "2026-06-30T21:15:00Z",
+        "updated_at": "2026-06-30T21:15:08Z",
+        "read_at": "NONE",
+        "conversations": 1,
+        "memories": 1
+      },
+      "task_choice_memories": 2,
+      "conversation_evaluation_memories": 1,
+      "search_depth_memories": 2
+    },
+    {
+      "id": "stripe_followup_cleanup",
+      "current_timestamp": "2026-07-03T15:00:00Z",
+      "current_user_request": "Do the same cleanup for the second Stripe CSV.",
+      "expected_task_id": "benchmark_task:needs_information",
+      "available_tasks": 3,
+      "session": {
+        "id": "benchmark_session:stripe_csv_cleanup",
+        "name": "Stripe CSV cleanup session",
+        "created_at": "2026-07-03T09:05:00Z",
+        "updated_at": "2026-07-03T09:05:08Z",
+        "read_at": "NONE",
+        "conversations": 1,
+        "memories": 1
+      },
+      "task_choice_memories": 2,
+      "conversation_evaluation_memories": 1,
+      "search_depth_memories": 2
+    }
+  ],
+  "snapshots": [
+    {
+      "case_id": "hacker_news_compact_panel",
+      "current_timestamp": "2026-07-03T15:00:00Z",
+      "current_user_request": "Open Hacker News, but keep it compact like last time.",
+      "expected_task_id": "benchmark_task:visual_panel",
+      "selected_task_id": "benchmark_task:visual_panel",
+      "task_correct": true,
+      "latency_seconds": 12.811412999999447,
+      "stage_latency_seconds": {
+        "task_choice": 8.56678649999958,
+        "search_hints": 4.244209299999056
+      },
+      "task_choice": {
+        "selected_task_id": "benchmark_task:visual_panel",
+        "confidence": 0.95,
+        "reason": "The user wants to open Hacker News in a compact layout, which is a request for a visual panel. The conversation history and session memories confirm this preference, making the visual panel preparation task the correct choice. Other tasks (needs_information, cannot_handle) are not appropriate as the request is clear and can be handled.",
+        "agent_thought": null,
+        "candidate_memory": null
+      },
+      "search_hints": {
+        "tags": {
+          "any_of": [
+            "hacker-news",
+            "visual-panel",
+            "preference"
+          ],
+          "all_of": [],
+          "none_of": []
+        },
+        "strings": {
+          "contains": [
+            "hacker news",
+            "compact",
+            "dense",
+            "preview cards"
+          ],
+          "equals": []
+        },
+        "candidate_memory": {
+          "title": "Hacker News compact row layout request",
+          "description": "The user asked to open Hacker News in a compact layout 'like last time,' reinforcing a previously expressed preference for dense story rows without expanded preview cards."
+        }
+      },
+      "search_depth_input_snapshot": {
+        "session": {
+          "id": "benchmark_session:hacker_news_panel",
+          "name": "Hacker News visual panel session",
+          "created_at": "2026-07-02T10:00:00Z",
+          "updated_at": "2026-07-02T10:00:08Z",
+          "read_at": "NONE"
+        },
+        "session_conversations": [
+          {
+            "id": "benchmark_conversation:hn_current_session",
+            "name": "Hacker News panel preference",
+            "created_at": "2026-07-02T10:00:00Z",
+            "updated_at": "2026-07-02T10:00:06Z",
+            "read_at": "NONE",
+            "messages": [
+              {
+                "created_at": "2026-07-02T10:00:00Z",
+                "updated_at": "2026-07-02T10:00:00Z",
+                "read_at": "NONE",
+                "role": "human",
+                "content": "Hacker News worked best as tight rows of titles, scores, and comment counts. The preview cards made it feel too airy."
+              },
+              {
+                "created_at": "2026-07-02T10:00:03Z",
+                "updated_at": "2026-07-02T10:00:03Z",
+                "read_at": "NONE",
+                "role": "agent_thought",
+                "content": "The user prefers a compact Hacker News layout with title-first rows and visible metadata."
+              },
+              {
+                "created_at": "2026-07-02T10:00:06Z",
+                "updated_at": "2026-07-02T10:00:06Z",
+                "read_at": "NONE",
+                "role": "agent",
+                "content": "Got it. Hacker News should stay compact, with no expanded preview cards."
+              }
+            ]
+          }
+        ],
+        "session_memories": [
+          {
+            "title": "Hacker News row density",
+            "description": "The user likes Hacker News as dense story rows: title first, score and comment count visible, and preview cards avoided.",
+            "tags": [
+              "hacker-news",
+              "visual-panel",
+              "preference"
+            ],
+            "created_at": "2026-07-02T10:00:08Z",
+            "updated_at": "2026-07-02T10:00:08Z",
+            "read_at": "NONE"
+          }
+        ],
+        "selected_task": {
+          "id": "benchmark_task:visual_panel",
+          "name": "Prepare visual panel",
+          "description": "Prepare a visual panel for the user's browsing task.",
+          "input": "The user's request and conversation context.",
+          "output": "A visual panel plan and context needed to render it.",
+          "prompt": "Prepare the visual panel requested by the user.",
+          "provider_id": "benchmark_provider:core",
+          "created_at": "2026-07-02T09:00:00Z",
+          "updated_at": "2026-07-02T09:00:00Z",
+          "read_at": "NONE"
+        },
+        "memory_search_hints": {
+          "tags": {
+            "any_of": [
+              "hacker-news",
+              "visual-panel",
+              "preference"
+            ],
+            "all_of": [],
+            "none_of": []
+          },
+          "strings": {
+            "contains": [
+              "hacker news",
+              "compact",
+              "dense",
+              "preview cards"
+            ],
+            "equals": []
+          },
+          "candidate_memory": {
+            "title": "Hacker News compact row layout request",
+            "description": "The user asked to open Hacker News in a compact layout 'like last time,' reinforcing a previously expressed preference for dense story rows without expanded preview cards."
+          }
+        },
+        "search_domains": [
+          {
+            "id": "task_catalog",
+            "description": "Historic task catalog records. Use this domain when older task definitions may help interpret or run the selected task.",
+            "searches": "Task memory nodes only.",
+            "hydrates": "Matched Task nodes only."
+          },
+          {
+            "id": "past_conversation_context",
+            "description": "Historic conversation context outside the current default session context. Use this domain when earlier sessions, conversations, messages, or session memories may clarify the request.",
+            "searches": "Session nodes, Conversation nodes, ConversationMessage nodes, and SessionMemory nodes attached to those past sessions.",
+            "hydrates": "The containing Session node, relevant Conversation nodes, matched ConversationMessage nodes, and relevant SessionMemory nodes from that session."
+          }
+        ],
+        "search_depth_memories": [
+          {
+            "title": "Followup depth",
+            "description": "Requests that reference earlier wording such as last time, this time, earlier this week, or the second one usually benefit from older conversation context.",
+            "tags": [
+              "search-depth",
+              "followup"
+            ],
+            "created_at": "2026-07-01T07:30:00Z",
+            "updated_at": "2026-07-01T07:30:00Z",
+            "read_at": "NONE"
+          },
+          {
+            "title": "Stable task catalog",
+            "description": "Task catalog records change slowly during normal browsing and cleanup requests.",
+            "tags": [
+              "search-depth",
+              "task-catalog"
+            ],
+            "created_at": "2026-07-01T07:35:00Z",
+            "updated_at": "2026-07-01T07:35:00Z",
+            "read_at": "NONE"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "reddit_slow_scroll",
+      "current_timestamp": "2026-07-03T15:00:00Z",
+      "current_user_request": "Open the Reddit thread from earlier this week and scroll slower this time.",
+      "expected_task_id": "benchmark_task:visual_panel",
+      "selected_task_id": "benchmark_task:visual_panel",
+      "task_correct": true,
+      "latency_seconds": 15.018188300000475,
+      "stage_latency_seconds": {
+        "task_choice": 10.454066700000112,
+        "search_hints": 4.564069199997903
+      },
+      "task_choice": {
+        "selected_task_id": "benchmark_task:visual_panel",
+        "confidence": 0.95,
+        "reason": "The user wants to open a Reddit thread and scroll slower. The task-choice memory indicates that requests to open, browse, scroll, or adjust a website view should select the visual panel preparation task. The conversation history shows the user had issues with scrolling speed, and the agent acknowledged it. Thus, preparing a visual panel with appropriate scrolling settings is the correct task.",
+        "agent_thought": null,
+        "candidate_memory": null
+      },
+      "search_hints": {
+        "tags": {
+          "any_of": [
+            "reddit",
+            "scrolling",
+            "preference",
+            "visual-panel"
+          ],
+          "all_of": [],
+          "none_of": []
+        },
+        "strings": {
+          "contains": [
+            "reddit",
+            "scroll",
+            "nested replies",
+            "slower"
+          ],
+          "equals": []
+        },
+        "candidate_memory": {
+          "title": "Reddit thread earlier this week",
+          "description": "The user wants to revisit a Reddit thread opened earlier this week and read nested replies with a slower scroll pace than previous browsing."
+        }
+      },
+      "search_depth_input_snapshot": {
+        "session": {
+          "id": "benchmark_session:reddit_motion",
+          "name": "Reddit visual panel session",
+          "created_at": "2026-06-30T21:15:00Z",
+          "updated_at": "2026-06-30T21:15:08Z",
+          "read_at": "NONE"
+        },
+        "session_conversations": [
+          {
+            "id": "benchmark_conversation:reddit_motion",
+            "name": "Reddit reading motion",
+            "created_at": "2026-06-30T21:15:00Z",
+            "updated_at": "2026-06-30T21:15:06Z",
+            "read_at": "NONE",
+            "messages": [
+              {
+                "created_at": "2026-06-30T21:15:00Z",
+                "updated_at": "2026-06-30T21:15:00Z",
+                "read_at": "NONE",
+                "role": "human",
+                "content": "The Reddit thread kept moving while I was still reading nested replies."
+              },
+              {
+                "created_at": "2026-06-30T21:15:03Z",
+                "updated_at": "2026-06-30T21:15:03Z",
+                "read_at": "NONE",
+                "role": "agent_thought",
+                "content": "The user is reacting to browsing motion, not the Reddit content itself."
+              },
+              {
+                "created_at": "2026-06-30T21:15:06Z",
+                "updated_at": "2026-06-30T21:15:06Z",
+                "read_at": "NONE",
+                "role": "agent",
+                "content": "I will give Reddit threads more time between scrolls."
+              }
+            ]
+          }
+        ],
+        "session_memories": [
+          {
+            "title": "Reddit scrolling pace",
+            "description": "The user found Reddit discussion threads hard to read when the panel moved again before they finished nested replies.",
+            "tags": [
+              "reddit",
+              "visual-panel",
+              "scrolling",
+              "preference"
+            ],
+            "created_at": "2026-06-30T21:15:08Z",
+            "updated_at": "2026-06-30T21:15:08Z",
+            "read_at": "NONE"
+          }
+        ],
+        "selected_task": {
+          "id": "benchmark_task:visual_panel",
+          "name": "Prepare visual panel",
+          "description": "Prepare a visual panel for the user's browsing task.",
+          "input": "The user's request and conversation context.",
+          "output": "A visual panel plan and context needed to render it.",
+          "prompt": "Prepare the visual panel requested by the user.",
+          "provider_id": "benchmark_provider:core",
+          "created_at": "2026-07-02T09:00:00Z",
+          "updated_at": "2026-07-02T09:00:00Z",
+          "read_at": "NONE"
+        },
+        "memory_search_hints": {
+          "tags": {
+            "any_of": [
+              "reddit",
+              "scrolling",
+              "preference",
+              "visual-panel"
+            ],
+            "all_of": [],
+            "none_of": []
+          },
+          "strings": {
+            "contains": [
+              "reddit",
+              "scroll",
+              "nested replies",
+              "slower"
+            ],
+            "equals": []
+          },
+          "candidate_memory": {
+            "title": "Reddit thread earlier this week",
+            "description": "The user wants to revisit a Reddit thread opened earlier this week and read nested replies with a slower scroll pace than previous browsing."
+          }
+        },
+        "search_domains": [
+          {
+            "id": "task_catalog",
+            "description": "Historic task catalog records. Use this domain when older task definitions may help interpret or run the selected task.",
+            "searches": "Task memory nodes only.",
+            "hydrates": "Matched Task nodes only."
+          },
+          {
+            "id": "past_conversation_context",
+            "description": "Historic conversation context outside the current default session context. Use this domain when earlier sessions, conversations, messages, or session memories may clarify the request.",
+            "searches": "Session nodes, Conversation nodes, ConversationMessage nodes, and SessionMemory nodes attached to those past sessions.",
+            "hydrates": "The containing Session node, relevant Conversation nodes, matched ConversationMessage nodes, and relevant SessionMemory nodes from that session."
+          }
+        ],
+        "search_depth_memories": [
+          {
+            "title": "Followup depth",
+            "description": "Requests that reference earlier wording such as last time, this time, earlier this week, or the second one usually benefit from older conversation context.",
+            "tags": [
+              "search-depth",
+              "followup"
+            ],
+            "created_at": "2026-07-01T07:30:00Z",
+            "updated_at": "2026-07-01T07:30:00Z",
+            "read_at": "NONE"
+          },
+          {
+            "title": "Stable task catalog",
+            "description": "Task catalog records change slowly during normal browsing and cleanup requests.",
+            "tags": [
+              "search-depth",
+              "task-catalog"
+            ],
+            "created_at": "2026-07-01T07:35:00Z",
+            "updated_at": "2026-07-01T07:35:00Z",
+            "read_at": "NONE"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "stripe_followup_cleanup",
+      "current_timestamp": "2026-07-03T15:00:00Z",
+      "current_user_request": "Do the same cleanup for the second Stripe CSV.",
+      "expected_task_id": "benchmark_task:needs_information",
+      "selected_task_id": "benchmark_task:needs_information",
+      "task_correct": true,
+      "latency_seconds": 20.96923870000319,
+      "stage_latency_seconds": {
+        "task_choice": 10.209925999999541,
+        "search_hints": 10.75926459999755
+      },
+      "task_choice": {
+        "selected_task_id": "benchmark_task:needs_information",
+        "confidence": 0.95,
+        "reason": "The user wants to clean the second Stripe CSV (February) but has not provided the file path. The conversation history shows the agent already requested the January path and offered to apply the same cleanup to February once given a path. The request lacks the necessary information (file path) to proceed, so we need to ask for it.",
+        "agent_thought": "The user is referring to the February CSV. They haven't provided the file path yet. We should ask for the specific file path for the second CSV before proceeding.",
+        "candidate_memory": null
+      },
+      "search_hints": {
+        "tags": {
+          "any_of": [
+            "stripe",
+            "csv",
+            "spreadsheet",
+            "followup"
+          ],
+          "all_of": [],
+          "none_of": []
+        },
+        "strings": {
+          "contains": [
+            "second",
+            "february",
+            "file path",
+            "duplicate rows",
+            "csv export"
+          ],
+          "equals": []
+        },
+        "candidate_memory": null
+      },
+      "search_depth_input_snapshot": {
+        "session": {
+          "id": "benchmark_session:stripe_csv_cleanup",
+          "name": "Stripe CSV cleanup session",
+          "created_at": "2026-07-03T09:05:00Z",
+          "updated_at": "2026-07-03T09:05:08Z",
+          "read_at": "NONE"
+        },
+        "session_conversations": [
+          {
+            "id": "benchmark_conversation:stripe_csv_cleanup",
+            "name": "Stripe CSV cleanup",
+            "created_at": "2026-07-03T09:05:00Z",
+            "updated_at": "2026-07-03T09:05:06Z",
+            "read_at": "NONE",
+            "messages": [
+              {
+                "created_at": "2026-07-03T09:05:00Z",
+                "updated_at": "2026-07-03T09:05:00Z",
+                "read_at": "NONE",
+                "role": "human",
+                "content": "I downloaded January and February CSV exports from Stripe. January has duplicate rows after yesterday's export hiccup."
+              },
+              {
+                "created_at": "2026-07-03T09:05:03Z",
+                "updated_at": "2026-07-03T09:05:03Z",
+                "read_at": "NONE",
+                "role": "agent_thought",
+                "content": "The user named two files conceptually but has not provided local paths."
+              },
+              {
+                "created_at": "2026-07-03T09:05:06Z",
+                "updated_at": "2026-07-03T09:05:06Z",
+                "read_at": "NONE",
+                "role": "agent",
+                "content": "I can clean January first once you give me the file path, then apply the same duplicate-row cleanup to February."
+              }
+            ]
+          }
+        ],
+        "session_memories": [
+          {
+            "title": "Stripe export pair",
+            "description": "The active cleanup conversation involves January and February Stripe CSV exports. January was described as having duplicate rows after an export hiccup.",
+            "tags": [
+              "stripe",
+              "csv",
+              "spreadsheet"
+            ],
+            "created_at": "2026-07-03T09:05:08Z",
+            "updated_at": "2026-07-03T09:05:08Z",
+            "read_at": "NONE"
+          }
+        ],
+        "selected_task": {
+          "id": "benchmark_task:needs_information",
+          "name": "Request more information from the user",
+          "description": "Use when the request needs input before it can be handled.",
+          "input": "The user's request and conversation context.",
+          "output": "A concise question for the missing information.",
+          "prompt": "Ask only for the information needed to continue.",
+          "provider_id": "benchmark_provider:core",
+          "created_at": "2026-07-02T09:05:00Z",
+          "updated_at": "2026-07-02T09:05:00Z",
+          "read_at": "NONE"
+        },
+        "memory_search_hints": {
+          "tags": {
+            "any_of": [
+              "stripe",
+              "csv",
+              "spreadsheet",
+              "followup"
+            ],
+            "all_of": [],
+            "none_of": []
+          },
+          "strings": {
+            "contains": [
+              "second",
+              "february",
+              "file path",
+              "duplicate rows",
+              "csv export"
+            ],
+            "equals": []
+          },
+          "candidate_memory": null
+        },
+        "search_domains": [
+          {
+            "id": "task_catalog",
+            "description": "Historic task catalog records. Use this domain when older task definitions may help interpret or run the selected task.",
+            "searches": "Task memory nodes only.",
+            "hydrates": "Matched Task nodes only."
+          },
+          {
+            "id": "past_conversation_context",
+            "description": "Historic conversation context outside the current default session context. Use this domain when earlier sessions, conversations, messages, or session memories may clarify the request.",
+            "searches": "Session nodes, Conversation nodes, ConversationMessage nodes, and SessionMemory nodes attached to those past sessions.",
+            "hydrates": "The containing Session node, relevant Conversation nodes, matched ConversationMessage nodes, and relevant SessionMemory nodes from that session."
+          }
+        ],
+        "search_depth_memories": [
+          {
+            "title": "Followup depth",
+            "description": "Requests that reference earlier wording such as last time, this time, earlier this week, or the second one usually benefit from older conversation context.",
+            "tags": [
+              "search-depth",
+              "followup"
+            ],
+            "created_at": "2026-07-01T07:30:00Z",
+            "updated_at": "2026-07-01T07:30:00Z",
+            "read_at": "NONE"
+          },
+          {
+            "title": "Stable task catalog",
+            "description": "Task catalog records change slowly during normal browsing and cleanup requests.",
+            "tags": [
+              "search-depth",
+              "task-catalog"
+            ],
+            "created_at": "2026-07-01T07:35:00Z",
+            "updated_at": "2026-07-01T07:35:00Z",
+            "read_at": "NONE"
+          }
+        ]
+      }
+    }
+  ],
+  "reasoning_effort_discovery": [
+    {
+      "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-flash",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "model_id": "deepseek-v4-flash",
+      "reasoning_effort": "low",
+      "supported": true,
+      "source": "probe",
+      "benchmark_client": "OpenCodeGoModelDeepseekV4FlashReasoningLow",
+      "latency_seconds": 1.9554241999976512,
+      "usage": {
+        "input_tokens": 1267,
+        "output_tokens": 16,
+        "cached_input_tokens": 256
+      }
+    },
+    {
+      "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-flash",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "model_id": "deepseek-v4-flash",
+      "reasoning_effort": "medium",
+      "supported": true,
+      "source": "probe",
+      "benchmark_client": "OpenCodeGoModelDeepseekV4FlashReasoningMedium",
+      "latency_seconds": 1.783381900000677,
+      "usage": {
+        "input_tokens": 1267,
+        "output_tokens": 16,
+        "cached_input_tokens": 1152
+      }
+    },
+    {
+      "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-flash",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "model_id": "deepseek-v4-flash",
+      "reasoning_effort": "high",
+      "supported": true,
+      "source": "probe",
+      "benchmark_client": "OpenCodeGoModelDeepseekV4FlashReasoningHigh",
+      "latency_seconds": 1.6441488999989815,
+      "usage": {
+        "input_tokens": 1267,
+        "output_tokens": 16,
+        "cached_input_tokens": 1152
+      }
+    }
+  ],
+  "providers": [
+    {
+      "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-flash",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "base_baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "benchmark_client": "OpenCodeGoModelDeepseekV4FlashReasoningLow",
+      "model_id": "deepseek-v4-flash",
+      "reasoning_effort": "low",
+      "total": 3,
+      "correct": 3,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 57.091188666667826,
+        "best": 47.42323530000067,
+        "worst": 69.10639580000134,
+        "p50": 54.74393490000148
+      },
+      "stage_latency_seconds": {
+        "search_depth": {
+          "average": 57.091188666667826,
+          "best": 47.42323530000067,
+          "worst": 69.10639580000134,
+          "p50": 54.74393490000148
+        }
+      },
+      "case_results": [
+        {
+          "case_id": "hacker_news_compact_panel",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "reasoning_effort": "low",
+          "current_timestamp": "2026-07-03T15:00:00Z",
+          "expected_task_id": "benchmark_task:visual_panel",
+          "selected_task_id": "benchmark_task:visual_panel",
+          "task_correct": true,
+          "search_depths": {
+            "depths": {
+              "task_catalog": {
+                "created_after": "2026-07-01T00:00:00Z",
+                "read_after": "1970-01-01T00:00:00Z",
+                "updated_after": "2026-07-01T00:00:00Z"
+              },
+              "past_conversation_context": {
+                "created_after": "2026-06-01T00:00:00Z",
+                "read_after": "1970-01-01T00:00:00Z",
+                "updated_after": "2026-06-01T00:00:00Z"
+              }
+            },
+            "candidate_memory": {
+              "title": "Search depth for layout followup requests",
+              "description": "For user requests referencing 'like last time' about layout preferences already stated in the current session, extend past_conversation_context cutoff to at least a month before the current session to capture earlier configurations, while task_catalog cutoff can be limited to just before the relevant task's creation since task definitions change slowly."
+            }
+          },
+          "search_depth_ages": {
+            "task_catalog": {
+              "created_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 1783090800,
+                "display": "20637 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              }
+            },
+            "past_conversation_context": {
+              "created_after": {
+                "seconds": 2818800,
+                "display": "32 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 1783090800,
+                "display": "20637 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 2818800,
+                "display": "32 days and 15 hours"
+              }
+            }
+          },
+          "latency_seconds": 69.10639580000134,
+          "stage_latency_seconds": {
+            "search_depth": 69.10639580000134
+          },
+          "usage": {
+            "input_tokens": 1267,
+            "output_tokens": 6131,
+            "cached_input_tokens": 1152
+          },
+          "stop_reason": null
+        },
+        {
+          "case_id": "reddit_slow_scroll",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "reasoning_effort": "low",
+          "current_timestamp": "2026-07-03T15:00:00Z",
+          "expected_task_id": "benchmark_task:visual_panel",
+          "selected_task_id": "benchmark_task:visual_panel",
+          "task_correct": true,
+          "search_depths": {
+            "depths": {
+              "task_catalog": {
+                "created_after": "2026-06-29T00:00:00Z",
+                "read_after": "2026-06-29T00:00:00Z",
+                "updated_after": "2026-06-29T00:00:00Z"
+              },
+              "past_conversation_context": {
+                "created_after": "2026-06-29T00:00:00Z",
+                "read_after": "2026-06-29T00:00:00Z",
+                "updated_after": "2026-06-29T00:00:00Z"
+              }
+            },
+            "candidate_memory": {
+              "title": "Followup reference date cutoff",
+              "description": "When the user references 'earlier this week' or similar relative times, set timestamp cutoffs to the start of the current week (Monday) to include relevant earlier interactions."
+            }
+          },
+          "search_depth_ages": {
+            "task_catalog": {
+              "created_after": {
+                "seconds": 399600,
+                "display": "4 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 399600,
+                "display": "4 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 399600,
+                "display": "4 days and 15 hours"
+              }
+            },
+            "past_conversation_context": {
+              "created_after": {
+                "seconds": 399600,
+                "display": "4 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 399600,
+                "display": "4 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 399600,
+                "display": "4 days and 15 hours"
+              }
+            }
+          },
+          "latency_seconds": 47.42323530000067,
+          "stage_latency_seconds": {
+            "search_depth": 47.42323530000067
+          },
+          "usage": {
+            "input_tokens": 1242,
+            "output_tokens": 4463,
+            "cached_input_tokens": 256
+          },
+          "stop_reason": null
+        },
+        {
+          "case_id": "stripe_followup_cleanup",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "reasoning_effort": "low",
+          "current_timestamp": "2026-07-03T15:00:00Z",
+          "expected_task_id": "benchmark_task:needs_information",
+          "selected_task_id": "benchmark_task:needs_information",
+          "task_correct": true,
+          "search_depths": {
+            "depths": {
+              "task_catalog": {
+                "created_after": "2026-06-30T00:00:00Z",
+                "read_after": "2026-06-30T00:00:00Z",
+                "updated_after": "2026-06-30T00:00:00Z"
+              },
+              "past_conversation_context": {
+                "created_after": "2026-06-28T00:00:00Z",
+                "read_after": "2026-06-28T00:00:00Z",
+                "updated_after": "2026-06-28T00:00:00Z"
+              }
+            },
+            "candidate_memory": {
+              "title": "Followup references benefit from older context",
+              "description": "When the user says 'the second Stripe CSV' or similar followup phrasing, setting broader timestamp cutoffs across search domains helps capture the initial references."
+            }
+          },
+          "search_depth_ages": {
+            "task_catalog": {
+              "created_after": {
+                "seconds": 313200,
+                "display": "3 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 313200,
+                "display": "3 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 313200,
+                "display": "3 days and 15 hours"
+              }
+            },
+            "past_conversation_context": {
+              "created_after": {
+                "seconds": 486000,
+                "display": "5 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 486000,
+                "display": "5 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 486000,
+                "display": "5 days and 15 hours"
+              }
+            }
+          },
+          "latency_seconds": 54.74393490000148,
+          "stage_latency_seconds": {
+            "search_depth": 54.74393490000148
+          },
+          "usage": {
+            "input_tokens": 1228,
+            "output_tokens": 5009,
+            "cached_input_tokens": 256
+          },
+          "stop_reason": null
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-flash",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "base_baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "benchmark_client": "OpenCodeGoModelDeepseekV4FlashReasoningMedium",
+      "model_id": "deepseek-v4-flash",
+      "reasoning_effort": "medium",
+      "total": 3,
+      "correct": 3,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 105.53183809999852,
+        "best": 48.401405099997646,
+        "worst": 162.62938059999942,
+        "p50": 105.56472859999849
+      },
+      "stage_latency_seconds": {
+        "search_depth": {
+          "average": 105.53183809999852,
+          "best": 48.401405099997646,
+          "worst": 162.62938059999942,
+          "p50": 105.56472859999849
+        }
+      },
+      "case_results": [
+        {
+          "case_id": "hacker_news_compact_panel",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "reasoning_effort": "medium",
+          "current_timestamp": "2026-07-03T15:00:00Z",
+          "expected_task_id": "benchmark_task:visual_panel",
+          "selected_task_id": "benchmark_task:visual_panel",
+          "task_correct": true,
+          "search_depths": {
+            "depths": {
+              "task_catalog": {
+                "created_after": "2026-07-01T00:00:00Z",
+                "read_after": "2026-07-01T00:00:00Z",
+                "updated_after": "2026-07-01T00:00:00Z"
+              },
+              "past_conversation_context": {
+                "created_after": "2026-06-01T00:00:00Z",
+                "read_after": "2026-06-01T00:00:00Z",
+                "updated_after": "2026-06-01T00:00:00Z"
+              }
+            },
+            "candidate_memory": {
+              "title": "Hacker News compact row layout request",
+              "description": "The user asked to open Hacker News in a compact layout 'like last time,' reinforcing a previously expressed preference for dense story rows without expanded preview cards."
+            }
+          },
+          "search_depth_ages": {
+            "task_catalog": {
+              "created_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              }
+            },
+            "past_conversation_context": {
+              "created_after": {
+                "seconds": 2818800,
+                "display": "32 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 2818800,
+                "display": "32 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 2818800,
+                "display": "32 days and 15 hours"
+              }
+            }
+          },
+          "latency_seconds": 162.62938059999942,
+          "stage_latency_seconds": {
+            "search_depth": 162.62938059999942
+          },
+          "usage": {
+            "input_tokens": 1267,
+            "output_tokens": 14662,
+            "cached_input_tokens": 1152
+          },
+          "stop_reason": null
+        },
+        {
+          "case_id": "reddit_slow_scroll",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "reasoning_effort": "medium",
+          "current_timestamp": "2026-07-03T15:00:00Z",
+          "expected_task_id": "benchmark_task:visual_panel",
+          "selected_task_id": "benchmark_task:visual_panel",
+          "task_correct": true,
+          "search_depths": {
+            "depths": {
+              "task_catalog": {
+                "created_after": "2026-07-01T00:00:00Z",
+                "read_after": "1970-01-01T00:00:00Z",
+                "updated_after": "1970-01-01T00:00:00Z"
+              },
+              "past_conversation_context": {
+                "created_after": "2026-06-26T00:00:00Z",
+                "read_after": "1970-01-01T00:00:00Z",
+                "updated_after": "1970-01-01T00:00:00Z"
+              }
+            },
+            "candidate_memory": {
+              "title": "Followup with earlier reference",
+              "description": "When a request mentions 'earlier this week' and 'slower scroll', older conversation context from the start of the week is valuable for past_conversation_context, while task_catalog can use more recent cutoffs due to stability."
+            }
+          },
+          "search_depth_ages": {
+            "task_catalog": {
+              "created_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 1783090800,
+                "display": "20637 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 1783090800,
+                "display": "20637 days and 15 hours"
+              }
+            },
+            "past_conversation_context": {
+              "created_after": {
+                "seconds": 658800,
+                "display": "7 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 1783090800,
+                "display": "20637 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 1783090800,
+                "display": "20637 days and 15 hours"
+              }
+            }
+          },
+          "latency_seconds": 48.401405099997646,
+          "stage_latency_seconds": {
+            "search_depth": 48.401405099997646
+          },
+          "usage": {
+            "input_tokens": 1242,
+            "output_tokens": 4470,
+            "cached_input_tokens": 1152
+          },
+          "stop_reason": null
+        },
+        {
+          "case_id": "stripe_followup_cleanup",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "reasoning_effort": "medium",
+          "current_timestamp": "2026-07-03T15:00:00Z",
+          "expected_task_id": "benchmark_task:needs_information",
+          "selected_task_id": "benchmark_task:needs_information",
+          "task_correct": true,
+          "search_depths": {
+            "depths": {
+              "task_catalog": {
+                "created_after": "2026-07-01T00:00:00Z",
+                "read_after": "2026-07-01T00:00:00Z",
+                "updated_after": "2026-07-01T00:00:00Z"
+              },
+              "past_conversation_context": {
+                "created_after": "2026-07-01T00:00:00Z",
+                "read_after": "2026-07-01T00:00:00Z",
+                "updated_after": "2026-07-01T00:00:00Z"
+              }
+            },
+            "candidate_memory": {
+              "title": "Followup reference timing",
+              "description": "When a request uses 'the second' or 'the same cleanup', older conversation context (e.g., prior sessions or task records) can clarify the reference. Setting cutoffs to include the past few days is sufficient for such followups."
+            }
+          },
+          "search_depth_ages": {
+            "task_catalog": {
+              "created_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              }
+            },
+            "past_conversation_context": {
+              "created_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 226800,
+                "display": "2 days and 15 hours"
+              }
+            }
+          },
+          "latency_seconds": 105.56472859999849,
+          "stage_latency_seconds": {
+            "search_depth": 105.56472859999849
+          },
+          "usage": {
+            "input_tokens": 1228,
+            "output_tokens": 9656,
+            "cached_input_tokens": 1152
+          },
+          "stop_reason": null
+        }
+      ]
+    },
+    {
+      "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+      "provider_name": "OpenCode Go direct model: deepseek-v4-flash",
+      "baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "base_baml_surface": "OpenCodeGoModelDeepseekV4Flash",
+      "benchmark_client": "OpenCodeGoModelDeepseekV4FlashReasoningHigh",
+      "model_id": "deepseek-v4-flash",
+      "reasoning_effort": "high",
+      "total": 3,
+      "correct": 3,
+      "errors": 0,
+      "warmup_errors": 0,
+      "accuracy": 1.0,
+      "latency_seconds": {
+        "average": 51.39325806666724,
+        "best": 40.66547730000093,
+        "worst": 72.4430571999983,
+        "p50": 41.07123970000248
+      },
+      "stage_latency_seconds": {
+        "search_depth": {
+          "average": 51.39325806666724,
+          "best": 40.66547730000093,
+          "worst": 72.4430571999983,
+          "p50": 41.07123970000248
+        }
+      },
+      "case_results": [
+        {
+          "case_id": "hacker_news_compact_panel",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "reasoning_effort": "high",
+          "current_timestamp": "2026-07-03T15:00:00Z",
+          "expected_task_id": "benchmark_task:visual_panel",
+          "selected_task_id": "benchmark_task:visual_panel",
+          "task_correct": true,
+          "search_depths": {
+            "depths": {
+              "task_catalog": {
+                "created_after": "2020-01-01T00:00:00Z",
+                "read_after": "2020-01-01T00:00:00Z",
+                "updated_after": "2020-01-01T00:00:00Z"
+              },
+              "past_conversation_context": {
+                "created_after": "2026-06-01T00:00:00Z",
+                "read_after": "2026-06-01T00:00:00Z",
+                "updated_after": "2026-06-01T00:00:00Z"
+              }
+            },
+            "candidate_memory": {
+              "title": "Hacker News compact row layout request",
+              "description": "The user asked to open Hacker News in a compact layout 'like last time,' reinforcing a previously expressed preference for dense story rows without expanded preview cards."
+            }
+          },
+          "search_depth_ages": {
+            "task_catalog": {
+              "created_after": {
+                "seconds": 205254000,
+                "display": "2375 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 205254000,
+                "display": "2375 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 205254000,
+                "display": "2375 days and 15 hours"
+              }
+            },
+            "past_conversation_context": {
+              "created_after": {
+                "seconds": 2818800,
+                "display": "32 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 2818800,
+                "display": "32 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 2818800,
+                "display": "32 days and 15 hours"
+              }
+            }
+          },
+          "latency_seconds": 40.66547730000093,
+          "stage_latency_seconds": {
+            "search_depth": 40.66547730000093
+          },
+          "usage": {
+            "input_tokens": 1267,
+            "output_tokens": 4139,
+            "cached_input_tokens": 1152
+          },
+          "stop_reason": null
+        },
+        {
+          "case_id": "reddit_slow_scroll",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "reasoning_effort": "high",
+          "current_timestamp": "2026-07-03T15:00:00Z",
+          "expected_task_id": "benchmark_task:visual_panel",
+          "selected_task_id": "benchmark_task:visual_panel",
+          "task_correct": true,
+          "search_depths": {
+            "depths": {
+              "task_catalog": {
+                "created_after": "2026-06-29T00:00:00Z",
+                "read_after": "1970-01-01T00:00:00Z",
+                "updated_after": "1970-01-01T00:00:00Z"
+              },
+              "past_conversation_context": {
+                "created_after": "2026-06-29T00:00:00Z",
+                "read_after": "1970-01-01T00:00:00Z",
+                "updated_after": "1970-01-01T00:00:00Z"
+              }
+            },
+            "candidate_memory": null
+          },
+          "search_depth_ages": {
+            "task_catalog": {
+              "created_after": {
+                "seconds": 399600,
+                "display": "4 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 1783090800,
+                "display": "20637 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 1783090800,
+                "display": "20637 days and 15 hours"
+              }
+            },
+            "past_conversation_context": {
+              "created_after": {
+                "seconds": 399600,
+                "display": "4 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 1783090800,
+                "display": "20637 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 1783090800,
+                "display": "20637 days and 15 hours"
+              }
+            }
+          },
+          "latency_seconds": 72.4430571999983,
+          "stage_latency_seconds": {
+            "search_depth": 72.4430571999983
+          },
+          "usage": {
+            "input_tokens": 1242,
+            "output_tokens": 7293,
+            "cached_input_tokens": 1152
+          },
+          "stop_reason": null
+        },
+        {
+          "case_id": "stripe_followup_cleanup",
+          "run_index": 0,
+          "provider_id": "memory_node:wyh4rirpqsj2q0ad2f1t",
+          "reasoning_effort": "high",
+          "current_timestamp": "2026-07-03T15:00:00Z",
+          "expected_task_id": "benchmark_task:needs_information",
+          "selected_task_id": "benchmark_task:needs_information",
+          "task_correct": true,
+          "search_depths": {
+            "depths": {
+              "task_catalog": {
+                "created_after": "2026-07-02T00:00:00Z",
+                "read_after": "2026-07-02T00:00:00Z",
+                "updated_after": "2026-07-02T00:00:00Z"
+              },
+              "past_conversation_context": {
+                "created_after": "2020-01-01T00:00:00Z",
+                "read_after": "2020-01-01T00:00:00Z",
+                "updated_after": "2020-01-01T00:00:00Z"
+              }
+            },
+            "candidate_memory": {
+              "title": "Timestamp cutoff strategy for followup requests",
+              "description": "For tasks that follow up on earlier steps (e.g., 'the second CSV'), past conversation context should be searched with a very broad window (e.g., since 2020) to capture any prior related sessions. For stable task catalog definitions, a window covering just the relevant period (e.g., since the task's creation date) is sufficient."
+            }
+          },
+          "search_depth_ages": {
+            "task_catalog": {
+              "created_after": {
+                "seconds": 140400,
+                "display": "1 day and 15 hours"
+              },
+              "read_after": {
+                "seconds": 140400,
+                "display": "1 day and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 140400,
+                "display": "1 day and 15 hours"
+              }
+            },
+            "past_conversation_context": {
+              "created_after": {
+                "seconds": 205254000,
+                "display": "2375 days and 15 hours"
+              },
+              "read_after": {
+                "seconds": 205254000,
+                "display": "2375 days and 15 hours"
+              },
+              "updated_after": {
+                "seconds": 205254000,
+                "display": "2375 days and 15 hours"
+              }
+            }
+          },
+          "latency_seconds": 41.07123970000248,
+          "stage_latency_seconds": {
+            "search_depth": 41.07123970000248
+          },
+          "usage": {
+            "input_tokens": 1228,
+            "output_tokens": 4097,
+            "cached_input_tokens": 1152
+          },
+          "stop_reason": null
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "base_providers": 1,
+    "provider_effort_runs": 3,
+    "providers": 3,
+    "cases": 3,
+    "snapshots": 3,
+    "search_depth_model_id": "deepseek-v4-flash",
+    "reasoning_effort_candidates": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "configured_reasoning_efforts": [],
+    "snapshot_errors": 0,
+    "snapshot_task_correct": 3,
+    "snapshot_accuracy": 1.0,
+    "snapshot_latency_seconds": {
+      "average": 16.266280000001036,
+      "best": 12.811412999999447,
+      "worst": 20.96923870000319,
+      "p50": 15.018188300000475
+    },
+    "runs_per_case": 1,
+    "total": 9,
+    "correct": 9,
+    "errors": 0,
+    "accuracy": 1.0,
+    "delay_seconds": 2.0,
+    "provider_cooldown_seconds": 8.0
+  }
+}

@@ -60,6 +60,15 @@ class ConversationEvaluationMemoryContext {
   read_at string
 }
 
+class SearchDepthMemoryContext {
+  title string
+  description string
+  tags string[]
+  created_at string
+  updated_at string
+  read_at string
+}
+
 class SelectedTaskContext {
   id string
   name string
@@ -89,9 +98,27 @@ class CandidateMemory {
   description string
 }
 
+class SearchDepthDomain {
+  id string
+  description string
+  searches string
+  hydrates string
+}
+
+class SearchDepthTimestamps {
+  created_after string
+  read_after string
+  updated_after string
+}
+
 class ConversationMemorySearchHints {
   tags MemoryTagSearch
   strings MemoryStringSearch
+  candidate_memory CandidateMemory?
+}
+
+class SearchDepthDecision {
+  depths map<string, SearchDepthTimestamps>
   candidate_memory CandidateMemory?
 }
 
@@ -223,8 +250,10 @@ function EvaluateConversationForMemorySearch(
 
     Rules:
     - Return only search hints and optional candidate_memory.
-    - Use tags.any_of for useful alternatives where any matching tag may help.
-    - Use tags.all_of only when every listed tag must be present.
+    - Search hints are alternatives during retrieval; a memory can be useful
+      when any positive tag or string hint matches.
+    - Prefer tags.any_of for positive tag hints.
+    - Leave tags.all_of empty unless compatibility with older memories needs it.
     - Use tags.none_of only for clear exclusions.
     - Use strings.contains for durable words or phrases that should appear
       inside a relevant memory.
@@ -285,6 +314,124 @@ function EvaluateConversationForMemorySearch(
     {% endfor %}
 
     Return only the memory search hints and optional candidate memory.
+    {{ ctx.output_format }}
+  "#
+}
+
+function EvaluateSearchDepths(
+  current_timestamp: string,
+  current_user_request: string,
+  session_conversations: ConversationHistory[],
+  session_memories: SessionMemoryContext[],
+  selected_task: SelectedTaskContext,
+  memory_search_hints: ConversationMemorySearchHints,
+  search_domains: SearchDepthDomain[],
+  search_depth_memories: SearchDepthMemoryContext[]
+) -> SearchDepthDecision {
+  client SearchDepthModel
+  prompt #"
+    {{ _.role("system") }}
+
+    Choose timestamp cutoffs for each listed search domain.
+
+    Rules:
+    - Return a SearchDepthDecision with depths and optional candidate_memory.
+    - depths must contain exactly one key for each listed domain id.
+    - Use the listed domain ids exactly as written.
+    - Each depth value must contain only created_after, read_after, and
+      updated_after ISO 8601 timestamp strings.
+    - Use the current timestamp as the reference point for recency.
+    - Choose each timestamp independently.
+    - Use older timestamps when older context may be useful.
+    - Use newer timestamps when recent context is enough.
+
+    Timestamp fields:
+    - created_after: lower-bound cutoff for created_at.
+    - read_after: lower-bound cutoff for read_at.
+    - updated_after: lower-bound cutoff for updated_at.
+
+    Optional output:
+    - candidate_memory: a remembered observation about choosing timestamp
+      cutoffs that could be useful later.
+
+    {{ _.role("user") }}
+
+    Current timestamp:
+    {{ current_timestamp }}
+
+    Current user request:
+    {{ current_user_request }}
+
+    Selected task:
+    - id: {{ selected_task.id }}
+      name: {{ selected_task.name }}
+      description: {{ selected_task.description }}
+      input: {{ selected_task.input }}
+      output: {{ selected_task.output }}
+      provider_id: {{ selected_task.provider_id }}
+      prompt: {{ selected_task.prompt }}
+      created_at: {{ selected_task.created_at }}
+      updated_at: {{ selected_task.updated_at }}
+      read_at: {{ selected_task.read_at }}
+
+    Search hints:
+    tags:
+      any_of: {{ memory_search_hints.tags.any_of }}
+      all_of: {{ memory_search_hints.tags.all_of }}
+      none_of: {{ memory_search_hints.tags.none_of }}
+    strings:
+      contains: {{ memory_search_hints.strings.contains }}
+      equals: {{ memory_search_hints.strings.equals }}
+    candidate_memory:
+    {% if memory_search_hints.candidate_memory %}
+      title: {{ memory_search_hints.candidate_memory.title }}
+      description: {{ memory_search_hints.candidate_memory.description }}
+    {% else %}
+      NONE
+    {% endif %}
+
+    Search domains:
+    {% for domain in search_domains %}
+    - id: {{ domain.id }}
+      description: {{ domain.description }}
+      searches: {{ domain.searches }}
+      hydrates: {{ domain.hydrates }}
+    {% endfor %}
+
+    Current session conversation history:
+    {% for conversation in session_conversations %}
+    Conversation:
+      id: {{ conversation.id }}
+      name: {{ conversation.name }}
+      created_at: {{ conversation.created_at }}
+      updated_at: {{ conversation.updated_at }}
+      read_at: {{ conversation.read_at }}
+    {% for message in conversation.messages %}
+    [{{ message.role }}] created_at={{ message.created_at }} updated_at={{ message.updated_at }} read_at={{ message.read_at }} {{ message.content }}
+    {% endfor %}
+    {% endfor %}
+
+    Current session memories:
+    {% for memory in session_memories %}
+    - {{ memory.title }}
+      Tags: {{ memory.tags }}
+      created_at: {{ memory.created_at }}
+      updated_at: {{ memory.updated_at }}
+      read_at: {{ memory.read_at }}
+      {{ memory.description }}
+    {% endfor %}
+
+    Past cutoff notes:
+    {% for memory in search_depth_memories %}
+    - {{ memory.title }}
+      Tags: {{ memory.tags }}
+      created_at: {{ memory.created_at }}
+      updated_at: {{ memory.updated_at }}
+      read_at: {{ memory.read_at }}
+      {{ memory.description }}
+    {% endfor %}
+
+    Return a SearchDepthDecision.
     {{ ctx.output_format }}
   "#
 }

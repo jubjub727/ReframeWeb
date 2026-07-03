@@ -1,7 +1,14 @@
 import unittest
 import json
+from datetime import datetime, timezone
 from tempfile import TemporaryDirectory
 
+from reframe_agent_host.baml_client import b
+from reframe_agent_host.benchmarks.conversation_evaluation_config import (
+    CONVERSATION_EVALUATION_DEFAULT_MODEL_ID,
+    CONVERSATION_EVALUATION_DEFAULT_REASONING_EFFORT,
+    ConversationEvaluationBenchmarkConfig,
+)
 from reframe_agent_host.benchmarks.conversation_evaluation_result_analysis import (
     conversation_evaluation_case_analyses,
 )
@@ -14,7 +21,11 @@ from reframe_agent_host.benchmarks.conversation_evaluation_context import (
     memory_context,
     selected_task_context,
 )
+from reframe_agent_host.benchmarks.conversation_evaluation_runner import (
+    _conversation_evaluation_providers,
+)
 from reframe_agent_host.commands.parser import build_parser
+from reframe_memory import MemoryNode, MemoryTimestamps, Provider
 
 
 class ConversationEvaluationBenchmarkTests(unittest.TestCase):
@@ -72,6 +83,36 @@ class ConversationEvaluationBenchmarkTests(unittest.TestCase):
         self.assertEqual(args.command, "benchmark-conversation-evaluation")
         self.assertEqual(args.case_ids, ["remembered_view_preference"])
         self.assertEqual(args.runs, 2)
+
+    def test_conversation_evaluation_defaults_to_glm51_none(self):
+        config = ConversationEvaluationBenchmarkConfig(
+            runs=1,
+            warmup_runs=0,
+            delay_seconds=0,
+            provider_cooldown_seconds=0,
+        )
+
+        self.assertEqual(CONVERSATION_EVALUATION_DEFAULT_MODEL_ID, "glm-5.1")
+        self.assertEqual(CONVERSATION_EVALUATION_DEFAULT_REASONING_EFFORT, "none")
+        self.assertEqual(config.conversation_evaluation_model_id, "glm-5.1")
+        self.assertEqual(config.reasoning_efforts, ("none",))
+
+    def test_conversation_evaluation_default_provider_filter(self):
+        providers = (
+            _provider("provider:deepseek", "OpenCodeGoModelDeepseekV4Flash"),
+            _provider("provider:glm51", "OpenCodeGoModelGlm51"),
+        )
+        config = ConversationEvaluationBenchmarkConfig(
+            runs=1,
+            warmup_runs=0,
+            delay_seconds=0,
+            provider_cooldown_seconds=0,
+        )
+
+        selected = _conversation_evaluation_providers(providers, config)
+
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(selected[0].content.baml_surface, "OpenCodeGoModelGlm51")
 
     def test_parser_accepts_conversation_evaluation_analysis(self):
         parser = build_parser()
@@ -155,6 +196,42 @@ class ConversationEvaluationBenchmarkTests(unittest.TestCase):
                 "strings": {"contains": ["compact"], "equals": []},
             },
         )
+
+
+class ConversationEvaluationClientTests(unittest.IsolatedAsyncioTestCase):
+    async def test_default_client_request_uses_glm51_none(self):
+        case = conversation_evaluation_cases()[0]
+        request = await b.request.EvaluateConversationForMemorySearch(
+            current_user_request=case.current_user_request,
+            session_conversations=conversation_context(case.session_conversations),
+            session_memories=memory_context(case.session_memories),
+            selected_task=selected_task_context(case.selected_task),
+            conversation_evaluation_memories=conversation_evaluation_memory_context(
+                case.conversation_evaluation_memories
+            ),
+        )
+        body = request.body.json()
+
+        self.assertEqual(body["model"], "glm-5.1")
+        self.assertEqual(body["reasoning_effort"], "none")
+
+
+def _provider(provider_id: str, surface: str):
+    now = datetime.now(timezone.utc)
+    return MemoryNode(
+        id=provider_id,
+        tags=(),
+        timestamps=MemoryTimestamps(
+            created_at=now,
+            updated_at=now,
+            read_at=None,
+        ),
+        content=Provider(
+            name=provider_id,
+            description="Test provider",
+            baml_surface=surface,
+        ),
+    )
 
 
 if __name__ == "__main__":

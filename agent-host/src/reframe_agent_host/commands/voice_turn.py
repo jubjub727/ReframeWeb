@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime
-import json
 import sys
 
 from reframe_agent_host.voice.microphone import AudioInputConfig
 from reframe_agent_host.baml_client import types
-from reframe_agent_host.commands.timing import TimedEventPrinter, print_timing_summary
+from reframe_agent_host.commands.timing import print_timing_summary
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
+from reframe_agent_host.memory_seed import ensure_core_tasks
 from reframe_agent_host.speech.transcription import (
     WhisperGpuRuntimeError,
     WhisperTranscriberConfig,
@@ -16,7 +16,18 @@ from reframe_agent_host.speech.transcription import (
 from reframe_agent_host.speech.triggers import TriggerPhraseConfig
 from reframe_agent_host.voice.activity import VoiceActivityConfig
 from reframe_agent_host.voice.pipeline import VoicePipelineConfig, VoiceTurnPipeline
-from reframe_memory import Conversation, Session, open_memory_database
+from reframe_memory import (
+    Conversation,
+    ConversationMessageNode,
+    MemoryNode,
+    RetrievedConversation,
+    RetrievedMemoryContext,
+    RetrievedSessionContext,
+    Session,
+    SessionMemoryNode,
+    TaskNode,
+    open_memory_database,
+)
 
 
 async def run_voice_turn(args: argparse.Namespace) -> int:
@@ -34,9 +45,9 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
             if args.turns != 1:
                 print(f"[turn {turn_index}] starting", file=sys.stderr)
 
-            result = await pipeline.run_once(on_event=TimedEventPrinter())
+            result = await pipeline.run_once(on_event=_ConciseEventPrinter())
             results.append(result)
-            print(json.dumps(_result_payload(result, config), indent=2))
+            _print_turn_result(result, config)
     except KeyboardInterrupt:
         print("\nInterrupted.", file=sys.stderr)
         if results:
@@ -77,6 +88,7 @@ async def _ensure_voice_memory_context(args: argparse.Namespace) -> None:
     try:
         await database.apply_schema()
         await database.ensure_roots()
+        await ensure_core_tasks(database)
 
         if args.session_id is None:
             session = await database.sessions.create(
@@ -105,11 +117,200 @@ def _timestamped_name(prefix: str) -> str:
     return f"{prefix} {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
 
 
-def _result_payload(result, config: VoicePipelineConfig) -> dict[str, object]:
-    payload = result.to_dict()
-    payload["session_id"] = config.session_id
-    payload["conversation_id"] = config.conversation_id
-    return payload
+class _ConciseEventPrinter:
+    def __call__(self, stage: str, message: str) -> None:
+        if stage in {
+            "preparing",
+            "ready",
+            "transcribing",
+            "trigger",
+            "task-choice",
+            "memory-search",
+            "search-depth",
+            "memory-retrieval",
+            "conversation-context",
+        }:
+            print(f"[{stage}] {message}", file=sys.stderr)
+
+
+def _print_turn_result(result, config: VoicePipelineConfig) -> None:
+    print()
+    print("Turn summary")
+    print(f"session_id: {config.session_id or 'NONE'}")
+    print(f"conversation_id: {config.conversation_id or 'NONE'}")
+    if result.routed_transcript:
+        print(f"routed_transcript: {_single_line(result.routed_transcript)}")
+
+    if result.transcript is not None:
+        print(
+            "transcription: "
+            f"{_latency(result.timings.transcription_seconds)}"
+        )
+    if result.task_choice is not None:
+        print(
+            "task_choice: "
+            f"{result.task_choice.selected_task_id} "
+            f"confidence={result.task_choice.confidence:.2f} "
+            f"latency={_latency(result.timings.task_choice_seconds)}"
+        )
+    if result.memory_search_hints is not None:
+        hints = result.memory_search_hints
+        print(
+            "memory_search_hints: "
+            f"tags_any={hints.tags.any_of} "
+            f"tags_none={hints.tags.none_of} "
+            f"strings_contains={hints.strings.contains} "
+            f"latency={_latency(result.timings.memory_search_seconds)}"
+        )
+    if result.search_depths is not None:
+        print(
+            "search_depth: "
+            f"{_depth_summary(result.search_depths)} "
+            f"latency={_latency(result.timings.search_depth_seconds)}"
+        )
+    if result.retrieved_memories is not None:
+        print(
+            "memory_retrieval: "
+            f"{_retrieval_counts(result.retrieved_memories)} "
+            f"latency={_latency(result.timings.memory_retrieval_seconds)}"
+        )
+        _print_retrieved_memories(result.retrieved_memories)
+
+
+def _depth_summary(depths: types.SearchDepthDecision) -> str:
+    pieces = []
+    for domain, timestamps in depths.depths.items():
+        pieces.append(
+            f"{domain}(created>{timestamps.created_after}, "
+            f"updated>{timestamps.updated_after}, read>{timestamps.read_after})"
+        )
+    return "; ".join(pieces)
+
+
+def _retrieval_counts(memories: RetrievedMemoryContext) -> str:
+    tasks = len(memories.task_catalog.tasks)
+    current_memories = len(memories.current_session_memories)
+    sessions = len(memories.past_conversation_context.sessions)
+    conversations = sum(
+        len(session.conversations)
+        for session in memories.past_conversation_context.sessions
+    )
+    messages = sum(
+        len(conversation.messages)
+        for session in memories.past_conversation_context.sessions
+        for conversation in session.conversations
+    )
+    session_memories = sum(
+        len(session.session_memories)
+        for session in memories.past_conversation_context.sessions
+    )
+    return (
+        f"tasks={tasks} current_session_memories={current_memories} "
+        f"past_sessions={sessions} conversations={conversations} "
+        f"messages={messages} past_session_memories={session_memories}"
+    )
+
+
+def _print_retrieved_memories(memories: RetrievedMemoryContext) -> None:
+    print()
+    print("Retrieved memories")
+    _print_session_memories(
+        "Current session memories",
+        memories.current_session_memories,
+    )
+    _print_tasks(memories.task_catalog.tasks)
+    _print_past_sessions(memories.past_conversation_context.sessions)
+
+
+def _print_tasks(tasks: tuple[TaskNode, ...]) -> None:
+    print()
+    print(f"Task catalog ({len(tasks)})")
+    if not tasks:
+        print("  none")
+        return
+    for task in tasks:
+        print(f"  - {task.content.name} [{task.id}]")
+        print(f"    tags: {_tags(task)}")
+        print(f"    description: {_single_line(task.content.description, limit=None)}")
+        print(f"    input: {_single_line(task.content.input, limit=None)}")
+        print(f"    output: {_single_line(task.content.output, limit=None)}")
+
+
+def _print_past_sessions(sessions: tuple[RetrievedSessionContext, ...]) -> None:
+    print()
+    print(f"Past conversation context ({len(sessions)} sessions)")
+    if not sessions:
+        print("  none")
+        return
+    for session in sessions:
+        marker = "matched" if session.matched else "wrapper"
+        print(f"  - Session {session.session.content.name} [{session.session.id}] {marker}")
+        _print_session_memories("    Session memories", session.session_memories)
+        _print_conversations(session.conversations)
+
+
+def _print_conversations(conversations: tuple[RetrievedConversation, ...]) -> None:
+    print(f"    Conversations ({len(conversations)})")
+    if not conversations:
+        print("      none")
+        return
+    for conversation in conversations:
+        _print_conversation(conversation)
+
+
+def _print_conversation(conversation: RetrievedConversation) -> None:
+    marker = "matched" if conversation.matched else "wrapper"
+    node = conversation.conversation
+    print(f"      - {node.content.name} [{node.id}] {marker}")
+    print(f"        messages ({len(conversation.messages)})")
+    if not conversation.messages:
+        print("          none")
+        return
+    for message in conversation.messages:
+        _print_message(message)
+
+
+def _print_message(message: ConversationMessageNode) -> None:
+    print(
+        f"          - [{message.content.role}] {message.id}: "
+        f"{_single_line(message.content.content, limit=None)}"
+    )
+
+
+def _print_session_memories(
+    label: str,
+    memories: tuple[SessionMemoryNode, ...],
+) -> None:
+    print()
+    print(f"{label} ({len(memories)})")
+    if not memories:
+        print("  none")
+        return
+    for memory in memories:
+        print(f"  - {memory.content.title} [{memory.id}]")
+        print(f"    tags: {_tags(memory)}")
+        print(f"    description: {_single_line(memory.content.description, limit=None)}")
+
+
+def _tags(node: MemoryNode[object]) -> str:
+    return ", ".join(node.tags) if node.tags else "none"
+
+
+def _single_line(value: str, limit: int | None = 180) -> str:
+    text = " ".join(value.split())
+    if limit is None:
+        return text
+    if len(text) <= limit:
+        return text
+    return text[: limit - 3].rstrip() + "..."
+
+
+def _latency(value: float | None) -> str:
+    if value is None:
+        return "n/a"
+    if value < 1:
+        return f"{value * 1000:.0f}ms"
+    return f"{value:.3f}s"
 
 
 def _voice_pipeline_config(args: argparse.Namespace) -> VoicePipelineConfig:

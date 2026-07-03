@@ -12,6 +12,7 @@ from reframe_agent_host.keyphrases import (
 from reframe_agent_host.speech.transcription import Transcript, WhisperTranscriberConfig
 from reframe_agent_host.speech.triggers import TriggerPhraseConfig, TriggerPhraseDetection
 from reframe_agent_host.voice.activity import DetectedUtterance, VoiceActivityConfig
+from reframe_memory import RetrievedMemoryContext
 
 
 VoicePipelineEventHandler = Callable[[str, str], None]
@@ -46,12 +47,18 @@ class VoiceTurnTimings:
     post_vad_transcript_seconds: float | None
     post_vad_task_choice_seconds: float | None
     post_vad_memory_search_seconds: float | None
+    post_vad_search_depth_seconds: float | None
+    post_vad_memory_retrieval_seconds: float | None
     estimated_user_stop_to_transcript_seconds: float | None
     estimated_user_stop_to_task_choice_seconds: float | None
     estimated_user_stop_to_memory_search_seconds: float | None
+    estimated_user_stop_to_search_depth_seconds: float | None
+    estimated_user_stop_to_memory_retrieval_seconds: float | None
     transcription_seconds: float | None
     task_choice_seconds: float | None
     memory_search_seconds: float | None
+    search_depth_seconds: float | None
+    memory_retrieval_seconds: float | None
     total_seconds: float
 
     def to_dict(self) -> dict[str, float | None]:
@@ -67,6 +74,10 @@ class VoiceTurnTimings:
             "post_vad_transcript_seconds": self.post_vad_transcript_seconds,
             "post_vad_task_choice_seconds": self.post_vad_task_choice_seconds,
             "post_vad_memory_search_seconds": self.post_vad_memory_search_seconds,
+            "post_vad_search_depth_seconds": self.post_vad_search_depth_seconds,
+            "post_vad_memory_retrieval_seconds": (
+                self.post_vad_memory_retrieval_seconds
+            ),
             "estimated_user_stop_to_transcript_seconds": (
                 self.estimated_user_stop_to_transcript_seconds
             ),
@@ -76,9 +87,17 @@ class VoiceTurnTimings:
             "estimated_user_stop_to_memory_search_seconds": (
                 self.estimated_user_stop_to_memory_search_seconds
             ),
+            "estimated_user_stop_to_search_depth_seconds": (
+                self.estimated_user_stop_to_search_depth_seconds
+            ),
+            "estimated_user_stop_to_memory_retrieval_seconds": (
+                self.estimated_user_stop_to_memory_retrieval_seconds
+            ),
             "transcription_seconds": self.transcription_seconds,
             "task_choice_seconds": self.task_choice_seconds,
             "memory_search_seconds": self.memory_search_seconds,
+            "search_depth_seconds": self.search_depth_seconds,
+            "memory_retrieval_seconds": self.memory_retrieval_seconds,
             "total_seconds": self.total_seconds,
         }
 
@@ -95,6 +114,8 @@ class VoiceTurnResult:
     transcript: Transcript | None
     task_choice: types.TaskChoiceDecision | None
     memory_search_hints: types.ConversationMemorySearchHints | None
+    search_depths: types.SearchDepthDecision | None
+    retrieved_memories: RetrievedMemoryContext | None
     timings: VoiceTurnTimings
 
     def to_dict(self) -> dict[str, object]:
@@ -150,6 +171,16 @@ class VoiceTurnResult:
             "memory_search_hints": (
                 self.memory_search_hints.model_dump(mode="json")
                 if self.memory_search_hints is not None
+                else None
+            ),
+            "search_depths": (
+                self.search_depths.model_dump(mode="json")
+                if self.search_depths is not None
+                else None
+            ),
+            "retrieved_memories": (
+                self.retrieved_memories.to_dict()
+                if self.retrieved_memories is not None
                 else None
             ),
             "timings": self.timings.to_dict(),

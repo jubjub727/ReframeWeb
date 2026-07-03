@@ -35,8 +35,10 @@ def build_parser() -> argparse.ArgumentParser:
     _add_choose_task_parser(subparsers)
     _add_benchmark_task_choice_parser(subparsers)
     _add_benchmark_conversation_evaluation_parser(subparsers)
+    _add_benchmark_control_flow_parser(subparsers)
     _add_analyze_task_choice_benchmark_parser(subparsers)
     _add_analyze_conversation_evaluation_benchmark_parser(subparsers)
+    _add_analyze_control_flow_benchmark_parser(subparsers)
     _add_debug_wake_audio_parser(subparsers)
     _add_record_wake_audio_parser(subparsers)
     _add_voice_turn_parser(subparsers)
@@ -92,6 +94,7 @@ def _add_benchmark_task_choice_parser(subparsers) -> None:
         dest="case_ids",
         help="Benchmark case id to run. Repeat to test a subset.",
     )
+    _add_reasoning_effort_args(benchmark)
     benchmark.add_argument("--runs", type=int, default=1)
     benchmark.add_argument("--warmup-runs", type=int, default=0)
     benchmark.add_argument("--delay-seconds", type=float, default=2.0)
@@ -119,6 +122,7 @@ def _add_benchmark_conversation_evaluation_parser(subparsers) -> None:
         dest="case_ids",
         help="Benchmark case id to run. Repeat to test a subset.",
     )
+    _add_reasoning_effort_args(benchmark)
     benchmark.add_argument("--runs", type=int, default=1)
     benchmark.add_argument("--warmup-runs", type=int, default=0)
     benchmark.add_argument("--delay-seconds", type=float, default=2.0)
@@ -128,6 +132,66 @@ def _add_benchmark_conversation_evaluation_parser(subparsers) -> None:
         help=(
             "Path to write benchmark JSON. Defaults to "
             "benchmark-results/conversation-evaluation-<timestamp>.json."
+        ),
+    )
+
+
+def _add_reasoning_effort_args(parser) -> None:
+    parser.add_argument(
+        "--reasoning-effort",
+        action="append",
+        dest="reasoning_efforts",
+        help=(
+            "Reasoning effort string to run. Repeat to bypass discovery and "
+            "run specific values."
+        ),
+    )
+    parser.add_argument(
+        "--reasoning-effort-candidate",
+        action="append",
+        dest="reasoning_effort_candidates",
+        help=(
+            "Reasoning effort string to probe. Repeat to replace the default "
+            "candidate set."
+        ),
+    )
+
+
+def _add_benchmark_control_flow_parser(subparsers) -> None:
+    benchmark = subparsers.add_parser(
+        "benchmark-control-flow",
+        help="Snapshot upstream memory context, then benchmark search-depth models.",
+    )
+    benchmark.add_argument(
+        "--provider-id",
+        action="append",
+        dest="provider_ids",
+        help="Direct model provider memory_node id to test. Repeat to test a subset.",
+    )
+    benchmark.add_argument(
+        "--search-depth-model-id",
+        default=None,
+        help=(
+            "OpenCode Go model id to use for search-depth benchmarking. "
+            "Defaults to glm-5.1."
+        ),
+    )
+    benchmark.add_argument(
+        "--case-id",
+        action="append",
+        dest="case_ids",
+        help="Benchmark case id to run. Repeat to test a subset.",
+    )
+    _add_reasoning_effort_args(benchmark)
+    benchmark.add_argument("--runs", type=int, default=1)
+    benchmark.add_argument("--warmup-runs", type=int, default=0)
+    benchmark.add_argument("--delay-seconds", type=float, default=2.0)
+    benchmark.add_argument("--provider-cooldown-seconds", type=float, default=8.0)
+    benchmark.add_argument(
+        "--output",
+        help=(
+            "Path to write benchmark JSON. Defaults to "
+            "benchmark-results/control-flow-<timestamp>.json."
         ),
     )
 
@@ -145,6 +209,15 @@ def _add_analyze_conversation_evaluation_benchmark_parser(subparsers) -> None:
         "analyze-conversation-evaluation-benchmark",
         aliases=["analyse-conversation-evaluation-benchmark"],
         help="Show conversation-evaluation replies ordered by latency.",
+    )
+    analyze.add_argument("path")
+
+
+def _add_analyze_control_flow_benchmark_parser(subparsers) -> None:
+    analyze = subparsers.add_parser(
+        "analyze-control-flow-benchmark",
+        aliases=["analyse-control-flow-benchmark"],
+        help="Show control-flow benchmark latency and search-depth age summaries.",
     )
     analyze.add_argument("path")
 

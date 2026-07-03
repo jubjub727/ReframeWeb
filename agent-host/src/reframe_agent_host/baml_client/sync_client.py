@@ -122,7 +122,21 @@ class BamlSyncClient:
                 "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"conversation_evaluation_memories": conversation_evaluation_memories,
             })
             return typing.cast(types.ConversationMemorySearchHints, __result__.cast_to(types, types, stream_types, False, __runtime__))
-
+    def EvaluateSearchDepths(self, current_timestamp: str,current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,memory_search_hints: types.ConversationMemorySearchHints,search_domains: typing.List["types.SearchDepthDomain"],search_depth_memories: typing.List["types.SearchDepthMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> types.SearchDepthDecision:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            __stream__ = self.stream.EvaluateSearchDepths(current_timestamp=current_timestamp,current_user_request=current_user_request,session_conversations=session_conversations,session_memories=session_memories,selected_task=selected_task,memory_search_hints=memory_search_hints,search_domains=search_domains,search_depth_memories=search_depth_memories,
+                baml_options=baml_options)
+            return __stream__.get_final_response()
+        else:
+            # Original non-streaming code
+            __result__ = self.__options.merge_options(baml_options).call_function_sync(function_name="EvaluateSearchDepths", args={
+                "current_timestamp": current_timestamp,"current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"memory_search_hints": memory_search_hints,"search_domains": search_domains,"search_depth_memories": search_depth_memories,
+            })
+            return typing.cast(types.SearchDepthDecision, __result__.cast_to(types, types, stream_types, False, __runtime__))
+    
 
 
 class BamlStreamClient:
@@ -155,7 +169,19 @@ class BamlStreamClient:
           lambda x: typing.cast(types.ConversationMemorySearchHints, x.cast_to(types, types, stream_types, False, __runtime__)),
           __ctx__,
         )
-
+    def EvaluateSearchDepths(self, current_timestamp: str,current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,memory_search_hints: types.ConversationMemorySearchHints,search_domains: typing.List["types.SearchDepthDomain"],search_depth_memories: typing.List["types.SearchDepthMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlSyncStream[stream_types.SearchDepthDecision, types.SearchDepthDecision]:
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_sync_stream(function_name="EvaluateSearchDepths", args={
+            "current_timestamp": current_timestamp,"current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"memory_search_hints": memory_search_hints,"search_domains": search_domains,"search_depth_memories": search_depth_memories,
+        })
+        return baml_py.BamlSyncStream[stream_types.SearchDepthDecision, types.SearchDepthDecision](
+          __result__,
+          lambda x: typing.cast(stream_types.SearchDepthDecision, x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(types.SearchDepthDecision, x.cast_to(types, types, stream_types, False, __runtime__)),
+          __ctx__,
+        )
+    
 
 class BamlHttpRequestClient:
     __options: DoNotUseDirectlyCallManager
@@ -177,7 +203,14 @@ class BamlHttpRequestClient:
             "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"conversation_evaluation_memories": conversation_evaluation_memories,
         }, mode="request")
         return __result__
-
+    def EvaluateSearchDepths(self, current_timestamp: str,current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,memory_search_hints: types.ConversationMemorySearchHints,search_domains: typing.List["types.SearchDepthDomain"],search_depth_memories: typing.List["types.SearchDepthMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="EvaluateSearchDepths", args={
+            "current_timestamp": current_timestamp,"current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"memory_search_hints": memory_search_hints,"search_domains": search_domains,"search_depth_memories": search_depth_memories,
+        }, mode="request")
+        return __result__
+    
 
 class BamlHttpStreamRequestClient:
     __options: DoNotUseDirectlyCallManager
@@ -199,6 +232,13 @@ class BamlHttpStreamRequestClient:
             "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"conversation_evaluation_memories": conversation_evaluation_memories,
         }, mode="stream")
         return __result__
-
+    def EvaluateSearchDepths(self, current_timestamp: str,current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,memory_search_hints: types.ConversationMemorySearchHints,search_domains: typing.List["types.SearchDepthDomain"],search_depth_memories: typing.List["types.SearchDepthMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = self.__options.merge_options(baml_options).create_http_request_sync(function_name="EvaluateSearchDepths", args={
+            "current_timestamp": current_timestamp,"current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"memory_search_hints": memory_search_hints,"search_domains": search_domains,"search_depth_memories": search_depth_memories,
+        }, mode="stream")
+        return __result__
+    
 
 b = BamlSyncClient(DoNotUseDirectlyCallManager({}))

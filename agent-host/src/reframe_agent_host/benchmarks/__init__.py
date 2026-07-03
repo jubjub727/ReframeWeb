@@ -1,5 +1,15 @@
 from __future__ import annotations
 
+from reframe_agent_host.benchmarks.control_flow_case_types import (
+    ControlFlowBenchmarkCase,
+)
+from reframe_agent_host.benchmarks.control_flow_cases import control_flow_cases
+from reframe_agent_host.benchmarks.control_flow_config import (
+    ControlFlowBenchmarkConfig,
+)
+from reframe_agent_host.benchmarks.control_flow_runner import (
+    run_control_flow_benchmark,
+)
 from reframe_agent_host.benchmarks.conversation_evaluation_case_types import (
     ConversationEvaluationBenchmarkCase,
 )
@@ -20,11 +30,15 @@ from reframe_agent_host.benchmarks.task_choice_config import TaskChoiceBenchmark
 from reframe_agent_host.benchmarks.task_choice_runner import run_task_choice_benchmark
 
 __all__ = [
+    "ControlFlowBenchmarkCase",
+    "ControlFlowBenchmarkConfig",
     "ConversationEvaluationBenchmarkCase",
     "ConversationEvaluationBenchmarkConfig",
     "TaskChoiceBenchmarkCase",
     "TaskChoiceBenchmarkConfig",
+    "control_flow_cases",
     "conversation_evaluation_cases",
+    "run_control_flow_benchmark",
     "run_conversation_evaluation_benchmark",
     "run_task_choice_benchmark",
     "task_choice_lack_of_capability_cases",

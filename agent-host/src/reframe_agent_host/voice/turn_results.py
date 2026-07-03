@@ -12,6 +12,7 @@ from reframe_agent_host.voice.types import (
     VoicePipelineConfig,
     VoiceTurnResult,
 )
+from reframe_memory import RetrievedMemoryContext
 
 
 def mode_switch_turn_result(
@@ -31,6 +32,8 @@ def mode_switch_turn_result(
         transcript=None,
         task_choice=None,
         memory_search_hints=None,
+        search_depths=None,
+        retrieved_memories=None,
         timings=mode_switch_timings(
             model_prepare_seconds,
             capture,
@@ -48,6 +51,8 @@ def transcribed_turn_result(
     routed_transcript: str,
     task_choice: types.TaskChoiceDecision | None,
     memory_search_hints: types.ConversationMemorySearchHints | None,
+    search_depths: types.SearchDepthDecision | None,
+    retrieved_memories: RetrievedMemoryContext | None,
     timings: dict[str, float | None],
 ) -> VoiceTurnResult:
     return VoiceTurnResult(
@@ -61,6 +66,8 @@ def transcribed_turn_result(
         transcript=transcript,
         task_choice=task_choice,
         memory_search_hints=memory_search_hints,
+        search_depths=search_depths,
+        retrieved_memories=retrieved_memories,
         timings=turn_timings(
             config,
             model_prepare_seconds=timings["model_prepare_seconds"],
@@ -69,8 +76,14 @@ def transcribed_turn_result(
             post_vad_transcript_seconds=timings["post_vad_transcript_seconds"],
             post_vad_task_choice_seconds=timings["post_vad_task_choice_seconds"],
             post_vad_memory_search_seconds=timings["post_vad_memory_search_seconds"],
+            post_vad_search_depth_seconds=timings["post_vad_search_depth_seconds"],
+            post_vad_memory_retrieval_seconds=timings[
+                "post_vad_memory_retrieval_seconds"
+            ],
             transcription_seconds=timings["transcription_seconds"],
             task_choice_seconds=timings["task_choice_seconds"],
             memory_search_seconds=timings["memory_search_seconds"],
+            search_depth_seconds=timings["search_depth_seconds"],
+            memory_retrieval_seconds=timings["memory_retrieval_seconds"],
         ),
     )

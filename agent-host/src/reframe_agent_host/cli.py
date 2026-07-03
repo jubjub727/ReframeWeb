@@ -12,6 +12,10 @@ from reframe_agent_host.commands.conversation_evaluation import (
     run_analyze_conversation_evaluation_benchmark,
     run_benchmark_conversation_evaluation,
 )
+from reframe_agent_host.commands.control_flow import (
+    run_analyze_control_flow_benchmark,
+    run_benchmark_control_flow,
+)
 from reframe_agent_host.commands.parser import build_parser
 from reframe_agent_host.commands.task_choice import (
     run_benchmark_task_choice,
@@ -58,6 +62,12 @@ def main(argv: Sequence[str] | None = None) -> None:
     ):
         raise SystemExit(run_analyze_conversation_evaluation_benchmark(args.path))
 
+    if args.command in (
+        "analyze-control-flow-benchmark",
+        "analyse-control-flow-benchmark",
+    ):
+        raise SystemExit(run_analyze_control_flow_benchmark(args.path))
+
     if args.command == "gpu-check":
         raise SystemExit(run_gpu_check(args.whisper_compute_type))
 
@@ -91,6 +101,8 @@ def main(argv: Sequence[str] | None = None) -> None:
                     provider_cooldown_seconds=args.provider_cooldown_seconds,
                     provider_ids=args.provider_ids,
                     case_ids=args.case_ids,
+                    reasoning_efforts=args.reasoning_efforts,
+                    reasoning_effort_candidates=args.reasoning_effort_candidates,
                     output=args.output,
                 ),
             )
@@ -114,6 +126,34 @@ def main(argv: Sequence[str] | None = None) -> None:
                     provider_cooldown_seconds=args.provider_cooldown_seconds,
                     provider_ids=args.provider_ids,
                     case_ids=args.case_ids,
+                    reasoning_efforts=args.reasoning_efforts,
+                    reasoning_effort_candidates=args.reasoning_effort_candidates,
+                    output=args.output,
+                ),
+            )
+        )
+
+    if args.command == "benchmark-control-flow":
+        if args.runs < 1:
+            parser.error("--runs must be at least 1")
+        if args.warmup_runs < 0:
+            parser.error("--warmup-runs cannot be negative")
+        if args.delay_seconds < 0:
+            parser.error("--delay-seconds cannot be negative")
+        if args.provider_cooldown_seconds < 0:
+            parser.error("--provider-cooldown-seconds cannot be negative")
+        raise SystemExit(
+            asyncio.run(
+                run_benchmark_control_flow(
+                    runs=args.runs,
+                    warmup_runs=args.warmup_runs,
+                    delay_seconds=args.delay_seconds,
+                    provider_cooldown_seconds=args.provider_cooldown_seconds,
+                    provider_ids=args.provider_ids,
+                    search_depth_model_id=args.search_depth_model_id,
+                    case_ids=args.case_ids,
+                    reasoning_efforts=args.reasoning_efforts,
+                    reasoning_effort_candidates=args.reasoning_effort_candidates,
                     output=args.output,
                 ),
             )

@@ -5,6 +5,7 @@ import time
 from reframe_agent_host.agent_flow.conversation_evaluation import (
     ConversationEvaluationPlanner,
 )
+from reframe_agent_host.agent_flow.search_depth import SearchDepthPlanner
 from reframe_agent_host.agent_flow.task_choice import TaskChoicePlanner
 from reframe_agent_host.baml_client import types
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
@@ -20,6 +21,7 @@ from reframe_agent_host.voice.types import (
     VoiceTurnResult,
 )
 from reframe_memory import ConversationMessage, open_memory_database
+from reframe_memory.retrieved_context import RetrievedMemoryContext
 
 
 class VoiceTurnProcessor:
@@ -30,12 +32,16 @@ class VoiceTurnProcessor:
         trigger_matcher: TriggerPhraseMatcher,
         planner: TaskChoicePlanner,
         conversation_evaluation: ConversationEvaluationPlanner,
+        search_depth: SearchDepthPlanner,
+        memory_retrieval,
     ) -> None:
         self._config = config
         self._transcriber = transcriber
         self._trigger_matcher = trigger_matcher
         self._planner = planner
         self._conversation_evaluation = conversation_evaluation
+        self._search_depth = search_depth
+        self._memory_retrieval = memory_retrieval
 
     async def process(
         self,
@@ -110,6 +116,27 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
+        (
+            search_depths,
+            search_depth_seconds,
+            post_vad_search_depth_seconds,
+        ) = await self._maybe_evaluate_search_depths(
+            routed_transcript,
+            task_choice,
+            memory_search_hints,
+            post_vad_started_at,
+            on_event,
+        )
+        (
+            retrieved_memories,
+            memory_retrieval_seconds,
+            post_vad_memory_retrieval_seconds,
+        ) = await self._maybe_retrieve_memories(
+            memory_search_hints,
+            search_depths,
+            post_vad_started_at,
+            on_event,
+        )
         post_vad_transcript_seconds = time.perf_counter() - post_vad_started_at
         return transcribed_turn_result(
             config=self._config,
@@ -120,15 +147,23 @@ class VoiceTurnProcessor:
             routed_transcript=routed_transcript,
             task_choice=task_choice,
             memory_search_hints=memory_search_hints,
+            search_depths=search_depths,
+            retrieved_memories=retrieved_memories,
             timings={
                 "model_prepare_seconds": model_prepare_seconds,
                 "total_started_at": total_started_at,
                 "post_vad_transcript_seconds": post_vad_transcript_seconds,
                 "post_vad_task_choice_seconds": post_vad_task_choice_seconds,
                 "post_vad_memory_search_seconds": post_vad_memory_search_seconds,
+                "post_vad_search_depth_seconds": post_vad_search_depth_seconds,
+                "post_vad_memory_retrieval_seconds": (
+                    post_vad_memory_retrieval_seconds
+                ),
                 "transcription_seconds": transcription_seconds,
                 "task_choice_seconds": task_choice_seconds,
                 "memory_search_seconds": memory_search_seconds,
+                "search_depth_seconds": search_depth_seconds,
+                "memory_retrieval_seconds": memory_retrieval_seconds,
             },
         )
 
@@ -239,6 +274,76 @@ class VoiceTurnProcessor:
         return (
             hints,
             memory_search_seconds,
+            time.perf_counter() - post_vad_started_at,
+        )
+
+    async def _maybe_evaluate_search_depths(
+        self,
+        routed_transcript: str,
+        task_choice: types.TaskChoiceDecision | None,
+        memory_search_hints: types.ConversationMemorySearchHints | None,
+        post_vad_started_at: float,
+        on_event: VoicePipelineEventHandler | None,
+    ):
+        if not self._config.task_choice_enabled:
+            return None, None, None
+        if task_choice is None or memory_search_hints is None or not routed_transcript:
+            return None, None, None
+
+        self._emit(
+            on_event,
+            "search-depth",
+            "evaluating historic memory search depth with BAML",
+        )
+        search_depth_started_at = time.perf_counter()
+        depths = await self._search_depth.evaluate_search_depths(
+            current_user_request=routed_transcript,
+            selected_task_id=task_choice.selected_task_id,
+            memory_search_hints=memory_search_hints,
+        )
+        search_depth_seconds = time.perf_counter() - search_depth_started_at
+        self._emit(
+            on_event,
+            "search-depths",
+            f"{depths.model_dump(mode='json')} ({search_depth_seconds:.3f}s)",
+        )
+        return (
+            depths,
+            search_depth_seconds,
+            time.perf_counter() - post_vad_started_at,
+        )
+
+    async def _maybe_retrieve_memories(
+        self,
+        memory_search_hints: types.ConversationMemorySearchHints | None,
+        search_depths: types.SearchDepthDecision | None,
+        post_vad_started_at: float,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> tuple[RetrievedMemoryContext | None, float | None, float | None]:
+        if not self._config.task_choice_enabled:
+            return None, None, None
+        if memory_search_hints is None or search_depths is None:
+            return None, None, None
+
+        self._emit(
+            on_event,
+            "memory-retrieval",
+            "retrieving graph memory context",
+        )
+        memory_retrieval_started_at = time.perf_counter()
+        retrieved = await self._memory_retrieval.retrieve(
+            memory_search_hints=memory_search_hints,
+            search_depths=search_depths,
+        )
+        memory_retrieval_seconds = time.perf_counter() - memory_retrieval_started_at
+        self._emit(
+            on_event,
+            "memory-retrieved",
+            f"{retrieved.to_dict()} ({memory_retrieval_seconds:.3f}s)",
+        )
+        return (
+            retrieved,
+            memory_retrieval_seconds,
             time.perf_counter() - post_vad_started_at,
         )
 

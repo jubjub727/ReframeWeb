@@ -50,23 +50,34 @@ async def run_benchmark_task_choice(
     provider_cooldown_seconds: float,
     provider_ids: list[str] | None,
     case_ids: list[str] | None,
+    reasoning_efforts: list[str] | None,
+    reasoning_effort_candidates: list[str] | None,
     output: str | None,
 ) -> int:
     database = await open_memory_database()
     try:
         await database.apply_schema()
         await database.ensure_roots()
+        config_kwargs = {
+            "session_id": session_id,
+            "runs": runs,
+            "warmup_runs": warmup_runs,
+            "delay_seconds": delay_seconds,
+            "provider_cooldown_seconds": provider_cooldown_seconds,
+            "provider_ids": tuple(provider_ids or ()),
+            "case_ids": tuple(case_ids or ()),
+        }
+        if reasoning_efforts is not None:
+            config_kwargs["reasoning_efforts"] = tuple(reasoning_efforts)
+        elif reasoning_effort_candidates is not None:
+            config_kwargs["reasoning_efforts"] = ()
+        if reasoning_effort_candidates is not None:
+            config_kwargs["reasoning_effort_candidates"] = tuple(
+                reasoning_effort_candidates
+            )
         result = await run_task_choice_benchmark(
             database=database,
-            config=TaskChoiceBenchmarkConfig(
-                session_id=session_id,
-                runs=runs,
-                warmup_runs=warmup_runs,
-                delay_seconds=delay_seconds,
-                provider_cooldown_seconds=provider_cooldown_seconds,
-                provider_ids=tuple(provider_ids or ()),
-                case_ids=tuple(case_ids or ()),
-            ),
+            config=TaskChoiceBenchmarkConfig(**config_kwargs),
         )
         output_path = _write_benchmark_result(result, output)
         _print_benchmark_saved(output_path, result)
@@ -152,8 +163,9 @@ def run_analyze_task_choice_benchmark(path: str) -> int:
         return 0
 
     for group in groups:
+        effort = f"/{group.reasoning_effort}" if group.reasoning_effort else ""
         print(
-            f"{group.status}: {group.model_id} "
+            f"{group.status}: {group.model_id}{effort} "
             f"{group.provider_id} {group.baml_surface} "
             f"cases={','.join(group.case_ids)}"
         )
@@ -178,7 +190,9 @@ def _print_benchmark_saved(path: Path, result: dict[str, object]) -> None:
     if isinstance(summary, dict):
         print(
             "summary: "
-            f"providers={summary.get('providers')} "
+            f"base_providers={summary.get('base_providers')} "
+            f"provider_effort_runs={summary.get('provider_effort_runs')} "
+            f"model={summary.get('task_choice_model_id')} "
             f"cases={summary.get('cases')} "
             f"total={summary.get('total')} "
             f"correct={summary.get('correct')} "

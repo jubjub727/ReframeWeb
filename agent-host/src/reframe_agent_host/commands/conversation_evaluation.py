@@ -23,22 +23,33 @@ async def run_benchmark_conversation_evaluation(
     provider_cooldown_seconds: float,
     provider_ids: list[str] | None,
     case_ids: list[str] | None,
+    reasoning_efforts: list[str] | None,
+    reasoning_effort_candidates: list[str] | None,
     output: str | None,
 ) -> int:
     database = await open_memory_database()
     try:
         await database.apply_schema()
         await database.ensure_roots()
+        config_kwargs = {
+            "runs": runs,
+            "warmup_runs": warmup_runs,
+            "delay_seconds": delay_seconds,
+            "provider_cooldown_seconds": provider_cooldown_seconds,
+            "provider_ids": tuple(provider_ids or ()),
+            "case_ids": tuple(case_ids or ()),
+        }
+        if reasoning_efforts is not None:
+            config_kwargs["reasoning_efforts"] = tuple(reasoning_efforts)
+        elif reasoning_effort_candidates is not None:
+            config_kwargs["reasoning_efforts"] = ()
+        if reasoning_effort_candidates is not None:
+            config_kwargs["reasoning_effort_candidates"] = tuple(
+                reasoning_effort_candidates
+            )
         result = await run_conversation_evaluation_benchmark(
             database=database,
-            config=ConversationEvaluationBenchmarkConfig(
-                runs=runs,
-                warmup_runs=warmup_runs,
-                delay_seconds=delay_seconds,
-                provider_cooldown_seconds=provider_cooldown_seconds,
-                provider_ids=tuple(provider_ids or ()),
-                case_ids=tuple(case_ids or ()),
-            ),
+            config=ConversationEvaluationBenchmarkConfig(**config_kwargs),
         )
         output_path = _write_benchmark_result(result, output)
         _print_benchmark_saved(output_path, result)
@@ -109,9 +120,10 @@ def _print_reply_table(replies: tuple[ConversationEvaluationReply, ...]) -> None
 
 
 def _reply_label(reply: ConversationEvaluationReply) -> str:
+    effort = f"/{reply.reasoning_effort}" if reply.reasoning_effort else ""
     if reply.run_index:
-        return f"{reply.model_id} r{reply.run_index}"
-    return reply.model_id
+        return f"{reply.model_id}{effort} r{reply.run_index}"
+    return f"{reply.model_id}{effort}"
 
 
 def _tag_summary(reply: ConversationEvaluationReply) -> str:
@@ -209,7 +221,9 @@ def _print_benchmark_saved(path: Path, result: dict[str, object]) -> None:
     if isinstance(summary, dict):
         print(
             "summary: "
-            f"providers={summary.get('providers')} "
+            f"base_providers={summary.get('base_providers')} "
+            f"provider_effort_runs={summary.get('provider_effort_runs')} "
+            f"model={summary.get('conversation_evaluation_model_id')} "
             f"cases={summary.get('cases')} "
             f"total={summary.get('total')} "
             f"errors={summary.get('errors')}"

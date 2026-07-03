@@ -12,6 +12,7 @@ class FailedProviderGroup:
     provider_name: str
     model_id: str | None
     baml_surface: str
+    reasoning_effort: str | None
     status: str
     case_ids: tuple[str, ...]
 
@@ -31,6 +32,7 @@ def task_choice_failed_provider_groups(path: str) -> tuple[FailedProviderGroup, 
                 provider_name=str(provider.get("provider_name")),
                 model_id=_optional_str(provider.get("model_id")),
                 baml_surface=str(provider.get("baml_surface")),
+                reasoning_effort=_optional_str(provider.get("reasoning_effort")),
                 status=_status_for_failures(failed),
                 case_ids=tuple(str(result.get("case_id")) for result in failed),
             )
