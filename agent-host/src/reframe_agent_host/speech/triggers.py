@@ -34,6 +34,10 @@ TRIGGER_PREFIX_ALIASES: dict[str, tuple[str, ...]] = {
     ),
 }
 
+CONFIRMED_WAKE_RESIDUES: dict[str, tuple[str, ...]] = {
+    "jarvis": ("just",),
+}
+
 
 @dataclass(frozen=True)
 class TriggerPhraseConfig:
@@ -88,6 +92,16 @@ class TriggerPhraseMatcher:
                     phrase=normalized,
                     routed_transcript=_clean_remainder(match.group("remainder")),
                 )
+        if kind == "wake_command":
+            for residue in CONFIRMED_WAKE_RESIDUES.get(normalized, ()):
+                pattern = _compile_prefix_pattern(residue)
+                match = pattern.match(transcript)
+                if match:
+                    return TriggerPhraseDetection(
+                        kind=kind,
+                        phrase=normalized,
+                        routed_transcript=_clean_remainder(match.group("remainder")),
+                    )
         return None
 
 

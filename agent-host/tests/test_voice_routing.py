@@ -228,6 +228,38 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(detection.phrase, "jarvis")
                 self.assertEqual(detection.routed_transcript, "do this")
 
+    def test_just_is_not_a_plain_wake_alias(self):
+        matcher = TriggerPhraseMatcher(TriggerPhraseConfig())
+
+        detection = matcher.match("Just tell me a joke.")
+
+        self.assertIsNone(detection)
+
+    def test_confirmed_wake_strips_whisper_just_residue(self):
+        matcher = TriggerPhraseMatcher(TriggerPhraseConfig())
+
+        detection = matcher.match_confirmed(
+            "Just tell me a joke.",
+            kind="wake_command",
+            phrase="jarvis",
+        )
+
+        self.assertIsNotNone(detection)
+        self.assertEqual(detection.phrase, "jarvis")
+        self.assertEqual(detection.routed_transcript, "tell me a joke")
+
+    def test_confirmed_wake_keeps_real_just_after_explicit_wake_word(self):
+        matcher = TriggerPhraseMatcher(TriggerPhraseConfig())
+
+        detection = matcher.match_confirmed(
+            "Jarvis, just tell me a joke.",
+            kind="wake_command",
+            phrase="jarvis",
+        )
+
+        self.assertIsNotNone(detection)
+        self.assertEqual(detection.routed_transcript, "just tell me a joke")
+
     async def test_task_choice_receives_routed_transcript(self):
         planner = RecordingPlanner()
         conversation_evaluation = RecordingConversationEvaluation()

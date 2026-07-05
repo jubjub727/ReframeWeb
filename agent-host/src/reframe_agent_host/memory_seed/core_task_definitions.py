@@ -14,7 +14,7 @@ class CoreTaskDefinition:
     prompt: str
     tags: tuple[str, ...]
     model_id: str
-    reasoning_effort: str
+    reasoning_effort: str | None
 
     def to_task(self, provider_id: str) -> Task:
         return Task(
@@ -138,7 +138,7 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "user preference."
         ),
         tags=("reply",),
-        model_id="deepseek-v4-flash",
-        reasoning_effort="low",
+        model_id="kimi-k2.6",
+        reasoning_effort=None,
     ),
 )

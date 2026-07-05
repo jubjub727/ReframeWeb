@@ -55,16 +55,17 @@ class CoreTaskDefinitionTests(unittest.TestCase):
             "none",
         )
         self.assertEqual(tasks["Reply to user"].tags, ("reply",))
-        self.assertEqual(tasks["Reply to user"].model_id, "deepseek-v4-flash")
-        self.assertEqual(tasks["Reply to user"].reasoning_effort, "low")
+        self.assertEqual(tasks["Reply to user"].model_id, "kimi-k2.6")
+        self.assertIsNone(tasks["Reply to user"].reasoning_effort)
 
     def test_every_core_task_declares_its_provider_choice(self):
         for task in CORE_TASKS:
             with self.subTest(task=task.name):
                 self.assertIsInstance(task.model_id, str)
                 self.assertTrue(task.model_id)
-                self.assertIsInstance(task.reasoning_effort, str)
-                self.assertTrue(task.reasoning_effort)
+                if task.reasoning_effort is not None:
+                    self.assertIsInstance(task.reasoning_effort, str)
+                    self.assertTrue(task.reasoning_effort)
 
         field_defaults = {field.name: field.default for field in fields(CoreTaskDefinition)}
         self.assertIs(field_defaults["model_id"], MISSING)

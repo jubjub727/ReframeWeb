@@ -30,7 +30,7 @@ class CoreTaskSeedResult:
 
 async def ensure_core_tasks(database: MemoryDatabase) -> CoreTaskSeedResult:
     await ensure_opencode_go_providers(database)
-    providers: dict[tuple[str, str], ProviderNode] = {}
+    providers: dict[tuple[str, str | None], ProviderNode] = {}
     created_task_ids: list[str] = []
     existing_task_ids: list[str] = []
     updated_task_ids: list[str] = []
@@ -75,11 +75,10 @@ async def _provider_for_definition(
     providers = await database.providers.search(
         ProviderSearch.build(
             tags=TagSearch.build(
-                all_of=DIRECT_MODEL_TAGS
-                + (definition.model_id, definition.reasoning_effort),
+                all_of=DIRECT_MODEL_TAGS + (definition.model_id,),
             ),
             model_ids=(definition.model_id,),
-            reasoning_efforts=(definition.reasoning_effort,),
+            reasoning_efforts=_reasoning_effort_search(definition.reasoning_effort),
         ),
         mark_read=False,
     )
@@ -92,9 +91,15 @@ async def _provider_for_definition(
 
     msg = (
         "core task provider was not seeded: "
-        f"{definition.model_id}/{definition.reasoning_effort}"
+        f"{definition.model_id}/{definition.reasoning_effort or 'default'}"
     )
     raise ValueError(msg)
+
+
+def _reasoning_effort_search(reasoning_effort: str | None) -> tuple[str, ...]:
+    if reasoning_effort is None:
+        return ()
+    return (reasoning_effort,)
 
 
 async def _find_task(

@@ -35,6 +35,13 @@ async def ensure_opencode_go_providers(
     created_provider_ids: list[str] = []
     existing_provider_ids: list[str] = []
     for reference in opencode_go_model_inventory():
+        direct_default = await _ensure_provider(
+            database,
+            _direct_provider(reference, None),
+            DIRECT_MODEL_TAGS + (reference.model_id,),
+        )
+        _record_seed_result(direct_default, created_provider_ids, existing_provider_ids)
+
         for effort in OPENCODE_GO_REASONING_EFFORTS:
             direct = await _ensure_provider(
                 database,
@@ -97,7 +104,18 @@ def _record_seed_result(
         existing_provider_ids.append(node.id)
 
 
-def _direct_provider(reference: OpenCodeGoModelReference, effort: str) -> Provider:
+def _direct_provider(reference: OpenCodeGoModelReference, effort: str | None) -> Provider:
+    if effort is None:
+        return Provider(
+            name=f"OpenCode Go direct model: {reference.model_id}",
+            description=(
+                "Calls the OpenCode Go OpenAI-compatible API directly with model "
+                f"{reference.model_id} and no explicit reasoning effort."
+            ),
+            baml_surface=reference.direct_baml_surface,
+            model_id=reference.model_id,
+        )
+
     return Provider(
         name=f"OpenCode Go direct model: {reference.model_id} / {effort}",
         description=(
@@ -145,6 +163,7 @@ async def _prune_removed_providers(database: MemoryDatabase) -> list[str]:
 def _allowed_provider_keys() -> set[tuple[str, str | None, str | None]]:
     keys: set[tuple[str, str | None, str | None]] = set()
     for reference in opencode_go_model_inventory():
+        keys.add((reference.direct_baml_surface, reference.model_id, None))
         for effort in OPENCODE_GO_REASONING_EFFORTS:
             keys.add((reference.direct_baml_surface, reference.model_id, effort))
         keys.add((reference.workspace_baml_surface, reference.model_id, None))

@@ -5,6 +5,10 @@ from dataclasses import dataclass
 import baml_sdk as baml
 import baml_sdk as types
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs, provider_client
+from reframe_agent_host.agent_flow.opencode_response_compat import (
+    execute_task_via_opencode_response_compat,
+    opencode_response_compat_required,
+)
 from reframe_memory import MemoryDatabase, open_memory_database
 
 
@@ -29,6 +33,11 @@ class TaskExecutionPlanner:
             raise ValueError(msg)
 
         client, _client_name = provider_client(provider)
+        if opencode_response_compat_required(_client_name):
+            return await execute_task_via_opencode_response_compat(
+                full_task_prompt=full_task_prompt,
+                client=client,
+            )
         return await baml.ExecuteTask_async(
             full_task_prompt=full_task_prompt,
             **client_kwargs(client),
@@ -50,4 +59,6 @@ class TaskExecutionPlanner:
 async def execute_task_with_default_client(
     full_task_prompt: str,
 ) -> types.TaskExecutionResult:
-    return await baml.ExecuteTask_async(full_task_prompt=full_task_prompt)
+    return await execute_task_via_opencode_response_compat(
+        full_task_prompt=full_task_prompt,
+    )
