@@ -96,6 +96,8 @@ class RelevanceMemoryStore:
     async def search(
         self,
         search: RelevanceMemorySearch | None = None,
+        *,
+        mark_read: bool = True,
     ) -> list[RelevanceMemoryNode]:
         parts = build_memory_node_where(_memory_search_from_relevance_memory_search(search))
         result = await self.database.query(
@@ -106,7 +108,10 @@ class RelevanceMemoryStore:
             """,
             parts.variables,
         )
-        return [relevance_memory_node_from_record(record) for record in _records(result)]
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
+        return [relevance_memory_node_from_record(record) for record in records]
 
 
 def _memory_search_from_relevance_memory_search(

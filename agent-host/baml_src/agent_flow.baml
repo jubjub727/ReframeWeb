@@ -78,6 +78,15 @@ class RelevanceMemoryContext {
   read_at string
 }
 
+class TaskPromptMemoryContext {
+  title string
+  description string
+  tags string[]
+  created_at string
+  updated_at string
+  read_at string
+}
+
 class SelectedTaskContext {
   id string
   name string
@@ -145,6 +154,15 @@ class RetrievedMemoryCandidate {
   parent_conversation_id string?
 }
 
+class TaskPromptSelectedMemoryContext {
+  title string
+  description string
+  tags string[]
+  created_at string
+  updated_at string
+  read_at string
+}
+
 class RelevantMemoryDecision {
   kept_memory_ids string[]
   candidate_memory CandidateMemory?
@@ -156,6 +174,20 @@ class TaskChoiceDecision {
   reason string
   agent_thought string?
   candidate_memory CandidateMemory?
+}
+
+class TaskPromptDecision {
+  full_task_prompt string
+  candidate_memory CandidateMemory?
+}
+
+class TaskReturnItem {
+  name string
+  payload map<string, string>?
+}
+
+class TaskExecutionResult {
+  returns TaskReturnItem[]
 }
 
 function ChooseInitialTask(
@@ -245,6 +277,112 @@ function ChooseInitialTask(
     {% endfor %}
 
     Return only the task choice decision.
+    {{ ctx.output_format }}
+  "#
+}
+
+function GenerateTaskPrompt(
+  current_user_request: string,
+  session_conversations: ConversationHistory[],
+  session_memories: SessionMemoryContext[],
+  selected_task: SelectedTaskContext,
+  selected_memories: TaskPromptSelectedMemoryContext[],
+  task_prompt_memories: TaskPromptMemoryContext[]
+) -> TaskPromptDecision {
+  client TaskPromptModel
+  prompt #"
+    {{ _.role("system") }}
+
+    Prepare the prompt text that will be sent to the selected task.
+
+    Return a compact prompt with exactly this shape:
+
+    Task:
+    <copy the selected task prompt exactly>
+
+    Input:
+    <write the task input from the supplied context>
+
+    Guidance:
+    - Copy the selected task prompt exactly under Task:.
+    - Build Input from the current request, conversation, and remembered
+      context.
+    - Preserve the user's goal, useful wording, preferences, constraints, and
+      unresolved details explicitly present in the supplied context.
+    - Translate remembered context into concrete task-relevant guidance.
+    - Keep Input concise and natural. Use light bullets when they make it
+      easier to read.
+    - Write for the task runner using human-meaningful context rather than
+      source bookkeeping.
+    - Set candidate_memory only when this composition step reveals durable
+      guidance for future prompt composition.
+
+    {{ _.role("user") }}
+
+    Selected task prompt:
+    {{ selected_task.prompt }}
+
+    Current request:
+    {{ current_user_request }}
+
+    Conversation:
+    {% for conversation in session_conversations %}
+    Conversation: {{ conversation.name }}
+    {% for message in conversation.messages %}
+    [{{ message.role }}] {{ message.content }}
+    {% endfor %}
+    {% endfor %}
+
+    Remembered context from this session:
+    {% for memory in session_memories %}
+    - {{ memory.title }}
+      Tags: {{ memory.tags }}
+      {{ memory.description }}
+    {% endfor %}
+
+    Other relevant remembered context:
+    {% for memory in selected_memories %}
+    - {{ memory.title }}
+      Tags: {{ memory.tags }}
+      {{ memory.description }}
+    {% endfor %}
+
+    Prompt composition guidance:
+    {% for memory in task_prompt_memories %}
+    - {{ memory.title }}
+      Tags: {{ memory.tags }}
+      {{ memory.description }}
+    {% endfor %}
+
+    Return the final task prompt decision.
+    {{ ctx.output_format }}
+  "#
+}
+
+function ExecuteTask(
+  full_task_prompt: string
+) -> TaskExecutionResult {
+  client TaskExecutionModel
+  prompt #"
+    {{ _.role("system") }}
+
+    Complete the task according to the task prompt and any guidance included in
+    it.
+
+    Rules:
+    - Follow the output shape requested by the task prompt.
+    - When the task prompt describes named response items, put each item name in
+      name and its arguments in payload.
+    - Do not add extra commentary outside the structured result.
+    - Return an empty returns array when the task prompt does not request any
+      response item.
+
+    {{ _.role("user") }}
+
+    Task prompt:
+    {{ full_task_prompt }}
+
+    Return the task execution result.
     {{ ctx.output_format }}
   "#
 }
@@ -449,6 +587,7 @@ function EvaluateSearchDepths(
     - Choose each timestamp independently.
     - Use older timestamps when older context may be useful.
     - Use newer timestamps when recent context is enough.
+    - Stop once the timestamp cutoffs look good enough for the request.
 
     Timestamp fields:
     - created_after: lower-bound cutoff for created_at.

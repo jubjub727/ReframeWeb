@@ -145,6 +145,8 @@ class ConversationMemory:
     async def messages_for(
         self,
         conversation_id: str,
+        *,
+        mark_read: bool = True,
     ) -> list[ConversationMessageNode]:
         conversation_record_id = memory_node_record_id(conversation_id)
         relation_result = await self.database.query(
@@ -160,12 +162,19 @@ class ConversationMemory:
             message_result = await self.database.query(f"SELECT * FROM {message_id};")
             records = _records(message_result)
             if records:
-                messages.append(conversation_message_node_from_record(records[0]))
+                touched = (
+                    await self.database.mark_records_read(records)
+                    if mark_read
+                    else records
+                )
+                messages.append(conversation_message_node_from_record(touched[0]))
         return messages
 
     async def search(
         self,
         search: ConversationSearch | None = None,
+        *,
+        mark_read: bool = True,
     ) -> list[ConversationNode]:
         parts = build_memory_node_where(_memory_search_from_conversation_search(search))
         result = await self.database.query(
@@ -176,7 +185,10 @@ class ConversationMemory:
             """,
             parts.variables,
         )
-        return [conversation_node_from_record(record) for record in _records(result)]
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
+        return [conversation_node_from_record(record) for record in records]
 
     async def _ensure_session(self, session_id: str) -> str:
         session_record_id = memory_node_record_id(session_id)

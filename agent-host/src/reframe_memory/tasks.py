@@ -117,7 +117,46 @@ class TaskMemory:
         )
         return task_node_from_record(node)
 
-    async def search(self, search: TaskSearch | None = None) -> list[TaskNode]:
+    async def update(
+        self,
+        task_id: str,
+        task: Task,
+        tags: Sequence[str] = (),
+    ) -> TaskNode:
+        await self.ensure_root()
+        provider_record_id = await self._ensure_provider(task.provider_id)
+        task_record_id = memory_node_record_id(task_id)
+        result = await self.database.query(
+            f"""
+            UPDATE {task_record_id} SET
+                tags = $tags,
+                content = $content,
+                updated_at = time::now()
+            RETURN AFTER;
+            """,
+            {
+                "tags": list(dict.fromkeys(tag.strip() for tag in tags if tag.strip())),
+                "content": asdict(task),
+            },
+        )
+        records = _records(result)
+        if not records:
+            msg = f"task does not exist: {task_id}"
+            raise ValueError(msg)
+        await self.database.query(
+            f"""
+            DELETE {PROVIDES_TASK_RELATION} WHERE out = {task_record_id};
+            RELATE {provider_record_id}->{PROVIDES_TASK_RELATION}->{task_record_id};
+            """,
+        )
+        return task_node_from_record(records[0])
+
+    async def search(
+        self,
+        search: TaskSearch | None = None,
+        *,
+        mark_read: bool = True,
+    ) -> list[TaskNode]:
         parts = build_memory_node_where(_memory_search_from_task_search(search))
         result = await self.database.query(
             f"""
@@ -127,9 +166,12 @@ class TaskMemory:
             """,
             parts.variables,
         )
-        return [task_node_from_record(record) for record in _records(result)]
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
+        return [task_node_from_record(record) for record in records]
 
-    async def get(self, task_id: str) -> TaskNode | None:
+    async def get(self, task_id: str, *, mark_read: bool = True) -> TaskNode | None:
         task_record_id = memory_node_record_id(task_id)
         result = await self.database.query(
             f"""
@@ -142,6 +184,8 @@ class TaskMemory:
         if not records:
             return None
 
+        if mark_read:
+            records = await self.database.mark_records_read(records)
         return task_node_from_record(records[0])
 
     async def _ensure_provider(self, provider_id: str) -> str:

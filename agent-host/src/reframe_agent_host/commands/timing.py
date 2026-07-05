@@ -49,6 +49,18 @@ def print_timing_summary(results) -> None:
         results,
         "estimated_user_stop_to_memory_relevance_seconds",
     )
+    user_stop_to_task_prompt_times = _timing_values(
+        results,
+        "estimated_user_stop_to_task_prompt_seconds",
+    )
+    user_stop_to_task_execution_times = _timing_values(
+        results,
+        "estimated_user_stop_to_task_execution_seconds",
+    )
+    user_stop_to_primitive_dispatch_times = _timing_values(
+        results,
+        "estimated_user_stop_to_primitive_dispatch_seconds",
+    )
     summary = f"[summary] turns={len(results)}"
     summary += _summary_part("user_stop_to_transcript", user_stop_to_transcript_times)
     summary += _summary_part("transcribe", transcription_times)
@@ -68,6 +80,18 @@ def print_timing_summary(results) -> None:
     summary += _summary_part(
         "user_stop_to_memory_relevance",
         user_stop_to_memory_relevance_times,
+    )
+    summary += _summary_part(
+        "user_stop_to_task_prompt",
+        user_stop_to_task_prompt_times,
+    )
+    summary += _summary_part(
+        "user_stop_to_task_execution",
+        user_stop_to_task_execution_times,
+    )
+    summary += _summary_part(
+        "user_stop_to_primitive_dispatch",
+        user_stop_to_primitive_dispatch_times,
     )
     print(summary, file=sys.stderr)
 

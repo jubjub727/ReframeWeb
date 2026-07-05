@@ -45,7 +45,7 @@ class ConversationMode(str, Enum):
     ContinuousConversation = "ContinuousConversation"
 
 # #########################################################################
-# Generated classes (19)
+# Generated classes (24)
 # #########################################################################
 
 class AvailableTask(BaseModel):
@@ -183,6 +183,33 @@ class TaskChoiceMemoryContext(BaseModel):
     created_at: str
     updated_at: str
     read_at: str
+
+class TaskExecutionResult(BaseModel):
+    returns: typing.List["TaskReturnItem"]
+
+class TaskPromptDecision(BaseModel):
+    full_task_prompt: str
+    candidate_memory: typing.Optional["CandidateMemory"] = None
+
+class TaskPromptMemoryContext(BaseModel):
+    title: str
+    description: str
+    tags: typing.List[str]
+    created_at: str
+    updated_at: str
+    read_at: str
+
+class TaskPromptSelectedMemoryContext(BaseModel):
+    title: str
+    description: str
+    tags: typing.List[str]
+    created_at: str
+    updated_at: str
+    read_at: str
+
+class TaskReturnItem(BaseModel):
+    name: str
+    payload: typing.Optional[typing.Dict[str, str]] = None
 
 # #########################################################################
 # Generated type aliases (0)

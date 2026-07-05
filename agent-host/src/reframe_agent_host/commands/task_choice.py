@@ -109,6 +109,7 @@ async def run_seed_core_tasks() -> int:
                     "provider_id": result.provider_id,
                     "created_task_ids": list(result.created_task_ids),
                     "existing_task_ids": list(result.existing_task_ids),
+                    "updated_task_ids": list(result.updated_task_ids),
                 },
                 indent=2,
             )

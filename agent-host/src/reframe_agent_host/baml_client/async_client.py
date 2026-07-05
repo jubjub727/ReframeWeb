@@ -142,6 +142,36 @@ class BamlAsyncClient:
                 "current_timestamp": current_timestamp,"current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"memory_search_hints": memory_search_hints,"search_domains": search_domains,"search_depth_memories": search_depth_memories,
             })
             return typing.cast(types.SearchDepthDecision, __result__.cast_to(types, types, stream_types, False, __runtime__))
+    async def ExecuteTask(self, full_task_prompt: str,
+        baml_options: BamlCallOptions = {},
+    ) -> types.TaskExecutionResult:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            # Use streaming internally when on_tick is provided
+            __stream__ = self.stream.ExecuteTask(full_task_prompt=full_task_prompt,
+                baml_options=baml_options)
+            return await __stream__.get_final_response()
+        else:
+            # Original non-streaming code
+            __result__ = await self.__options.merge_options(baml_options).call_function_async(function_name="ExecuteTask", args={
+                "full_task_prompt": full_task_prompt,
+            })
+            return typing.cast(types.TaskExecutionResult, __result__.cast_to(types, types, stream_types, False, __runtime__))
+    async def GenerateTaskPrompt(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,selected_memories: typing.List["types.TaskPromptSelectedMemoryContext"],task_prompt_memories: typing.List["types.TaskPromptMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> types.TaskPromptDecision:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            # Use streaming internally when on_tick is provided
+            __stream__ = self.stream.GenerateTaskPrompt(current_user_request=current_user_request,session_conversations=session_conversations,session_memories=session_memories,selected_task=selected_task,selected_memories=selected_memories,task_prompt_memories=task_prompt_memories,
+                baml_options=baml_options)
+            return await __stream__.get_final_response()
+        else:
+            # Original non-streaming code
+            __result__ = await self.__options.merge_options(baml_options).call_function_async(function_name="GenerateTaskPrompt", args={
+                "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"selected_memories": selected_memories,"task_prompt_memories": task_prompt_memories,
+            })
+            return typing.cast(types.TaskPromptDecision, __result__.cast_to(types, types, stream_types, False, __runtime__))
     
 
 
@@ -199,6 +229,30 @@ class BamlStreamClient:
           lambda x: typing.cast(types.SearchDepthDecision, x.cast_to(types, types, stream_types, False, __runtime__)),
           __ctx__,
         )
+    def ExecuteTask(self, full_task_prompt: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlStream[stream_types.TaskExecutionResult, types.TaskExecutionResult]:
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_async_stream(function_name="ExecuteTask", args={
+            "full_task_prompt": full_task_prompt,
+        })
+        return baml_py.BamlStream[stream_types.TaskExecutionResult, types.TaskExecutionResult](
+          __result__,
+          lambda x: typing.cast(stream_types.TaskExecutionResult, x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(types.TaskExecutionResult, x.cast_to(types, types, stream_types, False, __runtime__)),
+          __ctx__,
+        )
+    def GenerateTaskPrompt(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,selected_memories: typing.List["types.TaskPromptSelectedMemoryContext"],task_prompt_memories: typing.List["types.TaskPromptMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlStream[stream_types.TaskPromptDecision, types.TaskPromptDecision]:
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_async_stream(function_name="GenerateTaskPrompt", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"selected_memories": selected_memories,"task_prompt_memories": task_prompt_memories,
+        })
+        return baml_py.BamlStream[stream_types.TaskPromptDecision, types.TaskPromptDecision](
+          __result__,
+          lambda x: typing.cast(stream_types.TaskPromptDecision, x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(types.TaskPromptDecision, x.cast_to(types, types, stream_types, False, __runtime__)),
+          __ctx__,
+        )
     
 
 class BamlHttpRequestClient:
@@ -235,6 +289,20 @@ class BamlHttpRequestClient:
             "current_timestamp": current_timestamp,"current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"memory_search_hints": memory_search_hints,"search_domains": search_domains,"search_depth_memories": search_depth_memories,
         }, mode="request")
         return __result__
+    async def ExecuteTask(self, full_task_prompt: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExecuteTask", args={
+            "full_task_prompt": full_task_prompt,
+        }, mode="request")
+        return __result__
+    async def GenerateTaskPrompt(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,selected_memories: typing.List["types.TaskPromptSelectedMemoryContext"],task_prompt_memories: typing.List["types.TaskPromptMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="GenerateTaskPrompt", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"selected_memories": selected_memories,"task_prompt_memories": task_prompt_memories,
+        }, mode="request")
+        return __result__
     
 
 class BamlHttpStreamRequestClient:
@@ -269,6 +337,20 @@ class BamlHttpStreamRequestClient:
     ) -> baml_py.baml_py.HTTPRequest:
         __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="EvaluateSearchDepths", args={
             "current_timestamp": current_timestamp,"current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"memory_search_hints": memory_search_hints,"search_domains": search_domains,"search_depth_memories": search_depth_memories,
+        }, mode="stream")
+        return __result__
+    async def ExecuteTask(self, full_task_prompt: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExecuteTask", args={
+            "full_task_prompt": full_task_prompt,
+        }, mode="stream")
+        return __result__
+    async def GenerateTaskPrompt(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,selected_memories: typing.List["types.TaskPromptSelectedMemoryContext"],task_prompt_memories: typing.List["types.TaskPromptMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="GenerateTaskPrompt", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"selected_memories": selected_memories,"task_prompt_memories": task_prompt_memories,
         }, mode="stream")
         return __result__
     

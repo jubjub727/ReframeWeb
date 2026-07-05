@@ -125,6 +125,29 @@ class RecordingMemoryRelevance:
         return types.RelevantMemoryDecision(kept_memory_ids=[])
 
 
+class RecordingTaskPrompt:
+    def __init__(self):
+        self.current_user_request = None
+        self.selected_task_id = None
+        self.selected_memories = None
+        self.selected_memory_ids = None
+
+    async def generate_task_prompt(
+        self,
+        current_user_request,
+        selected_task_id,
+        selected_memories,
+        selected_memory_ids=(),
+    ):
+        self.current_user_request = current_user_request
+        self.selected_task_id = selected_task_id
+        self.selected_memories = selected_memories
+        self.selected_memory_ids = tuple(selected_memory_ids)
+        return types.TaskPromptDecision(
+            full_task_prompt="Task:\nAsk only for what matters.\n\nInput:\nDo this.",
+        )
+
+
 class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
     def test_wake_keyword_is_removed_from_routed_transcript(self):
         matcher = TriggerPhraseMatcher(TriggerPhraseConfig())
@@ -158,6 +181,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         search_depth = RecordingSearchDepth()
         memory_retrieval = RecordingMemoryRetrieval()
         memory_relevance = RecordingMemoryRelevance()
+        task_prompt = RecordingTaskPrompt()
         processor = VoiceTurnProcessor(
             config=_voice_config(),
             transcriber=StubTranscriber(),
@@ -167,6 +191,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             search_depth=search_depth,
             memory_retrieval=memory_retrieval,
             memory_relevance=memory_relevance,
+            task_prompt=task_prompt,
         )
 
         result = await processor.process(
@@ -206,6 +231,11 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             result.relevant_memories.to_dict(),
             RetrievedMemoryContext().to_dict(),
         )
+        self.assertEqual(task_prompt.current_user_request, "do this")
+        self.assertEqual(task_prompt.selected_task_id, "task:needs_more_information")
+        self.assertIs(task_prompt.selected_memories, result.relevant_memories)
+        self.assertEqual(task_prompt.selected_memory_ids, ())
+        self.assertIn("Task:\nAsk only for what matters.", result.task_prompt.full_task_prompt)
 
 
 def _voice_config():

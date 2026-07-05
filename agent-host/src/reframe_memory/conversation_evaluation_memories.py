@@ -101,6 +101,8 @@ class ConversationEvaluationMemoryStore:
     async def search(
         self,
         search: ConversationEvaluationMemorySearch | None = None,
+        *,
+        mark_read: bool = True,
     ) -> list[ConversationEvaluationMemoryNode]:
         parts = build_memory_node_where(
             _memory_search_from_conversation_evaluation_memory_search(search)
@@ -113,9 +115,12 @@ class ConversationEvaluationMemoryStore:
             """,
             parts.variables,
         )
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
         return [
             conversation_evaluation_memory_node_from_record(record)
-            for record in _records(result)
+            for record in records
         ]
 
 

@@ -44,15 +44,16 @@ class VoiceTurnCapture:
         state = create_capture_state(self._config, self._conversation_mode)
         keyphrase_gate = VoiceKeyphraseGate(self._config)
         debug_audio = create_debug_audio(self._config)
-        deadline = listen_deadline(self._config)
-        listen_started_at = time.perf_counter()
 
-        self._emit_listening(on_event, segmenter, state)
         with MicrophoneStream(self._config.audio) as microphone:
             try:
                 self._emit_audio_source(on_event, microphone)
                 if state.keyphrase_required:
                     keyphrase_gate.start(state, self._emitter(on_event))
+
+                deadline = listen_deadline(self._config)
+                listen_started_at = time.perf_counter()
+                self._emit_listening(on_event, segmenter, state)
 
                 for frame in microphone.frames():
                     debug_audio.append(frame)

@@ -9,8 +9,11 @@ from reframe_agent_host.agent_flow.memory_retrieval import MemoryRetrievalPlanne
 from reframe_agent_host.agent_flow.memory_relevance import MemoryRelevancePlanner
 from reframe_agent_host.agent_flow.search_depth import SearchDepthPlanner
 from reframe_agent_host.agent_flow.task_choice import TaskChoicePlanner
+from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
+from reframe_agent_host.agent_flow.task_prompt import TaskPromptPlanner
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
+from reframe_agent_host.speech.tts import KokoroSpeaker
 from reframe_agent_host.voice.turn_capture import VoiceTurnCapture
 from reframe_agent_host.voice.turn_processor import VoiceTurnProcessor
 from reframe_agent_host.voice.types import (
@@ -33,6 +36,9 @@ class VoiceTurnPipeline:
         self._search_depth = SearchDepthPlanner(session_id=config.session_id)
         self._memory_retrieval = MemoryRetrievalPlanner(session_id=config.session_id)
         self._memory_relevance = MemoryRelevancePlanner(session_id=config.session_id)
+        self._task_prompt = TaskPromptPlanner(session_id=config.session_id)
+        self._task_execution = TaskExecutionPlanner()
+        self._speaker = KokoroSpeaker()
         self._processor = VoiceTurnProcessor(
             config,
             self._transcriber,
@@ -42,6 +48,9 @@ class VoiceTurnPipeline:
             self._search_depth,
             self._memory_retrieval,
             self._memory_relevance,
+            self._task_prompt,
+            self._task_execution,
+            self._speaker,
         )
 
     async def run_once(
@@ -67,14 +76,15 @@ class VoiceTurnPipeline:
         self,
         on_event: VoicePipelineEventHandler | None,
     ) -> float:
-        self._emit(on_event, "preparing", "loading faster-whisper CUDA model")
+        self._emit(on_event, "preparing", "loading local speech models")
         prepare_started_at = time.perf_counter()
         self._transcriber.prepare()
+        self._speaker.prepare()
         model_prepare_seconds = time.perf_counter() - prepare_started_at
         self._emit(
             on_event,
             "ready",
-            f"faster-whisper CUDA model loaded in {model_prepare_seconds:.3f}s",
+            f"local speech models loaded in {model_prepare_seconds:.3f}s",
         )
         return model_prepare_seconds
 

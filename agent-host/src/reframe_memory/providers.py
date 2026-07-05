@@ -35,6 +35,8 @@ class ProviderSearch:
     names: tuple[str, ...] = ()
     descriptions: tuple[str, ...] = ()
     baml_surfaces: tuple[str, ...] = ()
+    model_ids: tuple[str, ...] = ()
+    reasoning_efforts: tuple[str, ...] = ()
 
     @classmethod
     def build(
@@ -45,6 +47,8 @@ class ProviderSearch:
         names: Sequence[str] = (),
         descriptions: Sequence[str] = (),
         baml_surfaces: Sequence[str] = (),
+        model_ids: Sequence[str] = (),
+        reasoning_efforts: Sequence[str] = (),
     ) -> "ProviderSearch":
         return cls(
             tags=tags or TagSearch(),
@@ -52,6 +56,8 @@ class ProviderSearch:
             names=tuple(names),
             descriptions=tuple(descriptions),
             baml_surfaces=tuple(baml_surfaces),
+            model_ids=tuple(model_ids),
+            reasoning_efforts=tuple(reasoning_efforts),
         )
 
 
@@ -99,7 +105,38 @@ class ProviderMemory:
         )
         return _parse_provider_node(node)
 
-    async def get(self, provider_id: str) -> ProviderNode | None:
+    async def update(
+        self,
+        provider_id: str,
+        provider: Provider,
+        tags: Sequence[str] = (),
+    ) -> ProviderNode:
+        provider_record_id = memory_node_record_id(provider_id)
+        result = await self.database.query(
+            f"""
+            UPDATE {provider_record_id} SET
+                tags = $tags,
+                content = $content,
+                updated_at = time::now()
+            RETURN AFTER;
+            """,
+            {
+                "tags": list(dict.fromkeys(tag.strip() for tag in tags if tag.strip())),
+                "content": asdict(provider),
+            },
+        )
+        records = _records(result)
+        if not records:
+            msg = f"provider does not exist: {provider_id}"
+            raise ValueError(msg)
+        return _parse_provider_node(records[0])
+
+    async def get(
+        self,
+        provider_id: str,
+        *,
+        mark_read: bool = True,
+    ) -> ProviderNode | None:
         provider_record_id = memory_node_record_id(provider_id)
         result = await self.database.query(
             f"""
@@ -112,11 +149,15 @@ class ProviderMemory:
         if not records:
             return None
 
+        if mark_read:
+            records = await self.database.mark_records_read(records)
         return _parse_provider_node(records[0])
 
     async def search(
         self,
         search: ProviderSearch | None = None,
+        *,
+        mark_read: bool = True,
     ) -> list[ProviderNode]:
         parts = build_memory_node_where(_memory_search_from_provider_search(search))
         result = await self.database.query(
@@ -127,9 +168,17 @@ class ProviderMemory:
             """,
             parts.variables,
         )
-        return [_parse_provider_node(record) for record in _records(result)]
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
+        return [_parse_provider_node(record) for record in records]
 
-    async def tasks_for(self, provider_id: str) -> list[TaskNode]:
+    async def tasks_for(
+        self,
+        provider_id: str,
+        *,
+        mark_read: bool = True,
+    ) -> list[TaskNode]:
         from reframe_memory.tasks import task_node_from_record
 
         provider_record_id = memory_node_record_id(provider_id)
@@ -139,7 +188,10 @@ class ProviderMemory:
             ORDER BY updated_at DESC, created_at DESC;
             """,
         )
-        return [task_node_from_record(record) for record in _records(result)]
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
+        return [task_node_from_record(record) for record in records]
 
 
 def _memory_search_from_provider_search(
@@ -151,11 +203,21 @@ def _memory_search_from_provider_search(
     return MemoryNodeSearch(
         tags=search.tags,
         strings=search.strings,
-        string_fields=("name", "description", "baml_surface"),
+        string_fields=(
+            "name",
+            "description",
+            "baml_surface",
+            "model_id",
+            "reasoning_effort",
+        ),
         content_contains={
             "name": search.names,
             "description": search.descriptions,
             "baml_surface": search.baml_surfaces,
+        },
+        content_equals={
+            "model_id": search.model_ids,
+            "reasoning_effort": search.reasoning_efforts,
         },
     )
 
@@ -169,7 +231,16 @@ def _parse_provider(content: Mapping[str, Any]) -> Provider:
         name=str(content["name"]),
         description=str(content["description"]),
         baml_surface=str(content["baml_surface"]),
+        model_id=_optional_string(content.get("model_id")),
+        reasoning_effort=_optional_string(content.get("reasoning_effort")),
     )
+
+
+def _optional_string(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = str(value)
+    return text if text else None
 
 
 def _records(result: Any) -> list[Mapping[str, Any]]:

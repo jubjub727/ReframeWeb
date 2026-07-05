@@ -63,7 +63,7 @@ class GraphMemoryRetriever:
         if breadth is None:
             return RetrievedTaskCatalog()
 
-        tasks = await self.database.tasks.search()
+        tasks = await _without_mark_read(self.database.tasks.search)
         matched = tuple(
             task
             for task in tasks
@@ -81,6 +81,7 @@ class GraphMemoryRetriever:
                 breadth=breadth,
             )
         )
+        await self._mark_record_ids_read([task.id for task in matched])
         return RetrievedTaskCatalog(tasks=matched)
 
     async def _past_conversation_context(
@@ -91,7 +92,7 @@ class GraphMemoryRetriever:
         if breadth is None:
             return RetrievedPastConversationContext()
 
-        sessions = await self.database.sessions.search()
+        sessions = await _without_mark_read(self.database.sessions.search)
         current_session_id = _normalized_session_id(self.current_session_id)
         retrieved_sessions = []
         for session in sessions:
@@ -129,6 +130,7 @@ class GraphMemoryRetriever:
         if not session_matched and not conversations and not session_memories:
             return None
 
+        await self._mark_record_ids_read([session.id])
         return RetrievedSessionContext(
             session=session,
             matched=session_matched,
@@ -142,7 +144,10 @@ class GraphMemoryRetriever:
         hints: GraphSearchHints,
         breadth: TimestampBreadth,
     ) -> tuple[RetrievedConversation, ...]:
-        conversations = await self.database.sessions.conversations_for(session_id)
+        conversations = await _without_mark_read(
+            self.database.sessions.conversations_for,
+            session_id,
+        )
         matched_contexts = []
         for conversation in conversations:
             conversation_matched = candidate_matches(
@@ -157,6 +162,7 @@ class GraphMemoryRetriever:
                 breadth,
             )
             if conversation_matched or messages:
+                await self._mark_record_ids_read([conversation.id])
                 matched_contexts.append(
                     RetrievedConversation(
                         conversation=conversation,
@@ -172,8 +178,11 @@ class GraphMemoryRetriever:
         hints: GraphSearchHints,
         breadth: TimestampBreadth,
     ) -> tuple[ConversationMessageNode, ...]:
-        messages = await self.database.conversations.messages_for(conversation_id)
-        return tuple(
+        messages = await _without_mark_read(
+            self.database.conversations.messages_for,
+            conversation_id,
+        )
+        matched = tuple(
             message
             for message in messages
             if candidate_matches(
@@ -183,6 +192,8 @@ class GraphMemoryRetriever:
                 breadth=breadth,
             )
         )
+        await self._mark_record_ids_read([message.id for message in matched])
+        return matched
 
     async def _session_memory_candidates(
         self,
@@ -190,8 +201,11 @@ class GraphMemoryRetriever:
         hints: GraphSearchHints,
         breadth: TimestampBreadth,
     ) -> tuple[SessionMemoryNode, ...]:
-        memories = await self.database.sessions.memories_for(session_id)
-        return tuple(
+        memories = await _without_mark_read(
+            self.database.sessions.memories_for,
+            session_id,
+        )
+        matched = tuple(
             memory
             for memory in memories
             if candidate_matches(
@@ -201,9 +215,25 @@ class GraphMemoryRetriever:
                 breadth=breadth,
             )
         )
+        await self._mark_record_ids_read([memory.id for memory in matched])
+        return matched
+
+    async def _mark_record_ids_read(self, record_ids: list[str]) -> None:
+        mark = getattr(self.database, "mark_record_ids_read", None)
+        if mark is not None:
+            await mark(record_ids)
 
 
 def _normalized_session_id(session_id: str | None) -> str | None:
     if session_id is None:
         return None
     return memory_node_record_id(session_id)
+
+
+async def _without_mark_read(method, *args):
+    try:
+        return await method(*args, mark_read=False)
+    except TypeError as exc:
+        if "mark_read" not in str(exc):
+            raise
+        return await method(*args)

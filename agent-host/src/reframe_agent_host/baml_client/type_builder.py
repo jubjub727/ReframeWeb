@@ -20,7 +20,7 @@ from .globals import DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIM
 class TypeBuilder(type_builder.TypeBuilder):
     def __init__(self):
         super().__init__(classes=set(
-          ["AvailableTask","CandidateMemory","ConversationEvaluationMemoryContext","ConversationHistory","ConversationHistoryMessage","ConversationMemorySearchHints","MemoryStringSearch","MemoryTagSearch","RelevanceMemoryContext","RelevantMemoryDecision","RetrievedMemoryCandidate","SearchDepthDecision","SearchDepthDomain","SearchDepthMemoryContext","SearchDepthTimestamps","SelectedTaskContext","SessionMemoryContext","TaskChoiceDecision","TaskChoiceMemoryContext",]
+          ["AvailableTask","CandidateMemory","ConversationEvaluationMemoryContext","ConversationHistory","ConversationHistoryMessage","ConversationMemorySearchHints","MemoryStringSearch","MemoryTagSearch","RelevanceMemoryContext","RelevantMemoryDecision","RetrievedMemoryCandidate","SearchDepthDecision","SearchDepthDomain","SearchDepthMemoryContext","SearchDepthTimestamps","SelectedTaskContext","SessionMemoryContext","TaskChoiceDecision","TaskChoiceMemoryContext","TaskExecutionResult","TaskPromptDecision","TaskPromptMemoryContext","TaskPromptSelectedMemoryContext","TaskReturnItem",]
         ), enums=set(
           ["ConversationMode",]
         ), runtime=DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME)
@@ -35,7 +35,7 @@ class TypeBuilder(type_builder.TypeBuilder):
 
 
     # #########################################################################
-    # Generated classes 19
+    # Generated classes 24
     # #########################################################################
 
     @property
@@ -114,6 +114,26 @@ class TypeBuilder(type_builder.TypeBuilder):
     def TaskChoiceMemoryContext(self) -> "TaskChoiceMemoryContextViewer":
         return TaskChoiceMemoryContextViewer(self)
 
+    @property
+    def TaskExecutionResult(self) -> "TaskExecutionResultViewer":
+        return TaskExecutionResultViewer(self)
+
+    @property
+    def TaskPromptDecision(self) -> "TaskPromptDecisionViewer":
+        return TaskPromptDecisionViewer(self)
+
+    @property
+    def TaskPromptMemoryContext(self) -> "TaskPromptMemoryContextViewer":
+        return TaskPromptMemoryContextViewer(self)
+
+    @property
+    def TaskPromptSelectedMemoryContext(self) -> "TaskPromptSelectedMemoryContextViewer":
+        return TaskPromptSelectedMemoryContextViewer(self)
+
+    @property
+    def TaskReturnItem(self) -> "TaskReturnItemViewer":
+        return TaskReturnItemViewer(self)
+
 
 
 # #########################################################################
@@ -164,7 +184,7 @@ class ConversationModeValues:
 
 
 # #########################################################################
-# Generated classes 19
+# Generated classes 24
 # #########################################################################
 
 class AvailableTaskAst:
@@ -1220,6 +1240,249 @@ class TaskChoiceMemoryContextProperties:
     @property
     def read_at(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("read_at"))
+    
+    
+
+
+class TaskExecutionResultAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("TaskExecutionResult")
+        self._properties: typing.Set[str] = set([  "returns",  ])
+        self._props = TaskExecutionResultProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "TaskExecutionResultProperties":
+        return self._props
+
+
+class TaskExecutionResultViewer(TaskExecutionResultAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class TaskExecutionResultProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def returns(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("returns"))
+    
+    
+
+
+class TaskPromptDecisionAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("TaskPromptDecision")
+        self._properties: typing.Set[str] = set([  "full_task_prompt",  "candidate_memory",  ])
+        self._props = TaskPromptDecisionProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "TaskPromptDecisionProperties":
+        return self._props
+
+
+class TaskPromptDecisionViewer(TaskPromptDecisionAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class TaskPromptDecisionProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def full_task_prompt(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("full_task_prompt"))
+    
+    @property
+    def candidate_memory(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("candidate_memory"))
+    
+    
+
+
+class TaskPromptMemoryContextAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("TaskPromptMemoryContext")
+        self._properties: typing.Set[str] = set([  "title",  "description",  "tags",  "created_at",  "updated_at",  "read_at",  ])
+        self._props = TaskPromptMemoryContextProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "TaskPromptMemoryContextProperties":
+        return self._props
+
+
+class TaskPromptMemoryContextViewer(TaskPromptMemoryContextAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class TaskPromptMemoryContextProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def title(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("title"))
+    
+    @property
+    def description(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("description"))
+    
+    @property
+    def tags(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("tags"))
+    
+    @property
+    def created_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("created_at"))
+    
+    @property
+    def updated_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("updated_at"))
+    
+    @property
+    def read_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("read_at"))
+    
+    
+
+
+class TaskPromptSelectedMemoryContextAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("TaskPromptSelectedMemoryContext")
+        self._properties: typing.Set[str] = set([  "title",  "description",  "tags",  "created_at",  "updated_at",  "read_at",  ])
+        self._props = TaskPromptSelectedMemoryContextProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "TaskPromptSelectedMemoryContextProperties":
+        return self._props
+
+
+class TaskPromptSelectedMemoryContextViewer(TaskPromptSelectedMemoryContextAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class TaskPromptSelectedMemoryContextProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def title(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("title"))
+    
+    @property
+    def description(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("description"))
+    
+    @property
+    def tags(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("tags"))
+    
+    @property
+    def created_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("created_at"))
+    
+    @property
+    def updated_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("updated_at"))
+    
+    @property
+    def read_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("read_at"))
+    
+    
+
+
+class TaskReturnItemAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("TaskReturnItem")
+        self._properties: typing.Set[str] = set([  "name",  "payload",  ])
+        self._props = TaskReturnItemProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "TaskReturnItemProperties":
+        return self._props
+
+
+class TaskReturnItemViewer(TaskReturnItemAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class TaskReturnItemProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def name(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("name"))
+    
+    @property
+    def payload(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("payload"))
     
     
 

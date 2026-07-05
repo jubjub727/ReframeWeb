@@ -20,6 +20,7 @@ from reframe_agent_host.commands.memory_relevance import (
     run_benchmark_memory_relevance,
 )
 from reframe_agent_host.commands.parser import build_parser
+from reframe_agent_host.commands.task_prompt import run_benchmark_task_prompt
 from reframe_agent_host.commands.task_choice import (
     run_benchmark_task_choice,
     run_analyze_task_choice_benchmark,
@@ -182,6 +183,32 @@ def main(argv: Sequence[str] | None = None) -> None:
                     case_ids=args.case_ids,
                     reasoning_efforts=args.reasoning_efforts,
                     reasoning_effort_candidates=args.reasoning_effort_candidates,
+                    output=args.output,
+                ),
+            )
+        )
+
+    if args.command == "benchmark-task-prompt":
+        if args.runs < 1:
+            parser.error("--runs must be at least 1")
+        if args.warmup_runs < 0:
+            parser.error("--warmup-runs cannot be negative")
+        if args.delay_seconds < 0:
+            parser.error("--delay-seconds cannot be negative")
+        if args.provider_cooldown_seconds < 0:
+            parser.error("--provider-cooldown-seconds cannot be negative")
+        raise SystemExit(
+            asyncio.run(
+                run_benchmark_task_prompt(
+                    runs=args.runs,
+                    warmup_runs=args.warmup_runs,
+                    delay_seconds=args.delay_seconds,
+                    provider_cooldown_seconds=args.provider_cooldown_seconds,
+                    provider_ids=args.provider_ids,
+                    case_ids=args.case_ids,
+                    reasoning_efforts=args.reasoning_efforts,
+                    reasoning_effort_candidates=args.reasoning_effort_candidates,
+                    refresh_snapshots=args.refresh_snapshots,
                     output=args.output,
                 ),
             )

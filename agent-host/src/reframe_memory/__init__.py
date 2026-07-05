@@ -24,7 +24,11 @@ from reframe_memory.models import (
     Task,
     TaskChoiceMemory,
     TaskChoiceMemoryNode,
+    TaskPromptMemory,
+    TaskPromptMemoryNode,
     TaskNode,
+    UserPreferenceMemory,
+    UserPreferenceMemoryNode,
 )
 from reframe_memory.providers import ProviderMemory, ProviderSearch
 from reframe_memory.schema import SCHEMA_STATEMENTS
@@ -60,6 +64,14 @@ from reframe_memory.tasks import TaskMemory, TaskSearch
 from reframe_memory.task_choice_memories import (
     TaskChoiceMemorySearch,
     TaskChoiceMemoryStore,
+)
+from reframe_memory.task_prompt_memories import (
+    TaskPromptMemorySearch,
+    TaskPromptMemoryStore,
+)
+from reframe_memory.user_preferences import (
+    UserPreferenceMemorySearch,
+    UserPreferenceMemoryStore,
 )
 
 __all__ = [
@@ -117,6 +129,14 @@ __all__ = [
     "TaskChoiceMemoryStore",
     "TaskMemory",
     "TaskNode",
+    "TaskPromptMemory",
+    "TaskPromptMemoryNode",
+    "TaskPromptMemorySearch",
+    "TaskPromptMemoryStore",
     "TaskSearch",
+    "UserPreferenceMemory",
+    "UserPreferenceMemoryNode",
+    "UserPreferenceMemorySearch",
+    "UserPreferenceMemoryStore",
     "open_memory_database",
 ]

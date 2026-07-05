@@ -10,9 +10,12 @@ from reframe_agent_host.agent_flow.conversation_evaluation import (
 )
 from reframe_agent_host.agent_flow.search_depth import SearchDepthPlanner
 from reframe_agent_host.agent_flow.task_choice import TaskChoicePlanner
+from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
 from reframe_agent_host.baml_client import types
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
+from reframe_agent_host.speech.tts import NoopSpeaker, TextSpeaker
+from reframe_agent_host.task_execution import PrimitiveDispatcher
 from reframe_agent_host.voice.turn_results import (
     mode_switch_turn_result,
     transcribed_turn_result,
@@ -38,6 +41,9 @@ class VoiceTurnProcessor:
         search_depth: SearchDepthPlanner,
         memory_retrieval,
         memory_relevance,
+        task_prompt,
+        task_execution: TaskExecutionPlanner | None = None,
+        speaker: TextSpeaker | None = None,
     ) -> None:
         self._config = config
         self._transcriber = transcriber
@@ -47,6 +53,9 @@ class VoiceTurnProcessor:
         self._search_depth = search_depth
         self._memory_retrieval = memory_retrieval
         self._memory_relevance = memory_relevance
+        self._task_prompt = task_prompt
+        self._task_execution = task_execution
+        self._speaker = speaker or NoopSpeaker()
 
     async def process(
         self,
@@ -92,6 +101,8 @@ class VoiceTurnProcessor:
             if trigger_detection is not None
             else transcript.text
         )
+        if routed_transcript:
+            self._emit(on_event, "human-reply", routed_transcript)
         if trigger_detection is not None:
             self._emit(
                 on_event,
@@ -154,6 +165,37 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
+        (
+            task_prompt,
+            task_prompt_seconds,
+            post_vad_task_prompt_seconds,
+        ) = await self._maybe_generate_task_prompt(
+            routed_transcript,
+            task_choice,
+            relevance_decision,
+            relevant_memories,
+            post_vad_started_at,
+            on_event,
+        )
+        (
+            task_execution,
+            task_execution_seconds,
+            post_vad_task_execution_seconds,
+        ) = await self._maybe_execute_task(
+            task_choice,
+            task_prompt,
+            post_vad_started_at,
+            on_event,
+        )
+        (
+            primitive_dispatch,
+            primitive_dispatch_seconds,
+            post_vad_primitive_dispatch_seconds,
+        ) = await self._maybe_dispatch_primitives(
+            task_execution,
+            post_vad_started_at,
+            on_event,
+        )
         post_vad_transcript_seconds = time.perf_counter() - post_vad_started_at
         return transcribed_turn_result(
             config=self._config,
@@ -168,6 +210,9 @@ class VoiceTurnProcessor:
             retrieved_memories=retrieved_memories,
             relevance_decision=relevance_decision,
             relevant_memories=relevant_memories,
+            task_prompt=task_prompt,
+            task_execution=task_execution,
+            primitive_dispatch=primitive_dispatch,
             timings={
                 "model_prepare_seconds": model_prepare_seconds,
                 "total_started_at": total_started_at,
@@ -181,12 +226,22 @@ class VoiceTurnProcessor:
                 "post_vad_memory_relevance_seconds": (
                     post_vad_memory_relevance_seconds
                 ),
+                "post_vad_task_prompt_seconds": post_vad_task_prompt_seconds,
+                "post_vad_task_execution_seconds": (
+                    post_vad_task_execution_seconds
+                ),
+                "post_vad_primitive_dispatch_seconds": (
+                    post_vad_primitive_dispatch_seconds
+                ),
                 "transcription_seconds": transcription_seconds,
                 "task_choice_seconds": task_choice_seconds,
                 "memory_search_seconds": memory_search_seconds,
                 "search_depth_seconds": search_depth_seconds,
                 "memory_retrieval_seconds": memory_retrieval_seconds,
                 "memory_relevance_seconds": memory_relevance_seconds,
+                "task_prompt_seconds": task_prompt_seconds,
+                "task_execution_seconds": task_execution_seconds,
+                "primitive_dispatch_seconds": primitive_dispatch_seconds,
             },
         )
 
@@ -222,6 +277,8 @@ class VoiceTurnProcessor:
             "task-chosen",
             f"{task_choice.selected_task_id} ({task_choice_seconds:.3f}s)",
         )
+        if task_choice.agent_thought:
+            self._emit(on_event, "agent-thought", task_choice.agent_thought)
         return (
             task_choice,
             task_choice_seconds,
@@ -412,6 +469,104 @@ class VoiceTurnProcessor:
             memory_relevance_seconds,
             time.perf_counter() - post_vad_started_at,
         )
+
+    async def _maybe_generate_task_prompt(
+        self,
+        routed_transcript: str,
+        task_choice: types.TaskChoiceDecision | None,
+        relevance_decision: types.RelevantMemoryDecision | None,
+        relevant_memories: RetrievedMemoryContext | None,
+        post_vad_started_at: float,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> tuple[types.TaskPromptDecision | None, float | None, float | None]:
+        if not self._config.task_choice_enabled:
+            return None, None, None
+        if task_choice is None or relevant_memories is None or not routed_transcript:
+            return None, None, None
+
+        self._emit(
+            on_event,
+            "task-prompt",
+            "generating final task prompt with BAML",
+        )
+        task_prompt_started_at = time.perf_counter()
+        decision = await self._task_prompt.generate_task_prompt(
+            current_user_request=routed_transcript,
+            selected_task_id=task_choice.selected_task_id,
+            selected_memories=relevant_memories,
+            selected_memory_ids=(
+                relevance_decision.kept_memory_ids if relevance_decision else ()
+            ),
+        )
+        task_prompt_seconds = time.perf_counter() - task_prompt_started_at
+        self._emit(
+            on_event,
+            "task-prompt-generated",
+            f"{len(decision.full_task_prompt)} chars ({task_prompt_seconds:.3f}s)",
+        )
+        return (
+            decision,
+            task_prompt_seconds,
+            time.perf_counter() - post_vad_started_at,
+        )
+
+    async def _maybe_execute_task(
+        self,
+        task_choice: types.TaskChoiceDecision | None,
+        task_prompt: types.TaskPromptDecision | None,
+        post_vad_started_at: float,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> tuple[types.TaskExecutionResult | None, float | None, float | None]:
+        if not self._config.task_choice_enabled:
+            return None, None, None
+        if self._task_execution is None or task_choice is None or task_prompt is None:
+            return None, None, None
+
+        self._emit(on_event, "task-execution", "executing selected task")
+        started_at = time.perf_counter()
+        result = await self._task_execution.execute_task(
+            selected_task_id=task_choice.selected_task_id,
+            full_task_prompt=task_prompt.full_task_prompt,
+        )
+        seconds = time.perf_counter() - started_at
+        self._emit(
+            on_event,
+            "task-executed",
+            f"{len(result.returns)} return items ({seconds:.3f}s)",
+        )
+        return result, seconds, time.perf_counter() - post_vad_started_at
+
+    async def _maybe_dispatch_primitives(
+        self,
+        task_execution: types.TaskExecutionResult | None,
+        post_vad_started_at: float,
+        on_event: VoicePipelineEventHandler | None,
+    ):
+        if task_execution is None:
+            return None, None, None
+
+        self._emit(on_event, "primitive-dispatch", "handling task return items")
+        started_at = time.perf_counter()
+        database = await open_memory_database()
+        try:
+            await database.apply_schema()
+            await database.ensure_roots()
+            result = await PrimitiveDispatcher(
+                database=database,
+                session_id=self._config.session_id,
+                conversation_id=self._config.conversation_id,
+                speaker=self._speaker,
+                on_event=on_event,
+            ).dispatch(task_execution)
+        finally:
+            await database.close()
+        seconds = time.perf_counter() - started_at
+        self._emit(
+            on_event,
+            "primitive-dispatched",
+            f"{len(result.records)} items ({seconds:.3f}s)",
+        )
+        return result, seconds, time.perf_counter() - post_vad_started_at
 
     def _emit(
         self,

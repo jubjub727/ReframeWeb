@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from reframe_agent_host.memory_seed.opencode_go_models import (
     OPENCODE_GO_BASE_URL,
+    OPENCODE_GO_REASONING_EFFORTS,
     OpenCodeGoModelReference,
     opencode_go_model_inventory,
 )
@@ -34,12 +35,13 @@ async def ensure_opencode_go_providers(
     created_provider_ids: list[str] = []
     existing_provider_ids: list[str] = []
     for reference in opencode_go_model_inventory():
-        direct = await _ensure_provider(
-            database,
-            _direct_provider(reference),
-            DIRECT_MODEL_TAGS + (reference.model_id,),
-        )
-        _record_seed_result(direct, created_provider_ids, existing_provider_ids)
+        for effort in OPENCODE_GO_REASONING_EFFORTS:
+            direct = await _ensure_provider(
+                database,
+                _direct_provider(reference, effort),
+                DIRECT_MODEL_TAGS + (reference.model_id, effort),
+            )
+            _record_seed_result(direct, created_provider_ids, existing_provider_ids)
 
         workspace = await _ensure_provider(
             database,
@@ -65,13 +67,19 @@ async def _ensure_provider(
         ProviderSearch.build(
             names=(provider.name,),
             baml_surfaces=(provider.baml_surface,),
+            model_ids=(provider.model_id or "",),
+            reasoning_efforts=(provider.reasoning_effort or "",),
         )
     )
     for node in existing:
         if (
             node.content.name == provider.name
             and node.content.baml_surface == provider.baml_surface
+            and node.content.model_id == provider.model_id
+            and node.content.reasoning_effort == provider.reasoning_effort
         ):
+            if node.content != provider or tuple(node.tags) != tuple(tags):
+                node = await database.providers.update(node.id, provider, tags=tags)
             return node, False
 
     return await database.providers.create(provider, tags=tags), True
@@ -89,14 +97,16 @@ def _record_seed_result(
         existing_provider_ids.append(node.id)
 
 
-def _direct_provider(reference: OpenCodeGoModelReference) -> Provider:
+def _direct_provider(reference: OpenCodeGoModelReference, effort: str) -> Provider:
     return Provider(
-        name=f"OpenCode Go direct model: {reference.model_id}",
+        name=f"OpenCode Go direct model: {reference.model_id} / {effort}",
         description=(
             "Calls the OpenCode Go OpenAI-compatible API directly with model "
-            f"{reference.model_id}."
+            f"{reference.model_id} and reasoning effort {effort}."
         ),
         baml_surface=reference.direct_baml_surface,
+        model_id=reference.model_id,
+        reasoning_effort=effort,
     )
 
 
@@ -108,29 +118,37 @@ def _workspace_provider(reference: OpenCodeGoModelReference) -> Provider:
             f"{reference.model_id}. This is not used by direct API benchmarks."
         ),
         baml_surface=reference.workspace_baml_surface,
+        model_id=reference.model_id,
     )
 
 
 async def _prune_removed_providers(database: MemoryDatabase) -> list[str]:
-    allowed_surfaces = _allowed_baml_surfaces()
+    allowed_keys = _allowed_provider_keys()
     providers = await database.providers.search(
-        ProviderSearch.build(tags=TagSearch.build(all_of=("opencode-go",)))
+        ProviderSearch.build(tags=TagSearch.build(all_of=("opencode-go",))),
+        mark_read=False,
     )
     removed_provider_ids = []
     for provider in providers:
-        if provider.content.baml_surface in allowed_surfaces:
+        key = (
+            provider.content.baml_surface,
+            provider.content.model_id,
+            provider.content.reasoning_effort,
+        )
+        if key in allowed_keys:
             continue
         await _delete_provider(database, provider.id)
         removed_provider_ids.append(provider.id)
     return removed_provider_ids
 
 
-def _allowed_baml_surfaces() -> set[str]:
-    surfaces: set[str] = set()
+def _allowed_provider_keys() -> set[tuple[str, str | None, str | None]]:
+    keys: set[tuple[str, str | None, str | None]] = set()
     for reference in opencode_go_model_inventory():
-        surfaces.add(reference.direct_baml_surface)
-        surfaces.add(reference.workspace_baml_surface)
-    return surfaces
+        for effort in OPENCODE_GO_REASONING_EFFORTS:
+            keys.add((reference.direct_baml_surface, reference.model_id, effort))
+        keys.add((reference.workspace_baml_surface, reference.model_id, None))
+    return keys
 
 
 async def _delete_provider(database: MemoryDatabase, provider_id: str) -> None:

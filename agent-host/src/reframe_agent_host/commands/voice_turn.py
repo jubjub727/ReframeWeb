@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime
+import os
 import sys
+import time
 
 from reframe_agent_host.voice.microphone import AudioInputConfig
 from reframe_agent_host.baml_client import types
@@ -35,6 +37,8 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
         print("[error] --turns must be 0 or greater", file=sys.stderr)
         return 2
 
+    debug_output = args.debug_output or args.verbose_context
+    _configure_baml_logging(debug_output)
     config = await _prepared_voice_pipeline_config(args)
     pipeline = VoiceTurnPipeline(config)
     results = []
@@ -42,29 +46,51 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
     try:
         while args.turns == 0 or turn_index < args.turns:
             turn_index += 1
-            if args.turns != 1:
+            if debug_output and args.turns != 1:
                 print(f"[turn {turn_index}] starting", file=sys.stderr)
 
-            result = await pipeline.run_once(on_event=_ConciseEventPrinter())
+            turn_started_at = time.perf_counter()
+            result = await pipeline.run_once(
+                on_event=_VoiceTurnEventPrinter(
+                    debug_output=debug_output,
+                    turn_started_at=turn_started_at,
+                ),
+            )
             results.append(result)
-            _print_turn_result(result, config)
+            _print_turn_result(
+                result,
+                config,
+                debug_output=debug_output,
+                verbose_context=args.verbose_context,
+            )
     except KeyboardInterrupt:
         print("\nInterrupted.", file=sys.stderr)
-        if results:
+        if debug_output and results:
             print_timing_summary(results)
         return 130
     except TimeoutError as error:
         print(f"[timeout] {error}", file=sys.stderr)
-        if results:
+        if debug_output and results:
             print_timing_summary(results)
         return 2
     except WhisperGpuRuntimeError as error:
         print(f"[gpu] {error}", file=sys.stderr)
         return 3
 
-    if args.turns != 1:
+    if debug_output and args.turns != 1:
         print_timing_summary(results)
     return 0
+
+
+def _configure_baml_logging(debug_output: bool) -> None:
+    if not debug_output:
+        os.environ["BAML_LOG"] = "OFF"
+        try:
+            from baml_py.logging import set_log_level
+
+            set_log_level("OFF")
+        except Exception:
+            pass
 
 
 async def _prepared_voice_pipeline_config(args: argparse.Namespace) -> VoicePipelineConfig:
@@ -107,40 +133,101 @@ async def _ensure_voice_memory_context(args: argparse.Namespace) -> None:
     finally:
         await database.close()
 
-    print(
-        f"[memory] session_id={args.session_id} conversation_id={args.conversation_id}",
-        file=sys.stderr,
-    )
+    if args.debug_output or args.verbose_context:
+        print(
+            f"[memory] session_id={args.session_id} conversation_id={args.conversation_id}",
+            file=sys.stderr,
+        )
 
 
 def _timestamped_name(prefix: str) -> str:
     return f"{prefix} {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
 
 
-class _ConciseEventPrinter:
+class _VoiceTurnEventPrinter:
+    _DISPLAY_NAMES = {
+        "primitive-dispatch": "response-items",
+        "primitive-dispatched": "response-items",
+    }
+    _LATENCY_STAGES = {
+        "task-chosen": "task_choice",
+        "memory-search-hints": "memory_search",
+        "search-depths": "search_depth",
+        "memory-relevance-decision": "memory_relevance",
+        "task-prompt-generated": "task_prompt",
+        "task-executed": "task_execution",
+    }
+
+    def __init__(self, *, debug_output: bool, turn_started_at: float) -> None:
+        self._debug_output = debug_output
+        self._turn_started_at = turn_started_at
+
     def __call__(self, stage: str, message: str) -> None:
+        if not self._debug_output:
+            if stage == "listening":
+                self._print_live(
+                    f"[startup {_latency(time.perf_counter() - self._turn_started_at)}] ready",
+                )
+            elif stage == "human-reply":
+                self._print_live(f"human_reply: {_single_line(message, limit=None)}")
+            elif stage == "agent-thought":
+                self._print_live(f"agent_thought: {_single_line(message, limit=None)}")
+            elif stage == "agent-reply":
+                self._print_live(f"agent_reply: {_single_line(message, limit=None)}")
+            elif stage in self._LATENCY_STAGES:
+                latency = _event_latency(message)
+                if latency is not None:
+                    label = self._LATENCY_STAGES[stage]
+                    self._print_live(f"[{label} {latency}]")
+            return
+
         if stage in {
             "preparing",
             "ready",
+            "listening",
+            "audio",
             "transcribing",
+            "transcript",
+            "human-reply",
             "trigger",
+            "keyphrase",
+            "speech",
             "task-choice",
             "memory-search",
             "search-depth",
             "memory-retrieval",
             "memory-relevance",
+            "task-prompt",
+            "task-execution",
+            "primitive-dispatch",
+            "agent-reply",
+            "agent-thought",
+            "tts-error",
             "conversation-context",
         }:
-            print(f"[{stage}] {message}", file=sys.stderr)
+            label = self._DISPLAY_NAMES.get(stage, stage)
+            self._print_live(f"[{label}] {message}")
+
+    def _print_live(self, message: str) -> None:
+        print(message, flush=True)
 
 
-def _print_turn_result(result, config: VoicePipelineConfig) -> None:
+def _print_turn_result(
+    result,
+    config: VoicePipelineConfig,
+    *,
+    debug_output: bool,
+    verbose_context: bool,
+) -> None:
+    if not debug_output:
+        return
+
     print()
     print("Turn summary")
     print(f"session_id: {config.session_id or 'NONE'}")
     print(f"conversation_id: {config.conversation_id or 'NONE'}")
     if result.routed_transcript:
-        print(f"routed_transcript: {_single_line(result.routed_transcript)}")
+        print(f"human_reply: {_single_line(result.routed_transcript, limit=None)}")
 
     if result.transcript is not None:
         print(
@@ -154,19 +241,24 @@ def _print_turn_result(result, config: VoicePipelineConfig) -> None:
             f"confidence={result.task_choice.confidence:.2f} "
             f"latency={_latency(result.timings.task_choice_seconds)}"
         )
+        if result.task_choice.agent_thought:
+            print(
+                "agent_thought: "
+                f"{_single_line(result.task_choice.agent_thought, limit=None)}"
+            )
     if result.memory_search_hints is not None:
         hints = result.memory_search_hints
         print(
             "memory_search_hints: "
-            f"tags_any={hints.tags.any_of} "
-            f"tags_none={hints.tags.none_of} "
-            f"strings_contains={hints.strings.contains} "
+            f"tags_any={len(hints.tags.any_of)} "
+            f"tags_none={len(hints.tags.none_of)} "
+            f"strings_contains={len(hints.strings.contains)} "
             f"latency={_latency(result.timings.memory_search_seconds)}"
         )
     if result.search_depths is not None:
         print(
             "search_depth: "
-            f"{_depth_summary(result.search_depths)} "
+            f"domains={len(result.search_depths.depths)} "
             f"latency={_latency(result.timings.search_depth_seconds)}"
         )
     if result.retrieved_memories is not None:
@@ -175,7 +267,8 @@ def _print_turn_result(result, config: VoicePipelineConfig) -> None:
             f"{_retrieval_counts(result.retrieved_memories)} "
             f"latency={_latency(result.timings.memory_retrieval_seconds)}"
         )
-        _print_retrieved_memories(result.retrieved_memories)
+        if verbose_context:
+            _print_retrieved_memories(result.retrieved_memories)
     if result.relevance_decision is not None:
         print(
             "memory_relevance: "
@@ -183,8 +276,53 @@ def _print_turn_result(result, config: VoicePipelineConfig) -> None:
             f"latency={_latency(result.timings.memory_relevance_seconds)}"
         )
     if result.relevant_memories is not None:
-        print(_retrieval_counts(result.relevant_memories))
-        _print_retrieved_memories(result.relevant_memories, "Relevant memories")
+        print(
+            "relevant_memory_context: "
+            f"{_retrieval_counts(result.relevant_memories)}"
+        )
+        if verbose_context:
+            _print_retrieved_memories(result.relevant_memories, "Relevant memories")
+    if result.task_prompt is not None:
+        print(
+            "task_prompt: "
+            f"chars={len(result.task_prompt.full_task_prompt)} "
+            f"latency={_latency(result.timings.task_prompt_seconds)}"
+        )
+    if result.task_execution is not None:
+        print(
+            "task_execution: "
+            f"returns={len(result.task_execution.returns)} "
+            f"latency={_latency(result.timings.task_execution_seconds)}"
+        )
+    if result.primitive_dispatch is not None:
+        print(
+            "response_items: "
+            f"records={len(result.primitive_dispatch.records)} "
+            f"latency={_latency(result.timings.primitive_dispatch_seconds)}"
+        )
+        _print_conversation_returns(result.primitive_dispatch.records)
+
+
+def _print_conversation_lines(result) -> None:
+    if result.routed_transcript:
+        print(f"human_reply: {_single_line(result.routed_transcript, limit=None)}")
+
+    if result.task_choice is not None and result.task_choice.agent_thought:
+        print(
+            "agent_thought: "
+            f"{_single_line(result.task_choice.agent_thought, limit=None)}"
+        )
+
+    if result.primitive_dispatch is not None:
+        _print_conversation_returns(result.primitive_dispatch.records)
+
+
+def _print_conversation_returns(records) -> None:
+    for record in records:
+        if record.name in {"agent_thought", "agent_reply"}:
+            print(f"{record.name}: {_single_line(record.detail, limit=None)}")
+        elif record.status in {"unsupported", "malformed"}:
+            print(f"agent_reply: {_single_line(record.detail, limit=None)}")
 
 
 def _depth_summary(depths: types.SearchDepthDecision) -> str:
@@ -324,6 +462,19 @@ def _latency(value: float | None) -> str:
     if value < 1:
         return f"{value * 1000:.0f}ms"
     return f"{value:.3f}s"
+
+
+def _event_latency(message: str) -> str | None:
+    marker = message.rsplit("(", 1)
+    if len(marker) != 2:
+        return None
+    value = marker[1].rstrip(")").strip()
+    if not value.endswith("s"):
+        return None
+    try:
+        return _latency(float(value[:-1]))
+    except ValueError:
+        return None
 
 
 def _voice_pipeline_config(args: argparse.Namespace) -> VoicePipelineConfig:

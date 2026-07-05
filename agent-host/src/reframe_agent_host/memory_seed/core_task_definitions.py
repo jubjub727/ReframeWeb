@@ -11,6 +11,20 @@ CORE_TASK_PROVIDER = Provider(
     baml_surface="CoreRepairTask",
 )
 CORE_TASK_TAGS = ("core", "repair")
+CORE_TASK_MODEL_ID = "deepseek-v4-flash"
+CORE_TASK_REASONING_EFFORT = "xhigh"
+
+CORE_TASK_RETURN_OPTIONS = (
+    "This task may respond with named items. Use agent_reply with payload "
+    "{\"text\": \"...\"} for text that should be shown and spoken to the user; "
+    "agent_thought with payload {\"text\": \"...\"} for private context that "
+    "should be saved to the conversation without being spoken; session_memory "
+    "with payload {\"title\": \"...\", \"description\": \"...\"} for useful "
+    "context that only belongs to the current session; user_preference with "
+    "payload {\"title\": \"...\", \"description\": \"...\"} for durable "
+    "preferences that should apply globally in future sessions. Other "
+    "included guidance may describe additional named items."
+)
 
 
 @dataclass(frozen=True)
@@ -45,21 +59,21 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "performed."
         ),
         output=(
-            "Return a human_reply that explains why the requested behavior "
-            "cannot be handled. Include an agent_thought when useful private "
-            "context should be added to the conversation without being spoken "
-            "to the human. Include a candidate_memory when there is a useful "
-            "observation to preserve."
+            "Return named items that explain why the requested behavior "
+            "cannot be handled and preserve useful context."
         ),
         prompt=(
+            CORE_TASK_RETURN_OPTIONS
+            + " "
             "Identify why the requested behavior cannot be handled with the "
             "system's current capabilities, then explain the limitation to the "
             "human clearly and briefly. Do not invent capabilities or pretend "
             "the request can be completed. Keep the reply direct, useful, and "
-            "conversational. Include an agent_thought for useful private context "
-            "that belongs in the conversation but should not be spoken aloud. "
-            "Include a candidate_memory when there is a useful observation to "
-            "preserve."
+            "conversational. Return agent_reply when the user should hear the "
+            "limitation. Return agent_thought for useful private context that "
+            "belongs in the conversation but should not be spoken aloud. Return "
+            "session_memory or user_preference only when the request reveals "
+            "context worth saving."
         ),
         tags=CORE_TASK_TAGS + ("not-possible",),
     ),
@@ -74,19 +88,19 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "performed."
         ),
         output=(
-            "Return a human_reply that asks for the information needed to "
-            "continue. Include an agent_thought when useful private context "
-            "should be added to the conversation without being spoken to the "
-            "human. Include a candidate_memory when there is a useful "
-            "observation to preserve."
+            "Return named items that ask for the information needed to "
+            "continue and preserve useful context."
         ),
         prompt=(
+            CORE_TASK_RETURN_OPTIONS
+            + " "
             "Identify what is needed from the human, then ask for it. Ask only "
             "for what matters. Keep the reply concise and make the next answer "
-            "easy to provide. Include an agent_thought for useful private "
-            "context that belongs in the conversation but should not be spoken "
-            "aloud. Include a candidate_memory when there is a useful observation "
-            "to preserve."
+            "easy to provide. Return agent_reply for the question the user "
+            "should hear. Return agent_thought for useful private context that "
+            "belongs in the conversation but should not be spoken aloud. Return "
+            "session_memory or user_preference only when the request reveals "
+            "context worth saving."
         ),
         tags=CORE_TASK_TAGS + ("needs-information",),
     ),

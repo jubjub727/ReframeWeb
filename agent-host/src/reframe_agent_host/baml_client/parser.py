@@ -47,6 +47,18 @@ class LlmResponseParser:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateSearchDepths", llm_response=llm_response, mode="request")
         return typing.cast(types.SearchDepthDecision, __result__)
 
+    def ExecuteTask(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> types.TaskExecutionResult:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExecuteTask", llm_response=llm_response, mode="request")
+        return typing.cast(types.TaskExecutionResult, __result__)
+
+    def GenerateTaskPrompt(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> types.TaskPromptDecision:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="GenerateTaskPrompt", llm_response=llm_response, mode="request")
+        return typing.cast(types.TaskPromptDecision, __result__)
+
     
 
 class LlmStreamParser:
@@ -78,5 +90,17 @@ class LlmStreamParser:
     ) -> stream_types.SearchDepthDecision:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateSearchDepths", llm_response=llm_response, mode="stream")
         return typing.cast(stream_types.SearchDepthDecision, __result__)
+
+    def ExecuteTask(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> stream_types.TaskExecutionResult:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExecuteTask", llm_response=llm_response, mode="stream")
+        return typing.cast(stream_types.TaskExecutionResult, __result__)
+
+    def GenerateTaskPrompt(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> stream_types.TaskPromptDecision:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="GenerateTaskPrompt", llm_response=llm_response, mode="stream")
+        return typing.cast(stream_types.TaskPromptDecision, __result__)
 
     

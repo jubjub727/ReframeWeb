@@ -73,6 +73,21 @@ type_map = {
     "types.TaskChoiceMemoryContext": types.TaskChoiceMemoryContext,
     "stream_types.TaskChoiceMemoryContext": stream_types.TaskChoiceMemoryContext,
 
+    "types.TaskExecutionResult": types.TaskExecutionResult,
+    "stream_types.TaskExecutionResult": stream_types.TaskExecutionResult,
+
+    "types.TaskPromptDecision": types.TaskPromptDecision,
+    "stream_types.TaskPromptDecision": stream_types.TaskPromptDecision,
+
+    "types.TaskPromptMemoryContext": types.TaskPromptMemoryContext,
+    "stream_types.TaskPromptMemoryContext": stream_types.TaskPromptMemoryContext,
+
+    "types.TaskPromptSelectedMemoryContext": types.TaskPromptSelectedMemoryContext,
+    "stream_types.TaskPromptSelectedMemoryContext": stream_types.TaskPromptSelectedMemoryContext,
+
+    "types.TaskReturnItem": types.TaskReturnItem,
+    "stream_types.TaskReturnItem": stream_types.TaskReturnItem,
+
 
     "types.ConversationMode": types.ConversationMode,
 

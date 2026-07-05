@@ -11,6 +11,7 @@ from reframe_agent_host.keyphrases import (
 )
 from reframe_agent_host.speech.transcription import Transcript, WhisperTranscriberConfig
 from reframe_agent_host.speech.triggers import TriggerPhraseConfig, TriggerPhraseDetection
+from reframe_agent_host.task_execution import PrimitiveDispatchResult
 from reframe_agent_host.voice.activity import DetectedUtterance, VoiceActivityConfig
 from reframe_memory import RetrievedMemoryContext
 
@@ -50,18 +51,27 @@ class VoiceTurnTimings:
     post_vad_search_depth_seconds: float | None
     post_vad_memory_retrieval_seconds: float | None
     post_vad_memory_relevance_seconds: float | None
+    post_vad_task_prompt_seconds: float | None
+    post_vad_task_execution_seconds: float | None
+    post_vad_primitive_dispatch_seconds: float | None
     estimated_user_stop_to_transcript_seconds: float | None
     estimated_user_stop_to_task_choice_seconds: float | None
     estimated_user_stop_to_memory_search_seconds: float | None
     estimated_user_stop_to_search_depth_seconds: float | None
     estimated_user_stop_to_memory_retrieval_seconds: float | None
     estimated_user_stop_to_memory_relevance_seconds: float | None
+    estimated_user_stop_to_task_prompt_seconds: float | None
+    estimated_user_stop_to_task_execution_seconds: float | None
+    estimated_user_stop_to_primitive_dispatch_seconds: float | None
     transcription_seconds: float | None
     task_choice_seconds: float | None
     memory_search_seconds: float | None
     search_depth_seconds: float | None
     memory_retrieval_seconds: float | None
     memory_relevance_seconds: float | None
+    task_prompt_seconds: float | None
+    task_execution_seconds: float | None
+    primitive_dispatch_seconds: float | None
     total_seconds: float
 
     def to_dict(self) -> dict[str, float | None]:
@@ -84,6 +94,13 @@ class VoiceTurnTimings:
             "post_vad_memory_relevance_seconds": (
                 self.post_vad_memory_relevance_seconds
             ),
+            "post_vad_task_prompt_seconds": self.post_vad_task_prompt_seconds,
+            "post_vad_task_execution_seconds": (
+                self.post_vad_task_execution_seconds
+            ),
+            "post_vad_primitive_dispatch_seconds": (
+                self.post_vad_primitive_dispatch_seconds
+            ),
             "estimated_user_stop_to_transcript_seconds": (
                 self.estimated_user_stop_to_transcript_seconds
             ),
@@ -102,12 +119,24 @@ class VoiceTurnTimings:
             "estimated_user_stop_to_memory_relevance_seconds": (
                 self.estimated_user_stop_to_memory_relevance_seconds
             ),
+            "estimated_user_stop_to_task_prompt_seconds": (
+                self.estimated_user_stop_to_task_prompt_seconds
+            ),
+            "estimated_user_stop_to_task_execution_seconds": (
+                self.estimated_user_stop_to_task_execution_seconds
+            ),
+            "estimated_user_stop_to_primitive_dispatch_seconds": (
+                self.estimated_user_stop_to_primitive_dispatch_seconds
+            ),
             "transcription_seconds": self.transcription_seconds,
             "task_choice_seconds": self.task_choice_seconds,
             "memory_search_seconds": self.memory_search_seconds,
             "search_depth_seconds": self.search_depth_seconds,
             "memory_retrieval_seconds": self.memory_retrieval_seconds,
             "memory_relevance_seconds": self.memory_relevance_seconds,
+            "task_prompt_seconds": self.task_prompt_seconds,
+            "task_execution_seconds": self.task_execution_seconds,
+            "primitive_dispatch_seconds": self.primitive_dispatch_seconds,
             "total_seconds": self.total_seconds,
         }
 
@@ -128,6 +157,9 @@ class VoiceTurnResult:
     retrieved_memories: RetrievedMemoryContext | None
     relevance_decision: types.RelevantMemoryDecision | None
     relevant_memories: RetrievedMemoryContext | None
+    task_prompt: types.TaskPromptDecision | None
+    task_execution: types.TaskExecutionResult | None
+    primitive_dispatch: PrimitiveDispatchResult | None
     timings: VoiceTurnTimings
 
     def to_dict(self) -> dict[str, object]:
@@ -203,6 +235,30 @@ class VoiceTurnResult:
             "relevant_memories": (
                 self.relevant_memories.to_dict()
                 if self.relevant_memories is not None
+                else None
+            ),
+            "task_prompt": (
+                self.task_prompt.model_dump(mode="json")
+                if self.task_prompt is not None
+                else None
+            ),
+            "task_execution": (
+                self.task_execution.model_dump(mode="json")
+                if self.task_execution is not None
+                else None
+            ),
+            "primitive_dispatch": (
+                {
+                    "records": [
+                        {
+                            "name": record.name,
+                            "status": record.status,
+                            "detail": record.detail,
+                        }
+                        for record in self.primitive_dispatch.records
+                    ]
+                }
+                if self.primitive_dispatch is not None
                 else None
             ),
             "timings": self.timings.to_dict(),

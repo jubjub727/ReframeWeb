@@ -3,6 +3,7 @@ from __future__ import annotations
 from reframe_agent_host.baml_client import types
 from reframe_agent_host.speech.transcription import Transcript
 from reframe_agent_host.speech.triggers import TriggerPhraseDetection
+from reframe_agent_host.task_execution import PrimitiveDispatchResult
 from reframe_agent_host.voice.pipeline_timings import (
     mode_switch_timings,
     turn_timings,
@@ -36,6 +37,9 @@ def mode_switch_turn_result(
         retrieved_memories=None,
         relevance_decision=None,
         relevant_memories=None,
+        task_prompt=None,
+        task_execution=None,
+        primitive_dispatch=None,
         timings=mode_switch_timings(
             model_prepare_seconds,
             capture,
@@ -57,6 +61,9 @@ def transcribed_turn_result(
     retrieved_memories: RetrievedMemoryContext | None,
     relevance_decision: types.RelevantMemoryDecision | None,
     relevant_memories: RetrievedMemoryContext | None,
+    task_prompt: types.TaskPromptDecision | None,
+    task_execution: types.TaskExecutionResult | None,
+    primitive_dispatch: PrimitiveDispatchResult | None,
     timings: dict[str, float | None],
 ) -> VoiceTurnResult:
     return VoiceTurnResult(
@@ -74,6 +81,9 @@ def transcribed_turn_result(
         retrieved_memories=retrieved_memories,
         relevance_decision=relevance_decision,
         relevant_memories=relevant_memories,
+        task_prompt=task_prompt,
+        task_execution=task_execution,
+        primitive_dispatch=primitive_dispatch,
         timings=turn_timings(
             config,
             model_prepare_seconds=timings["model_prepare_seconds"],
@@ -89,11 +99,21 @@ def transcribed_turn_result(
             post_vad_memory_relevance_seconds=timings[
                 "post_vad_memory_relevance_seconds"
             ],
+            post_vad_task_prompt_seconds=timings["post_vad_task_prompt_seconds"],
+            post_vad_task_execution_seconds=timings[
+                "post_vad_task_execution_seconds"
+            ],
+            post_vad_primitive_dispatch_seconds=timings[
+                "post_vad_primitive_dispatch_seconds"
+            ],
             transcription_seconds=timings["transcription_seconds"],
             task_choice_seconds=timings["task_choice_seconds"],
             memory_search_seconds=timings["memory_search_seconds"],
             search_depth_seconds=timings["search_depth_seconds"],
             memory_retrieval_seconds=timings["memory_retrieval_seconds"],
             memory_relevance_seconds=timings["memory_relevance_seconds"],
+            task_prompt_seconds=timings["task_prompt_seconds"],
+            task_execution_seconds=timings["task_execution_seconds"],
+            primitive_dispatch_seconds=timings["primitive_dispatch_seconds"],
         ),
     )

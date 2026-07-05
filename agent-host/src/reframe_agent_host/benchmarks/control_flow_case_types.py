@@ -31,3 +31,4 @@ class ControlFlowBenchmarkCase:
     task_choice_memories: tuple[BenchmarkMemory, ...] = ()
     conversation_evaluation_memories: tuple[BenchmarkMemory, ...] = ()
     search_depth_memories: tuple[BenchmarkMemory, ...] = ()
+    task_prompt_memories: tuple[BenchmarkMemory, ...] = ()

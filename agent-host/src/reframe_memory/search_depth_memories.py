@@ -95,6 +95,8 @@ class SearchDepthMemoryStore:
     async def search(
         self,
         search: SearchDepthMemorySearch | None = None,
+        *,
+        mark_read: bool = True,
     ) -> list[SearchDepthMemoryNode]:
         parts = build_memory_node_where(_memory_search_from_search_depth_memory_search(search))
         result = await self.database.query(
@@ -105,7 +107,10 @@ class SearchDepthMemoryStore:
             """,
             parts.variables,
         )
-        return [search_depth_memory_node_from_record(record) for record in _records(result)]
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
+        return [search_depth_memory_node_from_record(record) for record in records]
 
 
 def _memory_search_from_search_depth_memory_search(

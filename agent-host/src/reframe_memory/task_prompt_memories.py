@@ -4,7 +4,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Any
 
-from reframe_memory.models import TaskChoiceMemory, TaskChoiceMemoryNode
+from reframe_memory.models import TaskPromptMemory, TaskPromptMemoryNode
 from reframe_memory.records import memory_node_from_record
 from reframe_memory.search import (
     MemoryNodeSearch,
@@ -17,15 +17,16 @@ if TYPE_CHECKING:
     from reframe_memory.database import MemoryDatabase
 
 
-TASK_CHOICE_MEMORIES_ROOT_ID = "memory_root:task_choice_memories"
-TASK_CHOICE_MEMORIES_ROOT_NAME = "Task Choice Memories"
-TASK_CHOICE_MEMORIES_ROOT_DESCRIPTION = (
-    "Nodes connected from this root are memories for the task-choice prompt step."
+TASK_PROMPT_MEMORIES_ROOT_ID = "memory_root:task_prompt_memories"
+TASK_PROMPT_MEMORIES_ROOT_NAME = "Task Prompt Memories"
+TASK_PROMPT_MEMORIES_ROOT_DESCRIPTION = (
+    "Nodes connected from this root are memories for the task-prompt "
+    "composition step."
 )
 
 
 @dataclass(frozen=True)
-class TaskChoiceMemorySearch:
+class TaskPromptMemorySearch:
     tags: TagSearch = TagSearch()
     strings: StringSearch = StringSearch()
     titles: tuple[str, ...] = ()
@@ -39,7 +40,7 @@ class TaskChoiceMemorySearch:
         strings: StringSearch | None = None,
         titles: Sequence[str] = (),
         descriptions: Sequence[str] = (),
-    ) -> "TaskChoiceMemorySearch":
+    ) -> "TaskPromptMemorySearch":
         return cls(
             tags=tags or TagSearch(),
             strings=strings or StringSearch(),
@@ -49,27 +50,27 @@ class TaskChoiceMemorySearch:
 
 
 @dataclass
-class TaskChoiceMemoryStore:
+class TaskPromptMemoryStore:
     database: MemoryDatabase
 
     async def ensure_root(self) -> None:
         await self.database.query(
             f"""
-            UPSERT {TASK_CHOICE_MEMORIES_ROOT_ID} SET
+            UPSERT {TASK_PROMPT_MEMORIES_ROOT_ID} SET
                 name = $name,
                 description = $description;
             """,
             {
-                "name": TASK_CHOICE_MEMORIES_ROOT_NAME,
-                "description": TASK_CHOICE_MEMORIES_ROOT_DESCRIPTION,
+                "name": TASK_PROMPT_MEMORIES_ROOT_NAME,
+                "description": TASK_PROMPT_MEMORIES_ROOT_DESCRIPTION,
             },
         )
 
     async def create(
         self,
-        memory: TaskChoiceMemory,
+        memory: TaskPromptMemory,
         tags: Sequence[str] = (),
-    ) -> TaskChoiceMemoryNode:
+    ) -> TaskPromptMemoryNode:
         await self.ensure_root()
         result = await self.database.query(
             """
@@ -87,21 +88,21 @@ class TaskChoiceMemoryStore:
         )
         node = _first_record(result)
         await self.database.query(
-            f"RELATE {TASK_CHOICE_MEMORIES_ROOT_ID}->contains->$node_id;",
+            f"RELATE {TASK_PROMPT_MEMORIES_ROOT_ID}->contains->$node_id;",
             {"node_id": node["id"]},
         )
-        return task_choice_memory_node_from_record(node)
+        return task_prompt_memory_node_from_record(node)
 
     async def search(
         self,
-        search: TaskChoiceMemorySearch | None = None,
+        search: TaskPromptMemorySearch | None = None,
         *,
         mark_read: bool = True,
-    ) -> list[TaskChoiceMemoryNode]:
-        parts = build_memory_node_where(_memory_search_from_task_choice_memory_search(search))
+    ) -> list[TaskPromptMemoryNode]:
+        parts = build_memory_node_where(_memory_search_from_task_prompt_memory_search(search))
         result = await self.database.query(
             f"""
-            SELECT * FROM {TASK_CHOICE_MEMORIES_ROOT_ID}->contains->memory_node
+            SELECT * FROM {TASK_PROMPT_MEMORIES_ROOT_ID}->contains->memory_node
             {parts.where_sql}
             ORDER BY updated_at DESC, created_at DESC;
             """,
@@ -110,11 +111,11 @@ class TaskChoiceMemoryStore:
         records = _records(result)
         if mark_read:
             records = await self.database.mark_records_read(records)
-        return [task_choice_memory_node_from_record(record) for record in records]
+        return [task_prompt_memory_node_from_record(record) for record in records]
 
 
-def _memory_search_from_task_choice_memory_search(
-    search: TaskChoiceMemorySearch | None,
+def _memory_search_from_task_prompt_memory_search(
+    search: TaskPromptMemorySearch | None,
 ) -> MemoryNodeSearch | None:
     if search is None:
         return None
@@ -130,14 +131,14 @@ def _memory_search_from_task_choice_memory_search(
     )
 
 
-def task_choice_memory_node_from_record(
+def task_prompt_memory_node_from_record(
     record: Mapping[str, Any],
-) -> TaskChoiceMemoryNode:
-    return memory_node_from_record(record, _parse_task_choice_memory)
+) -> TaskPromptMemoryNode:
+    return memory_node_from_record(record, _parse_task_prompt_memory)
 
 
-def _parse_task_choice_memory(content: Mapping[str, Any]) -> TaskChoiceMemory:
-    return TaskChoiceMemory(
+def _parse_task_prompt_memory(content: Mapping[str, Any]) -> TaskPromptMemory:
+    return TaskPromptMemory(
         title=str(content["title"]),
         description=str(content["description"]),
     )

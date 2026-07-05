@@ -16,6 +16,12 @@ from reframe_agent_host.benchmarks.memory_relevance_config import (
 from reframe_agent_host.benchmarks.memory_relevance_runner import (
     run_memory_relevance_benchmark,
 )
+from reframe_agent_host.benchmarks.task_prompt_config import (
+    TaskPromptBenchmarkConfig,
+)
+from reframe_agent_host.benchmarks.task_prompt_runner import (
+    run_task_prompt_benchmark,
+)
 from reframe_agent_host.benchmarks.conversation_evaluation_case_types import (
     ConversationEvaluationBenchmarkCase,
 )
@@ -43,11 +49,13 @@ __all__ = [
     "MemoryRelevanceBenchmarkConfig",
     "TaskChoiceBenchmarkCase",
     "TaskChoiceBenchmarkConfig",
+    "TaskPromptBenchmarkConfig",
     "control_flow_cases",
     "conversation_evaluation_cases",
     "run_control_flow_benchmark",
     "run_conversation_evaluation_benchmark",
     "run_memory_relevance_benchmark",
     "run_task_choice_benchmark",
+    "run_task_prompt_benchmark",
     "task_choice_lack_of_capability_cases",
 ]

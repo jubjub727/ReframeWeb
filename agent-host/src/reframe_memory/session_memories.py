@@ -103,6 +103,8 @@ class SessionMemoryStore:
     async def search(
         self,
         search: SessionMemorySearch | None = None,
+        *,
+        mark_read: bool = True,
     ) -> list[SessionMemoryNode]:
         parts = build_memory_node_where(_memory_search_from_session_memory_search(search))
         result = await self.database.query(
@@ -113,9 +115,17 @@ class SessionMemoryStore:
             """,
             parts.variables,
         )
-        return [session_memory_node_from_record(record) for record in _records(result)]
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
+        return [session_memory_node_from_record(record) for record in records]
 
-    async def for_session(self, session_id: str) -> list[SessionMemoryNode]:
+    async def for_session(
+        self,
+        session_id: str,
+        *,
+        mark_read: bool = True,
+    ) -> list[SessionMemoryNode]:
         session_record_id = memory_node_record_id(session_id)
         result = await self.database.query(
             f"""
@@ -123,7 +133,10 @@ class SessionMemoryStore:
             ORDER BY updated_at DESC, created_at DESC;
             """,
         )
-        return [session_memory_node_from_record(record) for record in _records(result)]
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
+        return [session_memory_node_from_record(record) for record in records]
 
     async def _ensure_session(self, session_id: str) -> str:
         session_record_id = memory_node_record_id(session_id)

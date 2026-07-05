@@ -37,6 +37,8 @@ class Provider:
     name: str
     description: str
     baml_surface: str
+    model_id: str | None = None
+    reasoning_effort: str | None = None
 
 
 @dataclass(frozen=True)
@@ -72,6 +74,12 @@ class SessionMemory:
 
 
 @dataclass(frozen=True)
+class UserPreferenceMemory:
+    title: str
+    description: str
+
+
+@dataclass(frozen=True)
 class TaskChoiceMemory:
     title: str
     description: str
@@ -95,13 +103,21 @@ class RelevanceMemory:
     description: str
 
 
+@dataclass(frozen=True)
+class TaskPromptMemory:
+    title: str
+    description: str
+
+
 ProviderNode: TypeAlias = MemoryNode[Provider]
 TaskNode: TypeAlias = MemoryNode[Task]
 SessionNode: TypeAlias = MemoryNode[Session]
 ConversationNode: TypeAlias = MemoryNode[Conversation]
 ConversationMessageNode: TypeAlias = MemoryNode[ConversationMessage]
 SessionMemoryNode: TypeAlias = MemoryNode[SessionMemory]
+UserPreferenceMemoryNode: TypeAlias = MemoryNode[UserPreferenceMemory]
 TaskChoiceMemoryNode: TypeAlias = MemoryNode[TaskChoiceMemory]
 ConversationEvaluationMemoryNode: TypeAlias = MemoryNode[ConversationEvaluationMemory]
 SearchDepthMemoryNode: TypeAlias = MemoryNode[SearchDepthMemory]
 RelevanceMemoryNode: TypeAlias = MemoryNode[RelevanceMemory]
+TaskPromptMemoryNode: TypeAlias = MemoryNode[TaskPromptMemory]

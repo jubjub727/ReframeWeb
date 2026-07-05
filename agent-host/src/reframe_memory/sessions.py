@@ -85,7 +85,12 @@ class SessionStore:
         )
         return session_node_from_record(node)
 
-    async def get(self, session_id: str) -> SessionNode | None:
+    async def get(
+        self,
+        session_id: str,
+        *,
+        mark_read: bool = True,
+    ) -> SessionNode | None:
         session_record_id = memory_node_record_id(session_id)
         result = await self.database.query(
             f"""
@@ -98,9 +103,16 @@ class SessionStore:
         if not records:
             return None
 
+        if mark_read:
+            records = await self.database.mark_records_read(records)
         return session_node_from_record(records[0])
 
-    async def search(self, search: SessionSearch | None = None) -> list[SessionNode]:
+    async def search(
+        self,
+        search: SessionSearch | None = None,
+        *,
+        mark_read: bool = True,
+    ) -> list[SessionNode]:
         parts = build_memory_node_where(_memory_search_from_session_search(search))
         result = await self.database.query(
             f"""
@@ -110,9 +122,17 @@ class SessionStore:
             """,
             parts.variables,
         )
-        return [session_node_from_record(record) for record in _records(result)]
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
+        return [session_node_from_record(record) for record in records]
 
-    async def conversations_for(self, session_id: str) -> list[ConversationNode]:
+    async def conversations_for(
+        self,
+        session_id: str,
+        *,
+        mark_read: bool = True,
+    ) -> list[ConversationNode]:
         from reframe_memory.conversations import conversation_node_from_record
 
         session_record_id = memory_node_record_id(session_id)
@@ -122,9 +142,17 @@ class SessionStore:
             ORDER BY updated_at DESC, created_at DESC;
             """,
         )
-        return [conversation_node_from_record(record) for record in _records(result)]
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
+        return [conversation_node_from_record(record) for record in records]
 
-    async def memories_for(self, session_id: str) -> list[SessionMemoryNode]:
+    async def memories_for(
+        self,
+        session_id: str,
+        *,
+        mark_read: bool = True,
+    ) -> list[SessionMemoryNode]:
         from reframe_memory.session_memories import session_memory_node_from_record
 
         session_record_id = memory_node_record_id(session_id)
@@ -134,7 +162,10 @@ class SessionStore:
             ORDER BY updated_at DESC, created_at DESC;
             """,
         )
-        return [session_memory_node_from_record(record) for record in _records(result)]
+        records = _records(result)
+        if mark_read:
+            records = await self.database.mark_records_read(records)
+        return [session_memory_node_from_record(record) for record in records]
 
 
 def _memory_search_from_session_search(

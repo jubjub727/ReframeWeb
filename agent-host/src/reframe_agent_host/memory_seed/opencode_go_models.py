@@ -4,6 +4,14 @@ from dataclasses import dataclass
 
 
 OPENCODE_GO_BASE_URL = "https://opencode.ai/zen/go/v1"
+OPENCODE_GO_REASONING_EFFORTS = (
+    "none",
+    "minimal",
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+)
 
 
 @dataclass(frozen=True)

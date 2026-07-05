@@ -151,11 +151,21 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--turns",
         type=int,
-        default=1,
-        help="Number of voice turns to run. Use 0 to keep listening until Ctrl+C.",
+        default=0,
+        help="Number of voice turns to run. Default 0 keeps listening until Ctrl+C.",
     )
     parser.add_argument(
         "--no-task-choice",
         action="store_true",
         help="Stop after transcription instead of choosing an initial task with BAML.",
+    )
+    parser.add_argument(
+        "--debug-output",
+        action="store_true",
+        help="Print pipeline stages, ids, timing, and compact diagnostics.",
+    )
+    parser.add_argument(
+        "--verbose-context",
+        action="store_true",
+        help="Print retrieved memories, task catalog, and conversation context.",
     )

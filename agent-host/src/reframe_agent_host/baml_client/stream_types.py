@@ -23,7 +23,7 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
     value: StreamStateValueT
     state: typing_extensions.Literal["Pending", "Incomplete", "Complete"]
 # #########################################################################
-# Generated classes (19)
+# Generated classes (24)
 # #########################################################################
 
 class AvailableTask(BaseModel):
@@ -161,6 +161,33 @@ class TaskChoiceMemoryContext(BaseModel):
     created_at: typing.Optional[str] = None
     updated_at: typing.Optional[str] = None
     read_at: typing.Optional[str] = None
+
+class TaskExecutionResult(BaseModel):
+    returns: typing.List["TaskReturnItem"]
+
+class TaskPromptDecision(BaseModel):
+    full_task_prompt: typing.Optional[str] = None
+    candidate_memory: typing.Optional["CandidateMemory"] = None
+
+class TaskPromptMemoryContext(BaseModel):
+    title: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    tags: typing.List[str]
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
+
+class TaskPromptSelectedMemoryContext(BaseModel):
+    title: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    tags: typing.List[str]
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
+
+class TaskReturnItem(BaseModel):
+    name: typing.Optional[str] = None
+    payload: typing.Optional[typing.Dict[str, str]] = None
 
 # #########################################################################
 # Generated type aliases (0)
