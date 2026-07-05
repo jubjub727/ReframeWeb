@@ -21,6 +21,7 @@ from reframe_agent_host.commands.memory_relevance import (
 )
 from reframe_agent_host.commands.parser import build_parser
 from reframe_agent_host.commands.task_prompt import run_benchmark_task_prompt
+from reframe_agent_host.commands.audio_quality_test import run_audio_quality_test
 from reframe_agent_host.commands.task_choice import (
     run_benchmark_task_choice,
     run_analyze_task_choice_benchmark,
@@ -44,6 +45,9 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     if args.command == "audio-devices":
         raise SystemExit(run_audio_devices())
+
+    if args.command == "audio-quality-test":
+        raise SystemExit(run_audio_quality_test(args))
 
     if args.command == "memory-setup":
         raise SystemExit(asyncio.run(run_memory_setup()))

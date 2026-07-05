@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_memory.retrieved_context import (
     RetrievedConversation,
     RetrievedMemoryContext,

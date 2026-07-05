@@ -2,7 +2,7 @@ import asyncio
 from threading import Event
 import unittest
 
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.task_execution import PrimitiveDispatcher
 
 

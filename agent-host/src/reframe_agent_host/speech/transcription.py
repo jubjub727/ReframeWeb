@@ -15,9 +15,12 @@ from reframe_agent_host.speech.whisper_runtime import (
 )
 
 
+DEFAULT_WHISPER_MODEL = "turbo"
+
+
 @dataclass(frozen=True)
 class WhisperTranscriberConfig:
-    model_size_or_path: str = "base.en"
+    model_size_or_path: str = DEFAULT_WHISPER_MODEL
     compute_type: str = DEFAULT_GPU_COMPUTE_TYPE
     language: str | None = "en"
     beam_size: int = 1

@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 
 from reframe_agent_host import __version__
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.commands.voice_args import add_voice_turn_args
 from reframe_agent_host.speech.transcription import (
     DEFAULT_GPU_COMPUTE_TYPE,
@@ -32,6 +32,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="List the OpenCode Go model inventory used by BAML providers.",
     )
     _add_gpu_check_parser(subparsers)
+    _add_audio_quality_test_parser(subparsers)
     _add_choose_task_parser(subparsers)
     _add_benchmark_task_choice_parser(subparsers)
     _add_benchmark_conversation_evaluation_parser(subparsers)
@@ -56,6 +57,41 @@ def _add_gpu_check_parser(subparsers) -> None:
         "--whisper-compute-type",
         choices=GPU_COMPUTE_TYPES,
         default=DEFAULT_GPU_COMPUTE_TYPE,
+    )
+
+
+def _add_audio_quality_test_parser(subparsers) -> None:
+    parser = subparsers.add_parser(
+        "audio-quality-test",
+        help="Record one microphone sample and verify it is loud enough for ASR.",
+    )
+    parser.add_argument("--device", help="Input device index or name.")
+    parser.add_argument("--seconds", type=float, default=4.0)
+    parser.add_argument("--sample-rate", type=int, default=16_000)
+    parser.add_argument("--input-sample-rate", type=int, default=0)
+    parser.add_argument("--input-gain", type=float, default=1.0)
+    parser.add_argument("--limiter-ceiling", type=float, default=0.95)
+    parser.add_argument("--input-channels", type=int, default=0)
+    parser.add_argument("--input-channel", type=int, default=0)
+    parser.add_argument("--chunk-ms", type=int, default=32)
+    parser.add_argument("--countdown-seconds", type=float, default=1.0)
+    parser.add_argument("--output-dir", default=".debug-audio-quality")
+    parser.add_argument("--prompt", default="tell me a joke")
+    parser.add_argument("--no-prompt", action="store_true")
+    parser.add_argument(
+        "--save-calibration",
+        action="store_true",
+        help="Save the recommended input gain for voice-turn.",
+    )
+    parser.add_argument(
+        "--use-calibration",
+        action="store_true",
+        help="Apply the saved calibration before analyzing this test recording.",
+    )
+    parser.add_argument(
+        "--calibration-file",
+        default=".reframe-audio-calibration.json",
+        help="Calibration file used by --save-calibration and --use-calibration.",
     )
 
 
@@ -305,7 +341,7 @@ def _add_voice_turn_parser(subparsers) -> None:
     voice_turn.add_argument(
         "--mode",
         choices=[mode.value for mode in types.ConversationMode],
-        default=types.ConversationMode.WakeCommand.value,
+        default=types.ConversationMode.WAKE_COMMAND.value,
     )
     add_voice_turn_args(voice_turn)
 

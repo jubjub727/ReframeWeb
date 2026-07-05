@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.commands.voice_turn import (
     _VoiceTurnEventPrinter,
     _ensure_voice_memory_context,
@@ -51,6 +51,8 @@ class RecordingPlanner:
             selected_task_id="task:needs_more_information",
             confidence=1.0,
             reason="test",
+            agent_thought=None,
+            candidate_memory=None,
         )
 
 
@@ -76,6 +78,7 @@ class RecordingConversationEvaluation:
                 contains=["do this"],
                 equals=[],
             ),
+            candidate_memory=None,
         )
 
 
@@ -106,7 +109,8 @@ class RecordingSearchDepth:
                     read_after="2026-07-01T00:00:00Z",
                     updated_after="2026-07-01T00:00:00Z",
                 ),
-            }
+            },
+            candidate_memory=None,
         )
 
 
@@ -136,7 +140,10 @@ class RecordingMemoryRelevance:
         self.current_user_request = current_user_request
         self.selected_task_id = selected_task_id
         self.retrieved_memories = retrieved_memories
-        return types.RelevantMemoryDecision(kept_memory_ids=[])
+        return types.RelevantMemoryDecision(
+            kept_memory_ids=[],
+            candidate_memory=None,
+        )
 
 
 class RecordingTaskPrompt:
@@ -159,6 +166,7 @@ class RecordingTaskPrompt:
         self.selected_memory_ids = tuple(selected_memory_ids)
         return types.TaskPromptDecision(
             full_task_prompt="Task:\nAsk only for what matters.\n\nInput:\nDo this.",
+            candidate_memory=None,
         )
 
 
@@ -241,7 +249,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         result = await processor.process(
             capture=_capture_result(),
-            conversation_mode=types.ConversationMode.WakeCommand,
+            conversation_mode=types.ConversationMode.WAKE_COMMAND,
             model_prepare_seconds=0.0,
             total_started_at=time.perf_counter(),
             on_event=None,
@@ -299,7 +307,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         task = asyncio.create_task(
             processor.process(
                 capture=_capture_result(),
-                conversation_mode=types.ConversationMode.WakeCommand,
+                conversation_mode=types.ConversationMode.WAKE_COMMAND,
                 model_prepare_seconds=0.0,
                 total_started_at=time.perf_counter(),
                 on_event=lambda stage, message: events.append((stage, message)),
@@ -333,7 +341,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         task = asyncio.create_task(
             processor.process(
                 capture=_capture_result(),
-                conversation_mode=types.ConversationMode.WakeCommand,
+                conversation_mode=types.ConversationMode.WAKE_COMMAND,
                 model_prepare_seconds=0.0,
                 total_started_at=time.perf_counter(),
                 on_event=lambda stage, message: events.append((stage, message)),
@@ -432,14 +440,14 @@ def _voice_config(task_choice_enabled=True):
         keyphrases=KeyphraseSpotterConfig(),
         triggers=TriggerPhraseConfig(),
         transcription=WhisperTranscriberConfig(),
-        conversation_mode=types.ConversationMode.WakeCommand,
+        conversation_mode=types.ConversationMode.WAKE_COMMAND,
         task_choice_enabled=task_choice_enabled,
     )
 
 
 def _capture_result():
     return CaptureResult(
-        conversation_mode=types.ConversationMode.WakeCommand,
+        conversation_mode=types.ConversationMode.WAKE_COMMAND,
         keyphrase_detection=KeyphraseDetection(
             kind="wake_command",
             phrase="jarvis",

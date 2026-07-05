@@ -5,7 +5,7 @@ from collections import deque
 
 import numpy as np
 
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.voice.activity import (
     UtteranceSegmenter,
     create_voice_activity_detector,
@@ -26,7 +26,7 @@ def create_capture_state(
 ) -> CaptureState:
     return CaptureState(
         conversation_mode=conversation_mode,
-        keyphrase_required=conversation_mode == types.ConversationMode.WakeCommand,
+        keyphrase_required=conversation_mode == types.ConversationMode.WAKE_COMMAND,
         keyphrase_carry_frames=frame_deque(
             config,
             config.keyphrases.carry_ms,

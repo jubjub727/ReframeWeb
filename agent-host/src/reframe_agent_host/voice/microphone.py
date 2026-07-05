@@ -24,6 +24,7 @@ class AudioInputConfig:
     sample_rate: int = 16_000
     input_sample_rate: int | None = None
     input_gain: float = 1.0
+    limiter_ceiling: float = 0.95
     chunk_ms: int = 32
     channels: int = 0
     channel: int = 0
@@ -91,6 +92,7 @@ class MicrophoneStream:
             target_rate=self._config.sample_rate,
             chunk_samples=self._config.chunk_samples,
             gain=self._config.input_gain,
+            limiter_ceiling=self._config.limiter_ceiling,
         )
         stream_chunk_samples = max(
             1,

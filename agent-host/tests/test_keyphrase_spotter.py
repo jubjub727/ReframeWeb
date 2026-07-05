@@ -3,7 +3,7 @@ from collections import deque
 
 import numpy as np
 
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.commands.parser import build_parser
 from reframe_agent_host.commands.record_wake_audio import DEFAULT_CASES
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
@@ -243,7 +243,7 @@ def _spotter_with_decoder(hypstr):
 
 def _capture_state(spotter):
     state = CaptureState(
-        conversation_mode=types.ConversationMode.WakeCommand,
+        conversation_mode=types.ConversationMode.WAKE_COMMAND,
         keyphrase_required=True,
         keyphrase_carry_frames=deque(maxlen=4),
     )
@@ -258,7 +258,7 @@ def _voice_config():
         keyphrases=KeyphraseSpotterConfig(replay_pre_ms=80),
         triggers=TriggerPhraseConfig(),
         transcription=WhisperTranscriberConfig(),
-        conversation_mode=types.ConversationMode.WakeCommand,
+        conversation_mode=types.ConversationMode.WAKE_COMMAND,
     )
 
 

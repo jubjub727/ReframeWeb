@@ -12,7 +12,7 @@ from reframe_agent_host.agent_flow.conversation_evaluation import (
 from reframe_agent_host.agent_flow.search_depth import SearchDepthPlanner
 from reframe_agent_host.agent_flow.task_choice import TaskChoicePlanner
 from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
 from reframe_agent_host.speech.tts import NoopSpeaker, TextSpeaker

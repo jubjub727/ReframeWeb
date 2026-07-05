@@ -247,8 +247,8 @@ Useful tuning flags:
 - `--wake-carry-ms 220` keeps audio around wake detection so commands that start
   immediately after the wake word are not clipped.
 - `--energy-start-threshold 0.02` if the fallback detector starts too easily.
-- `--whisper-model small.en` for better English accuracy than the default
-  `base.en`.
+- `--whisper-model large-v3` to trade slower transcription for more accuracy
+  than the default `turbo`.
 - `--whisper-compute-type int8_float16` to test lower memory use than the
   default `float16`.
 - `--whisper-model C:\path\to\model` to use a local faster-whisper model path.

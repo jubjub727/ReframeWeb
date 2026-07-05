@@ -1,204 +1,198 @@
 enum ConversationMode {
-    WakeCommand,
-    ContinuousConversation,
+    WAKE_COMMAND
+    CONTINUOUS_CONVERSATION
 }
 
 class AvailableTask {
-    id: string,
-    name: string,
-    description: string,
-    input: string,
-    output: string,
-    prompt: string,
-    provider_id: string,
-    created_at: string,
-    updated_at: string,
-    read_at: string,
+    id string
+    name string
+    description string
+    input string
+    output string
+    prompt string
+    provider_id string
+    created_at string
+    updated_at string
+    read_at string
 }
 
 class ConversationHistoryMessage {
-    created_at: string,
-    updated_at: string,
-    read_at: string,
-    role: string,
-    content: string,
+    created_at string
+    updated_at string
+    read_at string
+    role string
+    content string
 }
 
 class ConversationHistory {
-    id: string,
-    name: string,
-    created_at: string,
-    updated_at: string,
-    read_at: string,
-    messages: ConversationHistoryMessage[],
+    id string
+    name string
+    created_at string
+    updated_at string
+    read_at string
+    messages ConversationHistoryMessage[]
 }
 
 class SessionMemoryContext {
-    title: string,
-    description: string,
-    tags: string[],
-    created_at: string,
-    updated_at: string,
-    read_at: string,
+    title string
+    description string
+    tags string[]
+    created_at string
+    updated_at string
+    read_at string
 }
 
 class TaskChoiceMemoryContext {
-    title: string,
-    description: string,
-    tags: string[],
-    created_at: string,
-    updated_at: string,
-    read_at: string,
+    title string
+    description string
+    tags string[]
+    created_at string
+    updated_at string
+    read_at string
 }
 
 class ConversationEvaluationMemoryContext {
-    title: string,
-    description: string,
-    tags: string[],
-    created_at: string,
-    updated_at: string,
-    read_at: string,
+    title string
+    description string
+    tags string[]
+    created_at string
+    updated_at string
+    read_at string
 }
 
 class SearchDepthMemoryContext {
-    title: string,
-    description: string,
-    tags: string[],
-    created_at: string,
-    updated_at: string,
-    read_at: string,
+    title string
+    description string
+    tags string[]
+    created_at string
+    updated_at string
+    read_at string
 }
 
 class RelevanceMemoryContext {
-    title: string,
-    description: string,
-    tags: string[],
-    created_at: string,
-    updated_at: string,
-    read_at: string,
+    title string
+    description string
+    tags string[]
+    created_at string
+    updated_at string
+    read_at string
 }
 
 class TaskPromptMemoryContext {
-    title: string,
-    description: string,
-    tags: string[],
-    created_at: string,
-    updated_at: string,
-    read_at: string,
+    title string
+    description string
+    tags string[]
+    created_at string
+    updated_at string
+    read_at string
 }
 
 class SelectedTaskContext {
-    id: string,
-    name: string,
-    description: string,
-    input: string,
-    output: string,
-    prompt: string,
-    provider_id: string,
-    created_at: string,
-    updated_at: string,
-    read_at: string,
+    id string
+    name string
+    description string
+    input string
+    output string
+    prompt string
+    provider_id string
+    created_at string
+    updated_at string
+    read_at string
 }
 
 class MemoryTagSearch {
-    any_of: string[],
-    all_of: string[],
-    none_of: string[],
+    any_of string[]
+    all_of string[]
+    none_of string[]
 }
 
 class MemoryStringSearch {
-    contains: string[],
-    equals: string[],
+    contains string[]
+    equals string[]
 }
 
 class CandidateMemory {
-    title: string,
-    description: string,
+    title string
+    description string
 }
 
 class SearchDepthDomain {
-    id: string,
-    description: string,
-    searches: string,
-    hydrates: string,
+    id string
+    description string
+    searches string
+    hydrates string
 }
 
 class SearchDepthTimestamps {
-    created_after: string,
-    read_after: string,
-    updated_after: string,
+    created_after string
+    read_after string
+    updated_after string
 }
 
 class ConversationMemorySearchHints {
-    tags: MemoryTagSearch,
-    strings: MemoryStringSearch,
-    candidate_memory: CandidateMemory?,
+    tags MemoryTagSearch
+    strings MemoryStringSearch
+    candidate_memory CandidateMemory?
 }
 
 class SearchDepthDecision {
-    depths: map<string, SearchDepthTimestamps>,
-    candidate_memory: CandidateMemory?,
+    depths map<string, SearchDepthTimestamps>
+    candidate_memory CandidateMemory?
 }
 
 class RetrievedMemoryCandidate {
-    id: string,
-    kind: string,
-    title: string,
-    description: string,
-    tags: string[],
-    created_at: string,
-    updated_at: string,
-    read_at: string,
-    retrieval_matched: bool,
-    parent_session_id: string?,
-    parent_conversation_id: string?,
+    id string
+    kind string
+    title string
+    description string
+    tags string[]
+    created_at string
+    updated_at string
+    read_at string
+    retrieval_matched bool
+    parent_session_id string?
+    parent_conversation_id string?
 }
 
 class TaskPromptSelectedMemoryContext {
-    title: string,
-    description: string,
-    tags: string[],
-    created_at: string,
-    updated_at: string,
-    read_at: string,
+    title string
+    description string
+    tags string[]
+    created_at string
+    updated_at string
+    read_at string
 }
 
 class RelevantMemoryDecision {
-    kept_memory_ids: string[],
-    candidate_memory: CandidateMemory?,
+    kept_memory_ids string[]
+    candidate_memory CandidateMemory?
 }
 
 class TaskChoiceDecision {
-    selected_task_id: string,
-    confidence: float,
-    reason: string,
-    agent_thought: string?,
-    candidate_memory: CandidateMemory?,
+    selected_task_id string
+    confidence float
+    reason string
+    agent_thought string?
+    candidate_memory CandidateMemory?
 }
 
 class TaskPromptDecision {
-    full_task_prompt: string,
-    candidate_memory: CandidateMemory?,
+    full_task_prompt string
+    candidate_memory CandidateMemory?
 }
 
 class TaskReturnItem {
-    name: string,
-    payload: map<string, string>?,
+    name string
+    payload map<string, string>?
 }
 
 class TaskExecutionResult {
-    returns: TaskReturnItem[],
+    returns TaskReturnItem[]
 }
 
-function ChooseInitialTask(
-    current_user_request: string,
-    session_conversations: ConversationHistory[],
-    session_memories: SessionMemoryContext[],
-    available_tasks: AvailableTask[],
-    task_choice_memories: TaskChoiceMemoryContext[],
-) -> TaskChoiceDecision {
-    client: TaskChoiceModel
-    prompt: #"
+function ChooseInitialTask(current_user_request: string, session_conversations: ConversationHistory[], session_memories: SessionMemoryContext[], available_tasks: AvailableTask[], task_choice_memories: TaskChoiceMemoryContext[]) -> TaskChoiceDecision {
+    client TaskChoiceModel
+    prompt #"
         {{ _.role("user") }}
 
         You choose one task for the current user request.
@@ -281,16 +275,9 @@ function ChooseInitialTask(
     "#
 }
 
-function GenerateTaskPrompt(
-    current_user_request: string,
-    session_conversations: ConversationHistory[],
-    session_memories: SessionMemoryContext[],
-    selected_task: SelectedTaskContext,
-    selected_memories: TaskPromptSelectedMemoryContext[],
-    task_prompt_memories: TaskPromptMemoryContext[],
-) -> TaskPromptDecision {
-    client: TaskPromptModel
-    prompt: #"
+function GenerateTaskPrompt(current_user_request: string, session_conversations: ConversationHistory[], session_memories: SessionMemoryContext[], selected_task: SelectedTaskContext, selected_memories: TaskPromptSelectedMemoryContext[], task_prompt_memories: TaskPromptMemoryContext[]) -> TaskPromptDecision {
+    client TaskPromptModel
+    prompt #"
         {{ _.role("system") }}
 
         Prepare the prompt text that will be sent to the selected task.
@@ -360,8 +347,8 @@ function GenerateTaskPrompt(
 }
 
 function ExecuteTask(full_task_prompt: string) -> TaskExecutionResult {
-    client: TaskExecutionModel
-    prompt: #"
+    client TaskExecutionModel
+    prompt #"
         {{ _.role("system") }}
 
         Complete the task according to the task prompt and any guidance included in
@@ -385,22 +372,15 @@ function ExecuteTask(full_task_prompt: string) -> TaskExecutionResult {
     "#
 }
 
-function EvaluateRelevantMemories(
-    current_user_request: string,
-    session_conversations: ConversationHistory[],
-    session_memories: SessionMemoryContext[],
-    selected_task: SelectedTaskContext,
-    candidate_memories: RetrievedMemoryCandidate[],
-    relevance_memories: RelevanceMemoryContext[],
-) -> RelevantMemoryDecision {
-    client: RelevanceModel
-    prompt: #"
+function EvaluateRelevantMemories(current_user_request: string, session_conversations: ConversationHistory[], session_memories: SessionMemoryContext[], selected_task: SelectedTaskContext, candidate_memories: RetrievedMemoryCandidate[], relevance_memories: RelevanceMemoryContext[]) -> RelevantMemoryDecision {
+    client RelevanceModel
+    prompt #"
         {{ _.role("system") }}
 
         Your job is to select which memories are relevant to performing the task
         with respect to the user's request.
 
-        Stop once you have a good set of relevant memories without overthinking it.
+        Stop once you have a good set of relevant memories without thinking about it too much.
 
         Optional output:
         - candidate_memory: an observational memory to create when something seems
@@ -464,15 +444,9 @@ function EvaluateRelevantMemories(
     "#
 }
 
-function EvaluateConversationForMemorySearch(
-    current_user_request: string,
-    session_conversations: ConversationHistory[],
-    session_memories: SessionMemoryContext[],
-    selected_task: SelectedTaskContext,
-    conversation_evaluation_memories: ConversationEvaluationMemoryContext[],
-) -> ConversationMemorySearchHints {
-    client: ConversationEvaluationModel
-    prompt: #"
+function EvaluateConversationForMemorySearch(current_user_request: string, session_conversations: ConversationHistory[], session_memories: SessionMemoryContext[], selected_task: SelectedTaskContext, conversation_evaluation_memories: ConversationEvaluationMemoryContext[]) -> ConversationMemorySearchHints {
+    client ConversationEvaluationModel
+    prompt #"
         {{ _.role("system") }}
 
         You evaluate the current conversation and produce memory search hints for
@@ -480,7 +454,7 @@ function EvaluateConversationForMemorySearch(
 
         The hints will drive memory search before the selected task runs.
 
-        Stop once the hints look good enough for the request instead of thinking about it too long.
+        Stop once the hints look good enough for the request without thinking about it too much.
 
         Search surfaces:
         - tags: exact memory tags. They are not substring searched.
@@ -563,21 +537,14 @@ function EvaluateConversationForMemorySearch(
     "#
 }
 
-function EvaluateSearchDepths(
-    current_timestamp: string,
-    current_user_request: string,
-    session_conversations: ConversationHistory[],
-    session_memories: SessionMemoryContext[],
-    selected_task: SelectedTaskContext,
-    memory_search_hints: ConversationMemorySearchHints,
-    search_domains: SearchDepthDomain[],
-    search_depth_memories: SearchDepthMemoryContext[],
-) -> SearchDepthDecision {
-    client: SearchDepthModel
-    prompt: #"
+function EvaluateSearchDepths(current_timestamp: string, current_user_request: string, session_conversations: ConversationHistory[], session_memories: SessionMemoryContext[], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: SearchDepthDomain[], search_depth_memories: SearchDepthMemoryContext[]) -> SearchDepthDecision {
+    client SearchDepthModel
+    prompt #"
         {{ _.role("system") }}
 
         Choose timestamp cutoffs for each listed search domain.
+
+        Stop once you have timestamps that look good enough for the request without thinking about it too much.
 
         Rules:
         - Return a SearchDepthDecision with depths and optional candidate_memory.
@@ -629,12 +596,7 @@ function EvaluateSearchDepths(
           contains: {{ memory_search_hints.strings.contains }}
           equals: {{ memory_search_hints.strings.equals }}
         candidate_memory:
-        {% if memory_search_hints.candidate_memory %}
-          title: {{ memory_search_hints.candidate_memory.title }}
-          description: {{ memory_search_hints.candidate_memory.description }}
-        {% else %}
-          NONE
-        {% endif %}
+        {{ memory_search_hints.candidate_memory }}
 
         Search domains:
         {% for domain in search_domains %}

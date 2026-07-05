@@ -4,7 +4,9 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
-from reframe_agent_host.baml_client import b, types
+import baml_sdk as baml
+import baml_sdk as types
+from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_memory import MemoryDatabase, TaskNode, open_memory_database
 
 
@@ -155,8 +157,7 @@ class SearchDepthPlanner:
             selected_task_id=selected_task_id,
         ).build()
 
-        client = b.with_options(client=self._client_name) if self._client_name else b
-        return await client.EvaluateSearchDepths(
+        return await baml.EvaluateSearchDepths_async(
             current_timestamp=current_timestamp(),
             current_user_request=current_user_request,
             session_conversations=context.session_conversations,
@@ -165,6 +166,7 @@ class SearchDepthPlanner:
             memory_search_hints=memory_search_hints,
             search_domains=context.search_domains,
             search_depth_memories=context.search_depth_memories,
+            **client_kwargs(self._client_name),
         )
 
     async def close(self) -> None:

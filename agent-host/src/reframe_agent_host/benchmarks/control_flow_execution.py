@@ -5,10 +5,11 @@ from dataclasses import dataclass
 import time
 from typing import Any
 
-from baml_py import Collector
+from baml_core import Collector
 
 from reframe_agent_host.agent_flow.search_depth import default_search_domains
-from reframe_agent_host.baml_client import b
+import baml_sdk as baml
+from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_agent_host.benchmarks.control_flow_case_types import (
     ControlFlowBenchmarkCase,
 )
@@ -63,7 +64,6 @@ async def build_control_flow_snapshot(
     case: ControlFlowBenchmarkCase,
     client=None,
 ) -> ControlFlowSnapshot:
-    snapshot_client = client or b
     total_started_at = time.perf_counter()
     stage_latencies: dict[str, float] = {}
     task_choice = None
@@ -75,11 +75,11 @@ async def build_control_flow_snapshot(
     search_depth_memories = search_depth_memory_context(case.search_depth_memories)
 
     try:
-        task_choice, task_choice_latency = await choose_task(snapshot_client, case)
+        task_choice, task_choice_latency = await choose_task(client, case)
         stage_latencies["task_choice"] = task_choice_latency
         selected_task = selected_task_from_case(case, task_choice.selected_task_id)
         hints, hints_latency = await search_hints(
-            snapshot_client,
+            client,
             case,
             selected_task,
         )
@@ -144,11 +144,7 @@ async def run_search_depth_case(
         }
 
     try:
-        depths, depth_latency = await search_depths(
-            client,
-            snapshot,
-            baml_options={"collector": collector},
-        )
+        depths, depth_latency = await search_depths(client, snapshot)
     except Exception as exc:
         return {
             "case_id": case.id,
@@ -201,19 +197,20 @@ async def warmup_search_depth(
 
 async def choose_task(client, case: ControlFlowBenchmarkCase):
     started_at = time.perf_counter()
-    result = await client.ChooseInitialTask(
+    result = await baml.ChooseInitialTask_async(
         current_user_request=case.current_user_request,
         session_conversations=case_conversation_context(case),
         session_memories=case_session_memory_context(case),
         available_tasks=available_task_context(case.available_tasks),
         task_choice_memories=task_choice_memory_context(case.task_choice_memories),
+        **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
 
 
 async def search_hints(client, case: ControlFlowBenchmarkCase, selected_task):
     started_at = time.perf_counter()
-    result = await client.EvaluateConversationForMemorySearch(
+    result = await baml.EvaluateConversationForMemorySearch_async(
         current_user_request=case.current_user_request,
         session_conversations=case_conversation_context(case),
         session_memories=case_session_memory_context(case),
@@ -221,6 +218,7 @@ async def search_hints(client, case: ControlFlowBenchmarkCase, selected_task):
         conversation_evaluation_memories=conversation_evaluation_memory_context(
             case.conversation_evaluation_memories
         ),
+        **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
 
@@ -228,10 +226,9 @@ async def search_hints(client, case: ControlFlowBenchmarkCase, selected_task):
 async def search_depths(
     client,
     snapshot: ControlFlowSnapshot,
-    baml_options: dict[str, Any] | None = None,
 ):
     started_at = time.perf_counter()
-    result = await client.EvaluateSearchDepths(
+    result = await baml.EvaluateSearchDepths_async(
         current_timestamp=snapshot.case.current_timestamp,
         current_user_request=snapshot.case.current_user_request,
         session_conversations=snapshot.session_conversations,
@@ -240,7 +237,7 @@ async def search_depths(
         memory_search_hints=snapshot.search_hints,
         search_domains=snapshot.search_domains,
         search_depth_memories=snapshot.search_depth_memories,
-        baml_options=baml_options or {},
+        **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
 

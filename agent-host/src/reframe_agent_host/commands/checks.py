@@ -13,7 +13,7 @@ from reframe_agent_host.speech.transcription import (
 
 
 DEPENDENCY_IMPORTS: tuple[tuple[str, str], ...] = (
-    ("baml-py", "baml_py"),
+    ("baml-core", "baml_core"),
     ("numpy", "numpy"),
     ("sounddevice", "sounddevice"),
     ("pocketsphinx", "pocketsphinx"),

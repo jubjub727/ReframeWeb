@@ -1,7 +1,10 @@
+import json
 import unittest
 from datetime import datetime, timezone
 
-from reframe_agent_host.baml_client import b, types
+import baml_sdk as baml
+import baml_sdk as types
+from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     opencode_reasoning_effort_client,
     unsupported_reasoning_effort_error,
@@ -12,7 +15,7 @@ from reframe_memory import MemoryNode, MemoryTimestamps, Provider
 
 class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
     async def test_default_task_choice_client_uses_kimi_k25_high(self):
-        request = await b.request.ChooseInitialTask(
+        request = await baml.ChooseInitialTask__build_request_async(
             current_user_request="Install the missing GPU driver for me.",
             session_conversations=[],
             session_memories=[],
@@ -32,18 +35,18 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
             ],
             task_choice_memories=[],
         )
-        body = request.body.json()
+        body = json.loads(request.body)
 
         self.assertEqual(body["model"], "kimi-k2.5")
         self.assertEqual(body["reasoning_effort"], "high")
 
-    async def test_dynamic_client_adds_reasoning_effort_to_request(self):
+    async def test_compiled_client_adds_reasoning_effort_to_request(self):
         client, client_name = opencode_reasoning_effort_client(
             _provider("OpenCodeGoModelDeepseekV4Pro"),
             "low",
         )
 
-        request = await client.request.ChooseInitialTask(
+        request = await baml.ChooseInitialTask__build_request_async(
             current_user_request="Test routing.",
             session_conversations=[],
             session_memories=[],
@@ -62,20 +65,21 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 )
             ],
             task_choice_memories=[],
+            **client_kwargs(client),
         )
-        body = request.body.json()
+        body = json.loads(request.body)
 
         self.assertEqual(client_name, "OpenCodeGoModelDeepseekV4ProReasoningLow")
         self.assertEqual(body["model"], "deepseek-v4-pro")
         self.assertEqual(body["reasoning_effort"], "low")
 
-    async def test_dynamic_client_adds_reasoning_effort_to_search_depth_request(self):
+    async def test_compiled_client_adds_reasoning_effort_to_search_depth_request(self):
         client, client_name = opencode_reasoning_effort_client(
             _provider("OpenCodeGoModelGlm51"),
             "high",
         )
 
-        request = await client.request.EvaluateSearchDepths(
+        request = await baml.EvaluateSearchDepths__build_request_async(
             current_timestamp="2026-07-03T15:00:00Z",
             current_user_request="Open Hacker News compactly.",
             session_conversations=[],
@@ -106,15 +110,16 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 )
             ],
             search_depth_memories=[],
+            **client_kwargs(client),
         )
-        body = request.body.json()
+        body = json.loads(request.body)
 
         self.assertEqual(client_name, "OpenCodeGoModelGlm51ReasoningHigh")
         self.assertEqual(body["model"], "glm-5.1")
         self.assertEqual(body["reasoning_effort"], "high")
 
     async def test_default_relevance_client_uses_glm51_none(self):
-        request = await b.request.EvaluateRelevantMemories(
+        request = await baml.EvaluateRelevantMemories__build_request_async(
             current_user_request="Open Hacker News compactly.",
             session_conversations=[],
             session_memories=[],
@@ -147,7 +152,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
             ],
             relevance_memories=[],
         )
-        body = request.body.json()
+        body = json.loads(request.body)
 
         self.assertEqual(body["model"], "glm-5.1")
         self.assertEqual(body["reasoning_effort"], "none")

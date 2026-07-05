@@ -4,8 +4,10 @@ import asyncio
 import time
 from typing import Any
 
-from baml_py import Collector
+from baml_core import Collector
 
+import baml_sdk as baml
+from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_agent_host.benchmarks.conversation_evaluation_case_types import (
     ConversationEvaluationBenchmarkCase,
 )
@@ -118,7 +120,7 @@ async def _run_case(
         )
     )
     try:
-        hints = await client.EvaluateConversationForMemorySearch(
+        hints = await baml.EvaluateConversationForMemorySearch_async(
             current_user_request=case.current_user_request,
             session_conversations=conversation_context(case.session_conversations),
             session_memories=memory_context(case.session_memories),
@@ -126,7 +128,7 @@ async def _run_case(
             conversation_evaluation_memories=conversation_evaluation_memory_context(
                 case.conversation_evaluation_memories
             ),
-            baml_options={"collector": collector},
+            **client_kwargs(client),
         )
     except Exception as exc:
         return {
@@ -163,7 +165,6 @@ async def _probe_conversation_evaluation_reasoning_effort(
     client, benchmark_client = opencode_reasoning_effort_client(
         provider,
         effort,
-        extra_options={"max_tokens": 16},
     )
     case = cases[0]
     collector = Collector(
@@ -171,7 +172,7 @@ async def _probe_conversation_evaluation_reasoning_effort(
     )
     started_at = time.perf_counter()
     try:
-        await client.EvaluateConversationForMemorySearch(
+        await baml.EvaluateConversationForMemorySearch_async(
             current_user_request=case.current_user_request,
             session_conversations=conversation_context(case.session_conversations),
             session_memories=memory_context(case.session_memories),
@@ -179,7 +180,7 @@ async def _probe_conversation_evaluation_reasoning_effort(
             conversation_evaluation_memories=conversation_evaluation_memory_context(
                 case.conversation_evaluation_memories
             ),
-            baml_options={"collector": collector},
+            **client_kwargs(client),
         )
     except Exception as exc:
         supported = not unsupported_reasoning_effort_error(exc)
@@ -217,7 +218,7 @@ async def _warmup(
     for _ in range(config.warmup_runs):
         try:
             case = cases[0]
-            await client.EvaluateConversationForMemorySearch(
+            await baml.EvaluateConversationForMemorySearch_async(
                 current_user_request=case.current_user_request,
                 session_conversations=conversation_context(case.session_conversations),
                 session_memories=memory_context(case.session_memories),
@@ -225,6 +226,7 @@ async def _warmup(
                 conversation_evaluation_memories=conversation_evaluation_memory_context(
                     case.conversation_evaluation_memories
                 ),
+                **client_kwargs(client),
             )
         except Exception:
             errors += 1

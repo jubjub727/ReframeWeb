@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from reframe_agent_host.voice.microphone import AudioInputConfig
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.keyphrases import (
     KeyphraseDetection,
     KeyphraseSpotterConfig,

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from threading import Thread
 from typing import Any
 
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.speech.tts import NoopSpeaker, TextSpeaker
 from reframe_memory import (
     ConversationMessage,

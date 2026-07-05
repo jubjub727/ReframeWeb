@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from reframe_agent_host.agent_flow.provider_clients import opencode_provider_client
-from reframe_agent_host.baml_client import b, types
+import baml_sdk as baml
+import baml_sdk as types
+from reframe_agent_host.agent_flow.baml_clients import client_kwargs, provider_client
 from reframe_memory import MemoryDatabase, open_memory_database
 
 
@@ -27,8 +28,11 @@ class TaskExecutionPlanner:
             msg = f"task provider does not exist: {task.content.provider_id}"
             raise ValueError(msg)
 
-        client, _client_name = opencode_provider_client(provider)
-        return await client.ExecuteTask(full_task_prompt=full_task_prompt)
+        client, _client_name = provider_client(provider)
+        return await baml.ExecuteTask_async(
+            full_task_prompt=full_task_prompt,
+            **client_kwargs(client),
+        )
 
     async def close(self) -> None:
         if self.database is not None:
@@ -46,4 +50,4 @@ class TaskExecutionPlanner:
 async def execute_task_with_default_client(
     full_task_prompt: str,
 ) -> types.TaskExecutionResult:
-    return await b.ExecuteTask(full_task_prompt=full_task_prompt)
+    return await baml.ExecuteTask_async(full_task_prompt=full_task_prompt)

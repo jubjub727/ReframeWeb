@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from reframe_agent_host.baml_client import b, types
+import baml_sdk as baml
+import baml_sdk as types
+from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
 from reframe_memory import MemoryDatabase, TaskNode, open_memory_database
 
@@ -118,8 +120,7 @@ class ConversationEvaluationPlanner:
             selected_task_id=selected_task_id,
         ).build()
 
-        client = b.with_options(client=self._client_name) if self._client_name else b
-        return await client.EvaluateConversationForMemorySearch(
+        return await baml.EvaluateConversationForMemorySearch_async(
             current_user_request=current_user_request,
             session_conversations=context.session_conversations,
             session_memories=context.session_memories,
@@ -127,6 +128,7 @@ class ConversationEvaluationPlanner:
             conversation_evaluation_memories=(
                 context.conversation_evaluation_memories
             ),
+            **client_kwargs(self._client_name),
         )
 
     async def close(self) -> None:

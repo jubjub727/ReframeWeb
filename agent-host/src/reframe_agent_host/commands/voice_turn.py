@@ -7,10 +7,11 @@ import sys
 import time
 
 from reframe_agent_host.voice.microphone import AudioInputConfig
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.commands.timing import print_timing_summary
 from reframe_agent_host.commands.voice_loop import run_voice_turn_loop
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
+from reframe_agent_host.voice.audio_calibration import load_audio_calibration
 from reframe_agent_host.speech.transcription import (
     WhisperGpuRuntimeError,
     WhisperTranscriberConfig,
@@ -81,12 +82,6 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
 def _configure_baml_logging(debug_output: bool) -> None:
     if not debug_output:
         os.environ["BAML_LOG"] = "OFF"
-        try:
-            from baml_py.logging import set_log_level
-
-            set_log_level("OFF")
-        except Exception:
-            pass
 
 
 async def _prepared_voice_pipeline_config(args: argparse.Namespace) -> VoicePipelineConfig:
@@ -536,12 +531,25 @@ def _audio_config(args: argparse.Namespace) -> AudioInputConfig:
     return AudioInputConfig(
         sample_rate=args.sample_rate,
         input_sample_rate=args.input_sample_rate or None,
-        input_gain=args.input_gain,
+        input_gain=_resolved_input_gain(args),
+        limiter_ceiling=args.limiter_ceiling,
         chunk_ms=args.chunk_ms,
         channels=args.input_channels,
         channel=args.input_channel,
         device=_coerce_device(args.device),
     )
+
+
+def _resolved_input_gain(args: argparse.Namespace) -> float:
+    if args.input_gain is not None:
+        return args.input_gain
+    if args.ignore_audio_calibration:
+        return 1.0
+
+    calibration = load_audio_calibration(args.audio_calibration_file)
+    if calibration is None:
+        return 1.0
+    return calibration.input_gain
 
 
 def _voice_activity_config(args: argparse.Namespace) -> VoiceActivityConfig:

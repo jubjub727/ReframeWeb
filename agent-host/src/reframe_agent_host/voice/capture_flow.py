@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 from reframe_agent_host.voice.microphone import MicrophoneStream
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.voice.activity import DetectedUtterance, UtteranceSegmenter
 from reframe_agent_host.voice.vad_types import UtteranceEvent
 from reframe_agent_host.voice.capture_results import (
@@ -34,7 +34,7 @@ class VoiceCaptureFlow:
         listen_started_at: float,
         on_event: VoicePipelineEventHandler | None,
     ) -> CaptureResult | None:
-        state.conversation_mode = types.ConversationMode.ContinuousConversation
+        state.conversation_mode = types.ConversationMode.CONTINUOUS_CONVERSATION
         state.keyphrase_required = False
         state.mode_switched = True
         state.keyphrase_carry_frames.clear()

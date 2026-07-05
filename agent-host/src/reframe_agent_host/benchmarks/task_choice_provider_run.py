@@ -4,8 +4,10 @@ import asyncio
 import time
 from typing import Any
 
-from baml_py import Collector
+from baml_core import Collector
 
+import baml_sdk as baml
+from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     collector_stop_reason,
     collector_usage,
@@ -118,18 +120,17 @@ async def _probe_task_choice_reasoning_effort(
     client, benchmark_client = opencode_reasoning_effort_client(
         provider,
         effort,
-        extra_options={"max_tokens": 16},
     )
     collector = Collector(name=f"task-choice-discovery-{provider.id}-{effort}")
     started_at = time.perf_counter()
     try:
-        await client.ChooseInitialTask(
+        await baml.ChooseInitialTask_async(
             current_user_request=cases[0].transcript,
             session_conversations=context.session_conversations,
             session_memories=context.session_memories,
             available_tasks=context.available_tasks,
             task_choice_memories=context.task_choice_memories,
-            baml_options={"collector": collector},
+            **client_kwargs(client),
         )
     except Exception as exc:
         supported = not unsupported_reasoning_effort_error(exc)
@@ -170,13 +171,13 @@ async def _run_case(
         name=f"task-choice-{provider.id}-{reasoning_effort}-{case.id}-{run_index}"
     )
     try:
-        decision = await client.ChooseInitialTask(
+        decision = await baml.ChooseInitialTask_async(
             current_user_request=case.transcript,
             session_conversations=context.session_conversations,
             session_memories=context.session_memories,
             available_tasks=context.available_tasks,
             task_choice_memories=context.task_choice_memories,
-            baml_options={"collector": collector},
+            **client_kwargs(client),
         )
     except Exception as exc:
         return {
@@ -216,12 +217,13 @@ async def _warmup(client, cases, context, config: TaskChoiceBenchmarkConfig) -> 
 
     for _ in range(config.warmup_runs):
         try:
-            await client.ChooseInitialTask(
+            await baml.ChooseInitialTask_async(
                 current_user_request=cases[0].transcript,
                 session_conversations=context.session_conversations,
                 session_memories=context.session_memories,
                 available_tasks=context.available_tasks,
                 task_choice_memories=context.task_choice_memories,
+                **client_kwargs(client),
             )
         except Exception:
             errors += 1

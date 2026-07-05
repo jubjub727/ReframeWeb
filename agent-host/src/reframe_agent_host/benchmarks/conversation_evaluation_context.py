@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.benchmarks.conversation_evaluation_case_types import (
     BenchmarkConversation,
     BenchmarkMemory,

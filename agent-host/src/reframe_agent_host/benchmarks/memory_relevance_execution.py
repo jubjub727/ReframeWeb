@@ -7,14 +7,16 @@ import re
 import time
 from typing import Any
 
-from baml_py import Collector
+from baml_core import Collector
 
 from reframe_agent_host.agent_flow.memory_retrieval import (
     _search_hints,
     _timestamp_breadths,
 )
 from reframe_agent_host.agent_flow.relevance_candidates import candidate_contexts
-from reframe_agent_host.baml_client import b, types
+import baml_sdk as baml
+import baml_sdk as types
+from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_agent_host.benchmarks.control_flow_case_types import (
     ControlFlowBenchmarkCase,
 )
@@ -67,9 +69,8 @@ async def build_memory_relevance_snapshot(
     case: ControlFlowBenchmarkCase,
     client=None,
 ) -> MemoryRelevanceSnapshot:
-    snapshot_client = client or b
     total_started_at = time.perf_counter()
-    control = await build_control_flow_snapshot(case, client=snapshot_client)
+    control = await build_control_flow_snapshot(case, client=client)
     stage_latencies = dict(control.stage_latency_seconds)
     expected_ids = _expected_kept_ids(case)
     relevance_memories: list[types.RelevanceMemoryContext] = []
@@ -92,7 +93,7 @@ async def build_memory_relevance_snapshot(
         )
 
     try:
-        depths, depth_latency = await search_depths(snapshot_client, control)
+        depths, depth_latency = await search_depths(client, control)
         stage_latencies["search_depth"] = depth_latency
         retrieved, retrieval_latency = await _retrieve_memory_context(control, depths)
         stage_latencies["memory_retrieval"] = retrieval_latency
@@ -157,11 +158,7 @@ async def run_memory_relevance_case(
         }
 
     try:
-        decision, relevance_latency = await relevant_memories(
-            client,
-            snapshot,
-            baml_options={"collector": collector},
-        )
+        decision, relevance_latency = await relevant_memories(client, snapshot)
     except Exception as exc:
         return {
             "case_id": case.id,
@@ -216,17 +213,16 @@ async def warmup_memory_relevance(client, snapshots, config) -> int:
 async def relevant_memories(
     client,
     snapshot: MemoryRelevanceSnapshot,
-    baml_options: dict[str, Any] | None = None,
 ):
     started_at = time.perf_counter()
-    result = await client.EvaluateRelevantMemories(
+    result = await baml.EvaluateRelevantMemories_async(
         current_user_request=snapshot.case.current_user_request,
         session_conversations=snapshot.control_flow.session_conversations,
         session_memories=snapshot.control_flow.session_memories,
         selected_task=snapshot.control_flow.selected_task,
         candidate_memories=snapshot.candidate_memories,
         relevance_memories=snapshot.relevance_memories,
-        baml_options=baml_options or {},
+        **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
 

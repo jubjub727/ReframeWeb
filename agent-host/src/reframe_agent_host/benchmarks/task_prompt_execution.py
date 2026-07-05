@@ -9,7 +9,7 @@ import re
 import time
 from typing import Any
 
-from baml_py import Collector
+from baml_core import Collector
 
 from reframe_agent_host.agent_flow.memory_retrieval import (
     _search_hints,
@@ -22,7 +22,9 @@ from reframe_agent_host.agent_flow.relevance_candidates import (
 from reframe_agent_host.agent_flow.search_depth import default_search_domains
 from reframe_agent_host.agent_flow.task_prompt import selected_memory_contexts
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
-from reframe_agent_host.baml_client import b, types
+import baml_sdk as baml
+import baml_sdk as types
+from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     collector_stop_reason,
     collector_usage,
@@ -107,7 +109,6 @@ async def _build_live_task_prompt_snapshot(
     case: TaskPromptBenchmarkCase,
     client=None,
 ) -> TaskPromptSnapshot:
-    snapshot_client = client or b
     started_at = time.perf_counter()
     current_timestamp = _current_timestamp()
     stage_latencies: dict[str, float] = {}
@@ -133,7 +134,7 @@ async def _build_live_task_prompt_snapshot(
         task_choice_memories = await _task_choice_memories(database)
 
         task_choice, latency = await _choose_task(
-            snapshot_client,
+            client,
             case,
             session_conversations,
             session_memories,
@@ -153,7 +154,7 @@ async def _build_live_task_prompt_snapshot(
         selected_task = _selected_task_context(selected_task_node)
 
         memory_search_hints, latency = await _memory_search_hints(
-            snapshot_client,
+            client,
             database,
             case,
             session_conversations,
@@ -163,7 +164,7 @@ async def _build_live_task_prompt_snapshot(
         stage_latencies["search_hints"] = latency
 
         search_depths, latency = await _search_depths(
-            snapshot_client,
+            client,
             database,
             case,
             current_timestamp,
@@ -183,7 +184,7 @@ async def _build_live_task_prompt_snapshot(
         stage_latencies["memory_retrieval"] = latency
 
         relevance_decision, latency = await _relevance_decision(
-            snapshot_client,
+            client,
             database,
             case,
             session_id,
@@ -284,11 +285,7 @@ async def run_task_prompt_case(
         }
 
     try:
-        decision, prompt_latency = await task_prompt(
-            client,
-            snapshot,
-            baml_options={"collector": collector},
-        )
+        decision, prompt_latency = await task_prompt(client, snapshot)
     except Exception as exc:
         return {
             "case_id": case.id,
@@ -342,17 +339,16 @@ async def warmup_task_prompt(client, snapshots, config: TaskPromptBenchmarkConfi
 async def task_prompt(
     client,
     snapshot: TaskPromptSnapshot,
-    baml_options: dict[str, Any] | None = None,
 ):
     started_at = time.perf_counter()
-    result = await client.GenerateTaskPrompt(
+    result = await baml.GenerateTaskPrompt_async(
         current_user_request=snapshot.case.current_user_request,
         session_conversations=snapshot.session_conversations,
         session_memories=snapshot.session_memories,
         selected_task=snapshot.selected_task,
         selected_memories=snapshot.selected_memory_contexts,
         task_prompt_memories=snapshot.task_prompt_memories,
-        baml_options=baml_options or {},
+        **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
 
@@ -555,12 +551,13 @@ async def _choose_task(
     task_choice_memories,
 ):
     started_at = time.perf_counter()
-    result = await client.ChooseInitialTask(
+    result = await baml.ChooseInitialTask_async(
         current_user_request=case.current_user_request,
         session_conversations=session_conversations,
         session_memories=session_memories,
         available_tasks=available_tasks,
         task_choice_memories=task_choice_memories,
+        **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
 
@@ -574,7 +571,7 @@ async def _memory_search_hints(
     selected_task,
 ):
     started_at = time.perf_counter()
-    result = await client.EvaluateConversationForMemorySearch(
+    result = await baml.EvaluateConversationForMemorySearch_async(
         current_user_request=case.current_user_request,
         session_conversations=session_conversations,
         session_memories=session_memories,
@@ -582,6 +579,7 @@ async def _memory_search_hints(
         conversation_evaluation_memories=await _conversation_evaluation_memories(
             database
         ),
+        **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
 
@@ -597,7 +595,7 @@ async def _search_depths(
     memory_search_hints,
 ):
     started_at = time.perf_counter()
-    result = await client.EvaluateSearchDepths(
+    result = await baml.EvaluateSearchDepths_async(
         current_timestamp=current_timestamp,
         current_user_request=case.current_user_request,
         session_conversations=session_conversations,
@@ -606,6 +604,7 @@ async def _search_depths(
         memory_search_hints=memory_search_hints,
         search_domains=default_search_domains(),
         search_depth_memories=await _search_depth_memories(database),
+        **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
 
@@ -638,7 +637,7 @@ async def _relevance_decision(
     retrieved_memories,
 ):
     started_at = time.perf_counter()
-    result = await client.EvaluateRelevantMemories(
+    result = await baml.EvaluateRelevantMemories_async(
         current_user_request=case.current_user_request,
         session_conversations=session_conversations,
         session_memories=session_memories,
@@ -648,6 +647,7 @@ async def _relevance_decision(
             current_session_id=session_id,
         ),
         relevance_memories=await _relevance_memories(database),
+        **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
 

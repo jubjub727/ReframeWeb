@@ -4,7 +4,7 @@ import asyncio
 import time
 from typing import Any
 
-from baml_py import Collector
+from baml_core import Collector
 
 from reframe_agent_host.benchmarks.memory_relevance_config import (
     MemoryRelevanceBenchmarkConfig,
@@ -122,16 +122,11 @@ async def _probe_memory_relevance_reasoning_effort(
     client, benchmark_client = opencode_reasoning_effort_client(
         provider,
         effort,
-        extra_options={"max_tokens": 64},
     )
     collector = Collector(name=f"memory-relevance-discovery-{provider.id}-{effort}")
     started_at = time.perf_counter()
     try:
-        await relevant_memories(
-            client,
-            usable[0],
-            baml_options={"collector": collector},
-        )
+        await relevant_memories(client, usable[0])
     except Exception as exc:
         supported = not unsupported_reasoning_effort_error(exc)
         return _discovery_result(

@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 
 from reframe_agent_host.agent_flow.task_prompt import selected_memory_contexts
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_memory import (
     Conversation,
     ConversationMessage,
@@ -42,6 +42,7 @@ class TaskPromptTests(unittest.TestCase):
     def test_task_prompt_decision_has_optional_candidate_memory(self):
         decision = types.TaskPromptDecision(
             full_task_prompt="Task:\nAsk only for what matters.\n\nInput:\nAsk for the CSV path.",
+            candidate_memory=None,
         )
 
         self.assertEqual(

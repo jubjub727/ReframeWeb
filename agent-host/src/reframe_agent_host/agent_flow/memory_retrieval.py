@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_memory import (
     MemoryDatabase,
     StringSearch,

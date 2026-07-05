@@ -5,7 +5,7 @@ from collections.abc import Callable
 from threading import Event
 
 from reframe_agent_host.voice.microphone import MicrophoneStream
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.voice.activity import (
     UtteranceSegmenter,
 )
@@ -174,7 +174,8 @@ class VoiceTurnCapture:
                 f"channels={microphone.input_channels} "
                 f"channel={self._config.audio.channel} "
                 f"-> processing={self._config.audio.sample_rate} Hz "
-                f"gain={self._config.audio.input_gain:g}x"
+                f"gain={self._config.audio.input_gain:g}x "
+                f"limiter={self._config.audio.limiter_ceiling:g}"
             ),
         )
 

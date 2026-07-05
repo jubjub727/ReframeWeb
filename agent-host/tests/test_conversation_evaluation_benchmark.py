@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timezone
 from tempfile import TemporaryDirectory
 
-from reframe_agent_host.baml_client import b
+import baml_sdk as baml
 from reframe_agent_host.benchmarks.conversation_evaluation_config import (
     CONVERSATION_EVALUATION_DEFAULT_MODEL_ID,
     CONVERSATION_EVALUATION_DEFAULT_REASONING_EFFORT,
@@ -201,7 +201,7 @@ class ConversationEvaluationBenchmarkTests(unittest.TestCase):
 class ConversationEvaluationClientTests(unittest.IsolatedAsyncioTestCase):
     async def test_default_client_request_uses_glm51_none(self):
         case = conversation_evaluation_cases()[0]
-        request = await b.request.EvaluateConversationForMemorySearch(
+        request = await baml.EvaluateConversationForMemorySearch__build_request_async(
             current_user_request=case.current_user_request,
             session_conversations=conversation_context(case.session_conversations),
             session_memories=memory_context(case.session_memories),
@@ -210,7 +210,7 @@ class ConversationEvaluationClientTests(unittest.IsolatedAsyncioTestCase):
                 case.conversation_evaluation_memories
             ),
         )
-        body = request.body.json()
+        body = json.loads(request.body)
 
         self.assertEqual(body["model"], "glm-5.1")
         self.assertEqual(body["reasoning_effort"], "none")

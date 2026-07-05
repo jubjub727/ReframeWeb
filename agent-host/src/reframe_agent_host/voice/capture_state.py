@@ -4,7 +4,7 @@ from collections import deque
 
 import numpy as np
 
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.keyphrases import (
     KeyphraseDetection,
     PocketSphinxPhraseSpotter,

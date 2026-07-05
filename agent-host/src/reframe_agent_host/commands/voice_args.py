@@ -4,6 +4,7 @@ import argparse
 
 from reframe_agent_host.speech.transcription import (
     DEFAULT_GPU_COMPUTE_TYPE,
+    DEFAULT_WHISPER_MODEL,
     GPU_COMPUTE_TYPES,
 )
 
@@ -25,8 +26,27 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--input-gain",
         type=float,
-        default=1.0,
-        help="Gain applied to captured mic audio before wake detection and transcription.",
+        default=None,
+        help=(
+            "Gain applied to captured mic audio before wake detection and "
+            "transcription. Defaults to saved audio calibration, or 1.0."
+        ),
+    )
+    parser.add_argument(
+        "--limiter-ceiling",
+        type=float,
+        default=0.95,
+        help="Peak limiter ceiling after input gain.",
+    )
+    parser.add_argument(
+        "--audio-calibration-file",
+        default=".reframe-audio-calibration.json",
+        help="Saved input gain calibration used when --input-gain is omitted.",
+    )
+    parser.add_argument(
+        "--ignore-audio-calibration",
+        action="store_true",
+        help="Use raw input gain 1.0 when --input-gain is omitted.",
     )
     parser.add_argument(
         "--input-channels",
@@ -130,7 +150,7 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
             "speech before returning a mode-only switch."
         ),
     )
-    parser.add_argument("--whisper-model", default="base.en")
+    parser.add_argument("--whisper-model", default=DEFAULT_WHISPER_MODEL)
     parser.add_argument(
         "--whisper-compute-type",
         choices=GPU_COMPUTE_TYPES,

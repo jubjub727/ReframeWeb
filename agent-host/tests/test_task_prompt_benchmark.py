@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 
 from reframe_agent_host import cli
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     OPENCODE_GO_REASONING_EFFORT_CANDIDATES,
 )
@@ -115,7 +115,8 @@ class TaskPromptBenchmarkTests(unittest.TestCase):
                 "Input:\n"
                 "Use selected_task memory_node:core_task_request_info and ask "
                 "about the spreadsheet."
-            )
+            ),
+            candidate_memory=None,
         )
 
         evaluation = evaluate_task_prompt(decision, snapshot)
@@ -133,7 +134,8 @@ class TaskPromptBenchmarkTests(unittest.TestCase):
                 "Task:\n"
                 "Ask only for the information needed to continue.\n\n"
                 "Input:\n"
-            )
+            ),
+            candidate_memory=None,
         )
 
         evaluation = evaluate_task_prompt(decision, snapshot)
@@ -279,6 +281,8 @@ def _snapshot():
         selected_task_id=selected_task.id,
         confidence=1.0,
         reason="test",
+        agent_thought=None,
+        candidate_memory=None,
     )
     return TaskPromptSnapshot(
         case=case,
@@ -293,7 +297,8 @@ def _snapshot():
         search_depths=None,
         retrieved_memories=None,
         relevance_decision=types.RelevantMemoryDecision(
-            kept_memory_ids=["memory_node:stripe_memory"]
+            kept_memory_ids=["memory_node:stripe_memory"],
+            candidate_memory=None,
         ),
         selected_memories=None,
         selected_memory_contexts=[],

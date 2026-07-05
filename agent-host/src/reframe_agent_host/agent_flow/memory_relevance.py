@@ -4,7 +4,9 @@ from dataclasses import dataclass
 
 from reframe_agent_host.agent_flow.relevance_candidates import candidate_contexts
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
-from reframe_agent_host.baml_client import b, types
+import baml_sdk as baml
+import baml_sdk as types
+from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_memory import MemoryDatabase, TaskNode, open_memory_database
 from reframe_memory.retrieved_context import RetrievedMemoryContext
 
@@ -124,14 +126,14 @@ class MemoryRelevancePlanner:
             retrieved_memories=retrieved_memories,
         ).build()
 
-        client = b.with_options(client=self._client_name) if self._client_name else b
-        return await client.EvaluateRelevantMemories(
+        return await baml.EvaluateRelevantMemories_async(
             current_user_request=current_user_request,
             session_conversations=context.session_conversations,
             session_memories=context.session_memories,
             selected_task=context.selected_task,
             candidate_memories=context.candidate_memories,
             relevance_memories=context.relevance_memories,
+            **client_kwargs(self._client_name),
         )
 
     async def close(self) -> None:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_agent_host.speech.transcription import Transcript
 from reframe_agent_host.speech.triggers import TriggerPhraseDetection
 from reframe_agent_host.task_execution import PrimitiveDispatchResult

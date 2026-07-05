@@ -5,7 +5,7 @@ from reframe_agent_host.agent_flow.relevance_candidates import (
     candidate_contexts,
     filter_retrieved_memories,
 )
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 from reframe_memory import (
     Conversation,
     ConversationMessage,
@@ -57,6 +57,7 @@ class MemoryRelevanceTests(unittest.TestCase):
                     "memory_node:currentmemory",
                     "memory_node:missing",
                 ],
+                candidate_memory=None,
             ),
         )
 
@@ -83,6 +84,7 @@ class MemoryRelevanceTests(unittest.TestCase):
             _retrieved_memories(),
             types.RelevantMemoryDecision(
                 kept_memory_ids=["memory_node:conversation1"],
+                candidate_memory=None,
             ),
         )
 
@@ -97,6 +99,7 @@ class MemoryRelevanceTests(unittest.TestCase):
     def test_relevance_decision_has_optional_candidate_memory(self):
         decision = types.RelevantMemoryDecision(
             kept_memory_ids=["memory_node:message1"],
+            candidate_memory=None,
         )
 
         self.assertEqual(

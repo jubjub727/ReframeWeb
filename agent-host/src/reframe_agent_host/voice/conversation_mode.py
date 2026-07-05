@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from threading import Lock
 
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 
 
 class ConversationModeController:
@@ -28,4 +28,4 @@ class ConversationModeController:
             return True
 
     def turn_off_conversation(self) -> bool:
-        return self.set(types.ConversationMode.WakeCommand)
+        return self.set(types.ConversationMode.WAKE_COMMAND)

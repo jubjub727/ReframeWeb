@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-import os
 import re
-from typing import Any
 
-from baml_py import ClientRegistry, Collector
+from baml_core import Collector
 
-from reframe_agent_host.baml_client import b
+from reframe_agent_host.agent_flow.baml_clients import (
+    BamlClient,
+    compiled_client,
+)
 from reframe_agent_host.benchmarks.task_choice_provider_index import (
     model_id_for_surface,
 )
-from reframe_agent_host.memory_seed.opencode_go_models import OPENCODE_GO_BASE_URL
 from reframe_memory import ProviderNode
 
 
@@ -27,26 +27,14 @@ OPENCODE_GO_REASONING_EFFORT_CANDIDATES = (
 def opencode_reasoning_effort_client(
     provider: ProviderNode,
     effort: str,
-    extra_options: dict[str, Any] | None = None,
-):
+) -> tuple[BamlClient, str]:
     model_id = model_id_for_surface(provider.content.baml_surface)
     if model_id is None:
         msg = f"provider has no OpenCode Go model id: {provider.id}"
         raise ValueError(msg)
 
     client_name = _client_name(provider.content.baml_surface, effort)
-    registry = ClientRegistry()
-    options = {
-        "base_url": OPENCODE_GO_BASE_URL,
-        "model": model_id,
-        "api_key": os.environ.get("OPENCODE_GO_API_KEY", ""),
-        "reasoning_effort": effort,
-    }
-    if extra_options:
-        options.update(extra_options)
-    registry.add_llm_client(client_name, "openai-generic", options)
-    registry.set_primary(client_name)
-    return b.with_options(client_registry=registry), client_name
+    return compiled_client(client_name), client_name
 
 
 def unsupported_reasoning_effort_error(error: Exception) -> bool:

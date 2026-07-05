@@ -4,7 +4,7 @@ import asyncio
 import time
 from typing import Any
 
-from baml_py import Collector
+from baml_core import Collector
 
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     collector_stop_reason,
@@ -118,12 +118,11 @@ async def _probe_task_prompt_reasoning_effort(
     client, benchmark_client = opencode_reasoning_effort_client(
         provider,
         effort,
-        extra_options={"max_tokens": 512},
     )
     collector = Collector(name=f"task-prompt-discovery-{provider.id}-{effort}")
     started_at = time.perf_counter()
     try:
-        await task_prompt(client, usable[0], baml_options={"collector": collector})
+        await task_prompt(client, usable[0])
     except Exception as exc:
         supported = not unsupported_reasoning_effort_error(exc)
         return _discovery_result(

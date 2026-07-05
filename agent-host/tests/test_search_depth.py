@@ -1,7 +1,7 @@
 import unittest
 
 from reframe_agent_host.agent_flow.search_depth import default_search_domains
-from reframe_agent_host.baml_client import types
+import baml_sdk as types
 
 
 class SearchDepthTests(unittest.TestCase):
@@ -24,7 +24,8 @@ class SearchDepthTests(unittest.TestCase):
                     read_after="2026-01-01T00:00:00Z",
                     updated_after="2026-01-01T00:00:00Z",
                 )
-            }
+            },
+            candidate_memory=None,
         )
 
         self.assertEqual(

@@ -4,7 +4,9 @@ from collections.abc import Collection
 from dataclasses import dataclass
 
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
-from reframe_agent_host.baml_client import b, types
+import baml_sdk as baml
+import baml_sdk as types
+from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_memory import MemoryDatabase, TaskNode, open_memory_database
 from reframe_memory.retrieved_context import RetrievedMemoryContext
 
@@ -127,14 +129,14 @@ class TaskPromptPlanner:
             selected_memory_ids=selected_memory_ids,
         ).build()
 
-        client = b.with_options(client=self._client_name) if self._client_name else b
-        return await client.GenerateTaskPrompt(
+        return await baml.GenerateTaskPrompt_async(
             current_user_request=current_user_request,
             session_conversations=context.session_conversations,
             session_memories=context.session_memories,
             selected_task=context.selected_task,
             selected_memories=context.selected_memories,
             task_prompt_memories=context.task_prompt_memories,
+            **client_kwargs(self._client_name),
         )
 
     async def close(self) -> None:
