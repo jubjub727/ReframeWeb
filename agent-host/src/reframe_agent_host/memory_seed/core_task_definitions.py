@@ -139,6 +139,6 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
         ),
         tags=("reply",),
         model_id="kimi-k2.6",
-        reasoning_effort=None,
+        reasoning_effort="none",
     ),
 )

@@ -4,6 +4,10 @@ import argparse
 
 from reframe_agent_host.speech.transcription import (
     DEFAULT_GPU_COMPUTE_TYPE,
+    DEFAULT_TRANSCRIPTION_MAX_GAIN,
+    DEFAULT_TRANSCRIPTION_TARGET_RMS,
+    DEFAULT_WHISPER_BEAM_SIZE,
+    DEFAULT_WHISPER_INITIAL_PROMPT,
     DEFAULT_WHISPER_MODEL,
     GPU_COMPUTE_TYPES,
 )
@@ -57,8 +61,8 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--input-channel",
         type=int,
-        default=0,
-        help="Zero-based captured channel to process.",
+        default=-1,
+        help="Zero-based captured channel to process. -1 picks the strongest channel.",
     )
     parser.add_argument("--chunk-ms", type=int, default=32)
     parser.add_argument(
@@ -157,7 +161,29 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
         default=DEFAULT_GPU_COMPUTE_TYPE,
     )
     parser.add_argument("--language", default="en")
-    parser.add_argument("--beam-size", type=int, default=1)
+    parser.add_argument("--beam-size", type=int, default=DEFAULT_WHISPER_BEAM_SIZE)
+    parser.add_argument(
+        "--whisper-initial-prompt",
+        default=DEFAULT_WHISPER_INITIAL_PROMPT,
+        help="Generic context prompt passed to Whisper for transcription.",
+    )
+    parser.add_argument(
+        "--no-transcription-normalization",
+        action="store_true",
+        help="Send captured utterance audio to Whisper without dynamic level normalization.",
+    )
+    parser.add_argument(
+        "--transcription-target-rms",
+        type=float,
+        default=DEFAULT_TRANSCRIPTION_TARGET_RMS,
+        help="Target active RMS for dynamic transcription audio normalization.",
+    )
+    parser.add_argument(
+        "--transcription-max-gain",
+        type=float,
+        default=DEFAULT_TRANSCRIPTION_MAX_GAIN,
+        help="Maximum per-utterance gain used by transcription audio normalization.",
+    )
     parser.add_argument(
         "--session-id",
         help="Active memory_node session id used for conversation and session memory context.",

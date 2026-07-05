@@ -10,9 +10,15 @@ from reframe_agent_host.commands.audio_quality_test import (
     _audio_config as _quality_audio_config,
 )
 from reframe_agent_host.commands.voice_turn import _audio_config as _voice_audio_config
-from reframe_agent_host.speech.transcription import DEFAULT_WHISPER_MODEL
+from reframe_agent_host.speech.transcription import (
+    DEFAULT_WHISPER_BEAM_SIZE,
+    DEFAULT_WHISPER_INITIAL_PROMPT,
+    DEFAULT_WHISPER_MODEL,
+    WhisperTranscriberConfig,
+)
 from reframe_agent_host.voice.audio_calibration import recommend_input_gain
 from reframe_agent_host.voice.audio_quality import analyze_audio_quality
+from reframe_agent_host.voice.input_level import normalize_active_level
 from reframe_agent_host.voice.resampling import AudioFrameProcessor
 
 
@@ -88,10 +94,47 @@ class AudioQualityTests(unittest.TestCase):
         self.assertTrue(args.save_calibration)
         self.assertTrue(args.no_prompt)
 
-    def test_voice_turn_defaults_to_turbo_whisper(self):
+    def test_voice_turn_defaults_to_large_v3_whisper(self):
         args = build_parser().parse_args(["voice-turn"])
 
         self.assertEqual(args.whisper_model, DEFAULT_WHISPER_MODEL)
+        self.assertEqual(args.whisper_model, "large-v3")
+        self.assertEqual(args.beam_size, DEFAULT_WHISPER_BEAM_SIZE)
+        self.assertEqual(args.whisper_initial_prompt, DEFAULT_WHISPER_INITIAL_PROMPT)
+        self.assertFalse(args.no_transcription_normalization)
+
+    def test_whisper_config_normalizes_transcription_audio_by_default(self):
+        config = WhisperTranscriberConfig()
+
+        self.assertTrue(config.normalize_audio)
+        self.assertEqual(config.beam_size, DEFAULT_WHISPER_BEAM_SIZE)
+        self.assertEqual(config.initial_prompt, DEFAULT_WHISPER_INITIAL_PROMPT)
+
+    def test_transcription_normalizer_lifts_quiet_active_audio(self):
+        quiet = _tone(0.02)
+
+        normalized = normalize_active_level(
+            quiet,
+            sample_rate=16_000,
+            target_active_rms=0.12,
+            max_gain=6.0,
+            limiter_ceiling=0.95,
+        )
+
+        self.assertGreater(float(np.max(np.abs(normalized))), float(np.max(np.abs(quiet))))
+
+    def test_transcription_normalizer_limits_loud_audio(self):
+        loud = _tone(0.9)
+
+        normalized = normalize_active_level(
+            loud,
+            sample_rate=16_000,
+            target_active_rms=0.12,
+            max_gain=6.0,
+            limiter_ceiling=0.5,
+        )
+
+        self.assertLessEqual(float(np.max(np.abs(normalized))), 0.5)
 
     def test_audio_quality_test_can_use_saved_calibration(self):
         with TemporaryDirectory() as directory:
@@ -156,7 +199,7 @@ def _voice_args(**overrides):
         "limiter_ceiling": 0.95,
         "chunk_ms": 32,
         "input_channels": 0,
-        "input_channel": 0,
+        "input_channel": -1,
         "device": None,
         "ignore_audio_calibration": False,
         "audio_calibration_file": ".reframe-audio-calibration.json",

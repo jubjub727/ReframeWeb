@@ -27,7 +27,7 @@ class AudioInputConfig:
     limiter_ceiling: float = 0.95
     chunk_ms: int = 32
     channels: int = 0
-    channel: int = 0
+    channel: int = -1
     device: int | str | None = None
     queue_seconds: float = 12.0
     start_retries: int = 5
@@ -149,6 +149,8 @@ class MicrophoneStream:
     def _to_mono(self, indata) -> np.ndarray:
         mono = np.asarray(indata, dtype=np.float32)
         if mono.ndim == 2:
+            if self._config.channel < 0:
+                return _strongest_channel(mono)
             channel = min(max(0, self._config.channel), mono.shape[1] - 1)
             return mono[:, channel]
         return mono.reshape(-1)
@@ -173,3 +175,11 @@ class MicrophoneStream:
 
 def _stopped(stop_event: Event | None) -> bool:
     return stop_event is not None and stop_event.is_set()
+
+
+def _strongest_channel(samples: np.ndarray) -> np.ndarray:
+    if samples.shape[1] <= 1:
+        return samples.reshape(-1)
+    channel_rms = np.sqrt(np.mean(np.square(samples), axis=0, dtype=np.float64))
+    channel = int(np.argmax(channel_rms))
+    return samples[:, channel]

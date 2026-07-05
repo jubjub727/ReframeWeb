@@ -220,6 +220,7 @@ class _VoiceTurnEventPrinter:
             "conversation-mode",
             "tts-error",
             "conversation-context",
+            "debug-audio",
         }:
             label = self._DISPLAY_NAMES.get(stage, stage)
             self._print_live(f"[{label}] {message}")
@@ -588,6 +589,10 @@ def _transcription_config(args: argparse.Namespace) -> WhisperTranscriberConfig:
         compute_type=args.whisper_compute_type,
         language=args.language,
         beam_size=args.beam_size,
+        initial_prompt=args.whisper_initial_prompt or None,
+        normalize_audio=not args.no_transcription_normalization,
+        normalization_target_rms=args.transcription_target_rms,
+        normalization_max_gain=args.transcription_max_gain,
     )
 
 

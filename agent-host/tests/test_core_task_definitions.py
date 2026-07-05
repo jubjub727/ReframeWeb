@@ -56,7 +56,7 @@ class CoreTaskDefinitionTests(unittest.TestCase):
         )
         self.assertEqual(tasks["Reply to user"].tags, ("reply",))
         self.assertEqual(tasks["Reply to user"].model_id, "kimi-k2.6")
-        self.assertIsNone(tasks["Reply to user"].reasoning_effort)
+        self.assertEqual(tasks["Reply to user"].reasoning_effort, "none")
 
     def test_every_core_task_declares_its_provider_choice(self):
         for task in CORE_TASKS:

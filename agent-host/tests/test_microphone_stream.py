@@ -1,5 +1,7 @@
 import unittest
 
+import numpy as np
+
 from reframe_agent_host.voice.microphone import AudioInputConfig, MicrophoneStream
 
 
@@ -30,6 +32,36 @@ class FakeSoundDevice:
 
 
 class MicrophoneStreamTests(unittest.TestCase):
+    def test_to_mono_auto_selects_strongest_channel(self):
+        microphone = MicrophoneStream(AudioInputConfig(channel=-1))
+        stereo = np.array(
+            [
+                [0.01, 0.2],
+                [-0.01, -0.2],
+                [0.01, 0.2],
+            ],
+            dtype=np.float32,
+        )
+
+        mono = microphone._to_mono(stereo)
+
+        np.testing.assert_allclose(mono, stereo[:, 1])
+
+    def test_to_mono_explicit_channel_still_selects_that_channel(self):
+        microphone = MicrophoneStream(AudioInputConfig(channel=0))
+        stereo = np.array(
+            [
+                [0.01, 0.2],
+                [-0.01, -0.2],
+                [0.01, 0.2],
+            ],
+            dtype=np.float32,
+        )
+
+        mono = microphone._to_mono(stereo)
+
+        np.testing.assert_allclose(mono, stereo[:, 0])
+
     def test_open_started_stream_retries_transient_start_failure(self):
         sounddevice = FakeSoundDevice(failures=1)
         microphone = MicrophoneStream(

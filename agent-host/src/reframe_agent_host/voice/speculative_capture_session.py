@@ -390,7 +390,7 @@ class SpeculativeCaptureSession:
             (
                 f"input={microphone.device_summary} "
                 f"channels={microphone.input_channels} "
-                f"channel={self._config.audio.channel} "
+                f"channel={_channel_label(self._config.audio.channel)} "
                 f"-> processing={self._config.audio.sample_rate} Hz "
                 f"gain={self._config.audio.input_gain:g}x "
                 f"limiter={self._config.audio.limiter_ceiling:g}"
@@ -408,3 +408,7 @@ class SpeculativeCaptureSession:
         on_event: VoicePipelineEventHandler | None,
     ) -> None:
         self._emit(on_event, "input-stopped", "microphone stream closed")
+
+
+def _channel_label(channel: int) -> str:
+    return "auto" if channel < 0 else str(channel)
