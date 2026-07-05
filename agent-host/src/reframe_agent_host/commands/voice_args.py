@@ -106,7 +106,7 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--wake-replay-pre-ms",
         type=int,
-        default=80,
+        default=0,
         help="Audio kept before the detected wake phrase ends when replaying into VAD.",
     )
     parser.add_argument(

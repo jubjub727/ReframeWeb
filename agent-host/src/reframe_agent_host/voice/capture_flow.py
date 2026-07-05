@@ -75,7 +75,11 @@ class VoiceCaptureFlow:
         state: CaptureState,
         on_event: VoicePipelineEventHandler | None,
     ) -> DetectedUtterance | None:
-        frames = result.replay_frames or list(state.keyphrase_carry_frames)
+        frames = result.replay_frames
+        if not frames:
+            self._emit(on_event, "keyphrase", "no post-trigger audio to replay to VAD")
+            state.keyphrase_carry_frames.clear()
+            return None
         self._emit(
             on_event,
             "keyphrase",

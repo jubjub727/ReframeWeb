@@ -16,7 +16,9 @@ from reframe_agent_host.keyphrases.pocketsphinx_phrase import (
 from reframe_agent_host.speech.transcription import WhisperTranscriberConfig
 from reframe_agent_host.speech.triggers import TriggerPhraseConfig
 from reframe_agent_host.voice.activity import VoiceActivityConfig
+from reframe_agent_host.voice.capture_flow import VoiceCaptureFlow
 from reframe_agent_host.voice.capture_state import CaptureState
+from reframe_agent_host.voice.keyphrase_gate import KeyphraseGateResult
 from reframe_agent_host.voice.keyphrase_gate import VoiceKeyphraseGate
 from reframe_agent_host.voice.microphone import AudioInputConfig
 from reframe_agent_host.voice.types import VoicePipelineConfig
@@ -66,6 +68,17 @@ class FakeReplaySpotter:
 
     def close(self):
         self.closed = True
+
+
+class RecordingSegmenter:
+    is_recording = False
+
+    def __init__(self):
+        self.frames = []
+
+    def accept(self, frame):
+        self.frames.append(frame)
+        return None
 
 
 class KeyphraseSpotterTests(unittest.TestCase):
@@ -130,7 +143,7 @@ class KeyphraseSpotterTests(unittest.TestCase):
 
         self.assertEqual(debug_args.wake_threshold, 1e-30)
         self.assertEqual(voice_args.wake_threshold, 1e-30)
-        self.assertEqual(voice_args.wake_replay_pre_ms, 80)
+        self.assertEqual(voice_args.wake_replay_pre_ms, 0)
 
     def test_phrase_sample_span_uses_first_and_last_phrase_words(self):
         segments = (
@@ -156,7 +169,7 @@ class KeyphraseSpotterTests(unittest.TestCase):
             [[7.0, 8.0, 9.0], [10.0, 11.0, 12.0, 13.0, 14.0]],
         )
 
-    def test_spotter_replay_starts_near_wake_phrase_end(self):
+    def test_spotter_replay_starts_at_wake_phrase_end_by_default(self):
         spotter = _spotter_with_decoder("jarvis")
         spotter._frames = [
             np.arange(0, 1600, dtype=np.float32),
@@ -171,9 +184,38 @@ class KeyphraseSpotterTests(unittest.TestCase):
             phrase_end_sample=2600,
         )
 
-        frames = spotter.replay_frames_for_detection(detection, pre_roll_ms=50)
+        frames = spotter.replay_frames_for_detection(detection, pre_roll_ms=0)
 
-        self.assertEqual(float(frames[0][0]), 1800.0)
+        self.assertEqual(float(frames[0][0]), 2600.0)
+
+    def test_empty_wake_replay_does_not_fallback_to_carry_frames(self):
+        detection = KeyphraseDetection(
+            kind="wake_command",
+            phrase="jarvis",
+            hypstr="jarvis",
+            confirmed=True,
+            phrase_start_sample=0,
+            phrase_end_sample=1600,
+        )
+        state = _capture_state(None)
+        state.keyphrase_carry_frames.append(np.ones(512, dtype=np.float32))
+        segmenter = RecordingSegmenter()
+        result = KeyphraseGateResult(
+            detection=detection,
+            conversation_enabled=False,
+            replay_frames=[],
+        )
+
+        utterance = VoiceCaptureFlow(_voice_config()).replay_wake_audio(
+            result,
+            segmenter,
+            state,
+            on_event=None,
+        )
+
+        self.assertIsNone(utterance)
+        self.assertEqual(segmenter.frames, [])
+        self.assertEqual(len(state.keyphrase_carry_frames), 0)
 
     def test_conversation_on_replays_no_buffered_audio(self):
         detection = KeyphraseDetection(
@@ -255,7 +297,7 @@ def _voice_config():
     return VoicePipelineConfig(
         audio=AudioInputConfig(),
         voice_activity=VoiceActivityConfig(),
-        keyphrases=KeyphraseSpotterConfig(replay_pre_ms=80),
+        keyphrases=KeyphraseSpotterConfig(replay_pre_ms=0),
         triggers=TriggerPhraseConfig(),
         transcription=WhisperTranscriberConfig(),
         conversation_mode=types.ConversationMode.WAKE_COMMAND,

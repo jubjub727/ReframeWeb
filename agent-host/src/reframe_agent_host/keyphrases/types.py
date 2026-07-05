@@ -17,7 +17,7 @@ class KeyphraseSpotterConfig:
     conversation_on_confirm_window_ms: int = 2_000
     check_interval_ms: int = 320
     carry_ms: int = 2_000
-    replay_pre_ms: int = 80
+    replay_pre_ms: int = 0
     gain: float = 1.0
     kws_threshold: float = 1e-30
 
