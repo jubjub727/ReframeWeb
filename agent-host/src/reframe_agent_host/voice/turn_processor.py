@@ -16,6 +16,7 @@ from reframe_agent_host.baml_client import types
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
 from reframe_agent_host.speech.tts import NoopSpeaker, TextSpeaker
+from reframe_agent_host.voice.conversation_mode import ConversationModeController
 from reframe_agent_host.voice.daemon_threads import run_in_daemon_thread
 from reframe_agent_host.task_execution import PrimitiveDispatcher
 from reframe_agent_host.voice.turn_results import (
@@ -47,6 +48,7 @@ class VoiceTurnProcessor:
         task_prompt,
         task_execution: TaskExecutionPlanner | None = None,
         speaker: TextSpeaker | None = None,
+        mode_controller: ConversationModeController | None = None,
     ) -> None:
         self._config = config
         self._transcriber = transcriber
@@ -59,6 +61,7 @@ class VoiceTurnProcessor:
         self._task_prompt = task_prompt
         self._task_execution = task_execution
         self._speaker = speaker or NoopSpeaker()
+        self._mode_controller = mode_controller
 
     async def process(
         self,
@@ -107,7 +110,8 @@ class VoiceTurnProcessor:
             if trigger_detection is not None
             else transcript.text
         )
-        if routed_transcript:
+        defer_public_events = turn_control is not None
+        if routed_transcript and not defer_public_events:
             self._emit(on_event, "human-reply", routed_transcript)
         if trigger_detection is not None:
             self._emit(
@@ -115,13 +119,16 @@ class VoiceTurnProcessor:
                 "trigger",
                 f"{trigger_detection.kind} {trigger_detection.phrase!r}",
             )
-        await self._checkpoint(turn_control)
+        await self._wait_until_committed(turn_control)
+        if routed_transcript and defer_public_events:
+            self._emit(on_event, "human-reply", routed_transcript)
 
         task_choice, task_choice_seconds, post_vad_task_choice_seconds = (
             await self._maybe_choose_task(
                 routed_transcript,
                 post_vad_started_at,
                 on_event,
+                emit_agent_thought=not defer_public_events,
             )
         )
         await self._checkpoint(turn_control)
@@ -184,7 +191,8 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
-        await self._wait_until_committed(turn_control)
+        if task_choice is not None and task_choice.agent_thought and defer_public_events:
+            self._emit(on_event, "agent-thought", task_choice.agent_thought)
         await self._record_current_turn_context(
             routed_transcript,
             task_choice,
@@ -299,6 +307,8 @@ class VoiceTurnProcessor:
         routed_transcript: str,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
+        *,
+        emit_agent_thought: bool = True,
     ):
         if not self._config.task_choice_enabled:
             return None, None, None
@@ -312,18 +322,28 @@ class VoiceTurnProcessor:
             current_user_request=routed_transcript,
         )
         task_choice_seconds = time.perf_counter() - task_choice_started_at
+        selected_task_name = await self._selected_task_name(
+            task_choice.selected_task_id
+        )
         self._emit(
             on_event,
             "task-chosen",
-            f"{task_choice.selected_task_id} ({task_choice_seconds:.3f}s)",
+            f"selected: {selected_task_name} ({task_choice_seconds:.3f}s)",
         )
-        if task_choice.agent_thought:
+        if task_choice.agent_thought and emit_agent_thought:
             self._emit(on_event, "agent-thought", task_choice.agent_thought)
         return (
             task_choice,
             task_choice_seconds,
             time.perf_counter() - post_vad_started_at,
         )
+
+    async def _selected_task_name(self, task_id: str) -> str:
+        resolver = getattr(self._planner, "task_name", None)
+        if resolver is None:
+            return task_id
+        name = await resolver(task_id)
+        return name or task_id
 
     async def _record_current_turn_context(
         self,
@@ -597,6 +617,11 @@ class VoiceTurnProcessor:
                 conversation_id=self._config.conversation_id,
                 speaker=self._speaker,
                 on_event=on_event,
+                on_conversation_mode_off=(
+                    self._mode_controller.turn_off_conversation
+                    if self._mode_controller is not None
+                    else None
+                ),
             ).dispatch(task_execution)
         finally:
             await database.close()

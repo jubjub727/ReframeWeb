@@ -11,7 +11,6 @@ from reframe_agent_host.baml_client import types
 from reframe_agent_host.commands.timing import print_timing_summary
 from reframe_agent_host.commands.voice_loop import run_voice_turn_loop
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
-from reframe_agent_host.memory_seed import ensure_core_tasks
 from reframe_agent_host.speech.transcription import (
     WhisperGpuRuntimeError,
     WhisperTranscriberConfig,
@@ -111,7 +110,6 @@ async def _ensure_voice_memory_context(args: argparse.Namespace) -> None:
     try:
         await database.apply_schema()
         await database.ensure_roots()
-        await ensure_core_tasks(database)
 
         if args.session_id is None:
             session = await database.sessions.create(
@@ -158,6 +156,7 @@ class _VoiceTurnEventPrinter:
     def __init__(self, *, debug_output: bool, turn_started_at: float) -> None:
         self._debug_output = debug_output
         self._turn_started_at = turn_started_at
+        self._startup_reported = False
 
     def __call__(self, stage: str, message: str) -> None:
         if stage == "input-started":
@@ -169,15 +168,32 @@ class _VoiceTurnEventPrinter:
 
         if not self._debug_output:
             if stage == "listening":
-                self._print_live(
-                    f"[startup {_latency(time.perf_counter() - self._turn_started_at)}] ready",
-                )
+                if self._startup_reported:
+                    self._print_live("[ready]")
+                else:
+                    self._startup_reported = True
+                    self._print_live(
+                        "[startup "
+                        f"{_latency(time.perf_counter() - self._turn_started_at)}] "
+                        "ready",
+                    )
             elif stage == "human-reply":
                 self._print_live(f"human_reply: {_single_line(message, limit=None)}")
             elif stage == "agent-thought":
                 self._print_live(f"agent_thought: {_single_line(message, limit=None)}")
             elif stage == "agent-reply":
                 self._print_live(f"agent_reply: {_single_line(message, limit=None)}")
+            elif stage == "conversation-mode":
+                self._print_live(
+                    f"conversation_mode: {_single_line(message, limit=None)}"
+                )
+            elif stage == "task-chosen":
+                selected = _selected_task_from_event(message)
+                if selected:
+                    self._print_live(f"selected: {selected}")
+                latency = _event_latency(message)
+                if latency is not None:
+                    self._print_live(f"[task_choice {latency}]")
             elif stage in self._LATENCY_STAGES:
                 latency = _event_latency(message)
                 if latency is not None:
@@ -206,6 +222,7 @@ class _VoiceTurnEventPrinter:
             "primitive-dispatch",
             "agent-reply",
             "agent-thought",
+            "conversation-mode",
             "tts-error",
             "conversation-context",
         }:
@@ -479,6 +496,18 @@ def _event_latency(message: str) -> str | None:
         return _latency(float(value[:-1]))
     except ValueError:
         return None
+
+
+def _selected_task_from_event(message: str) -> str:
+    text = message.strip()
+    prefix = "selected:"
+    if not text.lower().startswith(prefix):
+        return ""
+    selected = text[len(prefix) :].strip()
+    latency_index = selected.rfind("(")
+    if latency_index >= 0 and selected.endswith(")"):
+        selected = selected[:latency_index].strip()
+    return selected
 
 
 def _voice_pipeline_config(args: argparse.Namespace) -> VoicePipelineConfig:

@@ -49,7 +49,7 @@ class VoiceCaptureFlow:
         self._emit(
             on_event,
             "keyphrase",
-            f"replaying {self._duration(result.replay_frames):.2f}s around trigger to VAD",
+            f"replaying {self._duration(result.replay_frames):.2f}s after trigger to VAD",
         )
         for replay_frame in result.replay_frames:
             utterance = self.accept_speech_frame(

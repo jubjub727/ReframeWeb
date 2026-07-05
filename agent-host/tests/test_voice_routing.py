@@ -1,19 +1,30 @@
 import contextlib
+import asyncio
 import io
 import time
 import unittest
+from argparse import Namespace
+from dataclasses import dataclass
+from unittest.mock import patch
 
 import numpy as np
 
 from reframe_agent_host.baml_client import types
-from reframe_agent_host.commands.voice_turn import _VoiceTurnEventPrinter
+from reframe_agent_host.commands.voice_turn import (
+    _VoiceTurnEventPrinter,
+    _ensure_voice_memory_context,
+)
 from reframe_agent_host.keyphrases import KeyphraseDetection, KeyphraseSpotterConfig
 from reframe_agent_host.speech.transcription import Transcript, WhisperTranscriberConfig
 from reframe_agent_host.speech.triggers import TriggerPhraseConfig, TriggerPhraseMatcher
 from reframe_agent_host.voice.activity import DetectedUtterance, VoiceActivityConfig
 from reframe_agent_host.voice.microphone import AudioInputConfig
 from reframe_agent_host.voice.turn_processor import VoiceTurnProcessor
-from reframe_agent_host.voice.types import CaptureResult, VoicePipelineConfig
+from reframe_agent_host.voice.types import (
+    CaptureResult,
+    VoicePipelineConfig,
+    VoiceTurnControl,
+)
 from reframe_memory import RetrievedMemoryContext
 
 
@@ -151,6 +162,37 @@ class RecordingTaskPrompt:
         )
 
 
+@dataclass
+class FakeNode:
+    id: str
+
+
+class FakeSessions:
+    async def create(self, _session, tags=()):
+        return FakeNode("memory_node:session")
+
+
+class FakeVoiceContextConversations:
+    async def create(self, session_id, _conversation, tags=()):
+        return FakeNode(f"{session_id}:conversation")
+
+
+class MinimalVoiceMemoryDatabase:
+    def __init__(self):
+        self.sessions = FakeSessions()
+        self.conversations = FakeVoiceContextConversations()
+        self.closed = False
+
+    async def apply_schema(self):
+        return None
+
+    async def ensure_roots(self):
+        return None
+
+    async def close(self):
+        self.closed = True
+
+
 class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
     def test_wake_keyword_is_removed_from_routed_transcript(self):
         matcher = TriggerPhraseMatcher(TriggerPhraseConfig())
@@ -240,6 +282,75 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(task_prompt.selected_memory_ids, ())
         self.assertIn("Task:\nAsk only for what matters.", result.task_prompt.full_task_prompt)
 
+    async def test_speculative_turn_emits_human_reply_after_commit(self):
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(task_choice_enabled=False),
+            transcriber=StubTranscriber("Okay, nice."),
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            planner=RecordingPlanner(),
+            conversation_evaluation=RecordingConversationEvaluation(),
+            search_depth=RecordingSearchDepth(),
+            memory_retrieval=RecordingMemoryRetrieval(),
+            memory_relevance=RecordingMemoryRelevance(),
+            task_prompt=RecordingTaskPrompt(),
+        )
+        control = VoiceTurnControl()
+        task = asyncio.create_task(
+            processor.process(
+                capture=_capture_result(),
+                conversation_mode=types.ConversationMode.WakeCommand,
+                model_prepare_seconds=0.0,
+                total_started_at=time.perf_counter(),
+                on_event=lambda stage, message: events.append((stage, message)),
+                turn_control=control,
+            )
+        )
+
+        await asyncio.sleep(0.05)
+        self.assertNotIn(("human-reply", "Okay, nice."), events)
+
+        control.commit()
+        await task
+
+        self.assertEqual(events.count(("human-reply", "Okay, nice.")), 1)
+
+    async def test_speculative_turn_waits_for_commit_before_task_choice(self):
+        planner = RecordingPlanner()
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(),
+            transcriber=StubTranscriber("Jarvis, do this."),
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            planner=planner,
+            conversation_evaluation=RecordingConversationEvaluation(),
+            search_depth=RecordingSearchDepth(),
+            memory_retrieval=RecordingMemoryRetrieval(),
+            memory_relevance=RecordingMemoryRelevance(),
+            task_prompt=RecordingTaskPrompt(),
+        )
+        control = VoiceTurnControl()
+        task = asyncio.create_task(
+            processor.process(
+                capture=_capture_result(),
+                conversation_mode=types.ConversationMode.WakeCommand,
+                model_prepare_seconds=0.0,
+                total_started_at=time.perf_counter(),
+                on_event=lambda stage, message: events.append((stage, message)),
+                turn_control=control,
+            )
+        )
+
+        await asyncio.sleep(0.05)
+        self.assertIsNone(planner.current_user_request)
+
+        control.commit()
+        await task
+
+        self.assertEqual(planner.current_user_request, "do this")
+        stages = [stage for stage, _message in events]
+        self.assertLess(stages.index("human-reply"), stages.index("task-choice"))
+
     def test_cli_prints_input_lifecycle_events_in_normal_mode(self):
         output = io.StringIO()
         printer = _VoiceTurnEventPrinter(
@@ -256,8 +367,65 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             "[Input Stopped]",
         ])
 
+    def test_cli_prints_startup_latency_only_once(self):
+        output = io.StringIO()
+        printer = _VoiceTurnEventPrinter(
+            debug_output=False,
+            turn_started_at=10.0,
+        )
 
-def _voice_config():
+        with patch("time.perf_counter", side_effect=[10.25, 120.0]):
+            with contextlib.redirect_stdout(output):
+                printer("listening", "first")
+                printer("listening", "second")
+
+        self.assertEqual(output.getvalue().splitlines(), [
+            "[startup 250ms] ready",
+            "[ready]",
+        ])
+
+    def test_cli_prints_selected_task_name(self):
+        output = io.StringIO()
+        printer = _VoiceTurnEventPrinter(
+            debug_output=False,
+            turn_started_at=time.perf_counter(),
+        )
+
+        with contextlib.redirect_stdout(output):
+            printer("task-chosen", "selected: Reply to user (5.264s)")
+
+        self.assertEqual(output.getvalue().splitlines(), [
+            "selected: Reply to user",
+            "[task_choice 5.264s]",
+        ])
+
+    async def test_voice_context_setup_does_not_seed_core_tasks_by_default(self):
+        database = MinimalVoiceMemoryDatabase()
+        args = Namespace(
+            session_id=None,
+            conversation_id=None,
+            debug_output=False,
+            verbose_context=False,
+        )
+
+        async def fake_open_memory_database():
+            return database
+
+        with patch(
+            "reframe_agent_host.commands.voice_turn.open_memory_database",
+            fake_open_memory_database,
+        ):
+            await _ensure_voice_memory_context(args)
+
+        self.assertEqual(args.session_id, "memory_node:session")
+        self.assertEqual(
+            args.conversation_id,
+            "memory_node:session:conversation",
+        )
+        self.assertTrue(database.closed)
+
+
+def _voice_config(task_choice_enabled=True):
     return VoicePipelineConfig(
         audio=AudioInputConfig(),
         voice_activity=VoiceActivityConfig(),
@@ -265,6 +433,7 @@ def _voice_config():
         triggers=TriggerPhraseConfig(),
         transcription=WhisperTranscriberConfig(),
         conversation_mode=types.ConversationMode.WakeCommand,
+        task_choice_enabled=task_choice_enabled,
     )
 
 

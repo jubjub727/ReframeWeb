@@ -106,7 +106,7 @@ async def run_seed_core_tasks() -> int:
         print(
             json.dumps(
                 {
-                    "provider_id": result.provider_id,
+                    "provider_ids": list(result.provider_ids),
                     "created_task_ids": list(result.created_task_ids),
                     "existing_task_ids": list(result.existing_task_ids),
                     "updated_task_ids": list(result.updated_task_ids),

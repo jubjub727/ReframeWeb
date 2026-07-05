@@ -20,6 +20,7 @@ ACTION_NOT_SUPPORTED_REPLY = "Action not supported."
 SUPPORTED_PRIMITIVES = {
     "agent_thought",
     "agent_reply",
+    "conversation_mode_off",
     "session_memory",
     "user_preference",
 }
@@ -56,6 +57,7 @@ class PrimitiveDispatcher:
     conversation_id: str | None = None
     speaker: TextSpeaker | None = None
     on_event: Callable[[str, str], None] | None = None
+    on_conversation_mode_off: Callable[[], None] | None = None
 
     async def dispatch(
         self,
@@ -97,6 +99,16 @@ class PrimitiveDispatcher:
                 return _malformed(name)
             await self._agent_thought(text)
             return PrimitiveDispatchRecord(name=name, status="ok", detail=text)
+
+        if name == "conversation_mode_off":
+            if self.on_conversation_mode_off is not None:
+                self.on_conversation_mode_off()
+            self._emit("conversation-mode", "continuous conversation off")
+            return PrimitiveDispatchRecord(
+                name=name,
+                status="ok",
+                detail="continuous conversation off",
+            )
 
         if name == "session_memory":
             if self.session_id is None:

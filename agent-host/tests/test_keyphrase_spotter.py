@@ -1,15 +1,25 @@
 import unittest
+from collections import deque
 
 import numpy as np
 
+from reframe_agent_host.baml_client import types
 from reframe_agent_host.commands.parser import build_parser
 from reframe_agent_host.commands.record_wake_audio import DEFAULT_CASES
+from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
 from reframe_agent_host.keyphrases import KeyphraseDetection
 from reframe_agent_host.keyphrases.pocketsphinx_helpers import phrase_sample_span
 from reframe_agent_host.keyphrases.pocketsphinx_phrase import (
     PocketSphinxPhraseSpotter,
     trim_frames_from_sample,
 )
+from reframe_agent_host.speech.transcription import WhisperTranscriberConfig
+from reframe_agent_host.speech.triggers import TriggerPhraseConfig
+from reframe_agent_host.voice.activity import VoiceActivityConfig
+from reframe_agent_host.voice.capture_state import CaptureState
+from reframe_agent_host.voice.keyphrase_gate import VoiceKeyphraseGate
+from reframe_agent_host.voice.microphone import AudioInputConfig
+from reframe_agent_host.voice.types import VoicePipelineConfig
 
 
 class FakeSegment:
@@ -36,6 +46,26 @@ class FakeDecoder:
 
     def end_utt(self):
         return None
+
+
+class FakeReplaySpotter:
+    def __init__(self, detection):
+        self.detection = detection
+        self.replay_pre_ms = None
+        self.closed = False
+
+    def append(self, _frame):
+        return None
+
+    def detect(self):
+        return self.detection
+
+    def replay_frames_for_detection(self, _detection, pre_roll_ms):
+        self.replay_pre_ms = pre_roll_ms
+        return [np.array([float(pre_roll_ms)], dtype=np.float32)]
+
+    def close(self):
+        self.closed = True
 
 
 class KeyphraseSpotterTests(unittest.TestCase):
@@ -145,6 +175,56 @@ class KeyphraseSpotterTests(unittest.TestCase):
 
         self.assertEqual(float(frames[0][0]), 1800.0)
 
+    def test_conversation_on_replays_no_buffered_audio(self):
+        detection = KeyphraseDetection(
+            kind="conversation_on",
+            phrase="conversation on",
+            hypstr="conversation on",
+            confirmed=True,
+            phrase_start_sample=0,
+            phrase_end_sample=1600,
+        )
+        spotter = FakeReplaySpotter(detection)
+        state = _capture_state(spotter)
+        gate = VoiceKeyphraseGate(_voice_config())
+
+        result = gate.accept(
+            np.zeros(512, dtype=np.float32),
+            state,
+            listen_started_at=0.0,
+            emit=lambda _stage, _message: None,
+        )
+
+        self.assertIsNotNone(result)
+        self.assertTrue(result.conversation_enabled)
+        self.assertIsNone(spotter.replay_pre_ms)
+        self.assertEqual(result.replay_frames, [])
+
+    def test_conversation_on_without_phrase_boundary_replays_nothing(self):
+        detection = KeyphraseDetection(
+            kind="conversation_on",
+            phrase="conversation on",
+            hypstr="conversation on",
+            confirmed=True,
+            phrase_start_sample=None,
+            phrase_end_sample=None,
+        )
+        spotter = FakeReplaySpotter(detection)
+        state = _capture_state(spotter)
+        gate = VoiceKeyphraseGate(_voice_config())
+
+        result = gate.accept(
+            np.zeros(512, dtype=np.float32),
+            state,
+            listen_started_at=0.0,
+            emit=lambda _stage, _message: None,
+        )
+
+        self.assertIsNotNone(result)
+        self.assertTrue(result.conversation_enabled)
+        self.assertIsNone(spotter.replay_pre_ms)
+        self.assertEqual(result.replay_frames, [])
+
 
 def _spotter_with_decoder(hypstr):
     spotter = PocketSphinxPhraseSpotter(
@@ -159,6 +239,27 @@ def _spotter_with_decoder(hypstr):
     spotter._frames = [np.zeros(512, dtype=np.float32)]
     spotter._frames_since_check = 1
     return spotter
+
+
+def _capture_state(spotter):
+    state = CaptureState(
+        conversation_mode=types.ConversationMode.WakeCommand,
+        keyphrase_required=True,
+        keyphrase_carry_frames=deque(maxlen=4),
+    )
+    state.keyphrase_spotter = spotter
+    return state
+
+
+def _voice_config():
+    return VoicePipelineConfig(
+        audio=AudioInputConfig(),
+        voice_activity=VoiceActivityConfig(),
+        keyphrases=KeyphraseSpotterConfig(replay_pre_ms=80),
+        triggers=TriggerPhraseConfig(),
+        transcription=WhisperTranscriberConfig(),
+        conversation_mode=types.ConversationMode.WakeCommand,
+    )
 
 
 if __name__ == "__main__":

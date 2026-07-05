@@ -654,7 +654,14 @@ async def _relevance_decision(
 
 async def _core_available_tasks(database) -> list[types.AvailableTask]:
     seed = await ensure_core_tasks(database)
-    tasks = await database.providers.tasks_for(seed.provider_id)
+    tasks = []
+    seen_task_ids = set()
+    for provider_id in seed.provider_ids:
+        for task in await database.providers.tasks_for(provider_id):
+            if task.id in seen_task_ids:
+                continue
+            seen_task_ids.add(task.id)
+            tasks.append(task)
     return [
         types.AvailableTask(
             id=task.id,

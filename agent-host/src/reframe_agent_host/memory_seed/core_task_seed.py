@@ -3,9 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from reframe_agent_host.memory_seed.core_task_definitions import (
-    CORE_TASK_MODEL_ID,
-    CORE_TASK_REASONING_EFFORT,
     CORE_TASKS,
+    CoreTaskDefinition,
 )
 from reframe_agent_host.memory_seed.opencode_go import (
     DIRECT_MODEL_TAGS,
@@ -23,18 +22,23 @@ from reframe_memory import (
 
 @dataclass(frozen=True)
 class CoreTaskSeedResult:
-    provider_id: str
+    provider_ids: tuple[str, ...]
     created_task_ids: tuple[str, ...]
     existing_task_ids: tuple[str, ...]
     updated_task_ids: tuple[str, ...]
 
 
 async def ensure_core_tasks(database: MemoryDatabase) -> CoreTaskSeedResult:
-    provider = await _ensure_provider(database)
+    await ensure_opencode_go_providers(database)
+    providers: dict[tuple[str, str], ProviderNode] = {}
     created_task_ids: list[str] = []
     existing_task_ids: list[str] = []
     updated_task_ids: list[str] = []
     for definition in CORE_TASKS:
+        provider = providers.get((definition.model_id, definition.reasoning_effort))
+        if provider is None:
+            provider = await _provider_for_definition(database, definition)
+            providers[(definition.model_id, definition.reasoning_effort)] = provider
         expected = definition.to_task(provider.id)
         existing = await _find_task(database, definition.name)
         if existing is not None:
@@ -55,37 +59,40 @@ async def ensure_core_tasks(database: MemoryDatabase) -> CoreTaskSeedResult:
         )
         created_task_ids.append(task.id)
 
+    provider_ids = tuple(provider.id for provider in providers.values())
     return CoreTaskSeedResult(
-        provider_id=provider.id,
+        provider_ids=provider_ids,
         created_task_ids=tuple(created_task_ids),
         existing_task_ids=tuple(existing_task_ids),
         updated_task_ids=tuple(updated_task_ids),
     )
 
 
-async def _ensure_provider(database: MemoryDatabase) -> ProviderNode:
-    await ensure_opencode_go_providers(database)
+async def _provider_for_definition(
+    database: MemoryDatabase,
+    definition: CoreTaskDefinition,
+) -> ProviderNode:
     providers = await database.providers.search(
         ProviderSearch.build(
             tags=TagSearch.build(
                 all_of=DIRECT_MODEL_TAGS
-                + (CORE_TASK_MODEL_ID, CORE_TASK_REASONING_EFFORT),
+                + (definition.model_id, definition.reasoning_effort),
             ),
-            model_ids=(CORE_TASK_MODEL_ID,),
-            reasoning_efforts=(CORE_TASK_REASONING_EFFORT,),
+            model_ids=(definition.model_id,),
+            reasoning_efforts=(definition.reasoning_effort,),
         ),
         mark_read=False,
     )
     for provider in providers:
         if (
-            provider.content.model_id == CORE_TASK_MODEL_ID
-            and provider.content.reasoning_effort == CORE_TASK_REASONING_EFFORT
+            provider.content.model_id == definition.model_id
+            and provider.content.reasoning_effort == definition.reasoning_effort
         ):
             return provider
 
     msg = (
         "core task provider was not seeded: "
-        f"{CORE_TASK_MODEL_ID}/{CORE_TASK_REASONING_EFFORT}"
+        f"{definition.model_id}/{definition.reasoning_effort}"
     )
     raise ValueError(msg)
 

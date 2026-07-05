@@ -18,6 +18,7 @@ from reframe_agent_host.voice.capture_setup import (
     listen_deadline,
     timeout_message,
 )
+from reframe_agent_host.voice.conversation_mode import ConversationModeController
 from reframe_agent_host.voice.keyphrase_gate import VoiceKeyphraseGate
 from reframe_agent_host.voice.speculative_capture_session import (
     SpeculativeCaptureSession,
@@ -38,9 +39,11 @@ class VoiceTurnCapture:
         self,
         config: VoicePipelineConfig,
         conversation_mode: types.ConversationMode,
+        mode_controller: ConversationModeController | None = None,
     ) -> None:
         self._config = config
         self._conversation_mode = conversation_mode
+        self._mode_controller = mode_controller
         self._flow = VoiceCaptureFlow(config)
         self._router = CaptureFrameRouter(config, self._flow)
 
@@ -124,6 +127,7 @@ class VoiceTurnCapture:
         SpeculativeCaptureSession(
             self._config,
             self._conversation_mode,
+            mode_controller=self._mode_controller,
         ).run(
             on_event,
             on_capture_event,

@@ -128,6 +128,13 @@ class TaskChoicePlanner:
             task_choice_memories=context.task_choice_memories,
         )
 
+    async def task_name(self, task_id: str) -> str | None:
+        database = await self._get_database()
+        task = await database.tasks.get(task_id)
+        if task is None:
+            return None
+        return task.content.name
+
     async def close(self) -> None:
         if self._database is not None and self._owns_database:
             await self._database.close()

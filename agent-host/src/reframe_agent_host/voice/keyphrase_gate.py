@@ -55,15 +55,26 @@ class VoiceKeyphraseGate:
         emit("keyphrase", f"detected {detection.phrase!r} as {detection.hypstr!r}")
         state.keyphrase_detection = detection
         state.keyphrase_wait_seconds = time.perf_counter() - listen_started_at
-        replay_frames = state.keyphrase_spotter.replay_frames_for_detection(
-            detection,
-            self._config.keyphrases.replay_pre_ms,
-        )
+        replay_frames = self._replay_frames(state, detection)
         state.close_spotters()
         return KeyphraseGateResult(
             detection,
             detection.kind == "conversation_on",
             replay_frames,
+        )
+
+    def _replay_frames(
+        self,
+        state: CaptureState,
+        detection: KeyphraseDetection,
+    ) -> list[np.ndarray]:
+        if state.keyphrase_spotter is None:
+            return []
+        if detection.kind == "conversation_on":
+            return []
+        return state.keyphrase_spotter.replay_frames_for_detection(
+            detection,
+            self._config.keyphrases.replay_pre_ms,
         )
 
     def _phrase_spotter(self) -> PocketSphinxPhraseSpotter:

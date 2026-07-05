@@ -15,6 +15,7 @@ from reframe_agent_host.agent_flow.task_prompt import TaskPromptPlanner
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
 from reframe_agent_host.speech.tts import KokoroSpeaker
+from reframe_agent_host.voice.conversation_mode import ConversationModeController
 from reframe_agent_host.voice.turn_capture import VoiceTurnCapture
 from reframe_agent_host.voice.turn_capture import CaptureStreamEventHandler
 from reframe_agent_host.voice.turn_processor import VoiceTurnProcessor
@@ -30,7 +31,7 @@ from reframe_agent_host.voice.types import (
 class VoiceTurnPipeline:
     def __init__(self, config: VoicePipelineConfig) -> None:
         self._config = config
-        self._conversation_mode = config.conversation_mode
+        self._conversation_mode = ConversationModeController(config.conversation_mode)
         self._transcriber = FasterWhisperTranscriber(config.transcription)
         self._trigger_matcher = TriggerPhraseMatcher(config.triggers)
         self._speaker = KokoroSpeaker()
@@ -77,9 +78,10 @@ class VoiceTurnPipeline:
     ) -> CaptureResult:
         capture = VoiceTurnCapture(
             self._config,
-            self._conversation_mode,
+            self._conversation_mode.get(),
+            mode_controller=self._conversation_mode,
         ).capture(on_event, stop_event=stop_event)
-        self._conversation_mode = capture.conversation_mode
+        self._conversation_mode.set(capture.conversation_mode)
         return capture
 
     def capture_speculative_once(
@@ -90,7 +92,8 @@ class VoiceTurnPipeline:
     ) -> None:
         VoiceTurnCapture(
             self._config,
-            self._conversation_mode,
+            self._conversation_mode.get(),
+            mode_controller=self._conversation_mode,
         ).capture_speculative_once(
             on_event,
             on_capture_event,
@@ -106,7 +109,8 @@ class VoiceTurnPipeline:
     ) -> None:
         VoiceTurnCapture(
             self._config,
-            self._conversation_mode,
+            self._conversation_mode.get(),
+            mode_controller=self._conversation_mode,
         ).capture_speculative_session(
             on_event,
             on_capture_event,
@@ -136,7 +140,7 @@ class VoiceTurnPipeline:
             await processor.close()
 
     def apply_capture_mode(self, capture: CaptureResult) -> None:
-        self._conversation_mode = capture.conversation_mode
+        self._conversation_mode.set(capture.conversation_mode)
 
     def _create_processor(self) -> VoiceTurnProcessor:
         return VoiceTurnProcessor(
@@ -151,6 +155,7 @@ class VoiceTurnPipeline:
             TaskPromptPlanner(session_id=self._config.session_id),
             TaskExecutionPlanner(),
             self._speaker,
+            mode_controller=self._conversation_mode,
         )
 
     def _emit(

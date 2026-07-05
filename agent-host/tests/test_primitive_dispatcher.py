@@ -71,6 +71,34 @@ class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn(("agent-reply", "spoken reply"), events)
         self.assertIn(("agent-thought", "next thought"), events)
 
+    async def test_conversation_mode_off_invokes_host_callback(self):
+        database = FakeDatabase()
+        events = []
+        mode_changes = []
+        dispatcher = PrimitiveDispatcher(
+            database=database,
+            on_event=lambda stage, message: events.append((stage, message)),
+            on_conversation_mode_off=lambda: mode_changes.append("off"),
+        )
+        result = types.TaskExecutionResult(
+            returns=[
+                types.TaskReturnItem(
+                    name="conversation_mode_off",
+                    payload={},
+                )
+            ]
+        )
+
+        dispatch_result = await dispatcher.dispatch(result)
+
+        self.assertEqual(mode_changes, ["off"])
+        self.assertEqual(dispatch_result.records[0].name, "conversation_mode_off")
+        self.assertEqual(dispatch_result.records[0].status, "ok")
+        self.assertIn(
+            ("conversation-mode", "continuous conversation off"),
+            events,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

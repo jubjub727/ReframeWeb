@@ -16,6 +16,7 @@ from reframe_agent_host.voice.capture_setup import (
     timeout_message,
 )
 from reframe_agent_host.voice.capture_state import CaptureState
+from reframe_agent_host.voice.conversation_mode import ConversationModeController
 from reframe_agent_host.voice.microphone import MicrophoneStream
 from reframe_agent_host.voice.keyphrase_gate import VoiceKeyphraseGate
 from reframe_agent_host.voice.types import (
@@ -34,9 +35,14 @@ class SpeculativeCaptureSession:
         self,
         config: VoicePipelineConfig,
         conversation_mode: types.ConversationMode,
+        mode_controller: ConversationModeController | None = None,
     ) -> None:
         self._config = config
         self._conversation_mode = conversation_mode
+        self._mode_controller = mode_controller
+        self._mode_version = (
+            mode_controller.snapshot()[1] if mode_controller is not None else 0
+        )
         self._flow = VoiceCaptureFlow(config)
 
     def run(
@@ -71,6 +77,9 @@ class SpeculativeCaptureSession:
         def turn_finished(result: CaptureResult) -> bool:
             nonlocal completed_turns
             self._conversation_mode = result.conversation_mode
+            if self._mode_controller is not None:
+                self._mode_controller.set(result.conversation_mode)
+                self._mode_version = self._mode_controller.snapshot()[1]
             completed_turns += 1
             return max_turns > 0 and completed_turns >= max_turns
 
@@ -93,6 +102,20 @@ class SpeculativeCaptureSession:
                 for frame in microphone.frames(stop_event=stop_event):
                     if stop_event is not None and stop_event.is_set():
                         raise InterruptedError("Voice capture was stopped.")
+
+                    if self._sync_external_mode_change(state, on_event):
+                        pending_turn_id = None
+                        pending_capture = None
+                        state.close_spotters()
+                        (
+                            segmenter,
+                            state,
+                            keyphrase_gate,
+                            debug_audio,
+                            deadline,
+                            listen_started_at,
+                        ) = self._start_turn(on_event)
+                        continue
 
                     debug_audio.append(frame)
                     debug_audio.maybe_save_periodic(self._emitter(on_event))
@@ -229,6 +252,10 @@ class SpeculativeCaptureSession:
         self,
         on_event: VoicePipelineEventHandler | None,
     ):
+        if self._mode_controller is not None:
+            self._conversation_mode, self._mode_version = (
+                self._mode_controller.snapshot()
+            )
         segmenter = create_segmenter(self._config)
         state = create_capture_state(self._config, self._conversation_mode)
         keyphrase_gate = VoiceKeyphraseGate(self._config)
@@ -239,6 +266,26 @@ class SpeculativeCaptureSession:
         listen_started_at = time.perf_counter()
         self._emit_listening(on_event, segmenter, state)
         return segmenter, state, keyphrase_gate, debug_audio, deadline, listen_started_at
+
+    def _sync_external_mode_change(
+        self,
+        state: CaptureState,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> bool:
+        if self._mode_controller is None:
+            return False
+
+        mode, version = self._mode_controller.snapshot()
+        if version == self._mode_version:
+            return False
+
+        self._mode_version = version
+        if mode == state.conversation_mode:
+            return False
+
+        self._conversation_mode = mode
+        self._emit(on_event, "conversation-mode", mode.value)
+        return True
 
     def _accept_keyphrase_frame(
         self,

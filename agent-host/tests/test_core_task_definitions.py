@@ -1,0 +1,75 @@
+import unittest
+from dataclasses import MISSING, fields
+
+from reframe_agent_host.memory_seed import core_task_definitions
+from reframe_agent_host.memory_seed.core_task_definitions import (
+    CORE_TASKS,
+    CoreTaskDefinition,
+)
+
+
+class CoreTaskDefinitionTests(unittest.TestCase):
+    def test_core_tasks_do_not_use_shared_prompt_fragments_or_tags(self):
+        self.assertFalse(hasattr(core_task_definitions, "CORE_TASK_RETURN_OPTIONS"))
+        self.assertFalse(hasattr(core_task_definitions, "CORE_TASK_TAGS"))
+        self.assertFalse(hasattr(core_task_definitions, "CORE_TASK_MODEL_ID"))
+        self.assertFalse(hasattr(core_task_definitions, "CORE_TASK_REASONING_EFFORT"))
+
+    def test_core_task_inputs_describe_user_supplied_text_only(self):
+        inputs = {task.name: task.input for task in CORE_TASKS}
+
+        self.assertEqual(
+            inputs["Explain request cannot be handled"],
+            "The user's request.",
+        )
+        self.assertEqual(
+            inputs["Request more information from the user"],
+            "The user's request.",
+        )
+        self.assertEqual(
+            inputs["Turn conversation mode off"],
+            "The user's request to end continuous conversation.",
+        )
+        self.assertEqual(inputs["Reply to user"], "The user's message.")
+
+    def test_new_core_tasks_have_task_owned_return_items(self):
+        tasks = {task.name: task for task in CORE_TASKS}
+
+        self.assertIn("Turn conversation mode off", tasks)
+        self.assertIn("Reply to user", tasks)
+        self.assertIn(
+            "conversation_mode_off with empty payload {}",
+            tasks["Turn conversation mode off"].prompt,
+        )
+        self.assertIn(
+            'agent_reply with payload {"text": "..."}',
+            tasks["Reply to user"].prompt,
+        )
+        self.assertEqual(
+            tasks["Turn conversation mode off"].tags,
+            ("conversation-mode", "conversation-off"),
+        )
+        self.assertEqual(tasks["Turn conversation mode off"].model_id, "kimi-k2.6")
+        self.assertEqual(
+            tasks["Turn conversation mode off"].reasoning_effort,
+            "none",
+        )
+        self.assertEqual(tasks["Reply to user"].tags, ("reply",))
+        self.assertEqual(tasks["Reply to user"].model_id, "deepseek-v4-flash")
+        self.assertEqual(tasks["Reply to user"].reasoning_effort, "low")
+
+    def test_every_core_task_declares_its_provider_choice(self):
+        for task in CORE_TASKS:
+            with self.subTest(task=task.name):
+                self.assertIsInstance(task.model_id, str)
+                self.assertTrue(task.model_id)
+                self.assertIsInstance(task.reasoning_effort, str)
+                self.assertTrue(task.reasoning_effort)
+
+        field_defaults = {field.name: field.default for field in fields(CoreTaskDefinition)}
+        self.assertIs(field_defaults["model_id"], MISSING)
+        self.assertIs(field_defaults["reasoning_effort"], MISSING)
+
+
+if __name__ == "__main__":
+    unittest.main()
