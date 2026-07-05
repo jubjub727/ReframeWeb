@@ -7,3 +7,5 @@ There will be a graph db for memory storage as well. There will be nodes for var
 This will use the sounddevice Python library for taking audio in. Python library pocketsphinx for local trigger word detection such as "jarvis do x" and phrase detection such as "conversation on". Python library silero-vad for voice activity detection. Python library faster-whisper for transcribing audio prompts directly to BAML agentic flow. Python library kokoro for TTS voice playback using the af_heart voice. sounddevice should have the ability to cancel audio playback when the user starts talking but not completely destroy the underlying tasks it was completing.
 
 Don't make large files. Files should be named by intent and be small enough to view on a 1080p monitor without lots of scrolling.
+
+Don't give me python venv commands that you can run, give me uv commands that I can run.

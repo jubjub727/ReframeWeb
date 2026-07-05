@@ -35,6 +35,12 @@ class LlmResponseParser:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateConversationForMemorySearch", llm_response=llm_response, mode="request")
         return typing.cast(types.ConversationMemorySearchHints, __result__)
 
+    def EvaluateRelevantMemories(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> types.RelevantMemoryDecision:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateRelevantMemories", llm_response=llm_response, mode="request")
+        return typing.cast(types.RelevantMemoryDecision, __result__)
+
     def EvaluateSearchDepths(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> types.SearchDepthDecision:
@@ -60,6 +66,12 @@ class LlmStreamParser:
     ) -> stream_types.ConversationMemorySearchHints:
         __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateConversationForMemorySearch", llm_response=llm_response, mode="stream")
         return typing.cast(stream_types.ConversationMemorySearchHints, __result__)
+
+    def EvaluateRelevantMemories(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> stream_types.RelevantMemoryDecision:
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="EvaluateRelevantMemories", llm_response=llm_response, mode="stream")
+        return typing.cast(stream_types.RelevantMemoryDecision, __result__)
 
     def EvaluateSearchDepths(
         self, llm_response: str, baml_options: BamlCallOptions = {},

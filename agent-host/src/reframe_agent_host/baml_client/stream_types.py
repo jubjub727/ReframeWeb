@@ -23,7 +23,7 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
     value: StreamStateValueT
     state: typing_extensions.Literal["Pending", "Incomplete", "Complete"]
 # #########################################################################
-# Generated classes (16)
+# Generated classes (19)
 # #########################################################################
 
 class AvailableTask(BaseModel):
@@ -78,6 +78,31 @@ class MemoryTagSearch(BaseModel):
     any_of: typing.List[str]
     all_of: typing.List[str]
     none_of: typing.List[str]
+
+class RelevanceMemoryContext(BaseModel):
+    title: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    tags: typing.List[str]
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
+
+class RelevantMemoryDecision(BaseModel):
+    kept_memory_ids: typing.List[str]
+    candidate_memory: typing.Optional["CandidateMemory"] = None
+
+class RetrievedMemoryCandidate(BaseModel):
+    id: typing.Optional[str] = None
+    kind: typing.Optional[str] = None
+    title: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    tags: typing.List[str]
+    created_at: typing.Optional[str] = None
+    updated_at: typing.Optional[str] = None
+    read_at: typing.Optional[str] = None
+    retrieval_matched: typing.Optional[bool] = None
+    parent_session_id: typing.Optional[str] = None
+    parent_conversation_id: typing.Optional[str] = None
 
 class SearchDepthDecision(BaseModel):
     depths: typing.Dict[str, "SearchDepthTimestamps"]

@@ -89,6 +89,12 @@ class SearchDepthMemory:
     description: str
 
 
+@dataclass(frozen=True)
+class RelevanceMemory:
+    title: str
+    description: str
+
+
 ProviderNode: TypeAlias = MemoryNode[Provider]
 TaskNode: TypeAlias = MemoryNode[Task]
 SessionNode: TypeAlias = MemoryNode[Session]
@@ -98,3 +104,4 @@ SessionMemoryNode: TypeAlias = MemoryNode[SessionMemory]
 TaskChoiceMemoryNode: TypeAlias = MemoryNode[TaskChoiceMemory]
 ConversationEvaluationMemoryNode: TypeAlias = MemoryNode[ConversationEvaluationMemory]
 SearchDepthMemoryNode: TypeAlias = MemoryNode[SearchDepthMemory]
+RelevanceMemoryNode: TypeAlias = MemoryNode[RelevanceMemory]

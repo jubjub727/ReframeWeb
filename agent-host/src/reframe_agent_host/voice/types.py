@@ -49,16 +49,19 @@ class VoiceTurnTimings:
     post_vad_memory_search_seconds: float | None
     post_vad_search_depth_seconds: float | None
     post_vad_memory_retrieval_seconds: float | None
+    post_vad_memory_relevance_seconds: float | None
     estimated_user_stop_to_transcript_seconds: float | None
     estimated_user_stop_to_task_choice_seconds: float | None
     estimated_user_stop_to_memory_search_seconds: float | None
     estimated_user_stop_to_search_depth_seconds: float | None
     estimated_user_stop_to_memory_retrieval_seconds: float | None
+    estimated_user_stop_to_memory_relevance_seconds: float | None
     transcription_seconds: float | None
     task_choice_seconds: float | None
     memory_search_seconds: float | None
     search_depth_seconds: float | None
     memory_retrieval_seconds: float | None
+    memory_relevance_seconds: float | None
     total_seconds: float
 
     def to_dict(self) -> dict[str, float | None]:
@@ -78,6 +81,9 @@ class VoiceTurnTimings:
             "post_vad_memory_retrieval_seconds": (
                 self.post_vad_memory_retrieval_seconds
             ),
+            "post_vad_memory_relevance_seconds": (
+                self.post_vad_memory_relevance_seconds
+            ),
             "estimated_user_stop_to_transcript_seconds": (
                 self.estimated_user_stop_to_transcript_seconds
             ),
@@ -93,11 +99,15 @@ class VoiceTurnTimings:
             "estimated_user_stop_to_memory_retrieval_seconds": (
                 self.estimated_user_stop_to_memory_retrieval_seconds
             ),
+            "estimated_user_stop_to_memory_relevance_seconds": (
+                self.estimated_user_stop_to_memory_relevance_seconds
+            ),
             "transcription_seconds": self.transcription_seconds,
             "task_choice_seconds": self.task_choice_seconds,
             "memory_search_seconds": self.memory_search_seconds,
             "search_depth_seconds": self.search_depth_seconds,
             "memory_retrieval_seconds": self.memory_retrieval_seconds,
+            "memory_relevance_seconds": self.memory_relevance_seconds,
             "total_seconds": self.total_seconds,
         }
 
@@ -116,6 +126,8 @@ class VoiceTurnResult:
     memory_search_hints: types.ConversationMemorySearchHints | None
     search_depths: types.SearchDepthDecision | None
     retrieved_memories: RetrievedMemoryContext | None
+    relevance_decision: types.RelevantMemoryDecision | None
+    relevant_memories: RetrievedMemoryContext | None
     timings: VoiceTurnTimings
 
     def to_dict(self) -> dict[str, object]:
@@ -181,6 +193,16 @@ class VoiceTurnResult:
             "retrieved_memories": (
                 self.retrieved_memories.to_dict()
                 if self.retrieved_memories is not None
+                else None
+            ),
+            "relevance_decision": (
+                self.relevance_decision.model_dump(mode="json")
+                if self.relevance_decision is not None
+                else None
+            ),
+            "relevant_memories": (
+                self.relevant_memories.to_dict()
+                if self.relevant_memories is not None
                 else None
             ),
             "timings": self.timings.to_dict(),

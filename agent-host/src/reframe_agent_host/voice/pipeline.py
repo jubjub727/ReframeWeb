@@ -6,6 +6,7 @@ from reframe_agent_host.agent_flow.conversation_evaluation import (
     ConversationEvaluationPlanner,
 )
 from reframe_agent_host.agent_flow.memory_retrieval import MemoryRetrievalPlanner
+from reframe_agent_host.agent_flow.memory_relevance import MemoryRelevancePlanner
 from reframe_agent_host.agent_flow.search_depth import SearchDepthPlanner
 from reframe_agent_host.agent_flow.task_choice import TaskChoicePlanner
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
@@ -31,6 +32,7 @@ class VoiceTurnPipeline:
         )
         self._search_depth = SearchDepthPlanner(session_id=config.session_id)
         self._memory_retrieval = MemoryRetrievalPlanner(session_id=config.session_id)
+        self._memory_relevance = MemoryRelevancePlanner(session_id=config.session_id)
         self._processor = VoiceTurnProcessor(
             config,
             self._transcriber,
@@ -39,6 +41,7 @@ class VoiceTurnPipeline:
             self._conversation_evaluation,
             self._search_depth,
             self._memory_retrieval,
+            self._memory_relevance,
         )
 
     async def run_once(

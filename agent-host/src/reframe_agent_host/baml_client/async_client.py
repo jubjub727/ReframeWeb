@@ -112,6 +112,21 @@ class BamlAsyncClient:
                 "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"conversation_evaluation_memories": conversation_evaluation_memories,
             })
             return typing.cast(types.ConversationMemorySearchHints, __result__.cast_to(types, types, stream_types, False, __runtime__))
+    async def EvaluateRelevantMemories(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,candidate_memories: typing.List["types.RetrievedMemoryCandidate"],relevance_memories: typing.List["types.RelevanceMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> types.RelevantMemoryDecision:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            # Use streaming internally when on_tick is provided
+            __stream__ = self.stream.EvaluateRelevantMemories(current_user_request=current_user_request,session_conversations=session_conversations,session_memories=session_memories,selected_task=selected_task,candidate_memories=candidate_memories,relevance_memories=relevance_memories,
+                baml_options=baml_options)
+            return await __stream__.get_final_response()
+        else:
+            # Original non-streaming code
+            __result__ = await self.__options.merge_options(baml_options).call_function_async(function_name="EvaluateRelevantMemories", args={
+                "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"candidate_memories": candidate_memories,"relevance_memories": relevance_memories,
+            })
+            return typing.cast(types.RelevantMemoryDecision, __result__.cast_to(types, types, stream_types, False, __runtime__))
     async def EvaluateSearchDepths(self, current_timestamp: str,current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,memory_search_hints: types.ConversationMemorySearchHints,search_domains: typing.List["types.SearchDepthDomain"],search_depth_memories: typing.List["types.SearchDepthMemoryContext"],
         baml_options: BamlCallOptions = {},
     ) -> types.SearchDepthDecision:
@@ -160,6 +175,18 @@ class BamlStreamClient:
           lambda x: typing.cast(types.ConversationMemorySearchHints, x.cast_to(types, types, stream_types, False, __runtime__)),
           __ctx__,
         )
+    def EvaluateRelevantMemories(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,candidate_memories: typing.List["types.RetrievedMemoryCandidate"],relevance_memories: typing.List["types.RelevanceMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlStream[stream_types.RelevantMemoryDecision, types.RelevantMemoryDecision]:
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_async_stream(function_name="EvaluateRelevantMemories", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"candidate_memories": candidate_memories,"relevance_memories": relevance_memories,
+        })
+        return baml_py.BamlStream[stream_types.RelevantMemoryDecision, types.RelevantMemoryDecision](
+          __result__,
+          lambda x: typing.cast(stream_types.RelevantMemoryDecision, x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(types.RelevantMemoryDecision, x.cast_to(types, types, stream_types, False, __runtime__)),
+          __ctx__,
+        )
     def EvaluateSearchDepths(self, current_timestamp: str,current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,memory_search_hints: types.ConversationMemorySearchHints,search_domains: typing.List["types.SearchDepthDomain"],search_depth_memories: typing.List["types.SearchDepthMemoryContext"],
         baml_options: BamlCallOptions = {},
     ) -> baml_py.BamlStream[stream_types.SearchDepthDecision, types.SearchDepthDecision]:
@@ -194,6 +221,13 @@ class BamlHttpRequestClient:
             "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"conversation_evaluation_memories": conversation_evaluation_memories,
         }, mode="request")
         return __result__
+    async def EvaluateRelevantMemories(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,candidate_memories: typing.List["types.RetrievedMemoryCandidate"],relevance_memories: typing.List["types.RelevanceMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="EvaluateRelevantMemories", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"candidate_memories": candidate_memories,"relevance_memories": relevance_memories,
+        }, mode="request")
+        return __result__
     async def EvaluateSearchDepths(self, current_timestamp: str,current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,memory_search_hints: types.ConversationMemorySearchHints,search_domains: typing.List["types.SearchDepthDomain"],search_depth_memories: typing.List["types.SearchDepthMemoryContext"],
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
@@ -221,6 +255,13 @@ class BamlHttpStreamRequestClient:
     ) -> baml_py.baml_py.HTTPRequest:
         __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="EvaluateConversationForMemorySearch", args={
             "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"conversation_evaluation_memories": conversation_evaluation_memories,
+        }, mode="stream")
+        return __result__
+    async def EvaluateRelevantMemories(self, current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,candidate_memories: typing.List["types.RetrievedMemoryCandidate"],relevance_memories: typing.List["types.RelevanceMemoryContext"],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="EvaluateRelevantMemories", args={
+            "current_user_request": current_user_request,"session_conversations": session_conversations,"session_memories": session_memories,"selected_task": selected_task,"candidate_memories": candidate_memories,"relevance_memories": relevance_memories,
         }, mode="stream")
         return __result__
     async def EvaluateSearchDepths(self, current_timestamp: str,current_user_request: str,session_conversations: typing.List["types.ConversationHistory"],session_memories: typing.List["types.SessionMemoryContext"],selected_task: types.SelectedTaskContext,memory_search_hints: types.ConversationMemorySearchHints,search_domains: typing.List["types.SearchDepthDomain"],search_depth_memories: typing.List["types.SearchDepthMemoryContext"],

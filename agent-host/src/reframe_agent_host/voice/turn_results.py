@@ -34,6 +34,8 @@ def mode_switch_turn_result(
         memory_search_hints=None,
         search_depths=None,
         retrieved_memories=None,
+        relevance_decision=None,
+        relevant_memories=None,
         timings=mode_switch_timings(
             model_prepare_seconds,
             capture,
@@ -53,6 +55,8 @@ def transcribed_turn_result(
     memory_search_hints: types.ConversationMemorySearchHints | None,
     search_depths: types.SearchDepthDecision | None,
     retrieved_memories: RetrievedMemoryContext | None,
+    relevance_decision: types.RelevantMemoryDecision | None,
+    relevant_memories: RetrievedMemoryContext | None,
     timings: dict[str, float | None],
 ) -> VoiceTurnResult:
     return VoiceTurnResult(
@@ -68,6 +72,8 @@ def transcribed_turn_result(
         memory_search_hints=memory_search_hints,
         search_depths=search_depths,
         retrieved_memories=retrieved_memories,
+        relevance_decision=relevance_decision,
+        relevant_memories=relevant_memories,
         timings=turn_timings(
             config,
             model_prepare_seconds=timings["model_prepare_seconds"],
@@ -80,10 +86,14 @@ def transcribed_turn_result(
             post_vad_memory_retrieval_seconds=timings[
                 "post_vad_memory_retrieval_seconds"
             ],
+            post_vad_memory_relevance_seconds=timings[
+                "post_vad_memory_relevance_seconds"
+            ],
             transcription_seconds=timings["transcription_seconds"],
             task_choice_seconds=timings["task_choice_seconds"],
             memory_search_seconds=timings["memory_search_seconds"],
             search_depth_seconds=timings["search_depth_seconds"],
             memory_retrieval_seconds=timings["memory_retrieval_seconds"],
+            memory_relevance_seconds=timings["memory_relevance_seconds"],
         ),
     )

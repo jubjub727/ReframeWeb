@@ -26,16 +26,19 @@ def mode_switch_timings(
         post_vad_memory_search_seconds=None,
         post_vad_search_depth_seconds=None,
         post_vad_memory_retrieval_seconds=None,
+        post_vad_memory_relevance_seconds=None,
         estimated_user_stop_to_transcript_seconds=None,
         estimated_user_stop_to_task_choice_seconds=None,
         estimated_user_stop_to_memory_search_seconds=None,
         estimated_user_stop_to_search_depth_seconds=None,
         estimated_user_stop_to_memory_retrieval_seconds=None,
+        estimated_user_stop_to_memory_relevance_seconds=None,
         transcription_seconds=None,
         task_choice_seconds=None,
         memory_search_seconds=None,
         search_depth_seconds=None,
         memory_retrieval_seconds=None,
+        memory_relevance_seconds=None,
         total_seconds=time.perf_counter() - total_started_at,
     )
 
@@ -50,11 +53,13 @@ def turn_timings(
     post_vad_memory_search_seconds: float | None,
     post_vad_search_depth_seconds: float | None,
     post_vad_memory_retrieval_seconds: float | None,
+    post_vad_memory_relevance_seconds: float | None,
     transcription_seconds: float,
     task_choice_seconds: float | None,
     memory_search_seconds: float | None,
     search_depth_seconds: float | None,
     memory_retrieval_seconds: float | None,
+    memory_relevance_seconds: float | None,
 ) -> VoiceTurnTimings:
     vad_delay_seconds = config.voice_activity.min_silence_ms / 1000
     return VoiceTurnTimings(
@@ -69,6 +74,7 @@ def turn_timings(
         post_vad_memory_search_seconds=post_vad_memory_search_seconds,
         post_vad_search_depth_seconds=post_vad_search_depth_seconds,
         post_vad_memory_retrieval_seconds=post_vad_memory_retrieval_seconds,
+        post_vad_memory_relevance_seconds=post_vad_memory_relevance_seconds,
         estimated_user_stop_to_transcript_seconds=(
             vad_delay_seconds + post_vad_transcript_seconds
         ),
@@ -92,10 +98,16 @@ def turn_timings(
             if post_vad_memory_retrieval_seconds is not None
             else None
         ),
+        estimated_user_stop_to_memory_relevance_seconds=(
+            vad_delay_seconds + post_vad_memory_relevance_seconds
+            if post_vad_memory_relevance_seconds is not None
+            else None
+        ),
         transcription_seconds=transcription_seconds,
         task_choice_seconds=task_choice_seconds,
         memory_search_seconds=memory_search_seconds,
         search_depth_seconds=search_depth_seconds,
         memory_retrieval_seconds=memory_retrieval_seconds,
+        memory_relevance_seconds=memory_relevance_seconds,
         total_seconds=time.perf_counter() - total_started_at,
     )

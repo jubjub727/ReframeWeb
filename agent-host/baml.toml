@@ -1,0 +1,10 @@
+[package]
+name = "agent-host"
+
+# [scripts]
+# dev = "-f main"
+
+# [generator.my_client]
+# output_type = "python/pydantic"
+# output_dir = "../python"
+# naming_convention = "preserve-case"

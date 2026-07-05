@@ -32,6 +32,9 @@ models/
 .claude/
 .agents/
 
+# Benchmark output
+benchmark-results/
+
 # OS/editor noise
 .DS_Store
 Thumbs.db

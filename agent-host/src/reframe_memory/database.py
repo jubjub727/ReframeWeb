@@ -42,6 +42,7 @@ class MemoryDatabase:
         await self.task_choice_memories.ensure_root()
         await self.conversation_evaluation_memories.ensure_root()
         await self.search_depth_memories.ensure_root()
+        await self.relevance_memories.ensure_root()
 
     @property
     def tasks(self) -> "TaskMemory":
@@ -92,6 +93,12 @@ class MemoryDatabase:
         from reframe_memory.search_depth_memories import SearchDepthMemoryStore
 
         return SearchDepthMemoryStore(self)
+
+    @property
+    def relevance_memories(self) -> "RelevanceMemoryStore":
+        from reframe_memory.relevance_memories import RelevanceMemoryStore
+
+        return RelevanceMemoryStore(self)
 
 
 async def open_memory_database(config: MemoryConfig | None = None) -> MemoryDatabase:

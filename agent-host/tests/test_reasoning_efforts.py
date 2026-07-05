@@ -113,6 +113,45 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(body["model"], "glm-5.1")
         self.assertEqual(body["reasoning_effort"], "high")
 
+    async def test_default_relevance_client_uses_glm51_none(self):
+        request = await b.request.EvaluateRelevantMemories(
+            current_user_request="Open Hacker News compactly.",
+            session_conversations=[],
+            session_memories=[],
+            selected_task=types.SelectedTaskContext(
+                id="task:visual_panel",
+                name="Visual panel",
+                description="Open a visual panel.",
+                input="A request.",
+                output="A rendered panel.",
+                prompt="Use the store and panel.",
+                provider_id="provider:test",
+                created_at="2026-07-03T00:00:00Z",
+                updated_at="2026-07-03T00:00:00Z",
+                read_at="NONE",
+            ),
+            candidate_memories=[
+                types.RetrievedMemoryCandidate(
+                    id="memory_node:message1",
+                    kind="past_conversation_message",
+                    title="human message",
+                    description="Use compact rows for Hacker News.",
+                    tags=[],
+                    created_at="2026-07-03T00:00:00Z",
+                    updated_at="2026-07-03T00:00:00Z",
+                    read_at="NONE",
+                    retrieval_matched=True,
+                    parent_session_id="memory_node:session1",
+                    parent_conversation_id="memory_node:conversation1",
+                )
+            ],
+            relevance_memories=[],
+        )
+        body = request.body.json()
+
+        self.assertEqual(body["model"], "glm-5.1")
+        self.assertEqual(body["reasoning_effort"], "none")
+
     def test_unsupported_reasoning_effort_detection_is_narrow(self):
         self.assertTrue(
             unsupported_reasoning_effort_error(

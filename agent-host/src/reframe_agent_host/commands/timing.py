@@ -45,6 +45,10 @@ def print_timing_summary(results) -> None:
         results,
         "estimated_user_stop_to_memory_retrieval_seconds",
     )
+    user_stop_to_memory_relevance_times = _timing_values(
+        results,
+        "estimated_user_stop_to_memory_relevance_seconds",
+    )
     summary = f"[summary] turns={len(results)}"
     summary += _summary_part("user_stop_to_transcript", user_stop_to_transcript_times)
     summary += _summary_part("transcribe", transcription_times)
@@ -60,6 +64,10 @@ def print_timing_summary(results) -> None:
     summary += _summary_part(
         "user_stop_to_memory_retrieval",
         user_stop_to_memory_retrieval_times,
+    )
+    summary += _summary_part(
+        "user_stop_to_memory_relevance",
+        user_stop_to_memory_relevance_times,
     )
     print(summary, file=sys.stderr)
 

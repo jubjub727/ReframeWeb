@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import time
 
+from reframe_agent_host.agent_flow.relevance_candidates import (
+    filter_retrieved_memories,
+)
 from reframe_agent_host.agent_flow.conversation_evaluation import (
     ConversationEvaluationPlanner,
 )
@@ -34,6 +37,7 @@ class VoiceTurnProcessor:
         conversation_evaluation: ConversationEvaluationPlanner,
         search_depth: SearchDepthPlanner,
         memory_retrieval,
+        memory_relevance,
     ) -> None:
         self._config = config
         self._transcriber = transcriber
@@ -42,6 +46,7 @@ class VoiceTurnProcessor:
         self._conversation_evaluation = conversation_evaluation
         self._search_depth = search_depth
         self._memory_retrieval = memory_retrieval
+        self._memory_relevance = memory_relevance
 
     async def process(
         self,
@@ -137,6 +142,18 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
+        (
+            relevance_decision,
+            relevant_memories,
+            memory_relevance_seconds,
+            post_vad_memory_relevance_seconds,
+        ) = await self._maybe_evaluate_memory_relevance(
+            routed_transcript,
+            task_choice,
+            retrieved_memories,
+            post_vad_started_at,
+            on_event,
+        )
         post_vad_transcript_seconds = time.perf_counter() - post_vad_started_at
         return transcribed_turn_result(
             config=self._config,
@@ -149,6 +166,8 @@ class VoiceTurnProcessor:
             memory_search_hints=memory_search_hints,
             search_depths=search_depths,
             retrieved_memories=retrieved_memories,
+            relevance_decision=relevance_decision,
+            relevant_memories=relevant_memories,
             timings={
                 "model_prepare_seconds": model_prepare_seconds,
                 "total_started_at": total_started_at,
@@ -159,11 +178,15 @@ class VoiceTurnProcessor:
                 "post_vad_memory_retrieval_seconds": (
                     post_vad_memory_retrieval_seconds
                 ),
+                "post_vad_memory_relevance_seconds": (
+                    post_vad_memory_relevance_seconds
+                ),
                 "transcription_seconds": transcription_seconds,
                 "task_choice_seconds": task_choice_seconds,
                 "memory_search_seconds": memory_search_seconds,
                 "search_depth_seconds": search_depth_seconds,
                 "memory_retrieval_seconds": memory_retrieval_seconds,
+                "memory_relevance_seconds": memory_relevance_seconds,
             },
         )
 
@@ -344,6 +367,49 @@ class VoiceTurnProcessor:
         return (
             retrieved,
             memory_retrieval_seconds,
+            time.perf_counter() - post_vad_started_at,
+        )
+
+    async def _maybe_evaluate_memory_relevance(
+        self,
+        routed_transcript: str,
+        task_choice: types.TaskChoiceDecision | None,
+        retrieved_memories: RetrievedMemoryContext | None,
+        post_vad_started_at: float,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> tuple[
+        types.RelevantMemoryDecision | None,
+        RetrievedMemoryContext | None,
+        float | None,
+        float | None,
+    ]:
+        if not self._config.task_choice_enabled:
+            return None, None, None, None
+        if task_choice is None or retrieved_memories is None or not routed_transcript:
+            return None, None, None, None
+
+        self._emit(
+            on_event,
+            "memory-relevance",
+            "filtering retrieved memories with BAML",
+        )
+        memory_relevance_started_at = time.perf_counter()
+        decision = await self._memory_relevance.evaluate_relevant_memories(
+            current_user_request=routed_transcript,
+            selected_task_id=task_choice.selected_task_id,
+            retrieved_memories=retrieved_memories,
+        )
+        relevant_memories = filter_retrieved_memories(retrieved_memories, decision)
+        memory_relevance_seconds = time.perf_counter() - memory_relevance_started_at
+        self._emit(
+            on_event,
+            "memory-relevance-decision",
+            f"{decision.model_dump(mode='json')} ({memory_relevance_seconds:.3f}s)",
+        )
+        return (
+            decision,
+            relevant_memories,
+            memory_relevance_seconds,
             time.perf_counter() - post_vad_started_at,
         )
 

@@ -13,6 +13,8 @@ from reframe_memory.models import (
     MemoryTimestamps,
     Provider,
     ProviderNode,
+    RelevanceMemory,
+    RelevanceMemoryNode,
     SearchDepthMemory,
     SearchDepthMemoryNode,
     Session,
@@ -50,6 +52,10 @@ from reframe_memory.search_depth_memories import (
     SearchDepthMemorySearch,
     SearchDepthMemoryStore,
 )
+from reframe_memory.relevance_memories import (
+    RelevanceMemorySearch,
+    RelevanceMemoryStore,
+)
 from reframe_memory.tasks import TaskMemory, TaskSearch
 from reframe_memory.task_choice_memories import (
     TaskChoiceMemorySearch,
@@ -79,6 +85,10 @@ __all__ = [
     "ProviderMemory",
     "ProviderNode",
     "ProviderSearch",
+    "RelevanceMemory",
+    "RelevanceMemoryNode",
+    "RelevanceMemorySearch",
+    "RelevanceMemoryStore",
     "RetrievedConversation",
     "RetrievedMemoryContext",
     "RetrievedPastConversationContext",

@@ -128,6 +128,7 @@ class _ConciseEventPrinter:
             "memory-search",
             "search-depth",
             "memory-retrieval",
+            "memory-relevance",
             "conversation-context",
         }:
             print(f"[{stage}] {message}", file=sys.stderr)
@@ -175,6 +176,15 @@ def _print_turn_result(result, config: VoicePipelineConfig) -> None:
             f"latency={_latency(result.timings.memory_retrieval_seconds)}"
         )
         _print_retrieved_memories(result.retrieved_memories)
+    if result.relevance_decision is not None:
+        print(
+            "memory_relevance: "
+            f"kept_ids={result.relevance_decision.kept_memory_ids} "
+            f"latency={_latency(result.timings.memory_relevance_seconds)}"
+        )
+    if result.relevant_memories is not None:
+        print(_retrieval_counts(result.relevant_memories))
+        _print_retrieved_memories(result.relevant_memories, "Relevant memories")
 
 
 def _depth_summary(depths: types.SearchDepthDecision) -> str:
@@ -211,9 +221,12 @@ def _retrieval_counts(memories: RetrievedMemoryContext) -> str:
     )
 
 
-def _print_retrieved_memories(memories: RetrievedMemoryContext) -> None:
+def _print_retrieved_memories(
+    memories: RetrievedMemoryContext,
+    label: str = "Retrieved memories",
+) -> None:
     print()
-    print("Retrieved memories")
+    print(label)
     _print_session_memories(
         "Current session memories",
         memories.current_session_memories,

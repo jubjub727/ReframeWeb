@@ -69,6 +69,15 @@ class SearchDepthMemoryContext {
   read_at string
 }
 
+class RelevanceMemoryContext {
+  title string
+  description string
+  tags string[]
+  created_at string
+  updated_at string
+  read_at string
+}
+
 class SelectedTaskContext {
   id string
   name string
@@ -119,6 +128,25 @@ class ConversationMemorySearchHints {
 
 class SearchDepthDecision {
   depths map<string, SearchDepthTimestamps>
+  candidate_memory CandidateMemory?
+}
+
+class RetrievedMemoryCandidate {
+  id string
+  kind string
+  title string
+  description string
+  tags string[]
+  created_at string
+  updated_at string
+  read_at string
+  retrieval_matched bool
+  parent_session_id string?
+  parent_conversation_id string?
+}
+
+class RelevantMemoryDecision {
+  kept_memory_ids string[]
   candidate_memory CandidateMemory?
 }
 
@@ -217,6 +245,83 @@ function ChooseInitialTask(
     {% endfor %}
 
     Return only the task choice decision.
+    {{ ctx.output_format }}
+  "#
+}
+
+function EvaluateRelevantMemories(
+  current_user_request: string,
+  session_conversations: ConversationHistory[],
+  session_memories: SessionMemoryContext[],
+  selected_task: SelectedTaskContext,
+  candidate_memories: RetrievedMemoryCandidate[],
+  relevance_memories: RelevanceMemoryContext[]
+) -> RelevantMemoryDecision {
+  client RelevanceModel
+  prompt #"
+    {{ _.role("system") }}
+
+    Your job is to select which memories are relevant to performing the task
+    with respect to the user's request.
+
+    Optional output:
+    - candidate_memory: an observational memory to create when something seems
+      interesting or useful enough to remember.
+
+    Rules:
+    - Return only the ids of candidate memories that are relevant.
+    - A memory is relevant when it would materially affect how the task should
+      be performed for this request.
+    - Return an empty kept_memory_ids array when no memory is relevant.
+
+    {{ _.role("user") }}
+
+    Current user request:
+    {{ current_user_request }}
+
+    Task:
+    {{ selected_task.name }}
+    {{ selected_task.description }}
+
+    Conversation history for the current session:
+    {% for conversation in session_conversations %}
+    {% for message in conversation.messages %}
+    [{{ message.role }}] {{ message.content }}
+    {% endfor %}
+    {% endfor %}
+
+    Session memories for this session:
+    {% for memory in session_memories %}
+    - {{ memory.title }}
+      Tags: {{ memory.tags }}
+      created_at: {{ memory.created_at }}
+      updated_at: {{ memory.updated_at }}
+      read_at: {{ memory.read_at }}
+      {{ memory.description }}
+    {% endfor %}
+
+    Candidate memories:
+    {% for memory in candidate_memories %}
+    - id: {{ memory.id }}
+      title: {{ memory.title }}
+      tags: {{ memory.tags }}
+      created_at: {{ memory.created_at }}
+      updated_at: {{ memory.updated_at }}
+      read_at: {{ memory.read_at }}
+      description: {{ memory.description }}
+    {% endfor %}
+
+    Relevance memories:
+    {% for memory in relevance_memories %}
+    - {{ memory.title }}
+      Tags: {{ memory.tags }}
+      created_at: {{ memory.created_at }}
+      updated_at: {{ memory.updated_at }}
+      read_at: {{ memory.read_at }}
+      {{ memory.description }}
+    {% endfor %}
+
+    Return the relevant memory decision.
     {{ ctx.output_format }}
   "#
 }

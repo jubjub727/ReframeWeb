@@ -45,7 +45,7 @@ class ConversationMode(str, Enum):
     ContinuousConversation = "ContinuousConversation"
 
 # #########################################################################
-# Generated classes (16)
+# Generated classes (19)
 # #########################################################################
 
 class AvailableTask(BaseModel):
@@ -100,6 +100,31 @@ class MemoryTagSearch(BaseModel):
     any_of: typing.List[str]
     all_of: typing.List[str]
     none_of: typing.List[str]
+
+class RelevanceMemoryContext(BaseModel):
+    title: str
+    description: str
+    tags: typing.List[str]
+    created_at: str
+    updated_at: str
+    read_at: str
+
+class RelevantMemoryDecision(BaseModel):
+    kept_memory_ids: typing.List[str]
+    candidate_memory: typing.Optional["CandidateMemory"] = None
+
+class RetrievedMemoryCandidate(BaseModel):
+    id: str
+    kind: str
+    title: str
+    description: str
+    tags: typing.List[str]
+    created_at: str
+    updated_at: str
+    read_at: str
+    retrieval_matched: bool
+    parent_session_id: typing.Optional[str] = None
+    parent_conversation_id: typing.Optional[str] = None
 
 class SearchDepthDecision(BaseModel):
     depths: typing.Dict[str, "SearchDepthTimestamps"]

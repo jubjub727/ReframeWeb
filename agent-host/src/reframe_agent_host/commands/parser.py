@@ -36,6 +36,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_benchmark_task_choice_parser(subparsers)
     _add_benchmark_conversation_evaluation_parser(subparsers)
     _add_benchmark_control_flow_parser(subparsers)
+    _add_benchmark_memory_relevance_parser(subparsers)
     _add_analyze_task_choice_benchmark_parser(subparsers)
     _add_analyze_conversation_evaluation_benchmark_parser(subparsers)
     _add_analyze_control_flow_benchmark_parser(subparsers)
@@ -192,6 +193,40 @@ def _add_benchmark_control_flow_parser(subparsers) -> None:
         help=(
             "Path to write benchmark JSON. Defaults to "
             "benchmark-results/control-flow-<timestamp>.json."
+        ),
+    )
+
+
+def _add_benchmark_memory_relevance_parser(subparsers) -> None:
+    benchmark = subparsers.add_parser(
+        "benchmark-memory-relevance",
+        help=(
+            "Snapshot candidate memory context once per case, then benchmark "
+            "memory relevance across all direct model providers and reasoning levels."
+        ),
+    )
+    benchmark.add_argument(
+        "--provider-id",
+        action="append",
+        dest="provider_ids",
+        help="Direct model provider memory_node id to test. Repeat to test a subset.",
+    )
+    benchmark.add_argument(
+        "--case-id",
+        action="append",
+        dest="case_ids",
+        help="Benchmark case id to run. Repeat to test a subset.",
+    )
+    _add_reasoning_effort_args(benchmark)
+    benchmark.add_argument("--runs", type=int, default=1)
+    benchmark.add_argument("--warmup-runs", type=int, default=0)
+    benchmark.add_argument("--delay-seconds", type=float, default=2.0)
+    benchmark.add_argument("--provider-cooldown-seconds", type=float, default=8.0)
+    benchmark.add_argument(
+        "--output",
+        help=(
+            "Path to write benchmark JSON. Defaults to "
+            "benchmark-results/memory-relevance-<timestamp>.json."
         ),
     )
 

@@ -40,6 +40,15 @@ type_map = {
     "types.MemoryTagSearch": types.MemoryTagSearch,
     "stream_types.MemoryTagSearch": stream_types.MemoryTagSearch,
 
+    "types.RelevanceMemoryContext": types.RelevanceMemoryContext,
+    "stream_types.RelevanceMemoryContext": stream_types.RelevanceMemoryContext,
+
+    "types.RelevantMemoryDecision": types.RelevantMemoryDecision,
+    "stream_types.RelevantMemoryDecision": stream_types.RelevantMemoryDecision,
+
+    "types.RetrievedMemoryCandidate": types.RetrievedMemoryCandidate,
+    "stream_types.RetrievedMemoryCandidate": stream_types.RetrievedMemoryCandidate,
+
     "types.SearchDepthDecision": types.SearchDepthDecision,
     "stream_types.SearchDepthDecision": stream_types.SearchDepthDecision,
 

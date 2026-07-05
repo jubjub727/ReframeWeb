@@ -20,7 +20,7 @@ from .globals import DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIM
 class TypeBuilder(type_builder.TypeBuilder):
     def __init__(self):
         super().__init__(classes=set(
-          ["AvailableTask","CandidateMemory","ConversationEvaluationMemoryContext","ConversationHistory","ConversationHistoryMessage","ConversationMemorySearchHints","MemoryStringSearch","MemoryTagSearch","SearchDepthDecision","SearchDepthDomain","SearchDepthMemoryContext","SearchDepthTimestamps","SelectedTaskContext","SessionMemoryContext","TaskChoiceDecision","TaskChoiceMemoryContext",]
+          ["AvailableTask","CandidateMemory","ConversationEvaluationMemoryContext","ConversationHistory","ConversationHistoryMessage","ConversationMemorySearchHints","MemoryStringSearch","MemoryTagSearch","RelevanceMemoryContext","RelevantMemoryDecision","RetrievedMemoryCandidate","SearchDepthDecision","SearchDepthDomain","SearchDepthMemoryContext","SearchDepthTimestamps","SelectedTaskContext","SessionMemoryContext","TaskChoiceDecision","TaskChoiceMemoryContext",]
         ), enums=set(
           ["ConversationMode",]
         ), runtime=DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME)
@@ -35,7 +35,7 @@ class TypeBuilder(type_builder.TypeBuilder):
 
 
     # #########################################################################
-    # Generated classes 16
+    # Generated classes 19
     # #########################################################################
 
     @property
@@ -69,6 +69,18 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def MemoryTagSearch(self) -> "MemoryTagSearchViewer":
         return MemoryTagSearchViewer(self)
+
+    @property
+    def RelevanceMemoryContext(self) -> "RelevanceMemoryContextViewer":
+        return RelevanceMemoryContextViewer(self)
+
+    @property
+    def RelevantMemoryDecision(self) -> "RelevantMemoryDecisionViewer":
+        return RelevantMemoryDecisionViewer(self)
+
+    @property
+    def RetrievedMemoryCandidate(self) -> "RetrievedMemoryCandidateViewer":
+        return RetrievedMemoryCandidateViewer(self)
 
     @property
     def SearchDepthDecision(self) -> "SearchDepthDecisionViewer":
@@ -152,7 +164,7 @@ class ConversationModeValues:
 
 
 # #########################################################################
-# Generated classes 16
+# Generated classes 19
 # #########################################################################
 
 class AvailableTaskAst:
@@ -579,6 +591,187 @@ class MemoryTagSearchProperties:
     @property
     def none_of(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("none_of"))
+    
+    
+
+
+class RelevanceMemoryContextAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("RelevanceMemoryContext")
+        self._properties: typing.Set[str] = set([  "title",  "description",  "tags",  "created_at",  "updated_at",  "read_at",  ])
+        self._props = RelevanceMemoryContextProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "RelevanceMemoryContextProperties":
+        return self._props
+
+
+class RelevanceMemoryContextViewer(RelevanceMemoryContextAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class RelevanceMemoryContextProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def title(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("title"))
+    
+    @property
+    def description(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("description"))
+    
+    @property
+    def tags(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("tags"))
+    
+    @property
+    def created_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("created_at"))
+    
+    @property
+    def updated_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("updated_at"))
+    
+    @property
+    def read_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("read_at"))
+    
+    
+
+
+class RelevantMemoryDecisionAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("RelevantMemoryDecision")
+        self._properties: typing.Set[str] = set([  "kept_memory_ids",  "candidate_memory",  ])
+        self._props = RelevantMemoryDecisionProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "RelevantMemoryDecisionProperties":
+        return self._props
+
+
+class RelevantMemoryDecisionViewer(RelevantMemoryDecisionAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class RelevantMemoryDecisionProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def kept_memory_ids(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("kept_memory_ids"))
+    
+    @property
+    def candidate_memory(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("candidate_memory"))
+    
+    
+
+
+class RetrievedMemoryCandidateAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("RetrievedMemoryCandidate")
+        self._properties: typing.Set[str] = set([  "id",  "kind",  "title",  "description",  "tags",  "created_at",  "updated_at",  "read_at",  "retrieval_matched",  "parent_session_id",  "parent_conversation_id",  ])
+        self._props = RetrievedMemoryCandidateProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "RetrievedMemoryCandidateProperties":
+        return self._props
+
+
+class RetrievedMemoryCandidateViewer(RetrievedMemoryCandidateAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class RetrievedMemoryCandidateProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def id(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("id"))
+    
+    @property
+    def kind(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("kind"))
+    
+    @property
+    def title(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("title"))
+    
+    @property
+    def description(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("description"))
+    
+    @property
+    def tags(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("tags"))
+    
+    @property
+    def created_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("created_at"))
+    
+    @property
+    def updated_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("updated_at"))
+    
+    @property
+    def read_at(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("read_at"))
+    
+    @property
+    def retrieval_matched(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("retrieval_matched"))
+    
+    @property
+    def parent_session_id(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("parent_session_id"))
+    
+    @property
+    def parent_conversation_id(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("parent_conversation_id"))
     
     
 

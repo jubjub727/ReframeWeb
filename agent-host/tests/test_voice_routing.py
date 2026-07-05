@@ -107,6 +107,24 @@ class RecordingMemoryRetrieval:
         return RetrievedMemoryContext()
 
 
+class RecordingMemoryRelevance:
+    def __init__(self):
+        self.current_user_request = None
+        self.selected_task_id = None
+        self.retrieved_memories = None
+
+    async def evaluate_relevant_memories(
+        self,
+        current_user_request,
+        selected_task_id,
+        retrieved_memories,
+    ):
+        self.current_user_request = current_user_request
+        self.selected_task_id = selected_task_id
+        self.retrieved_memories = retrieved_memories
+        return types.RelevantMemoryDecision(kept_memory_ids=[])
+
+
 class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
     def test_wake_keyword_is_removed_from_routed_transcript(self):
         matcher = TriggerPhraseMatcher(TriggerPhraseConfig())
@@ -139,6 +157,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         conversation_evaluation = RecordingConversationEvaluation()
         search_depth = RecordingSearchDepth()
         memory_retrieval = RecordingMemoryRetrieval()
+        memory_relevance = RecordingMemoryRelevance()
         processor = VoiceTurnProcessor(
             config=_voice_config(),
             transcriber=StubTranscriber(),
@@ -147,6 +166,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             conversation_evaluation=conversation_evaluation,
             search_depth=search_depth,
             memory_retrieval=memory_retrieval,
+            memory_relevance=memory_relevance,
         )
 
         result = await processor.process(
@@ -176,6 +196,14 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIs(memory_retrieval.search_depths, result.search_depths)
         self.assertEqual(
             result.retrieved_memories.to_dict(),
+            RetrievedMemoryContext().to_dict(),
+        )
+        self.assertEqual(memory_relevance.current_user_request, "do this")
+        self.assertEqual(memory_relevance.selected_task_id, "task:needs_more_information")
+        self.assertIs(memory_relevance.retrieved_memories, result.retrieved_memories)
+        self.assertEqual(result.relevance_decision.kept_memory_ids, [])
+        self.assertEqual(
+            result.relevant_memories.to_dict(),
             RetrievedMemoryContext().to_dict(),
         )
 
