@@ -9,6 +9,7 @@ import time
 from reframe_agent_host.voice.microphone import AudioInputConfig
 from reframe_agent_host.baml_client import types
 from reframe_agent_host.commands.timing import print_timing_summary
+from reframe_agent_host.commands.voice_loop import run_voice_turn_loop
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
 from reframe_agent_host.memory_seed import ensure_core_tasks
 from reframe_agent_host.speech.transcription import (
@@ -42,27 +43,23 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
     config = await _prepared_voice_pipeline_config(args)
     pipeline = VoiceTurnPipeline(config)
     results = []
-    turn_index = 0
     try:
-        while args.turns == 0 or turn_index < args.turns:
-            turn_index += 1
-            if debug_output and args.turns != 1:
-                print(f"[turn {turn_index}] starting", file=sys.stderr)
-
-            turn_started_at = time.perf_counter()
-            result = await pipeline.run_once(
-                on_event=_VoiceTurnEventPrinter(
-                    debug_output=debug_output,
-                    turn_started_at=turn_started_at,
-                ),
-            )
-            results.append(result)
-            _print_turn_result(
+        await run_voice_turn_loop(
+            turns=args.turns,
+            pipeline=pipeline,
+            results=results,
+            debug_output=debug_output,
+            event_handler_factory=lambda turn_started_at: _VoiceTurnEventPrinter(
+                debug_output=debug_output,
+                turn_started_at=turn_started_at,
+            ),
+            result_handler=lambda result: _print_turn_result(
                 result,
                 config,
                 debug_output=debug_output,
                 verbose_context=args.verbose_context,
-            )
+            ),
+        )
     except KeyboardInterrupt:
         print("\nInterrupted.", file=sys.stderr)
         if debug_output and results:
@@ -163,6 +160,13 @@ class _VoiceTurnEventPrinter:
         self._turn_started_at = turn_started_at
 
     def __call__(self, stage: str, message: str) -> None:
+        if stage == "input-started":
+            self._print_live("[Input Started]")
+            return
+        if stage == "input-stopped":
+            self._print_live("[Input Stopped]")
+            return
+
         if not self._debug_output:
             if stage == "listening":
                 self._print_live(
@@ -518,6 +522,7 @@ def _voice_activity_config(args: argparse.Namespace) -> VoiceActivityConfig:
         detector=args.vad,
         threshold=args.vad_threshold,
         min_silence_ms=args.min_silence_ms,
+        final_silence_ms=args.final_silence_ms,
         speech_pad_ms=args.speech_pad_ms,
         pre_speech_ms=args.pre_speech_ms,
         min_utterance_ms=args.min_utterance_ms,

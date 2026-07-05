@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Literal
 
 from reframe_agent_host.voice.microphone import AudioInputConfig
 from reframe_agent_host.baml_client import types
@@ -17,6 +19,7 @@ from reframe_memory import RetrievedMemoryContext
 
 
 VoicePipelineEventHandler = Callable[[str, str], None]
+CaptureStreamEventKind = Literal["endpoint", "resumed", "confirmed", "mode_switch"]
 
 
 @dataclass(frozen=True)
@@ -275,3 +278,47 @@ class CaptureResult:
     listen_seconds: float
     wait_for_speech_seconds: float | None
     speech_capture_wall_seconds: float | None
+
+
+@dataclass(frozen=True)
+class CaptureStreamEvent:
+    kind: CaptureStreamEventKind
+    turn_id: int
+    capture: CaptureResult | None = None
+
+
+class VoiceTurnControl:
+    def __init__(self) -> None:
+        self._cancelled = asyncio.Event()
+        self._committed = asyncio.Event()
+
+    def cancel(self) -> None:
+        self._cancelled.set()
+
+    def commit(self) -> None:
+        self._committed.set()
+
+    async def checkpoint(self) -> None:
+        if self._cancelled.is_set():
+            raise asyncio.CancelledError
+
+    async def wait_until_committed(self) -> None:
+        if self._committed.is_set():
+            await self.checkpoint()
+            return
+
+        commit_task = asyncio.create_task(self._committed.wait())
+        cancel_task = asyncio.create_task(self._cancelled.wait())
+        try:
+            done, pending = await asyncio.wait(
+                {commit_task, cancel_task},
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+            for task in pending:
+                task.cancel()
+            if cancel_task in done:
+                raise asyncio.CancelledError
+        finally:
+            for task in (commit_task, cancel_task):
+                if not task.done():
+                    task.cancel()

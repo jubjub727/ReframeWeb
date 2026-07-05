@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from threading import Thread
 from typing import Any
 
 from reframe_agent_host.baml_client import types
@@ -136,10 +136,7 @@ class PrimitiveDispatcher:
                 ConversationMessage(role="agent", content=text),
             )
         self._emit("agent-reply", text)
-        try:
-            await asyncio.to_thread((self.speaker or NoopSpeaker()).speak, text)
-        except Exception as exc:
-            self._emit("tts-error", str(exc))
+        self._speak_in_background(text)
 
     async def _agent_thought(self, text: str) -> None:
         if self.conversation_id is None:
@@ -153,6 +150,17 @@ class PrimitiveDispatcher:
     def _emit(self, stage: str, message: str) -> None:
         if self.on_event is not None:
             self.on_event(stage, message)
+
+    def _speak_in_background(self, text: str) -> None:
+        speaker = self.speaker or NoopSpeaker()
+
+        def speak() -> None:
+            try:
+                speaker.speak(text)
+            except Exception as exc:
+                self._emit("tts-error", str(exc))
+
+        Thread(target=speak, daemon=True).start()
 
 
 def _payload_text(payload: Any, *keys: str) -> str:

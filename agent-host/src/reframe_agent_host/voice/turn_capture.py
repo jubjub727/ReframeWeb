@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
+from threading import Event
 
 from reframe_agent_host.voice.microphone import MicrophoneStream
 from reframe_agent_host.baml_client import types
@@ -16,13 +18,19 @@ from reframe_agent_host.voice.capture_setup import (
     listen_deadline,
     timeout_message,
 )
-from reframe_agent_host.voice.capture_state import CaptureState
 from reframe_agent_host.voice.keyphrase_gate import VoiceKeyphraseGate
+from reframe_agent_host.voice.speculative_capture_session import (
+    SpeculativeCaptureSession,
+)
 from reframe_agent_host.voice.types import (
+    CaptureStreamEvent,
     CaptureResult,
     VoicePipelineConfig,
     VoicePipelineEventHandler,
 )
+
+
+CaptureStreamEventHandler = Callable[[CaptureStreamEvent], None]
 
 
 class VoiceTurnCapture:
@@ -39,14 +47,18 @@ class VoiceTurnCapture:
     def capture(
         self,
         on_event: VoicePipelineEventHandler | None,
+        stop_event: Event | None = None,
     ) -> CaptureResult:
         segmenter = create_segmenter(self._config)
         state = create_capture_state(self._config, self._conversation_mode)
         keyphrase_gate = VoiceKeyphraseGate(self._config)
         debug_audio = create_debug_audio(self._config)
 
-        with MicrophoneStream(self._config.audio) as microphone:
-            try:
+        input_started = False
+        try:
+            with MicrophoneStream(self._config.audio) as microphone:
+                input_started = True
+                self._emit_input_started(on_event)
                 self._emit_audio_source(on_event, microphone)
                 if state.keyphrase_required:
                     keyphrase_gate.start(state, self._emitter(on_event))
@@ -55,7 +67,9 @@ class VoiceTurnCapture:
                 listen_started_at = time.perf_counter()
                 self._emit_listening(on_event, segmenter, state)
 
-                for frame in microphone.frames():
+                for frame in microphone.frames(stop_event=stop_event):
+                    if stop_event is not None and stop_event.is_set():
+                        raise InterruptedError("Voice capture was stopped.")
                     debug_audio.append(frame)
                     debug_audio.maybe_save_periodic(self._emitter(on_event))
                     result = self._router.accept_frame(
@@ -83,10 +97,39 @@ class VoiceTurnCapture:
                             },
                         )
                         raise TimeoutError(timeout_message(state))
-            finally:
-                state.close_spotters()
+        finally:
+            state.close_spotters()
+            if input_started:
+                self._emit_input_stopped(on_event)
 
+        if stop_event is not None and stop_event.is_set():
+            raise InterruptedError("Voice capture was stopped.")
         raise RuntimeError("Microphone stream closed before an utterance was detected.")
+
+    def capture_speculative_once(
+        self,
+        on_event: VoicePipelineEventHandler | None,
+        on_capture_event: CaptureStreamEventHandler,
+        stop_event: Event | None = None,
+    ) -> None:
+        self.capture_speculative_session(on_event, on_capture_event, stop_event, 1)
+
+    def capture_speculative_session(
+        self,
+        on_event: VoicePipelineEventHandler | None,
+        on_capture_event: CaptureStreamEventHandler,
+        stop_event: Event | None = None,
+        max_turns: int = 0,
+    ) -> None:
+        SpeculativeCaptureSession(
+            self._config,
+            self._conversation_mode,
+        ).run(
+            on_event,
+            on_capture_event,
+            stop_event=stop_event,
+            max_turns=max_turns,
+        )
 
     def _emit_listening(
         self,
@@ -130,3 +173,15 @@ class VoiceTurnCapture:
                 f"gain={self._config.audio.input_gain:g}x"
             ),
         )
+
+    def _emit_input_started(
+        self,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> None:
+        self._emit(on_event, "input-started", "microphone stream opened")
+
+    def _emit_input_stopped(
+        self,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> None:
+        self._emit(on_event, "input-stopped", "microphone stream closed")

@@ -240,6 +240,8 @@ Useful tuning flags:
   input.
 - `--min-silence-ms 0` is the default. Increase it only if the utterance cuts off
   too early.
+- `--final-silence-ms 1450` controls how long a provisional endpoint can be
+  cancelled if speech resumes after Whisper starts.
 - `--pre-speech-ms 320` keeps audio just before VAD start so first syllables are
   not cut off.
 - `--wake-carry-ms 220` keeps audio around wake detection so commands that start

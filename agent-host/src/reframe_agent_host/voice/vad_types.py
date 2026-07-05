@@ -7,6 +7,7 @@ import numpy as np
 
 
 VoiceDetectorName = Literal["auto", "silero", "energy"]
+UtteranceEventKind = Literal["endpoint", "resumed", "confirmed"]
 
 
 @dataclass(frozen=True)
@@ -16,6 +17,7 @@ class VoiceActivityConfig:
     detector: VoiceDetectorName = "auto"
     threshold: float = 0.35
     min_silence_ms: int = 0
+    final_silence_ms: int = 1450
     speech_pad_ms: int = 0
     pre_speech_ms: int = 320
     min_utterance_ms: int = 250
@@ -39,6 +41,12 @@ class DetectedUtterance:
     sample_rate: int
     duration_seconds: float
     forced_end: bool
+
+
+@dataclass(frozen=True)
+class UtteranceEvent:
+    kind: UtteranceEventKind
+    utterance: DetectedUtterance | None = None
 
 
 class VoiceActivityDetector(Protocol):

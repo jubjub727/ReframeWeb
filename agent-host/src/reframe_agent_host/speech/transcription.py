@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from threading import RLock
 
 import numpy as np
 
@@ -52,38 +53,45 @@ class FasterWhisperTranscriber:
     def __init__(self, config: WhisperTranscriberConfig) -> None:
         self._config = config
         self._model = None
+        self._lock = RLock()
 
     def prepare(self) -> None:
-        self._load_model()
+        with self._lock:
+            self._load_model()
 
     def transcribe(self, samples: np.ndarray, sample_rate: int) -> Transcript:
         if sample_rate != 16_000:
             raise ValueError("faster-whisper ndarray transcription expects 16000 Hz audio.")
 
-        model = self._load_model()
         audio = np.asarray(samples, dtype=np.float32).reshape(-1)
         audio = np.clip(audio, -1.0, 1.0)
 
-        segments_iter, info = model.transcribe(
-            audio,
-            language=self._config.language,
-            beam_size=self._config.beam_size,
-            condition_on_previous_text=False,
-        )
-        segments = [
-            TranscriptSegment(
-                start=float(segment.start),
-                end=float(segment.end),
-                text=segment.text.strip(),
+        with self._lock:
+            model = self._load_model()
+            segments_iter, info = model.transcribe(
+                audio,
+                language=self._config.language,
+                beam_size=self._config.beam_size,
+                condition_on_previous_text=False,
             )
-            for segment in segments_iter
-        ]
+            segments = [
+                TranscriptSegment(
+                    start=float(segment.start),
+                    end=float(segment.end),
+                    text=segment.text.strip(),
+                )
+                for segment in segments_iter
+            ]
+            language = getattr(info, "language", None)
+            duration_seconds = float(
+                getattr(info, "duration", len(audio) / sample_rate)
+            )
         text = " ".join(segment.text for segment in segments).strip()
 
         return Transcript(
             text=text,
-            language=getattr(info, "language", None),
-            duration_seconds=float(getattr(info, "duration", len(audio) / sample_rate)),
+            language=language,
+            duration_seconds=duration_seconds,
             segments=segments,
         )
 

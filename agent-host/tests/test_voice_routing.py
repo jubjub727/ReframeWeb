@@ -1,9 +1,12 @@
+import contextlib
+import io
 import time
 import unittest
 
 import numpy as np
 
 from reframe_agent_host.baml_client import types
+from reframe_agent_host.commands.voice_turn import _VoiceTurnEventPrinter
 from reframe_agent_host.keyphrases import KeyphraseDetection, KeyphraseSpotterConfig
 from reframe_agent_host.speech.transcription import Transcript, WhisperTranscriberConfig
 from reframe_agent_host.speech.triggers import TriggerPhraseConfig, TriggerPhraseMatcher
@@ -236,6 +239,22 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIs(task_prompt.selected_memories, result.relevant_memories)
         self.assertEqual(task_prompt.selected_memory_ids, ())
         self.assertIn("Task:\nAsk only for what matters.", result.task_prompt.full_task_prompt)
+
+    def test_cli_prints_input_lifecycle_events_in_normal_mode(self):
+        output = io.StringIO()
+        printer = _VoiceTurnEventPrinter(
+            debug_output=False,
+            turn_started_at=time.perf_counter(),
+        )
+
+        with contextlib.redirect_stdout(output):
+            printer("input-started", "microphone stream opened")
+            printer("input-stopped", "microphone stream closed")
+
+        self.assertEqual(output.getvalue().splitlines(), [
+            "[Input Started]",
+            "[Input Stopped]",
+        ])
 
 
 def _voice_config():

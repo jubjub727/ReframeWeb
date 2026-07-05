@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from contextlib import suppress
 from dataclasses import dataclass
 from queue import Empty, Full, Queue
 from threading import Event
+import time
 from typing import Iterator
 
 import numpy as np
@@ -27,6 +29,8 @@ class AudioInputConfig:
     channel: int = 0
     device: int | str | None = None
     queue_seconds: float = 12.0
+    start_retries: int = 5
+    start_retry_delay_seconds: float = 0.2
 
     @property
     def chunk_samples(self) -> int:
@@ -106,15 +110,17 @@ class MicrophoneStream:
                 except Full:
                     self._dropped_frames += 1
 
-        self._stream = sd.InputStream(
-            samplerate=self._input_sample_rate,
-            blocksize=stream_chunk_samples,
-            channels=self._input_channels,
-            dtype="float32",
-            device=self._resolved_device,
-            callback=callback,
+        self._stream = self._open_started_stream(
+            sd,
+            {
+                "samplerate": self._input_sample_rate,
+                "blocksize": stream_chunk_samples,
+                "channels": self._input_channels,
+                "dtype": "float32",
+                "device": self._resolved_device,
+                "callback": callback,
+            },
         )
-        self._stream.start()
         return self
 
     def __exit__(self, _exc_type, _exc, _tb) -> None:
@@ -127,8 +133,12 @@ class MicrophoneStream:
             self._stream.close()
             self._stream = None
 
-    def frames(self, timeout_seconds: float = 0.25) -> Iterator[np.ndarray]:
-        while not self._stop_event.is_set():
+    def frames(
+        self,
+        timeout_seconds: float = 0.25,
+        stop_event: Event | None = None,
+    ) -> Iterator[np.ndarray]:
+        while not self._stop_event.is_set() and not _stopped(stop_event):
             try:
                 yield self._queue.get(timeout=timeout_seconds)
             except Empty:
@@ -140,3 +150,24 @@ class MicrophoneStream:
             channel = min(max(0, self._config.channel), mono.shape[1] - 1)
             return mono[:, channel]
         return mono.reshape(-1)
+
+    def _open_started_stream(self, sounddevice, stream_kwargs):
+        attempts = max(1, self._config.start_retries + 1)
+        for attempt in range(attempts):
+            stream = None
+            try:
+                stream = sounddevice.InputStream(**stream_kwargs)
+                stream.start()
+                return stream
+            except Exception:
+                if stream is not None:
+                    with suppress(Exception):
+                        stream.close()
+                if attempt == attempts - 1:
+                    raise
+                time.sleep(self._config.start_retry_delay_seconds * (attempt + 1))
+        raise RuntimeError("unreachable microphone startup retry state")
+
+
+def _stopped(stop_event: Event | None) -> bool:
+    return stop_event is not None and stop_event.is_set()

@@ -7,6 +7,7 @@ import numpy as np
 from reframe_agent_host.voice.microphone import MicrophoneStream
 from reframe_agent_host.baml_client import types
 from reframe_agent_host.voice.activity import DetectedUtterance, UtteranceSegmenter
+from reframe_agent_host.voice.vad_types import UtteranceEvent
 from reframe_agent_host.voice.capture_results import (
     finish_mode_switch_result,
     finish_with_utterance_result,
@@ -103,6 +104,23 @@ class VoiceCaptureFlow:
             self._emit(on_event, "speech", "started")
         state.was_recording = segmenter.is_recording
         return utterance
+
+    def accept_speech_event(
+        self,
+        frame: np.ndarray,
+        segmenter: UtteranceSegmenter,
+        state: CaptureState,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> UtteranceEvent | None:
+        event = segmenter.accept_event(frame)
+        if segmenter.is_recording and not state.was_recording:
+            state.speech_started_at = time.perf_counter()
+            state.post_activation_deadline = None
+            self._emit(on_event, "speech", "started")
+        if event is not None and event.kind == "resumed":
+            self._emit(on_event, "speech", "resumed")
+        state.was_recording = segmenter.is_recording
+        return event
 
     def finish_with_utterance(
         self,

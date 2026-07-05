@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import time
 
 from reframe_agent_host.agent_flow.relevance_candidates import (
@@ -15,6 +16,7 @@ from reframe_agent_host.baml_client import types
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
 from reframe_agent_host.speech.tts import NoopSpeaker, TextSpeaker
+from reframe_agent_host.voice.daemon_threads import run_in_daemon_thread
 from reframe_agent_host.task_execution import PrimitiveDispatcher
 from reframe_agent_host.voice.turn_results import (
     mode_switch_turn_result,
@@ -24,6 +26,7 @@ from reframe_agent_host.voice.types import (
     CaptureResult,
     VoicePipelineConfig,
     VoicePipelineEventHandler,
+    VoiceTurnControl,
     VoiceTurnResult,
 )
 from reframe_memory import ConversationMessage, open_memory_database
@@ -64,6 +67,7 @@ class VoiceTurnProcessor:
         model_prepare_seconds: float,
         total_started_at: float,
         on_event: VoicePipelineEventHandler | None,
+        turn_control: VoiceTurnControl | None = None,
     ) -> VoiceTurnResult:
         if capture.mode_switched and capture.utterance is None:
             return mode_switch_turn_result(
@@ -84,11 +88,13 @@ class VoiceTurnProcessor:
             f"{utterance.duration_seconds:.2f}s utterance with faster-whisper",
         )
         transcription_started_at = time.perf_counter()
-        transcript = self._transcriber.transcribe(
+        transcript = await run_in_daemon_thread(
+            self._transcriber.transcribe,
             utterance.samples,
             utterance.sample_rate,
         )
         transcription_seconds = time.perf_counter() - transcription_started_at
+        await self._checkpoint(turn_control)
         self._emit(
             on_event,
             "transcript",
@@ -109,6 +115,7 @@ class VoiceTurnProcessor:
                 "trigger",
                 f"{trigger_detection.kind} {trigger_detection.phrase!r}",
             )
+        await self._checkpoint(turn_control)
 
         task_choice, task_choice_seconds, post_vad_task_choice_seconds = (
             await self._maybe_choose_task(
@@ -117,11 +124,7 @@ class VoiceTurnProcessor:
                 on_event,
             )
         )
-        await self._record_current_turn_context(
-            routed_transcript,
-            task_choice,
-            on_event,
-        )
+        await self._checkpoint(turn_control)
         (
             memory_search_hints,
             memory_search_seconds,
@@ -132,6 +135,7 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
+        await self._checkpoint(turn_control)
         (
             search_depths,
             search_depth_seconds,
@@ -143,6 +147,7 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
+        await self._checkpoint(turn_control)
         (
             retrieved_memories,
             memory_retrieval_seconds,
@@ -153,6 +158,7 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
+        await self._checkpoint(turn_control)
         (
             relevance_decision,
             relevant_memories,
@@ -165,6 +171,7 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
+        await self._checkpoint(turn_control)
         (
             task_prompt,
             task_prompt_seconds,
@@ -177,6 +184,12 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
+        await self._wait_until_committed(turn_control)
+        await self._record_current_turn_context(
+            routed_transcript,
+            task_choice,
+            on_event,
+        )
         (
             task_execution,
             task_execution_seconds,
@@ -187,6 +200,7 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
+        await self._checkpoint(turn_control)
         (
             primitive_dispatch,
             primitive_dispatch_seconds,
@@ -196,6 +210,7 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
+        await self._checkpoint(turn_control)
         post_vad_transcript_seconds = time.perf_counter() - post_vad_started_at
         return transcribed_turn_result(
             config=self._config,
@@ -253,6 +268,31 @@ class VoiceTurnProcessor:
             capture.keyphrase_detection.kind,
             capture.keyphrase_detection.phrase,
         )
+
+    async def _checkpoint(self, turn_control: VoiceTurnControl | None) -> None:
+        if turn_control is not None:
+            await turn_control.checkpoint()
+
+    async def _wait_until_committed(
+        self,
+        turn_control: VoiceTurnControl | None,
+    ) -> None:
+        if turn_control is not None:
+            await turn_control.wait_until_committed()
+
+    async def close(self) -> None:
+        for component in (
+            self._planner,
+            self._conversation_evaluation,
+            self._search_depth,
+            self._memory_retrieval,
+            self._memory_relevance,
+            self._task_prompt,
+            self._task_execution,
+        ):
+            close = getattr(component, "close", None)
+            if close is not None:
+                await close()
 
     async def _maybe_choose_task(
         self,

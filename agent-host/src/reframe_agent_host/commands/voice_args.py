@@ -97,6 +97,7 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument("--vad-threshold", type=float, default=0.35)
     parser.add_argument("--min-silence-ms", type=int, default=0)
+    parser.add_argument("--final-silence-ms", type=int, default=1450)
     parser.add_argument("--speech-pad-ms", type=int, default=0)
     parser.add_argument("--pre-speech-ms", type=int, default=320)
     parser.add_argument("--min-utterance-ms", type=int, default=250)
