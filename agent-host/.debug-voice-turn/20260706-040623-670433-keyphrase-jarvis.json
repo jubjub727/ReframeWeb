@@ -1,0 +1,11 @@
+{
+  "label": "keyphrase-jarvis",
+  "sample_rate": 16000,
+  "duration_seconds": 7.04,
+  "peak": 0.40133732557296753,
+  "rms": 0.02149309776723385,
+  "metadata": {
+    "hypstr": "jarvis",
+    "kind": "wake_command"
+  }
+}

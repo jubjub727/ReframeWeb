@@ -206,8 +206,6 @@ function ChooseInitialTask(
         Use the available task information and context to decide which task should
         run next.
 
-        Stop once you have the right task without taking too long to decide.
-
         Context sections:
         - Current user request: the request being routed now.
         - Conversation history: earlier human and agent messages from this session.
@@ -370,9 +368,10 @@ function ExecuteTask(full_task_prompt: string) -> TaskExecutionResult {
         it.
 
         Rules:
-        - Follow the output shape requested by the task prompt.
+        - You must follow the output shape requested by the task prompt.
         - When the task prompt describes named response items, put each item name in
           name and its arguments in payload.
+        - You must only return response items for which you have direct evidence of its name and structure.
         - Do not add extra commentary outside the structured result.
         - Return an empty returns array when the task prompt does not request any
           response item.

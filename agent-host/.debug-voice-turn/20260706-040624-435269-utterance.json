@@ -1,0 +1,11 @@
+{
+  "label": "utterance",
+  "sample_rate": 16000,
+  "duration_seconds": 7.936,
+  "peak": 0.40133732557296753,
+  "rms": 0.02544165775179863,
+  "metadata": {
+    "duration_seconds": 1.024,
+    "keyphrase": "jarvis"
+  }
+}
