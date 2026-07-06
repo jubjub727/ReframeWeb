@@ -42,8 +42,9 @@ class StubTranscriber:
 
 
 class RecordingPlanner:
-    def __init__(self):
+    def __init__(self, agent_thought=None):
         self.current_user_request = None
+        self.agent_thought = agent_thought
 
     async def choose_initial_task(self, current_user_request):
         self.current_user_request = current_user_request
@@ -51,7 +52,7 @@ class RecordingPlanner:
             selected_task_id="task:needs_more_information",
             confidence=1.0,
             reason="test",
-            agent_thought=None,
+            agent_thought=self.agent_thought,
             candidate_memory=None,
         )
 
@@ -418,6 +419,39 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(planner.current_user_request, "do this")
         stages = [stage for stage, _message in events]
         self.assertLess(stages.index("human-reply"), stages.index("task-choice"))
+
+    async def test_speculative_turn_emits_task_choice_thought_before_memory_search(self):
+        planner = RecordingPlanner(agent_thought="Task-choice thought.")
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(),
+            transcriber=StubTranscriber("Jarvis, do this."),
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            planner=planner,
+            conversation_evaluation=RecordingConversationEvaluation(),
+            search_depth=RecordingSearchDepth(),
+            memory_retrieval=RecordingMemoryRetrieval(),
+            memory_relevance=RecordingMemoryRelevance(),
+            task_prompt=RecordingTaskPrompt(),
+        )
+        control = VoiceTurnControl()
+        task = asyncio.create_task(
+            processor.process(
+                capture=_capture_result(),
+                conversation_mode=types.ConversationMode.WAKE_COMMAND,
+                model_prepare_seconds=0.0,
+                total_started_at=time.perf_counter(),
+                on_event=lambda stage, message: events.append((stage, message)),
+                turn_control=control,
+            )
+        )
+
+        control.commit()
+        await task
+
+        stages = [stage for stage, _message in events]
+        self.assertLess(stages.index("agent-thought"), stages.index("memory-search"))
+        self.assertEqual(events[stages.index("agent-thought")][1], "Task-choice thought.")
 
     def test_cli_prints_input_lifecycle_events_in_normal_mode(self):
         output = io.StringIO()

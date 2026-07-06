@@ -38,6 +38,7 @@ class TaskPromptContextBuilder:
             selected_memories=selected_memory_contexts(
                 self.selected_memories,
                 self.selected_memory_ids,
+                current_session_id=self.session_id,
             ),
             task_prompt_memories=await self._task_prompt_memories(),
         )
@@ -143,6 +144,7 @@ class TaskPromptPlanner:
 def selected_memory_contexts(
     memories: RetrievedMemoryContext,
     selected_memory_ids: Collection[str] = (),
+    current_session_id: str | None = None,
 ) -> list[types.TaskPromptSelectedMemoryContext]:
     selected_ids = set(selected_memory_ids)
     contexts: list[types.TaskPromptSelectedMemoryContext] = []
@@ -152,26 +154,17 @@ def selected_memory_contexts(
         for memory in memories.current_session_memories
     )
     for session in memories.past_conversation_context.sessions:
-        if session.matched or session.session.id in selected_ids:
-            contexts.append(
-                _context(
-                    title=f"Past session: {session.session.content.name}",
-                    description="A past session was selected as relevant.",
-                    node=session.session,
-                )
-            )
+        is_current_session = _is_current_session(session, current_session_id)
+        if _include_session_context(session, selected_ids):
+            contexts.append(_session_context(session, is_current_session))
         contexts.extend(
             _session_memory_context(memory)
             for memory in session.session_memories
         )
         for conversation in session.conversations:
-            if conversation.matched or conversation.conversation.id in selected_ids:
+            if _include_conversation_context(conversation, selected_ids):
                 contexts.append(
-                    _context(
-                        title=f"Past conversation: {conversation.conversation.content.name}",
-                        description="A past conversation was selected as relevant.",
-                        node=conversation.conversation,
-                    )
+                    _conversation_context(session, conversation, is_current_session)
                 )
             contexts.extend(_message_context(message) for message in conversation.messages)
     return contexts
@@ -207,11 +200,63 @@ def _selected_task_context(task: TaskNode) -> types.SelectedTaskContext:
     )
 
 
+def _include_session_context(session, selected_ids: set[str]) -> bool:
+    return (
+        session.matched
+        or session.session.id in selected_ids
+        or bool(session.session_memories)
+        or bool(session.conversations)
+    )
+
+
+def _include_conversation_context(
+    conversation,
+    selected_ids: set[str],
+) -> bool:
+    return (
+        conversation.matched
+        or conversation.conversation.id in selected_ids
+        or bool(conversation.messages)
+    )
+
+
+def _is_current_session(session, current_session_id: str | None) -> bool:
+    return current_session_id is not None and session.session.id == current_session_id
+
+
 def _task_context(task: TaskNode) -> types.TaskPromptSelectedMemoryContext:
     return _context(
         title=task.content.name,
         description=task.content.description,
         node=task,
+    )
+
+
+def _session_context(
+    session,
+    is_current_session: bool,
+) -> types.TaskPromptSelectedMemoryContext:
+    prefix = "Current" if is_current_session else "Past"
+    return _context(
+        title=f"{prefix} session: {session.session.content.name}",
+        description="Parent session for selected remembered context.",
+        node=session.session,
+    )
+
+
+def _conversation_context(
+    session,
+    conversation,
+    is_current_session: bool,
+) -> types.TaskPromptSelectedMemoryContext:
+    prefix = "Current" if is_current_session else "Past"
+    return _context(
+        title=f"{prefix} conversation: {conversation.conversation.content.name}",
+        description=(
+            "Parent conversation for selected remembered context "
+            f"in session: {session.session.content.name}."
+        ),
+        node=conversation.conversation,
     )
 
 

@@ -20,7 +20,7 @@ def candidate_contexts(
     candidates: list[types.RetrievedMemoryCandidate] = []
     candidates.extend(_task_candidates(memories))
     candidates.extend(_current_session_memory_candidates(memories, current_session_id))
-    candidates.extend(_past_conversation_candidates(memories))
+    candidates.extend(_past_conversation_candidates(memories, current_session_id))
     return candidates
 
 
@@ -90,13 +90,19 @@ def _current_session_memory_candidates(
 
 def _past_conversation_candidates(
     memories: RetrievedMemoryContext,
+    current_session_id: str | None,
 ) -> Iterable[types.RetrievedMemoryCandidate]:
     for session in memories.past_conversation_context.sessions:
-        yield _session_candidate(session)
+        is_current_session = _is_current_session(session, current_session_id)
+        yield _session_candidate(session, is_current_session)
         for memory in session.session_memories:
             yield types.RetrievedMemoryCandidate(
                 id=memory.id,
-                kind="past_session_memory",
+                kind=(
+                    "current_session_memory"
+                    if is_current_session
+                    else "past_session_memory"
+                ),
                 title=memory.content.title,
                 description=memory.content.description,
                 tags=list(memory.tags),
@@ -106,15 +112,20 @@ def _past_conversation_candidates(
                 **timestamp_fields(memory),
             )
         for conversation in session.conversations:
-            yield _conversation_candidate(session, conversation)
+            yield _conversation_candidate(session, conversation, is_current_session)
+            matched_message_ids = _matched_message_ids(conversation)
             for message in conversation.messages:
                 yield types.RetrievedMemoryCandidate(
                     id=message.id,
-                    kind="past_conversation_message",
+                    kind=(
+                        "current_conversation_message"
+                        if is_current_session
+                        else "past_conversation_message"
+                    ),
                     title=f"{message.content.role} message",
                     description=message.content.content,
                     tags=list(message.tags),
-                    retrieval_matched=True,
+                    retrieval_matched=message.id in matched_message_ids,
                     parent_session_id=session.session.id,
                     parent_conversation_id=conversation.conversation.id,
                     **timestamp_fields(message),
@@ -123,12 +134,17 @@ def _past_conversation_candidates(
 
 def _session_candidate(
     session: RetrievedSessionContext,
+    is_current_session: bool,
 ) -> types.RetrievedMemoryCandidate:
     return types.RetrievedMemoryCandidate(
         id=session.session.id,
-        kind="past_session",
+        kind="current_session" if is_current_session else "past_session",
         title=session.session.content.name,
-        description="Past session wrapper.",
+        description=(
+            "Current session wrapper."
+            if is_current_session
+            else "Past session wrapper."
+        ),
         tags=list(session.session.tags),
         retrieval_matched=session.matched,
         parent_session_id=None,
@@ -140,18 +156,37 @@ def _session_candidate(
 def _conversation_candidate(
     session: RetrievedSessionContext,
     conversation: RetrievedConversation,
+    is_current_session: bool,
 ) -> types.RetrievedMemoryCandidate:
     return types.RetrievedMemoryCandidate(
         id=conversation.conversation.id,
-        kind="past_conversation",
+        kind="current_conversation" if is_current_session else "past_conversation",
         title=conversation.conversation.content.name,
-        description="Past conversation wrapper.",
+        description=(
+            "Current conversation wrapper."
+            if is_current_session
+            else "Past conversation wrapper."
+        ),
         tags=list(conversation.conversation.tags),
         retrieval_matched=conversation.matched,
         parent_session_id=session.session.id,
         parent_conversation_id=None,
         **timestamp_fields(conversation.conversation),
     )
+
+
+def _is_current_session(
+    session: RetrievedSessionContext,
+    current_session_id: str | None,
+) -> bool:
+    return current_session_id is not None and session.session.id == current_session_id
+
+
+def _matched_message_ids(conversation: RetrievedConversation) -> set[str]:
+    matched_ids = getattr(conversation, "matched_message_ids", ())
+    if matched_ids:
+        return set(matched_ids)
+    return {message.id for message in conversation.messages}
 
 
 def _filter_session_context(
@@ -194,6 +229,11 @@ def _filter_conversation(
         conversation=conversation.conversation,
         matched=conversation.matched,
         messages=messages,
+        matched_message_ids=tuple(
+            message_id
+            for message_id in getattr(conversation, "matched_message_ids", ())
+            if message_id in kept_ids
+        ),
     )
 
 

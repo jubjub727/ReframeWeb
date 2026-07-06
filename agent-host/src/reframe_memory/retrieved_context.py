@@ -26,12 +26,14 @@ class RetrievedConversation:
     conversation: ConversationNode
     matched: bool
     messages: tuple[ConversationMessageNode, ...] = ()
+    matched_message_ids: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         return {
             "conversation": _node_to_dict(self.conversation),
             "matched": self.matched,
             "messages": [_node_to_dict(message) for message in self.messages],
+            "matched_message_ids": list(self.matched_message_ids),
         }
 
 

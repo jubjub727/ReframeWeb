@@ -157,7 +157,6 @@ class VoiceTurnProcessor:
                 routed_transcript,
                 post_vad_started_at,
                 on_event,
-                emit_agent_thought=not defer_public_events,
             )
         )
         await self._checkpoint(turn_control)
@@ -220,8 +219,6 @@ class VoiceTurnProcessor:
             post_vad_started_at,
             on_event,
         )
-        if task_choice is not None and task_choice.agent_thought and defer_public_events:
-            self._emit(on_event, "agent-thought", task_choice.agent_thought)
         await self._record_current_turn_context(
             routed_transcript,
             task_choice,

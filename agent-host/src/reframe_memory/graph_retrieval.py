@@ -96,13 +96,11 @@ class GraphMemoryRetriever:
         current_session_id = _normalized_session_id(self.current_session_id)
         retrieved_sessions = []
         for session in sessions:
-            if session.id == current_session_id:
-                continue
-
             context = await self._session_context(
                 session,
                 request.hints,
                 breadth,
+                include_session_memories=session.id != current_session_id,
             )
             if context is not None:
                 retrieved_sessions.append(context)
@@ -114,6 +112,8 @@ class GraphMemoryRetriever:
         session: SessionNode,
         hints: GraphSearchHints,
         breadth: TimestampBreadth,
+        *,
+        include_session_memories: bool = True,
     ) -> RetrievedSessionContext | None:
         session_matched = candidate_matches(
             session,
@@ -122,11 +122,13 @@ class GraphMemoryRetriever:
             breadth=breadth,
         )
         conversations = await self._conversation_contexts(session.id, hints, breadth)
-        session_memories = await self._session_memory_candidates(
-            session.id,
-            hints,
-            breadth,
-        )
+        session_memories = ()
+        if include_session_memories:
+            session_memories = await self._session_memory_candidates(
+                session.id,
+                hints,
+                breadth,
+            )
         if not session_matched and not conversations and not session_memories:
             return None
 
@@ -156,7 +158,7 @@ class GraphMemoryRetriever:
                 hints=hints,
                 breadth=breadth,
             )
-            messages = await self._message_candidates(
+            messages, matched_message_ids = await self._message_candidates(
                 conversation.id,
                 hints,
                 breadth,
@@ -168,6 +170,7 @@ class GraphMemoryRetriever:
                         conversation=conversation,
                         matched=conversation_matched,
                         messages=messages,
+                        matched_message_ids=matched_message_ids,
                     )
                 )
         return tuple(matched_contexts)
@@ -177,7 +180,7 @@ class GraphMemoryRetriever:
         conversation_id: str,
         hints: GraphSearchHints,
         breadth: TimestampBreadth,
-    ) -> tuple[ConversationMessageNode, ...]:
+    ) -> tuple[tuple[ConversationMessageNode, ...], tuple[str, ...]]:
         messages = await _without_mark_read(
             self.database.conversations.messages_for,
             conversation_id,
@@ -192,8 +195,11 @@ class GraphMemoryRetriever:
                 breadth=breadth,
             )
         )
-        await self._mark_record_ids_read([message.id for message in matched])
-        return matched
+        if not matched:
+            return (), ()
+
+        await self._mark_record_ids_read([message.id for message in messages])
+        return tuple(messages), tuple(message.id for message in matched)
 
     async def _session_memory_candidates(
         self,

@@ -20,6 +20,7 @@ DEPENDENCY_IMPORTS: tuple[tuple[str, str], ...] = (
     ("silero-vad", "silero_vad"),
     ("faster-whisper", "faster_whisper"),
     ("kokoro", "kokoro"),
+    ("kokoro-onnx", "kokoro_onnx"),
 )
 
 

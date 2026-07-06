@@ -984,6 +984,21 @@ wheels = [
 ]
 
 [[package]]
+name = "kokoro-onnx"
+version = "0.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "espeakng-loader" },
+    { name = "numpy" },
+    { name = "onnxruntime" },
+    { name = "phonemizer-fork" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6b/18/277bd18aeeceaf5c46a51bb50c1cbdccdad8cab7fd1d58f0173bbeeec708/kokoro_onnx-0.5.0.tar.gz", hash = "sha256:5beb15f085e2828ed8d493f792c079af857103ab2dceaa1e112b1760587ac96a", size = 84570, upload-time = "2026-01-30T03:05:45.6Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0d/55/0bfcb4aa50033c89e5ac132af3d07fac0543824ce6eaefd4d1bfdcc3795b/kokoro_onnx-0.5.0-py3-none-any.whl", hash = "sha256:4e1c38a296db5dbc1f722f69f5e3c13f2e2877b3e5b145287f56ec057013e357", size = 17448, upload-time = "2026-01-30T03:05:46.931Z" },
+]
+
+[[package]]
 name = "language-tags"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1954,6 +1969,7 @@ dependencies = [
     { name = "baml-core" },
     { name = "faster-whisper" },
     { name = "kokoro" },
+    { name = "kokoro-onnx" },
     { name = "numpy" },
     { name = "nvidia-cublas-cu12", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'" },
     { name = "nvidia-cuda-runtime-cu12", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'" },
@@ -1968,6 +1984,7 @@ requires-dist = [
     { name = "baml-core", editable = "../../baml-jubjub/baml/baml_language/sdks/python" },
     { name = "faster-whisper", specifier = ">=1.2.1" },
     { name = "kokoro", specifier = ">=0.9.4" },
+    { name = "kokoro-onnx", specifier = ">=0.5.0" },
     { name = "numpy", specifier = ">=2.0.0" },
     { name = "nvidia-cublas-cu12", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'", specifier = ">=12.0.0" },
     { name = "nvidia-cuda-runtime-cu12", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'", specifier = ">=12.0.0" },

@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from datetime import datetime
 import os
 import sys
 import time
 
+from reframe_agent_host.agent_flow.task_prompt import selected_memory_contexts
 from reframe_agent_host.voice.microphone import AudioInputConfig
 import baml_sdk as types
 from reframe_agent_host.commands.timing import print_timing_summary
+from reframe_agent_host.commands.memory_output import (
+    memory_search_summary,
+    memory_type_counts_summary,
+    search_depth_summary,
+    selected_memory_type_counts_summary,
+)
 from reframe_agent_host.commands.voice_loop import run_voice_turn_loop
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
 from reframe_agent_host.voice.audio_calibration import load_audio_calibration
@@ -229,10 +237,6 @@ class _VoiceTurnEventPrinter:
                 self._print_live(
                     f"conversation_mode: {_single_line(message, limit=None)}"
                 )
-            elif stage == "tts-first-audio":
-                self._print_live(
-                    f"[tts_first_audio] {_single_line(message, limit=None)}"
-                )
             elif stage in {"turn-error", "capture-error", "warning", "tts-error"}:
                 self._print_live(f"[{stage}] {_single_line(message, limit=None)}")
             elif stage == "turn-ignored":
@@ -272,11 +276,6 @@ class _VoiceTurnEventPrinter:
             "primitive-dispatch",
             "agent-reply",
             "agent-thought",
-            "tts-started",
-            "tts-chunk-started",
-            "tts-first-audio",
-            "tts-play-started",
-            "tts-finished",
             "conversation-mode",
             "tts-error",
             "turn-error",
@@ -328,24 +327,21 @@ def _print_turn_result(
                 f"{_single_line(result.task_choice.agent_thought, limit=None)}"
             )
     if result.memory_search_hints is not None:
-        hints = result.memory_search_hints
         print(
-            "memory_search_hints: "
-            f"tags_any={len(hints.tags.any_of)} "
-            f"tags_none={len(hints.tags.none_of)} "
-            f"strings_contains={len(hints.strings.contains)} "
+            "memory_search_terms: "
+            f"{memory_search_summary(result.memory_search_hints)} "
             f"latency={_latency(result.timings.memory_search_seconds)}"
         )
     if result.search_depths is not None:
         print(
             "search_depth: "
-            f"domains={len(result.search_depths.depths)} "
+            f"{search_depth_summary(result.search_depths)} "
             f"latency={_latency(result.timings.search_depth_seconds)}"
         )
     if result.retrieved_memories is not None:
         print(
-            "memory_retrieval: "
-            f"{_retrieval_counts(result.retrieved_memories)} "
+            "memory_candidates_by_type: "
+            f"{memory_type_counts_summary(result.retrieved_memories, config.session_id)} "
             f"latency={_latency(result.timings.memory_retrieval_seconds)}"
         )
         if verbose_context:
@@ -357,10 +353,14 @@ def _print_turn_result(
             f"latency={_latency(result.timings.memory_relevance_seconds)}"
         )
     if result.relevant_memories is not None:
-        print(
-            "relevant_memory_context: "
-            f"{_retrieval_counts(result.relevant_memories)}"
+        selected_counts = _selected_memory_counts(result, config.session_id)
+        print(f"selected_memories_by_type: {selected_counts}")
+        context_summary = _task_prompt_selected_context_summary(
+            result,
+            current_session_id=config.session_id,
         )
+        if context_summary is not None:
+            print(f"task_prompt_selected_contexts: {context_summary}")
         if verbose_context:
             _print_retrieved_memories(result.relevant_memories, "Relevant memories")
     if result.task_prompt is not None:
@@ -384,6 +384,78 @@ def _print_turn_result(
         _print_conversation_returns(result.primitive_dispatch.records)
 
 
+def _selected_memory_counts(
+    result,
+    current_session_id: str | None = None,
+) -> str | None:
+    relevance_decision = getattr(result, "relevance_decision", None)
+    retrieved_memories = getattr(result, "retrieved_memories", None)
+    if relevance_decision is not None and retrieved_memories is not None:
+        return selected_memory_type_counts_summary(
+            retrieved_memories,
+            getattr(relevance_decision, "kept_memory_ids", ()),
+            current_session_id,
+        )
+
+    relevant_memories = getattr(result, "relevant_memories", None)
+    if relevant_memories is not None:
+        return memory_type_counts_summary(relevant_memories, current_session_id)
+    return None
+
+
+def _task_prompt_selected_context_summary(
+    result,
+    current_session_id: str | None = None,
+) -> str | None:
+    relevant_memories = getattr(result, "relevant_memories", None)
+    if relevant_memories is None:
+        return None
+
+    relevance_decision = getattr(result, "relevance_decision", None)
+    selected_ids = getattr(relevance_decision, "kept_memory_ids", ())
+    try:
+        contexts = selected_memory_contexts(
+            relevant_memories,
+            selected_memory_ids=selected_ids,
+            current_session_id=current_session_id,
+        )
+    except AttributeError:
+        return None
+
+    titles = Counter(context.title for context in contexts)
+    message_contexts = sum(
+        count for title, count in titles.items() if title.endswith(" message")
+    )
+    session_contexts = sum(
+        count
+        for title, count in titles.items()
+        if title.startswith(("Current session:", "Past session:"))
+    )
+    conversation_contexts = sum(
+        count
+        for title, count in titles.items()
+        if title.startswith(("Current conversation:", "Past conversation:"))
+    )
+    role_counts = {
+        "human_message": titles.get("human message", 0),
+        "agent_message": titles.get("agent message", 0),
+        "agent_thought_message": titles.get("agent_thought message", 0),
+    }
+    other = len(contexts) - message_contexts
+    description_chars = sum(len(context.description) for context in contexts)
+    return (
+        f"total={len(contexts)} "
+        f"session_contexts={session_contexts} "
+        f"conversation_contexts={conversation_contexts} "
+        f"message_contexts={message_contexts} "
+        f"human_message={role_counts['human_message']} "
+        f"agent_message={role_counts['agent_message']} "
+        f"agent_thought_message={role_counts['agent_thought_message']} "
+        f"other={other} "
+        f"description_chars={description_chars}"
+    )
+
+
 def _print_conversation_lines(result) -> None:
     if result.routed_transcript:
         print(f"human_reply: {_single_line(result.routed_transcript, limit=None)}")
@@ -404,40 +476,6 @@ def _print_conversation_returns(records) -> None:
             print(f"{record.name}: {_single_line(record.detail, limit=None)}")
         elif record.status in {"unsupported", "malformed"}:
             print(f"agent_reply: {_single_line(record.detail, limit=None)}")
-
-
-def _depth_summary(depths: types.SearchDepthDecision) -> str:
-    pieces = []
-    for domain, timestamps in depths.depths.items():
-        pieces.append(
-            f"{domain}(created>{timestamps.created_after}, "
-            f"updated>{timestamps.updated_after}, read>{timestamps.read_after})"
-        )
-    return "; ".join(pieces)
-
-
-def _retrieval_counts(memories: RetrievedMemoryContext) -> str:
-    tasks = len(memories.task_catalog.tasks)
-    current_memories = len(memories.current_session_memories)
-    sessions = len(memories.past_conversation_context.sessions)
-    conversations = sum(
-        len(session.conversations)
-        for session in memories.past_conversation_context.sessions
-    )
-    messages = sum(
-        len(conversation.messages)
-        for session in memories.past_conversation_context.sessions
-        for conversation in session.conversations
-    )
-    session_memories = sum(
-        len(session.session_memories)
-        for session in memories.past_conversation_context.sessions
-    )
-    return (
-        f"tasks={tasks} current_session_memories={current_memories} "
-        f"past_sessions={sessions} conversations={conversations} "
-        f"messages={messages} past_session_memories={session_memories}"
-    )
 
 
 def _print_retrieved_memories(

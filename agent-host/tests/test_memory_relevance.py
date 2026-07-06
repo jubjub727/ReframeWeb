@@ -39,12 +39,61 @@ class MemoryRelevanceTests(unittest.TestCase):
                 "memory_node:pastmemory",
                 "memory_node:conversation1",
                 "memory_node:message1",
+                "memory_node:message2",
             ],
         )
         message = candidates[-1]
         self.assertEqual(message.kind, "past_conversation_message")
         self.assertEqual(message.parent_session_id, "memory_node:session1")
         self.assertEqual(message.parent_conversation_id, "memory_node:conversation1")
+
+    def test_candidate_contexts_marks_current_session_conversation_kinds(self):
+        session = _session("memory_node:current", name="Current session")
+        conversation = _conversation(
+            "memory_node:conversationcurrent",
+            name="Current conversation",
+        )
+        message = _message(
+            "memory_node:messagecurrent",
+            content="This is from the current session.",
+        )
+        sibling = _message(
+            "memory_node:messagesibling",
+            content="Surrounding context from the current session.",
+        )
+        memories = RetrievedMemoryContext(
+            past_conversation_context=RetrievedPastConversationContext(
+                sessions=(
+                    RetrievedSessionContext(
+                        session=session,
+                        matched=True,
+                        conversations=(
+                            RetrievedConversation(
+                                conversation=conversation,
+                                matched=False,
+                                messages=(message, sibling),
+                                matched_message_ids=(message.id,),
+                            ),
+                        ),
+                    ),
+                )
+            )
+        )
+
+        candidates = candidate_contexts(memories, "memory_node:current")
+
+        self.assertEqual(
+            [
+                (candidate.id, candidate.kind, candidate.retrieval_matched)
+                for candidate in candidates
+            ],
+            [
+                ("memory_node:current", "current_session", True),
+                ("memory_node:conversationcurrent", "current_conversation", False),
+                ("memory_node:messagecurrent", "current_conversation_message", True),
+                ("memory_node:messagesibling", "current_conversation_message", False),
+            ],
+        )
 
     def test_filter_keeps_child_memories_with_parent_wrappers(self):
         memories = _retrieved_memories()
@@ -78,6 +127,23 @@ class MemoryRelevanceTests(unittest.TestCase):
             [message.id for message in conversations[0].messages],
             ["memory_node:message1"],
         )
+
+    def test_filter_keeps_parent_session_for_selected_session_memory(self):
+        filtered = filter_retrieved_memories(
+            _retrieved_memories(),
+            types.RelevantMemoryDecision(
+                kept_memory_ids=["memory_node:pastmemory"],
+                candidate_memory=None,
+            ),
+        )
+
+        sessions = filtered.past_conversation_context.sessions
+        self.assertEqual([session.session.id for session in sessions], ["memory_node:session1"])
+        self.assertEqual(
+            [memory.id for memory in sessions[0].session_memories],
+            ["memory_node:pastmemory"],
+        )
+        self.assertEqual(sessions[0].conversations, ())
 
     def test_filter_can_keep_explicit_wrapper_without_children(self):
         filtered = filter_retrieved_memories(
@@ -126,6 +192,10 @@ def _retrieved_memories():
         "memory_node:message1",
         content="Please keep Hacker News compact like last time.",
     )
+    sibling = _message(
+        "memory_node:message2",
+        content="The layout should still keep the story title visible.",
+    )
     past_memory = _session_memory(
         "memory_node:pastmemory",
         title="Hacker News compact rows",
@@ -141,7 +211,8 @@ def _retrieved_memories():
                         RetrievedConversation(
                             conversation=conversation,
                             matched=False,
-                            messages=(message,),
+                            messages=(message, sibling),
+                            matched_message_ids=(message.id,),
                         ),
                     ),
                     session_memories=(past_memory,),

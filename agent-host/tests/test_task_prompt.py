@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 import re
 
+from reframe_agent_host.agent_flow.relevance_candidates import filter_retrieved_memories
 from reframe_agent_host.agent_flow.task_prompt import (
     build_task_prompt_decision,
     selected_memory_contexts,
@@ -85,11 +86,100 @@ class TaskPromptTests(unittest.TestCase):
         self.assertIn("Task description", rendered)
         self.assertIn("Current compact preference", rendered)
         self.assertIn("Past conversation: HN layout conversation", rendered)
+        self.assertIn("human message", rendered)
         self.assertIn("Please keep Hacker News compact like last time.", rendered)
         self.assertNotIn("Task input", rendered)
         self.assertNotIn("Task output", rendered)
         self.assertNotIn("Task prompt", rendered)
         self.assertNotIn("memory_node:provider", rendered)
+
+    def test_selected_message_contexts_keep_only_relevance_selected_messages(self):
+        selected = filter_retrieved_memories(
+            _retrieved_memories_with_message_pair(),
+            types.RelevantMemoryDecision(
+                kept_memory_ids=["memory_node:human1"],
+                candidate_memory=None,
+            ),
+        )
+        contexts = selected_memory_contexts(
+            selected,
+            selected_memory_ids=("memory_node:human1",),
+        )
+
+        rendered = "\n".join(
+            f"{context.title}\n{context.description}" for context in contexts
+        )
+
+        self.assertEqual(
+            [context.title for context in contexts],
+            [
+                "Past session: Past joke session",
+                "Past conversation: Joke conversation",
+                "human message",
+            ],
+        )
+        self.assertIn("Parent session for selected remembered context.", rendered)
+        self.assertIn(
+            "Parent conversation for selected remembered context in session: "
+            "Past joke session.",
+            rendered,
+        )
+        self.assertIn("human message", rendered)
+        self.assertIn("tell me a joke", rendered)
+        self.assertNotIn("agent message", rendered)
+        self.assertNotIn("library and asks for books about paranoia", rendered)
+
+    def test_selected_session_memory_context_keeps_parent_session_context(self):
+        selected = filter_retrieved_memories(
+            _retrieved_memories_with_session_memory(),
+            types.RelevantMemoryDecision(
+                kept_memory_ids=["memory_node:preference1"],
+                candidate_memory=None,
+            ),
+        )
+        contexts = selected_memory_contexts(
+            selected,
+            selected_memory_ids=("memory_node:preference1",),
+        )
+
+        rendered = "\n".join(
+            f"{context.title}\n{context.description}" for context in contexts
+        )
+
+        self.assertEqual(
+            [context.title for context in contexts],
+            [
+                "Past session: Browser preference session",
+                "Compact browser rows",
+            ],
+        )
+        self.assertIn("Parent session for selected remembered context.", rendered)
+        self.assertIn("Memory description", rendered)
+
+    def test_selected_current_session_context_is_labeled_current(self):
+        selected = filter_retrieved_memories(
+            _retrieved_memories_with_session_memory(
+                session_id="memory_node:current",
+                session_name="Current browser session",
+            ),
+            types.RelevantMemoryDecision(
+                kept_memory_ids=["memory_node:preference1"],
+                candidate_memory=None,
+            ),
+        )
+        contexts = selected_memory_contexts(
+            selected,
+            selected_memory_ids=("memory_node:preference1",),
+            current_session_id="memory_node:current",
+        )
+
+        self.assertEqual(
+            [context.title for context in contexts],
+            [
+                "Current session: Current browser session",
+                "Compact browser rows",
+            ],
+        )
 
 
 def _retrieved_memories():
@@ -129,6 +219,70 @@ def _retrieved_memories():
     )
 
 
+def _retrieved_memories_with_message_pair():
+    session = _session("memory_node:session2", name="Past joke session")
+    conversation = _conversation(
+        "memory_node:conversation2",
+        name="Joke conversation",
+    )
+    human = _message(
+        "memory_node:human1",
+        role="human",
+        content="tell me a joke",
+    )
+    agent = _message(
+        "memory_node:agent1",
+        role="agent",
+        content=(
+            "A man walks into a library and asks for books about paranoia. "
+            "The librarian whispers that they're right behind him."
+        ),
+    )
+    return RetrievedMemoryContext(
+        past_conversation_context=RetrievedPastConversationContext(
+            sessions=(
+                RetrievedSessionContext(
+                    session=session,
+                    matched=False,
+                    conversations=(
+                        RetrievedConversation(
+                            conversation=conversation,
+                            matched=False,
+                            messages=(human, agent),
+                            matched_message_ids=(human.id,),
+                        ),
+                    ),
+                    session_memories=(),
+                ),
+            )
+        )
+    )
+
+
+def _retrieved_memories_with_session_memory(
+    *,
+    session_id="memory_node:session3",
+    session_name="Browser preference session",
+):
+    session = _session(session_id, name=session_name)
+    memory = _session_memory(
+        "memory_node:preference1",
+        title="Compact browser rows",
+    )
+    return RetrievedMemoryContext(
+        past_conversation_context=RetrievedPastConversationContext(
+            sessions=(
+                RetrievedSessionContext(
+                    session=session,
+                    matched=False,
+                    conversations=(),
+                    session_memories=(memory,),
+                ),
+            )
+        )
+    )
+
+
 def _task(node_id, *, name):
     return _node(
         node_id,
@@ -151,8 +305,8 @@ def _conversation(node_id, *, name):
     return _node(node_id, content=Conversation(name=name))
 
 
-def _message(node_id, *, content):
-    return _node(node_id, content=ConversationMessage(role="human", content=content))
+def _message(node_id, *, content, role="human"):
+    return _node(node_id, content=ConversationMessage(role=role, content=content))
 
 
 def _session_memory(node_id, *, title):

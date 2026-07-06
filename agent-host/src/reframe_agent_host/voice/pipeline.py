@@ -14,7 +14,7 @@ from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
 from reframe_agent_host.agent_flow.task_prompt import TaskPromptPlanner
 from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
-from reframe_agent_host.speech.tts import KokoroSpeaker
+from reframe_agent_host.speech.kokoro_onnx import KokoroOnnxSpeaker
 from reframe_agent_host.voice.conversation_mode import ConversationModeController
 from reframe_agent_host.voice.turn_capture import VoiceTurnCapture
 from reframe_agent_host.voice.turn_capture import CaptureStreamEventHandler
@@ -34,7 +34,7 @@ class VoiceTurnPipeline:
         self._conversation_mode = ConversationModeController(config.conversation_mode)
         self._transcriber = FasterWhisperTranscriber(config.transcription)
         self._trigger_matcher = TriggerPhraseMatcher(config.triggers)
-        self._speaker = KokoroSpeaker()
+        self._speaker = KokoroOnnxSpeaker()
         self._prepared = False
 
     async def run_once(

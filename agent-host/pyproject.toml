@@ -17,6 +17,7 @@ dependencies = [
     "sounddevice>=0.5.5",
     "surrealdb>=2.0.0",
     "baml-core==0.13.0",
+    "kokoro-onnx>=0.5.0",
 ]
 
 [project.scripts]

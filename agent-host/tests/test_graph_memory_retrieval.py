@@ -85,7 +85,7 @@ class GraphMemoryRetrievalTests(unittest.IsolatedAsyncioTestCase):
             )
         )
 
-    async def test_child_candidates_hydrate_parent_wrappers(self):
+    async def test_child_candidates_include_current_session_wrappers(self):
         past_session = _session(
             "memory_node:session1",
             name="Old session",
@@ -104,6 +104,12 @@ class GraphMemoryRetrievalTests(unittest.IsolatedAsyncioTestCase):
             created_at=_dt("2026-02-01T00:00:00Z"),
             updated_at=_dt("2026-02-01T00:00:00Z"),
         )
+        sibling_message = _message(
+            "memory_node:message2",
+            content="Surrounding context without the search terms.",
+            created_at=_dt("2026-02-01T00:00:00Z"),
+            updated_at=_dt("2026-02-01T00:00:00Z"),
+        )
         matching_memory = _session_memory(
             "memory_node:memory1",
             title="Compact view preference",
@@ -119,6 +125,12 @@ class GraphMemoryRetrievalTests(unittest.IsolatedAsyncioTestCase):
         current_message = _message(
             "memory_node:currentmessage",
             content="compact view in current session",
+            created_at=_dt("2026-02-01T00:00:00Z"),
+            updated_at=_dt("2026-02-01T00:00:00Z"),
+        )
+        current_sibling_message = _message(
+            "memory_node:currentsibling",
+            content="Current session context around the match.",
             created_at=_dt("2026-02-01T00:00:00Z"),
             updated_at=_dt("2026-02-01T00:00:00Z"),
         )
@@ -142,8 +154,11 @@ class GraphMemoryRetrievalTests(unittest.IsolatedAsyncioTestCase):
                 ],
             },
             messages={
-                conversation.id: [matching_message],
-                "memory_node:currentconversation": [current_message],
+                conversation.id: [matching_message, sibling_message],
+                "memory_node:currentconversation": [
+                    current_message,
+                    current_sibling_message,
+                ],
             },
             memories={
                 past_session.id: [matching_memory],
@@ -171,7 +186,10 @@ class GraphMemoryRetrievalTests(unittest.IsolatedAsyncioTestCase):
         )
 
         sessions = result.past_conversation_context.sessions
-        self.assertEqual([session.session.id for session in sessions], [past_session.id])
+        self.assertEqual(
+            [session.session.id for session in sessions],
+            [past_session.id, current_session.id],
+        )
         self.assertFalse(sessions[0].matched)
         self.assertEqual(
             [item.conversation.id for item in sessions[0].conversations],
@@ -180,11 +198,30 @@ class GraphMemoryRetrievalTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(sessions[0].conversations[0].matched)
         self.assertEqual(
             [message.id for message in sessions[0].conversations[0].messages],
-            [matching_message.id],
+            [matching_message.id, sibling_message.id],
+        )
+        self.assertEqual(
+            sessions[0].conversations[0].matched_message_ids,
+            (matching_message.id,),
         )
         self.assertEqual(
             [memory.id for memory in sessions[0].session_memories],
             [matching_memory.id],
+        )
+        self.assertTrue(sessions[1].matched)
+        self.assertEqual(sessions[1].session_memories, ())
+        self.assertEqual(
+            [item.conversation.id for item in sessions[1].conversations],
+            ["memory_node:currentconversation"],
+        )
+        self.assertFalse(sessions[1].conversations[0].matched)
+        self.assertEqual(
+            [message.id for message in sessions[1].conversations[0].messages],
+            [current_message.id, current_sibling_message.id],
+        )
+        self.assertEqual(
+            sessions[1].conversations[0].matched_message_ids,
+            (current_message.id,),
         )
         self.assertEqual(
             [memory.id for memory in result.current_session_memories],
