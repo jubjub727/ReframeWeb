@@ -7,6 +7,10 @@ from reframe_agent_host.agent_flow.timestamps import timestamp_fields
 import baml_sdk as baml
 import baml_sdk as types
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from reframe_agent_host.agent_flow.session_context import (
+    session_conversation_history,
+    session_memory_contexts,
+)
 from reframe_memory import MemoryDatabase, TaskNode, open_memory_database
 
 
@@ -72,44 +76,13 @@ class SearchDepthContextBuilder:
         )
 
     async def _session_conversations(self) -> list[types.ConversationHistory]:
-        if self.session_id is None:
-            return []
-
-        conversations = await self.database.sessions.conversations_for(self.session_id)
-        history = []
-        for conversation in conversations:
-            messages = await self.database.conversations.messages_for(conversation.id)
-            history.append(
-                types.ConversationHistory(
-                    id=conversation.id,
-                    name=conversation.content.name,
-                    **timestamp_fields(conversation),
-                    messages=[
-                        types.ConversationHistoryMessage(
-                            **timestamp_fields(message),
-                            role=message.content.role,
-                            content=message.content.content,
-                        )
-                        for message in messages
-                    ],
-                )
-            )
-        return history
+        return await session_conversation_history(
+            self.database,
+            self.session_id,
+        )
 
     async def _session_memories(self) -> list[types.SessionMemoryContext]:
-        if self.session_id is None:
-            return []
-
-        memories = await self.database.session_memories.for_session(self.session_id)
-        return [
-            types.SessionMemoryContext(
-                title=memory.content.title,
-                description=memory.content.description,
-                tags=list(memory.tags),
-                **timestamp_fields(memory),
-            )
-            for memory in memories
-        ]
+        return await session_memory_contexts(self.database, self.session_id)
 
     async def _selected_task(self) -> types.SelectedTaskContext:
         task = await self.database.tasks.get(self.selected_task_id)

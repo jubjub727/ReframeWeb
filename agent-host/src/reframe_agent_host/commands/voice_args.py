@@ -186,13 +186,16 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--session-id",
-        help="Active memory_node session id used for conversation and session memory context.",
+        help=(
+            "Explicit memory_node session id to resume. Must be paired with "
+            "--conversation-id; omitted by default to create a fresh CLI session."
+        ),
     )
     parser.add_argument(
         "--conversation-id",
         help=(
-            "Active memory_node conversation id used to record this voice turn. "
-            "Created automatically when omitted."
+            "Explicit memory_node conversation id to resume. Must be paired with "
+            "--session-id; omitted by default to create a fresh CLI conversation."
         ),
     )
     parser.add_argument(

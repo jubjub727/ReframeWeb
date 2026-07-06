@@ -201,6 +201,33 @@ class MinimalVoiceMemoryDatabase:
         self.closed = True
 
 
+class ExistingVoiceContextSessions:
+    async def get(self, session_id, mark_read=True):
+        if session_id == "memory_node:session":
+            return FakeNode(session_id)
+        return None
+
+    async def conversations_for(self, session_id, mark_read=True):
+        if session_id != "memory_node:session":
+            return []
+        return [FakeNode("memory_node:conversation")]
+
+
+class ExistingVoiceMemoryDatabase:
+    def __init__(self):
+        self.sessions = ExistingVoiceContextSessions()
+        self.closed = False
+
+    async def apply_schema(self):
+        return None
+
+    async def ensure_roots(self):
+        return None
+
+    async def close(self):
+        self.closed = True
+
+
 class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
     def test_wake_keyword_is_removed_from_routed_transcript(self):
         matcher = TriggerPhraseMatcher(TriggerPhraseConfig())
@@ -462,6 +489,40 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             args.conversation_id,
             "memory_node:session:conversation",
         )
+        self.assertTrue(database.closed)
+
+    async def test_voice_context_rejects_half_resume(self):
+        args = Namespace(
+            session_id="memory_node:session",
+            conversation_id=None,
+            debug_output=False,
+            verbose_context=False,
+        )
+
+        with contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as raised:
+                await _ensure_voice_memory_context(args)
+
+        self.assertEqual(raised.exception.code, 2)
+
+    async def test_voice_context_validates_explicit_resume_pair(self):
+        database = ExistingVoiceMemoryDatabase()
+        args = Namespace(
+            session_id="memory_node:session",
+            conversation_id="memory_node:conversation",
+            debug_output=False,
+            verbose_context=False,
+        )
+
+        async def fake_open_memory_database():
+            return database
+
+        with patch(
+            "reframe_agent_host.commands.voice_turn.open_memory_database",
+            fake_open_memory_database,
+        ):
+            await _ensure_voice_memory_context(args)
+
         self.assertTrue(database.closed)
 
 

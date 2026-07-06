@@ -31,6 +31,7 @@ from reframe_memory import (
     TaskNode,
     open_memory_database,
 )
+from reframe_memory.ids import memory_node_record_id
 
 
 async def run_voice_turn(args: argparse.Namespace) -> int:
@@ -91,14 +92,15 @@ async def _prepared_voice_pipeline_config(args: argparse.Namespace) -> VoicePipe
 
 
 async def _ensure_voice_memory_context(args: argparse.Namespace) -> None:
-    if args.conversation_id is not None and args.session_id is None:
+    if (args.session_id is None) != (args.conversation_id is None):
         print(
-            "[error] --conversation-id requires --session-id",
+            "[error] --session-id and --conversation-id must be provided together",
             file=sys.stderr,
         )
         raise SystemExit(2)
 
     if args.session_id is not None and args.conversation_id is not None:
+        await _validate_voice_memory_context(args.session_id, args.conversation_id)
         return
 
     database = await open_memory_database()
@@ -128,6 +130,46 @@ async def _ensure_voice_memory_context(args: argparse.Namespace) -> None:
             f"[memory] session_id={args.session_id} conversation_id={args.conversation_id}",
             file=sys.stderr,
         )
+
+
+async def _validate_voice_memory_context(
+    session_id: str,
+    conversation_id: str,
+) -> None:
+    database = await open_memory_database()
+    try:
+        await database.apply_schema()
+        await database.ensure_roots()
+        try:
+            session = await database.sessions.get(session_id, mark_read=False)
+            expected_conversation_id = memory_node_record_id(conversation_id)
+        except ValueError as error:
+            print(f"[error] {error}", file=sys.stderr)
+            raise SystemExit(2) from error
+
+        if session is None:
+            print(
+                f"[error] session does not exist: {session_id}",
+                file=sys.stderr,
+            )
+            raise SystemExit(2)
+
+        conversations = await database.sessions.conversations_for(
+            session_id,
+            mark_read=False,
+        )
+        if not any(
+            conversation.id == expected_conversation_id
+            for conversation in conversations
+        ):
+            print(
+                "[error] conversation is not attached to session: "
+                f"{conversation_id} session_id={session_id}",
+                file=sys.stderr,
+            )
+            raise SystemExit(2)
+    finally:
+        await database.close()
 
 
 def _timestamped_name(prefix: str) -> str:
