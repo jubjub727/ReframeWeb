@@ -232,6 +232,8 @@ function ChooseInitialTask(
         - Do not invent task ids.
         - Do not perform the task. Only choose the task.
         - Use optional outputs only when they are useful.
+        - User request may be related to memories that this layer is not yet aware of, simply finish your task without thinking too much if that seems to be the case.
+        - Do not generate misleading agent_thoughts that would only be relevant to your lack of memory capabilities.
 
         {{ _.role("user") }}
 
