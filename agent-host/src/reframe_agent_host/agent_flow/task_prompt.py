@@ -4,6 +4,7 @@ from collections.abc import Collection
 from dataclasses import dataclass
 
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
+from reframe_agent_host.agent_flow.session_context import current_conversation_history
 import baml_sdk as baml
 import baml_sdk as types
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
@@ -13,7 +14,7 @@ from reframe_memory.retrieved_context import RetrievedMemoryContext
 
 @dataclass(frozen=True)
 class TaskPromptContext:
-    session_conversations: list[types.ConversationHistory]
+    current_conversation: types.ConversationHistory | None
     session_memories: list[types.SessionMemoryContext]
     selected_task: types.SelectedTaskContext
     selected_memories: list[types.TaskPromptSelectedMemoryContext]
@@ -27,10 +28,11 @@ class TaskPromptContextBuilder:
     selected_memories: RetrievedMemoryContext
     selected_memory_ids: Collection[str] = ()
     session_id: str | None = None
+    conversation_id: str | None = None
 
     async def build(self) -> TaskPromptContext:
         return TaskPromptContext(
-            session_conversations=await self._session_conversations(),
+            current_conversation=await self._current_conversation(),
             session_memories=await self._session_memories(),
             selected_task=await self._selected_task(),
             selected_memories=selected_memory_contexts(
@@ -40,30 +42,12 @@ class TaskPromptContextBuilder:
             task_prompt_memories=await self._task_prompt_memories(),
         )
 
-    async def _session_conversations(self) -> list[types.ConversationHistory]:
-        if self.session_id is None:
-            return []
-
-        conversations = await self.database.sessions.conversations_for(self.session_id)
-        history = []
-        for conversation in conversations:
-            messages = await self.database.conversations.messages_for(conversation.id)
-            history.append(
-                types.ConversationHistory(
-                    id=conversation.id,
-                    name=conversation.content.name,
-                    **timestamp_fields(conversation),
-                    messages=[
-                        types.ConversationHistoryMessage(
-                            **timestamp_fields(message),
-                            role=message.content.role,
-                            content=message.content.content,
-                        )
-                        for message in messages
-                    ],
-                )
-            )
-        return history
+    async def _current_conversation(self) -> types.ConversationHistory | None:
+        return await current_conversation_history(
+            self.database,
+            self.session_id,
+            self.conversation_id,
+        )
 
     async def _session_memories(self) -> list[types.SessionMemoryContext]:
         if self.session_id is None:
@@ -106,11 +90,13 @@ class TaskPromptPlanner:
         self,
         database: MemoryDatabase | None = None,
         session_id: str | None = None,
+        conversation_id: str | None = None,
         client_name: str | None = None,
     ) -> None:
         self._database = database
         self._owns_database = database is None
         self._session_id = session_id
+        self._conversation_id = conversation_id
         self._client_name = client_name
 
     async def generate_task_prompt(
@@ -124,6 +110,7 @@ class TaskPromptPlanner:
         context = await TaskPromptContextBuilder(
             database=database,
             session_id=self._session_id,
+            conversation_id=self._conversation_id,
             selected_task_id=selected_task_id,
             selected_memories=selected_memories,
             selected_memory_ids=selected_memory_ids,
@@ -131,7 +118,7 @@ class TaskPromptPlanner:
 
         composition = await baml.GenerateTaskPrompt_async(
             current_user_request=current_user_request,
-            session_conversations=context.session_conversations,
+            current_conversation=context.current_conversation,
             session_memories=context.session_memories,
             selected_task=context.selected_task,
             selected_memories=context.selected_memories,

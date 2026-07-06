@@ -3,6 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from reframe_agent_host.agent_flow.relevance_candidates import candidate_contexts
+from reframe_agent_host.agent_flow.session_context import (
+    current_conversation_history,
+    session_memory_contexts,
+)
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
 import baml_sdk as baml
 import baml_sdk as types
@@ -13,7 +17,7 @@ from reframe_memory.retrieved_context import RetrievedMemoryContext
 
 @dataclass(frozen=True)
 class MemoryRelevanceContext:
-    session_conversations: list[types.ConversationHistory]
+    current_conversation: types.ConversationHistory | None
     session_memories: list[types.SessionMemoryContext]
     selected_task: types.SelectedTaskContext
     candidate_memories: list[types.RetrievedMemoryCandidate]
@@ -26,10 +30,11 @@ class MemoryRelevanceContextBuilder:
     selected_task_id: str
     retrieved_memories: RetrievedMemoryContext
     session_id: str | None = None
+    conversation_id: str | None = None
 
     async def build(self) -> MemoryRelevanceContext:
         return MemoryRelevanceContext(
-            session_conversations=await self._session_conversations(),
+            current_conversation=await self._current_conversation(),
             session_memories=await self._session_memories(),
             selected_task=await self._selected_task(),
             candidate_memories=candidate_contexts(
@@ -39,45 +44,15 @@ class MemoryRelevanceContextBuilder:
             relevance_memories=await self._relevance_memories(),
         )
 
-    async def _session_conversations(self) -> list[types.ConversationHistory]:
-        if self.session_id is None:
-            return []
-
-        conversations = await self.database.sessions.conversations_for(self.session_id)
-        history = []
-        for conversation in conversations:
-            messages = await self.database.conversations.messages_for(conversation.id)
-            history.append(
-                types.ConversationHistory(
-                    id=conversation.id,
-                    name=conversation.content.name,
-                    **timestamp_fields(conversation),
-                    messages=[
-                        types.ConversationHistoryMessage(
-                            **timestamp_fields(message),
-                            role=message.content.role,
-                            content=message.content.content,
-                        )
-                        for message in messages
-                    ],
-                )
-            )
-        return history
+    async def _current_conversation(self) -> types.ConversationHistory | None:
+        return await current_conversation_history(
+            self.database,
+            self.session_id,
+            self.conversation_id,
+        )
 
     async def _session_memories(self) -> list[types.SessionMemoryContext]:
-        if self.session_id is None:
-            return []
-
-        memories = await self.database.session_memories.for_session(self.session_id)
-        return [
-            types.SessionMemoryContext(
-                title=memory.content.title,
-                description=memory.content.description,
-                tags=list(memory.tags),
-                **timestamp_fields(memory),
-            )
-            for memory in memories
-        ]
+        return await session_memory_contexts(self.database, self.session_id)
 
     async def _selected_task(self) -> types.SelectedTaskContext:
         task = await self.database.tasks.get(self.selected_task_id)
@@ -105,11 +80,13 @@ class MemoryRelevancePlanner:
         self,
         database: MemoryDatabase | None = None,
         session_id: str | None = None,
+        conversation_id: str | None = None,
         client_name: str | None = None,
     ) -> None:
         self._database = database
         self._owns_database = database is None
         self._session_id = session_id
+        self._conversation_id = conversation_id
         self._client_name = client_name
 
     async def evaluate_relevant_memories(
@@ -122,13 +99,14 @@ class MemoryRelevancePlanner:
         context = await MemoryRelevanceContextBuilder(
             database=database,
             session_id=self._session_id,
+            conversation_id=self._conversation_id,
             selected_task_id=selected_task_id,
             retrieved_memories=retrieved_memories,
         ).build()
 
         return await baml.EvaluateRelevantMemories_async(
             current_user_request=current_user_request,
-            session_conversations=context.session_conversations,
+            current_conversation=context.current_conversation,
             session_memories=context.session_memories,
             selected_task=context.selected_task,
             candidate_memories=context.candidate_memories,

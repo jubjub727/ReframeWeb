@@ -8,7 +8,7 @@ import baml_sdk as baml
 import baml_sdk as types
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_agent_host.agent_flow.session_context import (
-    session_conversation_history,
+    current_conversation_history,
     session_memory_contexts,
 )
 from reframe_memory import MemoryDatabase, TaskNode, open_memory_database
@@ -53,7 +53,7 @@ def default_search_domains() -> list[types.SearchDepthDomain]:
 
 @dataclass(frozen=True)
 class SearchDepthContext:
-    session_conversations: list[types.ConversationHistory]
+    current_conversation: types.ConversationHistory | None
     session_memories: list[types.SessionMemoryContext]
     selected_task: types.SelectedTaskContext
     search_depth_memories: list[types.SearchDepthMemoryContext]
@@ -65,20 +65,22 @@ class SearchDepthContextBuilder:
     database: MemoryDatabase
     selected_task_id: str
     session_id: str | None = None
+    conversation_id: str | None = None
 
     async def build(self) -> SearchDepthContext:
         return SearchDepthContext(
-            session_conversations=await self._session_conversations(),
+            current_conversation=await self._current_conversation(),
             session_memories=await self._session_memories(),
             selected_task=await self._selected_task(),
             search_depth_memories=await self._search_depth_memories(),
             search_domains=default_search_domains(),
         )
 
-    async def _session_conversations(self) -> list[types.ConversationHistory]:
-        return await session_conversation_history(
+    async def _current_conversation(self) -> types.ConversationHistory | None:
+        return await current_conversation_history(
             self.database,
             self.session_id,
+            self.conversation_id,
         )
 
     async def _session_memories(self) -> list[types.SessionMemoryContext]:
@@ -110,11 +112,13 @@ class SearchDepthPlanner:
         self,
         database: MemoryDatabase | None = None,
         session_id: str | None = None,
+        conversation_id: str | None = None,
         client_name: str | None = None,
     ) -> None:
         self._database = database
         self._owns_database = database is None
         self._session_id = session_id
+        self._conversation_id = conversation_id
         self._client_name = client_name
 
     async def evaluate_search_depths(
@@ -127,13 +131,14 @@ class SearchDepthPlanner:
         context = await SearchDepthContextBuilder(
             database=database,
             session_id=self._session_id,
+            conversation_id=self._conversation_id,
             selected_task_id=selected_task_id,
         ).build()
 
         return await baml.EvaluateSearchDepths_async(
             current_timestamp=current_timestamp(),
             current_user_request=current_user_request,
-            session_conversations=context.session_conversations,
+            current_conversation=context.current_conversation,
             session_memories=context.session_memories,
             selected_task=context.selected_task,
             memory_search_hints=memory_search_hints,

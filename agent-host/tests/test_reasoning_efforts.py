@@ -17,7 +17,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
     async def test_default_task_choice_client_uses_kimi_k25_high(self):
         request = await baml.ChooseInitialTask__build_request_async(
             current_user_request="Install the missing GPU driver for me.",
-            session_conversations=[],
+            current_conversation=None,
             session_memories=[],
             available_tasks=[
                 types.AvailableTask(
@@ -48,7 +48,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
 
         request = await baml.ChooseInitialTask__build_request_async(
             current_user_request="Test routing.",
-            session_conversations=[],
+            current_conversation=None,
             session_memories=[],
             available_tasks=[
                 types.AvailableTask(
@@ -82,7 +82,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
         request = await baml.EvaluateSearchDepths__build_request_async(
             current_timestamp="2026-07-03T15:00:00Z",
             current_user_request="Open Hacker News compactly.",
-            session_conversations=[],
+            current_conversation=None,
             session_memories=[],
             selected_task=types.SelectedTaskContext(
                 id="task:visual_panel",
@@ -121,7 +121,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
     async def test_default_relevance_client_uses_glm51_none(self):
         request = await baml.EvaluateRelevantMemories__build_request_async(
             current_user_request="Open Hacker News compactly.",
-            session_conversations=[],
+            current_conversation=None,
             session_memories=[],
             selected_task=types.SelectedTaskContext(
                 id="task:visual_panel",

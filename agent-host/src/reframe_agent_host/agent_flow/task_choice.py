@@ -6,7 +6,7 @@ import baml_sdk as baml
 import baml_sdk as types
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_agent_host.agent_flow.session_context import (
-    session_conversation_history,
+    current_conversation_history,
     session_memory_contexts,
 )
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
@@ -15,7 +15,7 @@ from reframe_memory import MemoryDatabase, open_memory_database
 
 @dataclass(frozen=True)
 class TaskChoiceContext:
-    session_conversations: list[types.ConversationHistory]
+    current_conversation: types.ConversationHistory | None
     session_memories: list[types.SessionMemoryContext]
     available_tasks: list[types.AvailableTask]
     task_choice_memories: list[types.TaskChoiceMemoryContext]
@@ -25,19 +25,23 @@ class TaskChoiceContext:
 class TaskChoiceContextBuilder:
     database: MemoryDatabase
     session_id: str | None = None
+    conversation_id: str | None = None
 
     async def build(self) -> TaskChoiceContext:
         return TaskChoiceContext(
-            session_conversations=await self._session_conversations(),
+            current_conversation=await self._current_conversation(),
             session_memories=await self._session_memories(),
             available_tasks=await self._available_tasks(),
             task_choice_memories=await self._task_choice_memories(),
         )
 
-    async def _session_conversations(self) -> list[types.ConversationHistory]:
-        return await session_conversation_history(
+    async def _current_conversation(
+        self,
+    ) -> types.ConversationHistory | None:
+        return await current_conversation_history(
             self.database,
             self.session_id,
+            self.conversation_id,
         )
 
     async def _session_memories(self) -> list[types.SessionMemoryContext]:
@@ -77,11 +81,13 @@ class TaskChoicePlanner:
         self,
         database: MemoryDatabase | None = None,
         session_id: str | None = None,
+        conversation_id: str | None = None,
         client_name: str | None = None,
     ) -> None:
         self._database = database
         self._owns_database = database is None
         self._session_id = session_id
+        self._conversation_id = conversation_id
         self._client_name = client_name
 
     async def choose_initial_task(
@@ -92,11 +98,12 @@ class TaskChoicePlanner:
         context = await TaskChoiceContextBuilder(
             database=database,
             session_id=self._session_id,
+            conversation_id=self._conversation_id,
         ).build()
 
         return await baml.ChooseInitialTask_async(
             current_user_request=current_user_request,
-            session_conversations=context.session_conversations,
+            current_conversation=context.current_conversation,
             session_memories=context.session_memories,
             available_tasks=context.available_tasks,
             task_choice_memories=context.task_choice_memories,

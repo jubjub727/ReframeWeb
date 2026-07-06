@@ -273,22 +273,22 @@ class TaskExecutionResult(pydantic.BaseModel):
     returns: typing.List[TaskReturnItem]
 
 
-ChooseInitialTask       = _define_function("user.ChooseInitialTask", "sync",  ["current_user_request", "session_conversations", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
+ChooseInitialTask       = _define_function("user.ChooseInitialTask", "sync",  ["current_user_request", "current_conversation", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
 ChooseInitialTask.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-ChooseInitialTask_async = _define_function("user.ChooseInitialTask", "async", ["current_user_request", "session_conversations", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
+ChooseInitialTask_async = _define_function("user.ChooseInitialTask", "async", ["current_user_request", "current_conversation", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
 ChooseInitialTask_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-ChooseInitialTask__build_request       = _define_function("user.ChooseInitialTask$build_request", "sync",  ["current_user_request", "session_conversations", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
+ChooseInitialTask__build_request       = _define_function("user.ChooseInitialTask$build_request", "sync",  ["current_user_request", "current_conversation", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
 ChooseInitialTask__build_request.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-ChooseInitialTask__build_request_async = _define_function("user.ChooseInitialTask$build_request", "async", ["current_user_request", "session_conversations", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
+ChooseInitialTask__build_request_async = _define_function("user.ChooseInitialTask$build_request", "async", ["current_user_request", "current_conversation", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
 ChooseInitialTask__build_request_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-ChooseInitialTask__build_request_stream       = _define_function("user.ChooseInitialTask$build_request_stream", "sync",  ["current_user_request", "session_conversations", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
+ChooseInitialTask__build_request_stream       = _define_function("user.ChooseInitialTask$build_request_stream", "sync",  ["current_user_request", "current_conversation", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
 ChooseInitialTask__build_request_stream.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-ChooseInitialTask__build_request_stream_async = _define_function("user.ChooseInitialTask$build_request_stream", "async", ["current_user_request", "session_conversations", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
+ChooseInitialTask__build_request_stream_async = _define_function("user.ChooseInitialTask$build_request_stream", "async", ["current_user_request", "current_conversation", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
 ChooseInitialTask__build_request_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
 ChooseInitialTask__parse       = _define_function("user.ChooseInitialTask$parse", "sync",  ["json"], ["client"])
@@ -303,36 +303,36 @@ ChooseInitialTask__parse_stream.__doc__ = """Raises:
 ChooseInitialTask__parse_stream_async = _define_function("user.ChooseInitialTask$parse_stream", "async", ["sse"], ["client"])
 ChooseInitialTask__parse_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient"""
-ChooseInitialTask__render_prompt       = _define_function("user.ChooseInitialTask$render_prompt", "sync",  ["current_user_request", "session_conversations", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
+ChooseInitialTask__render_prompt       = _define_function("user.ChooseInitialTask$render_prompt", "sync",  ["current_user_request", "current_conversation", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
 ChooseInitialTask__render_prompt.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-ChooseInitialTask__render_prompt_async = _define_function("user.ChooseInitialTask$render_prompt", "async", ["current_user_request", "session_conversations", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
+ChooseInitialTask__render_prompt_async = _define_function("user.ChooseInitialTask$render_prompt", "async", ["current_user_request", "current_conversation", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
 ChooseInitialTask__render_prompt_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-ChooseInitialTask_stream       = _define_function("user.ChooseInitialTask$stream", "sync",  ["current_user_request", "session_conversations", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
+ChooseInitialTask_stream       = _define_function("user.ChooseInitialTask$stream", "sync",  ["current_user_request", "current_conversation", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
 ChooseInitialTask_stream.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-ChooseInitialTask_stream_async = _define_function("user.ChooseInitialTask$stream", "async", ["current_user_request", "session_conversations", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
+ChooseInitialTask_stream_async = _define_function("user.ChooseInitialTask$stream", "async", ["current_user_request", "current_conversation", "session_memories", "available_tasks", "task_choice_memories"], ["client"])
 ChooseInitialTask_stream_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-GenerateTaskPrompt       = _define_function("user.GenerateTaskPrompt", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
+GenerateTaskPrompt       = _define_function("user.GenerateTaskPrompt", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
 GenerateTaskPrompt.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-GenerateTaskPrompt_async = _define_function("user.GenerateTaskPrompt", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
+GenerateTaskPrompt_async = _define_function("user.GenerateTaskPrompt", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
 GenerateTaskPrompt_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-GenerateTaskPrompt__build_request       = _define_function("user.GenerateTaskPrompt$build_request", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
+GenerateTaskPrompt__build_request       = _define_function("user.GenerateTaskPrompt$build_request", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
 GenerateTaskPrompt__build_request.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-GenerateTaskPrompt__build_request_async = _define_function("user.GenerateTaskPrompt$build_request", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
+GenerateTaskPrompt__build_request_async = _define_function("user.GenerateTaskPrompt$build_request", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
 GenerateTaskPrompt__build_request_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-GenerateTaskPrompt__build_request_stream       = _define_function("user.GenerateTaskPrompt$build_request_stream", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
+GenerateTaskPrompt__build_request_stream       = _define_function("user.GenerateTaskPrompt$build_request_stream", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
 GenerateTaskPrompt__build_request_stream.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-GenerateTaskPrompt__build_request_stream_async = _define_function("user.GenerateTaskPrompt$build_request_stream", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
+GenerateTaskPrompt__build_request_stream_async = _define_function("user.GenerateTaskPrompt$build_request_stream", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
 GenerateTaskPrompt__build_request_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
 GenerateTaskPrompt__parse       = _define_function("user.GenerateTaskPrompt$parse", "sync",  ["json"], ["client"])
@@ -347,16 +347,16 @@ GenerateTaskPrompt__parse_stream.__doc__ = """Raises:
 GenerateTaskPrompt__parse_stream_async = _define_function("user.GenerateTaskPrompt$parse_stream", "async", ["sse"], ["client"])
 GenerateTaskPrompt__parse_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient"""
-GenerateTaskPrompt__render_prompt       = _define_function("user.GenerateTaskPrompt$render_prompt", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
+GenerateTaskPrompt__render_prompt       = _define_function("user.GenerateTaskPrompt$render_prompt", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
 GenerateTaskPrompt__render_prompt.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-GenerateTaskPrompt__render_prompt_async = _define_function("user.GenerateTaskPrompt$render_prompt", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
+GenerateTaskPrompt__render_prompt_async = _define_function("user.GenerateTaskPrompt$render_prompt", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
 GenerateTaskPrompt__render_prompt_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-GenerateTaskPrompt_stream       = _define_function("user.GenerateTaskPrompt$stream", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
+GenerateTaskPrompt_stream       = _define_function("user.GenerateTaskPrompt$stream", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
 GenerateTaskPrompt_stream.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-GenerateTaskPrompt_stream_async = _define_function("user.GenerateTaskPrompt$stream", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
+GenerateTaskPrompt_stream_async = _define_function("user.GenerateTaskPrompt$stream", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "selected_memories", "task_prompt_memories"], ["client"])
 GenerateTaskPrompt_stream_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
@@ -405,22 +405,22 @@ ExecuteTask_stream_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-EvaluateRelevantMemories       = _define_function("user.EvaluateRelevantMemories", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
+EvaluateRelevantMemories       = _define_function("user.EvaluateRelevantMemories", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
 EvaluateRelevantMemories.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-EvaluateRelevantMemories_async = _define_function("user.EvaluateRelevantMemories", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
+EvaluateRelevantMemories_async = _define_function("user.EvaluateRelevantMemories", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
 EvaluateRelevantMemories_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-EvaluateRelevantMemories__build_request       = _define_function("user.EvaluateRelevantMemories$build_request", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
+EvaluateRelevantMemories__build_request       = _define_function("user.EvaluateRelevantMemories$build_request", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
 EvaluateRelevantMemories__build_request.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateRelevantMemories__build_request_async = _define_function("user.EvaluateRelevantMemories$build_request", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
+EvaluateRelevantMemories__build_request_async = _define_function("user.EvaluateRelevantMemories$build_request", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
 EvaluateRelevantMemories__build_request_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateRelevantMemories__build_request_stream       = _define_function("user.EvaluateRelevantMemories$build_request_stream", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
+EvaluateRelevantMemories__build_request_stream       = _define_function("user.EvaluateRelevantMemories$build_request_stream", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
 EvaluateRelevantMemories__build_request_stream.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateRelevantMemories__build_request_stream_async = _define_function("user.EvaluateRelevantMemories$build_request_stream", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
+EvaluateRelevantMemories__build_request_stream_async = _define_function("user.EvaluateRelevantMemories$build_request_stream", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
 EvaluateRelevantMemories__build_request_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
 EvaluateRelevantMemories__parse       = _define_function("user.EvaluateRelevantMemories$parse", "sync",  ["json"], ["client"])
@@ -435,36 +435,36 @@ EvaluateRelevantMemories__parse_stream.__doc__ = """Raises:
 EvaluateRelevantMemories__parse_stream_async = _define_function("user.EvaluateRelevantMemories$parse_stream", "async", ["sse"], ["client"])
 EvaluateRelevantMemories__parse_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient"""
-EvaluateRelevantMemories__render_prompt       = _define_function("user.EvaluateRelevantMemories$render_prompt", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
+EvaluateRelevantMemories__render_prompt       = _define_function("user.EvaluateRelevantMemories$render_prompt", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
 EvaluateRelevantMemories__render_prompt.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateRelevantMemories__render_prompt_async = _define_function("user.EvaluateRelevantMemories$render_prompt", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
+EvaluateRelevantMemories__render_prompt_async = _define_function("user.EvaluateRelevantMemories$render_prompt", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
 EvaluateRelevantMemories__render_prompt_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateRelevantMemories_stream       = _define_function("user.EvaluateRelevantMemories$stream", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
+EvaluateRelevantMemories_stream       = _define_function("user.EvaluateRelevantMemories$stream", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
 EvaluateRelevantMemories_stream.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-EvaluateRelevantMemories_stream_async = _define_function("user.EvaluateRelevantMemories$stream", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
+EvaluateRelevantMemories_stream_async = _define_function("user.EvaluateRelevantMemories$stream", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "candidate_memories", "relevance_memories"], ["client"])
 EvaluateRelevantMemories_stream_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-EvaluateConversationForMemorySearch       = _define_function("user.EvaluateConversationForMemorySearch", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
+EvaluateConversationForMemorySearch       = _define_function("user.EvaluateConversationForMemorySearch", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
 EvaluateConversationForMemorySearch.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-EvaluateConversationForMemorySearch_async = _define_function("user.EvaluateConversationForMemorySearch", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
+EvaluateConversationForMemorySearch_async = _define_function("user.EvaluateConversationForMemorySearch", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
 EvaluateConversationForMemorySearch_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-EvaluateConversationForMemorySearch__build_request       = _define_function("user.EvaluateConversationForMemorySearch$build_request", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
+EvaluateConversationForMemorySearch__build_request       = _define_function("user.EvaluateConversationForMemorySearch$build_request", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
 EvaluateConversationForMemorySearch__build_request.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateConversationForMemorySearch__build_request_async = _define_function("user.EvaluateConversationForMemorySearch$build_request", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
+EvaluateConversationForMemorySearch__build_request_async = _define_function("user.EvaluateConversationForMemorySearch$build_request", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
 EvaluateConversationForMemorySearch__build_request_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateConversationForMemorySearch__build_request_stream       = _define_function("user.EvaluateConversationForMemorySearch$build_request_stream", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
+EvaluateConversationForMemorySearch__build_request_stream       = _define_function("user.EvaluateConversationForMemorySearch$build_request_stream", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
 EvaluateConversationForMemorySearch__build_request_stream.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateConversationForMemorySearch__build_request_stream_async = _define_function("user.EvaluateConversationForMemorySearch$build_request_stream", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
+EvaluateConversationForMemorySearch__build_request_stream_async = _define_function("user.EvaluateConversationForMemorySearch$build_request_stream", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
 EvaluateConversationForMemorySearch__build_request_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
 EvaluateConversationForMemorySearch__parse       = _define_function("user.EvaluateConversationForMemorySearch$parse", "sync",  ["json"], ["client"])
@@ -479,36 +479,36 @@ EvaluateConversationForMemorySearch__parse_stream.__doc__ = """Raises:
 EvaluateConversationForMemorySearch__parse_stream_async = _define_function("user.EvaluateConversationForMemorySearch$parse_stream", "async", ["sse"], ["client"])
 EvaluateConversationForMemorySearch__parse_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient"""
-EvaluateConversationForMemorySearch__render_prompt       = _define_function("user.EvaluateConversationForMemorySearch$render_prompt", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
+EvaluateConversationForMemorySearch__render_prompt       = _define_function("user.EvaluateConversationForMemorySearch$render_prompt", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
 EvaluateConversationForMemorySearch__render_prompt.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateConversationForMemorySearch__render_prompt_async = _define_function("user.EvaluateConversationForMemorySearch$render_prompt", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
+EvaluateConversationForMemorySearch__render_prompt_async = _define_function("user.EvaluateConversationForMemorySearch$render_prompt", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
 EvaluateConversationForMemorySearch__render_prompt_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateConversationForMemorySearch_stream       = _define_function("user.EvaluateConversationForMemorySearch$stream", "sync",  ["current_user_request", "session_conversations", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
+EvaluateConversationForMemorySearch_stream       = _define_function("user.EvaluateConversationForMemorySearch$stream", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
 EvaluateConversationForMemorySearch_stream.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-EvaluateConversationForMemorySearch_stream_async = _define_function("user.EvaluateConversationForMemorySearch$stream", "async", ["current_user_request", "session_conversations", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
+EvaluateConversationForMemorySearch_stream_async = _define_function("user.EvaluateConversationForMemorySearch$stream", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "conversation_evaluation_memories"], ["client"])
 EvaluateConversationForMemorySearch_stream_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-EvaluateSearchDepths       = _define_function("user.EvaluateSearchDepths", "sync",  ["current_timestamp", "current_user_request", "session_conversations", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
+EvaluateSearchDepths       = _define_function("user.EvaluateSearchDepths", "sync",  ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
 EvaluateSearchDepths.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-EvaluateSearchDepths_async = _define_function("user.EvaluateSearchDepths", "async", ["current_timestamp", "current_user_request", "session_conversations", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
+EvaluateSearchDepths_async = _define_function("user.EvaluateSearchDepths", "async", ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
 EvaluateSearchDepths_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-EvaluateSearchDepths__build_request       = _define_function("user.EvaluateSearchDepths$build_request", "sync",  ["current_timestamp", "current_user_request", "session_conversations", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
+EvaluateSearchDepths__build_request       = _define_function("user.EvaluateSearchDepths$build_request", "sync",  ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
 EvaluateSearchDepths__build_request.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateSearchDepths__build_request_async = _define_function("user.EvaluateSearchDepths$build_request", "async", ["current_timestamp", "current_user_request", "session_conversations", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
+EvaluateSearchDepths__build_request_async = _define_function("user.EvaluateSearchDepths$build_request", "async", ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
 EvaluateSearchDepths__build_request_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateSearchDepths__build_request_stream       = _define_function("user.EvaluateSearchDepths$build_request_stream", "sync",  ["current_timestamp", "current_user_request", "session_conversations", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
+EvaluateSearchDepths__build_request_stream       = _define_function("user.EvaluateSearchDepths$build_request_stream", "sync",  ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
 EvaluateSearchDepths__build_request_stream.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateSearchDepths__build_request_stream_async = _define_function("user.EvaluateSearchDepths$build_request_stream", "async", ["current_timestamp", "current_user_request", "session_conversations", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
+EvaluateSearchDepths__build_request_stream_async = _define_function("user.EvaluateSearchDepths$build_request_stream", "async", ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
 EvaluateSearchDepths__build_request_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
 EvaluateSearchDepths__parse       = _define_function("user.EvaluateSearchDepths$parse", "sync",  ["json"], ["client"])
@@ -523,16 +523,16 @@ EvaluateSearchDepths__parse_stream.__doc__ = """Raises:
 EvaluateSearchDepths__parse_stream_async = _define_function("user.EvaluateSearchDepths$parse_stream", "async", ["sse"], ["client"])
 EvaluateSearchDepths__parse_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient"""
-EvaluateSearchDepths__render_prompt       = _define_function("user.EvaluateSearchDepths$render_prompt", "sync",  ["current_timestamp", "current_user_request", "session_conversations", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
+EvaluateSearchDepths__render_prompt       = _define_function("user.EvaluateSearchDepths$render_prompt", "sync",  ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
 EvaluateSearchDepths__render_prompt.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateSearchDepths__render_prompt_async = _define_function("user.EvaluateSearchDepths$render_prompt", "async", ["current_timestamp", "current_user_request", "session_conversations", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
+EvaluateSearchDepths__render_prompt_async = _define_function("user.EvaluateSearchDepths$render_prompt", "async", ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
 EvaluateSearchDepths__render_prompt_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-EvaluateSearchDepths_stream       = _define_function("user.EvaluateSearchDepths$stream", "sync",  ["current_timestamp", "current_user_request", "session_conversations", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
+EvaluateSearchDepths_stream       = _define_function("user.EvaluateSearchDepths$stream", "sync",  ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
 EvaluateSearchDepths_stream.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-EvaluateSearchDepths_stream_async = _define_function("user.EvaluateSearchDepths$stream", "async", ["current_timestamp", "current_user_request", "session_conversations", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
+EvaluateSearchDepths_stream_async = _define_function("user.EvaluateSearchDepths$stream", "async", ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "selected_task", "memory_search_hints", "search_domains", "search_depth_memories"], ["client"])
 EvaluateSearchDepths_stream_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 

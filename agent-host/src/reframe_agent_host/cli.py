@@ -84,11 +84,14 @@ def main(argv: Sequence[str] | None = None) -> None:
         raise SystemExit(run_gpu_check(args.whisper_compute_type))
 
     if args.command == "choose-task":
+        if args.conversation_id is not None and args.session_id is None:
+            parser.error("--conversation-id requires --session-id")
         raise SystemExit(
             asyncio.run(
                 run_choose_task(
                     transcript=args.transcript,
                     session_id=args.session_id,
+                    conversation_id=args.conversation_id,
                     client_name=args.client,
                 ),
             )

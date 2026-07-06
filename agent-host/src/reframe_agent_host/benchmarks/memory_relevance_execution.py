@@ -217,7 +217,9 @@ async def relevant_memories(
     started_at = time.perf_counter()
     result = await baml.EvaluateRelevantMemories_async(
         current_user_request=snapshot.case.current_user_request,
-        session_conversations=snapshot.control_flow.session_conversations,
+        current_conversation=_current_conversation(
+            snapshot.control_flow.session_conversations
+        ),
         session_memories=snapshot.control_flow.session_memories,
         selected_task=snapshot.control_flow.selected_task,
         candidate_memories=snapshot.candidate_memories,
@@ -225,6 +227,10 @@ async def relevant_memories(
         **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
+
+
+def _current_conversation(conversations):
+    return conversations[0] if conversations else None
 
 
 def snapshot_payload(snapshot: MemoryRelevanceSnapshot) -> dict[str, Any]:
@@ -238,8 +244,8 @@ def snapshot_payload(snapshot: MemoryRelevanceSnapshot) -> dict[str, Any]:
         "latency_seconds": snapshot.latency_seconds,
         "stage_latency_seconds": dict(snapshot.stage_latency_seconds),
         "relevance_input_snapshot": {
-            "session_conversations": _dump_models(
-                snapshot.control_flow.session_conversations
+            "current_conversation": _dump_model(
+                _current_conversation(snapshot.control_flow.session_conversations)
             ),
             "session_memories": _dump_models(snapshot.control_flow.session_memories),
             "selected_task": _dump_model(snapshot.control_flow.selected_task),

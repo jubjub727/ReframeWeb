@@ -158,6 +158,11 @@ class TaskPromptBenchmarkTests(unittest.TestCase):
             ],
             ["memory_node:stripe_memory"],
         )
+        self.assertIn("current_conversation", payload["task_prompt_input_snapshot"])
+        self.assertNotIn(
+            "session_conversations",
+            payload["task_prompt_input_snapshot"],
+        )
         self.assertNotIn("expected_input_phrases", payload)
         self.assertNotIn("forbidden_phrases", payload)
 
@@ -291,7 +296,7 @@ def _snapshot():
         conversation_id="memory_node:conversation",
         task_choice=task_choice,
         selected_task=selected_task,
-        session_conversations=[],
+        current_conversation=None,
         session_memories=[],
         memory_search_hints=None,
         search_depths=None,

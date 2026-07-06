@@ -147,12 +147,27 @@ class VoiceTurnPipeline:
             self._config,
             self._transcriber,
             self._trigger_matcher,
-            TaskChoicePlanner(session_id=self._config.session_id),
-            ConversationEvaluationPlanner(session_id=self._config.session_id),
-            SearchDepthPlanner(session_id=self._config.session_id),
+            TaskChoicePlanner(
+                session_id=self._config.session_id,
+                conversation_id=self._config.conversation_id,
+            ),
+            ConversationEvaluationPlanner(
+                session_id=self._config.session_id,
+                conversation_id=self._config.conversation_id,
+            ),
+            SearchDepthPlanner(
+                session_id=self._config.session_id,
+                conversation_id=self._config.conversation_id,
+            ),
             MemoryRetrievalPlanner(session_id=self._config.session_id),
-            MemoryRelevancePlanner(session_id=self._config.session_id),
-            TaskPromptPlanner(session_id=self._config.session_id),
+            MemoryRelevancePlanner(
+                session_id=self._config.session_id,
+                conversation_id=self._config.conversation_id,
+            ),
+            TaskPromptPlanner(
+                session_id=self._config.session_id,
+                conversation_id=self._config.conversation_id,
+            ),
             TaskExecutionPlanner(),
             self._speaker,
             mode_controller=self._conversation_mode,

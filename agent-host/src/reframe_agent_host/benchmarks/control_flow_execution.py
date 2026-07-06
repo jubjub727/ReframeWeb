@@ -199,7 +199,7 @@ async def choose_task(client, case: ControlFlowBenchmarkCase):
     started_at = time.perf_counter()
     result = await baml.ChooseInitialTask_async(
         current_user_request=case.current_user_request,
-        session_conversations=case_conversation_context(case),
+        current_conversation=_current_conversation(case_conversation_context(case)),
         session_memories=case_session_memory_context(case),
         available_tasks=available_task_context(case.available_tasks),
         task_choice_memories=task_choice_memory_context(case.task_choice_memories),
@@ -208,11 +208,15 @@ async def choose_task(client, case: ControlFlowBenchmarkCase):
     return result, time.perf_counter() - started_at
 
 
+def _current_conversation(conversations):
+    return conversations[0] if conversations else None
+
+
 async def search_hints(client, case: ControlFlowBenchmarkCase, selected_task):
     started_at = time.perf_counter()
     result = await baml.EvaluateConversationForMemorySearch_async(
         current_user_request=case.current_user_request,
-        session_conversations=case_conversation_context(case),
+        current_conversation=_current_conversation(case_conversation_context(case)),
         session_memories=case_session_memory_context(case),
         selected_task=selected_task,
         conversation_evaluation_memories=conversation_evaluation_memory_context(
@@ -231,7 +235,7 @@ async def search_depths(
     result = await baml.EvaluateSearchDepths_async(
         current_timestamp=snapshot.case.current_timestamp,
         current_user_request=snapshot.case.current_user_request,
-        session_conversations=snapshot.session_conversations,
+        current_conversation=_current_conversation(snapshot.session_conversations),
         session_memories=snapshot.session_memories,
         selected_task=snapshot.selected_task,
         memory_search_hints=snapshot.search_hints,
@@ -266,7 +270,9 @@ def snapshot_payload(snapshot: ControlFlowSnapshot) -> dict[str, Any]:
         "search_hints": _dump_model(snapshot.search_hints),
         "search_depth_input_snapshot": {
             "session": _session_payload(snapshot.case),
-            "session_conversations": _dump_models(snapshot.session_conversations),
+            "current_conversation": _dump_model(
+                _current_conversation(snapshot.session_conversations)
+            ),
             "session_memories": _dump_models(snapshot.session_memories),
             "selected_task": _dump_model(snapshot.selected_task),
             "memory_search_hints": _dump_model(snapshot.search_hints),

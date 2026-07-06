@@ -20,6 +20,7 @@ from reframe_agent_host.agent_flow.relevance_candidates import (
     filter_retrieved_memories,
 )
 from reframe_agent_host.agent_flow.search_depth import default_search_domains
+from reframe_agent_host.agent_flow.session_context import current_conversation_history
 from reframe_agent_host.agent_flow.task_prompt import (
     build_task_prompt_decision,
     selected_memory_contexts,
@@ -61,7 +62,7 @@ class TaskPromptSnapshot:
     conversation_id: str | None
     task_choice: types.TaskChoiceDecision | None
     selected_task: types.SelectedTaskContext | None
-    session_conversations: list[types.ConversationHistory]
+    current_conversation: types.ConversationHistory | None
     session_memories: list[types.SessionMemoryContext]
     memory_search_hints: types.ConversationMemorySearchHints | None
     search_depths: types.SearchDepthDecision | None
@@ -126,12 +127,17 @@ async def _build_live_task_prompt_snapshot(
     task_prompt_memories: list[types.TaskPromptMemoryContext] = []
     session_id = None
     conversation_id = None
+    current_conversation = None
 
     try:
         await ensure_core_tasks(database)
         session_id, conversation_id = await _create_case_memory(database, case)
 
-        session_conversations = await _session_conversations(database, session_id)
+        current_conversation = await current_conversation_history(
+            database,
+            session_id,
+            conversation_id,
+        )
         session_memories = await _session_memories(database, session_id)
         available_tasks = await _core_available_tasks(database)
         task_choice_memories = await _task_choice_memories(database)
@@ -139,7 +145,7 @@ async def _build_live_task_prompt_snapshot(
         task_choice, latency = await _choose_task(
             client,
             case,
-            session_conversations,
+            current_conversation,
             session_memories,
             available_tasks,
             task_choice_memories,
@@ -147,7 +153,11 @@ async def _build_live_task_prompt_snapshot(
         stage_latencies["task_choice"] = latency
 
         await _record_current_turn(database, conversation_id, case, task_choice)
-        session_conversations = await _session_conversations(database, session_id)
+        current_conversation = await current_conversation_history(
+            database,
+            session_id,
+            conversation_id,
+        )
         session_memories = await _session_memories(database, session_id)
 
         selected_task_node = await database.tasks.get(task_choice.selected_task_id)
@@ -160,7 +170,7 @@ async def _build_live_task_prompt_snapshot(
             client,
             database,
             case,
-            session_conversations,
+            current_conversation,
             session_memories,
             selected_task,
         )
@@ -171,7 +181,7 @@ async def _build_live_task_prompt_snapshot(
             database,
             case,
             current_timestamp,
-            session_conversations,
+            current_conversation,
             session_memories,
             selected_task,
             memory_search_hints,
@@ -191,7 +201,7 @@ async def _build_live_task_prompt_snapshot(
             database,
             case,
             session_id,
-            session_conversations,
+            current_conversation,
             session_memories,
             selected_task,
             retrieved_memories,
@@ -215,11 +225,7 @@ async def _build_live_task_prompt_snapshot(
             conversation_id=conversation_id,
             task_choice=task_choice,
             selected_task=selected_task,
-            session_conversations=(
-                await _session_conversations(database, session_id)
-                if session_id is not None
-                else []
-            ),
+            current_conversation=current_conversation,
             session_memories=(
                 await _session_memories(database, session_id)
                 if session_id is not None
@@ -244,7 +250,7 @@ async def _build_live_task_prompt_snapshot(
         conversation_id=conversation_id,
         task_choice=task_choice,
         selected_task=selected_task,
-        session_conversations=session_conversations,
+        current_conversation=current_conversation,
         session_memories=session_memories,
         memory_search_hints=memory_search_hints,
         search_depths=search_depths,
@@ -346,7 +352,7 @@ async def task_prompt(
     started_at = time.perf_counter()
     composition = await baml.GenerateTaskPrompt_async(
         current_user_request=snapshot.case.current_user_request,
-        session_conversations=snapshot.session_conversations,
+        current_conversation=snapshot.current_conversation,
         session_memories=snapshot.session_memories,
         selected_task=snapshot.selected_task,
         selected_memories=snapshot.selected_memory_contexts,
@@ -404,7 +410,7 @@ def snapshot_payload(snapshot: TaskPromptSnapshot) -> dict[str, Any]:
             "conversation_id": snapshot.conversation_id,
             "task_choice": _dump_model(snapshot.task_choice),
             "selected_task": _dump_model(snapshot.selected_task),
-            "session_conversations": _dump_models(snapshot.session_conversations),
+            "current_conversation": _dump_model(snapshot.current_conversation),
             "session_memories": _dump_models(snapshot.session_memories),
             "memory_search_hints": _dump_model(snapshot.memory_search_hints),
             "search_depths": _dump_model(snapshot.search_depths),
@@ -454,10 +460,10 @@ def _load_snapshot(
             types.SelectedTaskContext,
             prompt_input.get("selected_task"),
         ),
-        session_conversations=[
-            types.ConversationHistory(**conversation)
-            for conversation in prompt_input.get("session_conversations", [])
-        ],
+        current_conversation=_model_or_none(
+            types.ConversationHistory,
+            prompt_input["current_conversation"],
+        ),
         session_memories=[
             types.SessionMemoryContext(**memory)
             for memory in prompt_input.get("session_memories", [])
@@ -549,7 +555,7 @@ async def _record_current_turn(
 async def _choose_task(
     client,
     case,
-    session_conversations,
+    current_conversation,
     session_memories,
     available_tasks,
     task_choice_memories,
@@ -557,7 +563,7 @@ async def _choose_task(
     started_at = time.perf_counter()
     result = await baml.ChooseInitialTask_async(
         current_user_request=case.current_user_request,
-        session_conversations=session_conversations,
+        current_conversation=current_conversation,
         session_memories=session_memories,
         available_tasks=available_tasks,
         task_choice_memories=task_choice_memories,
@@ -570,14 +576,14 @@ async def _memory_search_hints(
     client,
     database,
     case,
-    session_conversations,
+    current_conversation,
     session_memories,
     selected_task,
 ):
     started_at = time.perf_counter()
     result = await baml.EvaluateConversationForMemorySearch_async(
         current_user_request=case.current_user_request,
-        session_conversations=session_conversations,
+        current_conversation=current_conversation,
         session_memories=session_memories,
         selected_task=selected_task,
         conversation_evaluation_memories=await _conversation_evaluation_memories(
@@ -593,7 +599,7 @@ async def _search_depths(
     database,
     case,
     current_timestamp,
-    session_conversations,
+    current_conversation,
     session_memories,
     selected_task,
     memory_search_hints,
@@ -602,7 +608,7 @@ async def _search_depths(
     result = await baml.EvaluateSearchDepths_async(
         current_timestamp=current_timestamp,
         current_user_request=case.current_user_request,
-        session_conversations=session_conversations,
+        current_conversation=current_conversation,
         session_memories=session_memories,
         selected_task=selected_task,
         memory_search_hints=memory_search_hints,
@@ -635,7 +641,7 @@ async def _relevance_decision(
     database,
     case,
     session_id,
-    session_conversations,
+    current_conversation,
     session_memories,
     selected_task,
     retrieved_memories,
@@ -643,7 +649,7 @@ async def _relevance_decision(
     started_at = time.perf_counter()
     result = await baml.EvaluateRelevantMemories_async(
         current_user_request=case.current_user_request,
-        session_conversations=session_conversations,
+        current_conversation=current_conversation,
         session_memories=session_memories,
         selected_task=selected_task,
         candidate_memories=candidate_contexts(
@@ -692,29 +698,6 @@ def _selected_task_context(task: TaskNode) -> types.SelectedTaskContext:
         provider_id=task.content.provider_id,
         **timestamp_fields(task),
     )
-
-
-async def _session_conversations(database, session_id) -> list[types.ConversationHistory]:
-    conversations = await database.sessions.conversations_for(session_id)
-    history = []
-    for conversation in conversations:
-        messages = await database.conversations.messages_for(conversation.id)
-        history.append(
-            types.ConversationHistory(
-                id=conversation.id,
-                name=conversation.content.name,
-                **timestamp_fields(conversation),
-                messages=[
-                    types.ConversationHistoryMessage(
-                        **timestamp_fields(message),
-                        role=message.content.role,
-                        content=message.content.content,
-                    )
-                    for message in messages
-                ],
-            )
-        )
-    return history
 
 
 async def _session_memories(database, session_id) -> list[types.SessionMemoryContext]:

@@ -126,7 +126,7 @@ async def _probe_task_choice_reasoning_effort(
     try:
         await baml.ChooseInitialTask_async(
             current_user_request=cases[0].transcript,
-            session_conversations=context.session_conversations,
+            current_conversation=context.current_conversation,
             session_memories=context.session_memories,
             available_tasks=context.available_tasks,
             task_choice_memories=context.task_choice_memories,
@@ -173,7 +173,7 @@ async def _run_case(
     try:
         decision = await baml.ChooseInitialTask_async(
             current_user_request=case.transcript,
-            session_conversations=context.session_conversations,
+            current_conversation=context.current_conversation,
             session_memories=context.session_memories,
             available_tasks=context.available_tasks,
             task_choice_memories=context.task_choice_memories,
@@ -219,7 +219,7 @@ async def _warmup(client, cases, context, config: TaskChoiceBenchmarkConfig) -> 
         try:
             await baml.ChooseInitialTask_async(
                 current_user_request=cases[0].transcript,
-                session_conversations=context.session_conversations,
+                current_conversation=context.current_conversation,
                 session_memories=context.session_memories,
                 available_tasks=context.available_tasks,
                 task_choice_memories=context.task_choice_memories,

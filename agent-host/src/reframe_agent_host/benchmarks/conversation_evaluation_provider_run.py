@@ -122,7 +122,9 @@ async def _run_case(
     try:
         hints = await baml.EvaluateConversationForMemorySearch_async(
             current_user_request=case.current_user_request,
-            session_conversations=conversation_context(case.session_conversations),
+            current_conversation=_current_conversation(
+                conversation_context(case.session_conversations)
+            ),
             session_memories=memory_context(case.session_memories),
             selected_task=selected_task_context(case.selected_task),
             conversation_evaluation_memories=conversation_evaluation_memory_context(
@@ -174,7 +176,9 @@ async def _probe_conversation_evaluation_reasoning_effort(
     try:
         await baml.EvaluateConversationForMemorySearch_async(
             current_user_request=case.current_user_request,
-            session_conversations=conversation_context(case.session_conversations),
+            current_conversation=_current_conversation(
+                conversation_context(case.session_conversations)
+            ),
             session_memories=memory_context(case.session_memories),
             selected_task=selected_task_context(case.selected_task),
             conversation_evaluation_memories=conversation_evaluation_memory_context(
@@ -220,7 +224,9 @@ async def _warmup(
             case = cases[0]
             await baml.EvaluateConversationForMemorySearch_async(
                 current_user_request=case.current_user_request,
-                session_conversations=conversation_context(case.session_conversations),
+                current_conversation=_current_conversation(
+                    conversation_context(case.session_conversations)
+                ),
                 session_memories=memory_context(case.session_memories),
                 selected_task=selected_task_context(case.selected_task),
                 conversation_evaluation_memories=conversation_evaluation_memory_context(
@@ -233,6 +239,10 @@ async def _warmup(
         if config.delay_seconds > 0:
             await asyncio.sleep(config.delay_seconds)
     return errors
+
+
+def _current_conversation(conversations):
+    return conversations[0] if conversations else None
 
 
 def _discovery_result(

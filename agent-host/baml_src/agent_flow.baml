@@ -197,7 +197,7 @@ class TaskExecutionResult {
 
 function ChooseInitialTask(
     current_user_request: string,
-    session_conversations: ConversationHistory[],
+    current_conversation: ConversationHistory?,
     session_memories: SessionMemoryContext[],
     available_tasks: AvailableTask[],
     task_choice_memories: TaskChoiceMemoryContext[],
@@ -215,7 +215,7 @@ function ChooseInitialTask(
 
         Context sections:
         - Current user request: the request being routed now.
-        - Conversation history: earlier human and agent messages from this session.
+        - Conversation history: earlier human and agent messages.
         - Session memories: remembered observations for this session.
         - Available tasks: the only tasks that may be selected.
         - Task-choice memories: remembered observations about choosing tasks.
@@ -239,17 +239,17 @@ function ChooseInitialTask(
         {{ current_user_request }}
 
         Conversation history:
-        {% for conversation in session_conversations %}
+        {% if current_conversation %}
         Conversation:
-          id: {{ conversation.id }}
-          name: {{ conversation.name }}
-          created_at: {{ conversation.created_at }}
-          updated_at: {{ conversation.updated_at }}
-          read_at: {{ conversation.read_at }}
-        {% for message in conversation.messages %}
+          id: {{ current_conversation.id }}
+          name: {{ current_conversation.name }}
+          created_at: {{ current_conversation.created_at }}
+          updated_at: {{ current_conversation.updated_at }}
+          read_at: {{ current_conversation.read_at }}
+        {% for message in current_conversation.messages %}
         [{{ message.role }}] created_at={{ message.created_at }} updated_at={{ message.updated_at }} read_at={{ message.read_at }} {{ message.content }}
         {% endfor %}
-        {% endfor %}
+        {% endif %}
 
         Session memories:
         {% for memory in session_memories %}
@@ -292,7 +292,7 @@ function ChooseInitialTask(
 
 function GenerateTaskPrompt(
     current_user_request: string,
-    session_conversations: ConversationHistory[],
+    current_conversation: ConversationHistory?,
     session_memories: SessionMemoryContext[],
     selected_task: SelectedTaskContext,
     selected_memories: TaskPromptSelectedMemoryContext[],
@@ -328,13 +328,18 @@ function GenerateTaskPrompt(
         Current request:
         {{ current_user_request }}
 
+        Conversation history:
+        {% if current_conversation %}
         Conversation:
-        {% for conversation in session_conversations %}
-        Conversation: {{ conversation.name }}
-        {% for message in conversation.messages %}
+          id: {{ current_conversation.id }}
+          name: {{ current_conversation.name }}
+          created_at: {{ current_conversation.created_at }}
+          updated_at: {{ current_conversation.updated_at }}
+          read_at: {{ current_conversation.read_at }}
+        {% for message in current_conversation.messages %}
         [{{ message.role }}] {{ message.content }}
         {% endfor %}
-        {% endfor %}
+        {% endif %}
 
         Remembered context from this session:
         {% for memory in session_memories %}
@@ -391,7 +396,7 @@ function ExecuteTask(full_task_prompt: string) -> TaskExecutionResult {
 
 function EvaluateRelevantMemories(
     current_user_request: string,
-    session_conversations: ConversationHistory[],
+    current_conversation: ConversationHistory?,
     session_memories: SessionMemoryContext[],
     selected_task: SelectedTaskContext,
     candidate_memories: RetrievedMemoryCandidate[],
@@ -425,12 +430,18 @@ function EvaluateRelevantMemories(
         {{ selected_task.name }}
         {{ selected_task.description }}
 
-        Conversation history for the current session:
-        {% for conversation in session_conversations %}
-        {% for message in conversation.messages %}
+        Conversation history:
+        {% if current_conversation %}
+        Conversation:
+          id: {{ current_conversation.id }}
+          name: {{ current_conversation.name }}
+          created_at: {{ current_conversation.created_at }}
+          updated_at: {{ current_conversation.updated_at }}
+          read_at: {{ current_conversation.read_at }}
+        {% for message in current_conversation.messages %}
         [{{ message.role }}] {{ message.content }}
         {% endfor %}
-        {% endfor %}
+        {% endif %}
 
         Session memories for this session:
         {% for memory in session_memories %}
@@ -470,7 +481,7 @@ function EvaluateRelevantMemories(
 
 function EvaluateConversationForMemorySearch(
     current_user_request: string,
-    session_conversations: ConversationHistory[],
+    current_conversation: ConversationHistory?,
     session_memories: SessionMemoryContext[],
     selected_task: SelectedTaskContext,
     conversation_evaluation_memories: ConversationEvaluationMemoryContext[],
@@ -479,7 +490,7 @@ function EvaluateConversationForMemorySearch(
     prompt: #"
         {{ _.role("system") }}
 
-        You evaluate the current conversation and produce memory search hints for
+        You evaluate the conversation and produce memory search hints for
         the selected task.
 
         The hints will drive memory search before the selected task runs.
@@ -517,18 +528,18 @@ function EvaluateConversationForMemorySearch(
         Current user request:
         {{ current_user_request }}
 
-        Conversation history for the current session:
-        {% for conversation in session_conversations %}
+        Conversation history:
+        {% if current_conversation %}
         Conversation:
-          id: {{ conversation.id }}
-          name: {{ conversation.name }}
-          created_at: {{ conversation.created_at }}
-          updated_at: {{ conversation.updated_at }}
-          read_at: {{ conversation.read_at }}
-        {% for message in conversation.messages %}
+          id: {{ current_conversation.id }}
+          name: {{ current_conversation.name }}
+          created_at: {{ current_conversation.created_at }}
+          updated_at: {{ current_conversation.updated_at }}
+          read_at: {{ current_conversation.read_at }}
+        {% for message in current_conversation.messages %}
         [{{ message.role }}] created_at={{ message.created_at }} updated_at={{ message.updated_at }} read_at={{ message.read_at }} {{ message.content }}
         {% endfor %}
-        {% endfor %}
+        {% endif %}
 
         Session memories for this session:
         {% for memory in session_memories %}
@@ -570,7 +581,7 @@ function EvaluateConversationForMemorySearch(
 function EvaluateSearchDepths(
     current_timestamp: string,
     current_user_request: string,
-    session_conversations: ConversationHistory[],
+    current_conversation: ConversationHistory?,
     session_memories: SessionMemoryContext[],
     selected_task: SelectedTaskContext,
     memory_search_hints: ConversationMemorySearchHints,
@@ -645,18 +656,18 @@ function EvaluateSearchDepths(
           hydrates: {{ domain.hydrates }}
         {% endfor %}
 
-        Current session conversation history:
-        {% for conversation in session_conversations %}
+        Conversation history:
+        {% if current_conversation %}
         Conversation:
-          id: {{ conversation.id }}
-          name: {{ conversation.name }}
-          created_at: {{ conversation.created_at }}
-          updated_at: {{ conversation.updated_at }}
-          read_at: {{ conversation.read_at }}
-        {% for message in conversation.messages %}
+          id: {{ current_conversation.id }}
+          name: {{ current_conversation.name }}
+          created_at: {{ current_conversation.created_at }}
+          updated_at: {{ current_conversation.updated_at }}
+          read_at: {{ current_conversation.read_at }}
+        {% for message in current_conversation.messages %}
         [{{ message.role }}] created_at={{ message.created_at }} updated_at={{ message.updated_at }} read_at={{ message.read_at }} {{ message.content }}
         {% endfor %}
-        {% endfor %}
+        {% endif %}
 
         Current session memories:
         {% for memory in session_memories %}

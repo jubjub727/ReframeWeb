@@ -155,7 +155,7 @@ class MemoryRelevanceBenchmarkTests(unittest.TestCase):
         self.assertIn("candidate_memories", relevance_input)
         self.assertIn(
             "Hacker News worked best",
-            relevance_input["session_conversations"][0]["messages"][0]["content"],
+            relevance_input["current_conversation"]["messages"][0]["content"],
         )
         self.assertEqual(
             relevance_input["candidate_memories"][0]["id"],

@@ -25,6 +25,7 @@ from reframe_memory import open_memory_database
 async def run_choose_task(
     transcript: str,
     session_id: str | None,
+    conversation_id: str | None,
     client_name: str | None,
 ) -> int:
     database = await open_memory_database()
@@ -34,6 +35,7 @@ async def run_choose_task(
         result = await TaskChoicePlanner(
             database=database,
             session_id=session_id,
+            conversation_id=conversation_id,
             client_name=client_name,
         ).choose_initial_task(transcript)
         print(json.dumps(result.model_dump(mode="json"), indent=2))

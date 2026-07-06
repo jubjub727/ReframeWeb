@@ -113,7 +113,14 @@ def _add_choose_task_parser(subparsers) -> None:
     choose_task.add_argument("transcript")
     choose_task.add_argument(
         "--session-id",
-        help="Active memory_node session id used for conversation and session memory context.",
+        help="Active memory_node session id used for session memory context.",
+    )
+    choose_task.add_argument(
+        "--conversation-id",
+        help=(
+            "Active memory_node conversation id. When provided with --session-id, "
+            "only this conversation is included under Conversation history."
+        ),
     )
     choose_task.add_argument(
         "--client",

@@ -201,9 +201,10 @@ class ConversationEvaluationBenchmarkTests(unittest.TestCase):
 class ConversationEvaluationClientTests(unittest.IsolatedAsyncioTestCase):
     async def test_default_client_request_uses_glm51_none(self):
         case = conversation_evaluation_cases()[0]
+        conversations = conversation_context(case.session_conversations)
         request = await baml.EvaluateConversationForMemorySearch__build_request_async(
             current_user_request=case.current_user_request,
-            session_conversations=conversation_context(case.session_conversations),
+            current_conversation=conversations[0] if conversations else None,
             session_memories=memory_context(case.session_memories),
             selected_task=selected_task_context(case.selected_task),
             conversation_evaluation_memories=conversation_evaluation_memory_context(
