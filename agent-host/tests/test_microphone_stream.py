@@ -1,3 +1,4 @@
+from unittest.mock import patch
 import unittest
 
 import numpy as np
@@ -76,6 +77,71 @@ class MicrophoneStreamTests(unittest.TestCase):
         self.assertIs(stream, sounddevice.streams[1])
         self.assertTrue(sounddevice.streams[0].closed)
         self.assertEqual(sounddevice.starts, 2)
+
+    def test_enter_falls_back_to_next_resolved_device(self):
+        sounddevice = FallbackSoundDevice(failing_device=1)
+        microphone = MicrophoneStream(
+            AudioInputConfig(
+                start_retries=0,
+                start_retry_delay_seconds=0,
+            )
+        )
+
+        with (
+            patch.dict("sys.modules", {"sounddevice": sounddevice}),
+            patch(
+                "reframe_agent_host.voice.microphone.resolve_input_devices",
+                return_value=(1, 2),
+            ),
+            patch(
+                "reframe_agent_host.voice.microphone.device_default_sample_rate",
+                return_value=16_000,
+            ),
+            patch(
+                "reframe_agent_host.voice.microphone.device_input_channels",
+                return_value=1,
+            ),
+            patch(
+                "reframe_agent_host.voice.microphone.device_summary",
+                side_effect=lambda device: f"device {device}",
+            ),
+        ):
+            with microphone:
+                self.assertEqual(microphone.device_summary, "device 2")
+
+        self.assertEqual([stream.device for stream in sounddevice.streams], [1, 2])
+        self.assertTrue(sounddevice.streams[0].closed)
+        self.assertTrue(sounddevice.streams[1].stopped)
+        self.assertTrue(sounddevice.streams[1].closed)
+
+
+class FallbackStream:
+    def __init__(self, device, failing_device):
+        self.device = device
+        self._failing_device = failing_device
+        self.closed = False
+        self.stopped = False
+
+    def start(self):
+        if self.device == self._failing_device:
+            raise RuntimeError("host API failed")
+
+    def stop(self):
+        self.stopped = True
+
+    def close(self):
+        self.closed = True
+
+
+class FallbackSoundDevice:
+    def __init__(self, failing_device):
+        self._failing_device = failing_device
+        self.streams = []
+
+    def InputStream(self, **kwargs):
+        stream = FallbackStream(kwargs["device"], self._failing_device)
+        self.streams.append(stream)
+        return stream
 
 
 if __name__ == "__main__":

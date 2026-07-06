@@ -319,6 +319,8 @@ function GenerateTaskPrompt(
           source bookkeeping.
         - Set candidate_memory only when this composition step reveals durable
           guidance for future prompt composition.
+        - Keep a list of exact memories when their contents as memories are directly related to the user request
+        - When keeping exact memories make sure to keep their parent context memory as well so the structure/origin of the memory is kept even if its siblings aren't
 
         {{ _.role("user") }}
 

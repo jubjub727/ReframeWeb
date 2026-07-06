@@ -5,9 +5,9 @@ from dataclasses import dataclass
 
 PREFERRED_HOST_APIS = (
     "Windows WASAPI",
-    "Windows WDM-KS",
     "Windows DirectSound",
     "MME",
+    "Windows WDM-KS",
 )
 
 
@@ -50,14 +50,22 @@ def list_input_devices() -> list[AudioDeviceInfo]:
 
 
 def resolve_input_device(device: int | str | None) -> int | str | None:
+    return resolve_input_devices(device)[0]
+
+
+def resolve_input_devices(device: int | str | None) -> tuple[int | str | None, ...]:
     devices = list_input_devices()
     if device is None:
         default = next((item for item in devices if item.is_default_input), None)
-        return _preferred_duplicate(default, devices).index if default else None
+        if default is None:
+            return (None,)
+        return _device_indexes(_preferred_duplicates(default, devices))
 
     if isinstance(device, int):
         selected = next((item for item in devices if item.index == device), None)
-        return _preferred_duplicate(selected, devices).index if selected else device
+        if selected is None:
+            return (device,)
+        return _device_indexes(_preferred_duplicates(selected, devices))
 
     matched = [
         item
@@ -65,7 +73,9 @@ def resolve_input_device(device: int | str | None) -> int | str | None:
         if device.casefold() in item.name.casefold()
         or device.casefold() in item.host_api_name.casefold()
     ]
-    return _preferred_device(matched).index if matched else device
+    if not matched:
+        return (device,)
+    return _device_indexes(_preferred_devices(matched))
 
 
 def device_default_sample_rate(device: int | str | None) -> int:
@@ -96,16 +106,27 @@ def _preferred_duplicate(
     selected: AudioDeviceInfo | None,
     devices: list[AudioDeviceInfo],
 ) -> AudioDeviceInfo:
+    return _preferred_duplicates(selected, devices)[0]
+
+
+def _preferred_duplicates(
+    selected: AudioDeviceInfo | None,
+    devices: list[AudioDeviceInfo],
+) -> tuple[AudioDeviceInfo, ...]:
     if selected is None:
         raise ValueError("Input device was not found.")
     same_name = [item for item in devices if item.name == selected.name]
-    return _preferred_device(same_name)
+    return _preferred_devices(same_name)
 
 
 def _preferred_device(devices: list[AudioDeviceInfo]) -> AudioDeviceInfo:
+    return _preferred_devices(devices)[0]
+
+
+def _preferred_devices(devices: list[AudioDeviceInfo]) -> tuple[AudioDeviceInfo, ...]:
     if not devices:
         raise ValueError("No input device candidates were found.")
-    return sorted(devices, key=_device_rank)[0]
+    return tuple(sorted(devices, key=_device_rank))
 
 
 def _device_rank(device: AudioDeviceInfo) -> tuple[int, int]:
@@ -120,3 +141,7 @@ def _device_info(device: int | str | None) -> AudioDeviceInfo | None:
     if not isinstance(device, int):
         return None
     return next((item for item in list_input_devices() if item.index == device), None)
+
+
+def _device_indexes(devices: tuple[AudioDeviceInfo, ...]) -> tuple[int, ...]:
+    return tuple(device.index for device in devices)

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from inspect import Parameter, signature
 from threading import Thread
 from typing import Any
 
@@ -179,7 +180,7 @@ class PrimitiveDispatcher:
 
         def speak() -> None:
             try:
-                speaker.speak(text)
+                _speak_with_events(speaker, text, self._emit)
             except Exception as exc:
                 self._emit("tts-error", str(exc))
 
@@ -258,4 +259,26 @@ def _malformed(name: str, detail: str) -> PrimitiveDispatchRecord:
         name=name,
         status="malformed",
         detail=detail,
+    )
+
+
+def _speak_with_events(
+    speaker: TextSpeaker,
+    text: str,
+    on_event: Callable[[str, str], None],
+) -> None:
+    if _accepts_on_event(speaker.speak):
+        speaker.speak(text, on_event=on_event)
+        return
+    speaker.speak(text)
+
+
+def _accepts_on_event(callable_object: Callable[..., object]) -> bool:
+    try:
+        parameters = signature(callable_object).parameters
+    except (TypeError, ValueError):
+        return False
+    return "on_event" in parameters or any(
+        parameter.kind == Parameter.VAR_KEYWORD
+        for parameter in parameters.values()
     )

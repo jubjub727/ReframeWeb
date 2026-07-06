@@ -229,6 +229,10 @@ class _VoiceTurnEventPrinter:
                 self._print_live(
                     f"conversation_mode: {_single_line(message, limit=None)}"
                 )
+            elif stage == "tts-first-audio":
+                self._print_live(
+                    f"[tts_first_audio] {_single_line(message, limit=None)}"
+                )
             elif stage in {"turn-error", "capture-error", "warning", "tts-error"}:
                 self._print_live(f"[{stage}] {_single_line(message, limit=None)}")
             elif stage == "turn-ignored":
@@ -268,6 +272,11 @@ class _VoiceTurnEventPrinter:
             "primitive-dispatch",
             "agent-reply",
             "agent-thought",
+            "tts-started",
+            "tts-chunk-started",
+            "tts-first-audio",
+            "tts-play-started",
+            "tts-finished",
             "conversation-mode",
             "tts-error",
             "turn-error",

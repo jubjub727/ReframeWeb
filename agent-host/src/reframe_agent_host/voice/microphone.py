@@ -13,8 +13,7 @@ from reframe_agent_host.voice.audio_devices import (
     device_default_sample_rate,
     device_input_channels,
     device_summary,
-    list_input_devices,
-    resolve_input_device,
+    resolve_input_devices,
 )
 from reframe_agent_host.voice.resampling import AudioFrameProcessor
 
@@ -78,7 +77,25 @@ class MicrophoneStream:
     def __enter__(self) -> MicrophoneStream:
         import sounddevice as sd
 
-        self._resolved_device = resolve_input_device(self._config.device)
+        last_error: Exception | None = None
+        attempted: list[str] = []
+
+        for device in resolve_input_devices(self._config.device):
+            attempted.append(device_summary(device))
+            try:
+                self._open_device(sd, device)
+                return self
+            except Exception as exc:
+                last_error = exc
+                self._close_stream()
+
+        tried = "; ".join(attempted) or str(self._config.device or "default")
+        raise RuntimeError(
+            f"Could not start input stream. Tried: {tried}. Last error: {last_error}"
+        ) from last_error
+
+    def _open_device(self, sounddevice, device: int | str | None) -> None:
+        self._resolved_device = device
         self._input_sample_rate = (
             self._config.input_sample_rate
             or device_default_sample_rate(self._resolved_device)
@@ -113,7 +130,7 @@ class MicrophoneStream:
                     self._dropped_frames += 1
 
         self._stream = self._open_started_stream(
-            sd,
+            sounddevice,
             {
                 "samplerate": self._input_sample_rate,
                 "blocksize": stream_chunk_samples,
@@ -123,13 +140,15 @@ class MicrophoneStream:
                 "callback": callback,
             },
         )
-        return self
 
     def __exit__(self, _exc_type, _exc, _tb) -> None:
         self.close()
 
     def close(self) -> None:
         self._stop_event.set()
+        self._close_stream()
+
+    def _close_stream(self) -> None:
         if self._stream is not None:
             self._stream.stop()
             self._stream.close()

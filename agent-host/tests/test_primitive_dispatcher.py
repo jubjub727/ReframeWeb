@@ -32,6 +32,19 @@ class BlockingSpeaker:
         self.release.wait(timeout=5)
 
 
+class EventSpeaker:
+    def __init__(self):
+        self.finished = Event()
+
+    def prepare(self):
+        return None
+
+    def speak(self, text, *, on_event=None):
+        if on_event is not None:
+            on_event("tts-first-audio", f"text={text}")
+        self.finished.set()
+
+
 class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
     async def test_agent_reply_speech_does_not_block_later_items(self):
         database = FakeDatabase()
@@ -70,6 +83,31 @@ class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
         ])
         self.assertIn(("agent-reply", "spoken reply"), events)
         self.assertIn(("agent-thought", "next thought"), events)
+
+    async def test_agent_reply_forwards_tts_events(self):
+        database = FakeDatabase()
+        speaker = EventSpeaker()
+        events = []
+        dispatcher = PrimitiveDispatcher(
+            database=database,
+            conversation_id="conversation:test",
+            speaker=speaker,
+            on_event=lambda stage, message: events.append((stage, message)),
+        )
+
+        await dispatcher.dispatch(
+            types.TaskExecutionResult(
+                returns=[
+                    types.TaskReturnItem(
+                        name="agent_reply",
+                        payload={"text": "spoken reply"},
+                    )
+                ]
+            )
+        )
+
+        self.assertTrue(speaker.finished.wait(timeout=1))
+        self.assertIn(("tts-first-audio", "text=spoken reply"), events)
 
     async def test_conversation_mode_off_invokes_host_callback(self):
         database = FakeDatabase()
