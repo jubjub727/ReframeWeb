@@ -1,0 +1,99 @@
+:root {
+  color-scheme: light;
+  --ink: #1b1f23;
+  --muted: #66707a;
+  --line: #d9dde3;
+  --panel: #f7f8f8;
+  --paper: #ffffff;
+  --teal: #0f766e;
+  --teal-ink: #083d38;
+  --amber: #b86e00;
+  --coral: #b44b4b;
+  --focus: #2f80ed;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  color: var(--ink);
+  background: var(--paper);
+  font: 14px/1.45 "Segoe UI", system-ui, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+select,
+input {
+  min-height: 36px;
+}
+
+button {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  padding: 0 12px;
+}
+
+button:hover,
+.record-row:hover {
+  border-color: var(--teal);
+}
+
+button.primary {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: white;
+}
+
+button.danger {
+  border-color: #d7aaaa;
+  color: #8e2424;
+  background: #fff7f7;
+}
+
+button.tab-active,
+.record-row.selected {
+  border-color: var(--teal);
+  background: #e8f3f1;
+  color: var(--teal-ink);
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+input,
+select {
+  padding: 0 10px;
+}
+
+textarea {
+  min-height: 220px;
+  resize: vertical;
+  padding: 10px;
+  font-family: Consolas, "Cascadia Mono", monospace;
+  font-size: 13px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}

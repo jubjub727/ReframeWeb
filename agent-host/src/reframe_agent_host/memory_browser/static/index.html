@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reframe Memory Browser</title>
+    <link rel="stylesheet" href="/base.css">
+    <link rel="stylesheet" href="/layout.css">
+    <link rel="stylesheet" href="/views.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Memory Browser</h1>
+        <p id="status">Starting</p>
+      </div>
+      <button id="refreshButton" type="button">Refresh</button>
+    </header>
+
+    <main class="shell">
+      <aside class="sidebar">
+        <nav id="viewTabs" class="view-tabs"></nav>
+        <section id="overview" class="overview"></section>
+        <label class="table-picker">
+          <span>Raw table</span>
+          <select id="tableSelect"></select>
+        </label>
+      </aside>
+
+      <section class="list-pane">
+        <div class="toolbar">
+          <input id="searchInput" type="search" placeholder="Search records">
+          <select id="limitSelect">
+            <option value="50">50</option>
+            <option value="100" selected>100</option>
+            <option value="250">250</option>
+            <option value="500">500</option>
+          </select>
+        </div>
+        <div id="recordList" class="record-list"></div>
+      </section>
+
+      <section id="detailPane" class="detail-pane"></section>
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

@@ -22,6 +22,7 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("doctor", help="Verify the installed Agent Host stack.")
     subparsers.add_parser("audio-devices", help="List available microphone devices.")
     subparsers.add_parser("memory-setup", help="Apply memory schema and root nodes.")
+    _add_memory_browser_parser(subparsers)
     subparsers.add_parser("seed-core-tasks", help="Create the built-in core task memories.")
     subparsers.add_parser(
         "seed-opencode-go-providers",
@@ -93,6 +94,15 @@ def _add_audio_quality_test_parser(subparsers) -> None:
         default=".reframe-audio-calibration.json",
         help="Calibration file used by --save-calibration and --use-calibration.",
     )
+
+
+def _add_memory_browser_parser(subparsers) -> None:
+    parser = subparsers.add_parser(
+        "memory-browser",
+        help="Start a local visual browser for the Reframe memory database.",
+    )
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=8765)
 
 
 def _add_choose_task_parser(subparsers) -> None:

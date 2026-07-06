@@ -19,6 +19,7 @@ from reframe_agent_host.commands.control_flow import (
 from reframe_agent_host.commands.memory_relevance import (
     run_benchmark_memory_relevance,
 )
+from reframe_agent_host.commands.memory_browser import run_memory_browser
 from reframe_agent_host.commands.parser import build_parser
 from reframe_agent_host.commands.task_prompt import run_benchmark_task_prompt
 from reframe_agent_host.commands.audio_quality_test import run_audio_quality_test
@@ -51,6 +52,9 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     if args.command == "memory-setup":
         raise SystemExit(asyncio.run(run_memory_setup()))
+
+    if args.command == "memory-browser":
+        raise SystemExit(run_memory_browser(args))
 
     if args.command == "seed-core-tasks":
         raise SystemExit(asyncio.run(run_seed_core_tasks()))
