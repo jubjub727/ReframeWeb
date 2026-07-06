@@ -104,13 +104,13 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--wake-carry-ms",
         type=int,
-        default=2000,
+        default=3500,
         help="Recent audio replayed after wake detection to avoid clipping commands.",
     )
     parser.add_argument(
         "--wake-replay-pre-ms",
         type=int,
-        default=0,
+        default=500,
         help="Audio kept before the detected wake phrase ends when replaying into VAD.",
     )
     parser.add_argument(

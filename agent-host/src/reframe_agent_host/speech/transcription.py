@@ -18,9 +18,14 @@ from reframe_agent_host.voice.input_level import normalize_active_level
 
 DEFAULT_WHISPER_MODEL = "large-v3"
 DEFAULT_WHISPER_BEAM_SIZE = 5
-DEFAULT_TRANSCRIPTION_TARGET_RMS = 0.12
-DEFAULT_TRANSCRIPTION_MAX_GAIN = 6.0
-DEFAULT_WHISPER_INITIAL_PROMPT = "The speaker uses a New Zealand English accent."
+DEFAULT_TRANSCRIPTION_TARGET_RMS = 0.1
+DEFAULT_TRANSCRIPTION_MAX_GAIN = 5.0
+DEFAULT_WHISPER_INITIAL_PROMPT = (
+    "The speaker uses a New Zealand English accent. Wake-command prompts often "
+    "start with the wake word Jarvis. At the start of a prompt, words like "
+    "just, Java, or Travis may be misheard forms of Jarvis. Requests may mention "
+    "jokes."
+)
 
 
 @dataclass(frozen=True)

@@ -44,6 +44,23 @@ class FakePipeline:
         self.applied_modes.append(capture.conversation_mode)
 
 
+class FailingThenRecoveringPipeline(FakePipeline):
+    async def process_capture(
+        self,
+        capture,
+        _model_prepare_seconds,
+        _total_started_at,
+        _on_event,
+        turn_control=None,
+    ):
+        if turn_control is not None:
+            await turn_control.wait_until_committed()
+        self.processed.append(capture)
+        if len(self.processed) == 1:
+            raise RuntimeError("synthetic turn failure")
+        return f"result:{len(self.processed)}"
+
+
 class VoiceLoopTests(unittest.IsolatedAsyncioTestCase):
     async def test_loop_keeps_one_capture_session_across_turns(self):
         pipeline = FakePipeline()
@@ -63,6 +80,31 @@ class VoiceLoopTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(pipeline.processed), 2)
         self.assertEqual(results, ["result:1", "result:2"])
         self.assertEqual(handled, ["result:1", "result:2"])
+
+    async def test_loop_reports_turn_error_and_keeps_listening(self):
+        pipeline = FailingThenRecoveringPipeline()
+        results = []
+        handled = []
+        events = []
+
+        await run_voice_turn_loop(
+            turns=2,
+            pipeline=pipeline,
+            results=results,
+            debug_output=False,
+            event_handler_factory=lambda _started_at: (
+                lambda stage, message: events.append((stage, message))
+            ),
+            result_handler=handled.append,
+        )
+
+        self.assertEqual(len(pipeline.processed), 2)
+        self.assertEqual(results, ["result:2"])
+        self.assertEqual(handled, ["result:2"])
+        self.assertIn(
+            ("turn-error", "RuntimeError: synthetic turn failure"),
+            events,
+        )
 
 
 def _capture_result():

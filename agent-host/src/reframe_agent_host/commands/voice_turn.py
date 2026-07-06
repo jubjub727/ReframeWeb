@@ -74,6 +74,11 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
     except WhisperGpuRuntimeError as error:
         print(f"[gpu] {error}", file=sys.stderr)
         return 3
+    except Exception as error:
+        print(f"[error] {type(error).__name__}: {error}", file=sys.stderr)
+        if debug_output and results:
+            print_timing_summary(results)
+        return 1
 
     if debug_output and args.turns != 1:
         print_timing_summary(results)
@@ -224,6 +229,10 @@ class _VoiceTurnEventPrinter:
                 self._print_live(
                     f"conversation_mode: {_single_line(message, limit=None)}"
                 )
+            elif stage in {"turn-error", "capture-error", "warning", "tts-error"}:
+                self._print_live(f"[{stage}] {_single_line(message, limit=None)}")
+            elif stage == "turn-ignored":
+                self._print_live(f"[ignored] {_single_line(message, limit=None)}")
             elif stage == "task-chosen":
                 selected = _selected_task_from_event(message)
                 if selected:
@@ -261,6 +270,10 @@ class _VoiceTurnEventPrinter:
             "agent-thought",
             "conversation-mode",
             "tts-error",
+            "turn-error",
+            "turn-ignored",
+            "capture-error",
+            "warning",
             "conversation-context",
             "debug-audio",
         }:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from threading import Thread
@@ -16,6 +17,7 @@ from reframe_memory import (
 
 
 ACTION_NOT_SUPPORTED_REPLY = "Action not supported."
+MAX_ACTION_DETAIL_CHARS = 1200
 
 SUPPORTED_PRIMITIVES = {
     "agent_thought",
@@ -77,26 +79,29 @@ class PrimitiveDispatcher:
     ) -> PrimitiveDispatchRecord:
         name = call.name.strip()
         if name in UNSUPPORTED_PRIMITIVES or name not in SUPPORTED_PRIMITIVES:
-            await self._agent_reply(ACTION_NOT_SUPPORTED_REPLY)
+            detail = _action_not_supported_detail(name, call.payload)
+            await self._agent_reply(detail)
             return PrimitiveDispatchRecord(
                 name=name or "<empty>",
                 status="unsupported",
-                detail=ACTION_NOT_SUPPORTED_REPLY,
+                detail=detail,
             )
 
         if name == "agent_reply":
             text = _payload_text(call.payload, "text", "message", "reply")
             if not text:
-                await self._agent_reply(ACTION_NOT_SUPPORTED_REPLY)
-                return _malformed(name)
+                detail = _malformed_detail(name, call.payload)
+                await self._agent_reply(detail)
+                return _malformed(name, detail)
             await self._agent_reply(text)
             return PrimitiveDispatchRecord(name=name, status="ok", detail=text)
 
         if name == "agent_thought":
             text = _payload_text(call.payload, "text", "thought", "message")
             if not text:
-                await self._agent_reply(ACTION_NOT_SUPPORTED_REPLY)
-                return _malformed(name)
+                detail = _malformed_detail(name, call.payload)
+                await self._agent_reply(detail)
+                return _malformed(name, detail)
             await self._agent_thought(text)
             return PrimitiveDispatchRecord(name=name, status="ok", detail=text)
 
@@ -112,11 +117,16 @@ class PrimitiveDispatcher:
 
         if name == "session_memory":
             if self.session_id is None:
-                await self._agent_reply(ACTION_NOT_SUPPORTED_REPLY)
+                detail = _action_not_supported_detail(
+                    name,
+                    call.payload,
+                    reason="missing session_id",
+                )
+                await self._agent_reply(detail)
                 return PrimitiveDispatchRecord(
                     name=name,
                     status="unsupported",
-                    detail="missing session_id",
+                    detail=detail,
                 )
             title, description = _memory_payload(call.payload, "Session memory")
             await self.database.session_memories.create(
@@ -134,11 +144,12 @@ class PrimitiveDispatcher:
             )
             return PrimitiveDispatchRecord(name=name, status="ok", detail=title)
 
-        await self._agent_reply(ACTION_NOT_SUPPORTED_REPLY)
+        detail = _action_not_supported_detail(name, call.payload)
+        await self._agent_reply(detail)
         return PrimitiveDispatchRecord(
             name=name,
             status="unsupported",
-            detail=ACTION_NOT_SUPPORTED_REPLY,
+            detail=detail,
         )
 
     async def _agent_reply(self, text: str) -> None:
@@ -214,9 +225,37 @@ def _first_text(payload: Mapping[str, Any], keys: tuple[str, ...]) -> str:
     return ""
 
 
-def _malformed(name: str) -> PrimitiveDispatchRecord:
+def _action_not_supported_detail(
+    name: str,
+    payload: Any,
+    *,
+    reason: str | None = None,
+) -> str:
+    action = name or "<empty>"
+    pieces = [f"Action not supported: {action}"]
+    if reason:
+        pieces.append(f"reason={reason}")
+    pieces.append(f"payload={_payload_preview(payload)}")
+    return " ".join(pieces)
+
+
+def _malformed_detail(name: str, payload: Any) -> str:
+    return f"Malformed action payload: {name} payload={_payload_preview(payload)}"
+
+
+def _payload_preview(payload: Any) -> str:
+    try:
+        text = json.dumps(payload, sort_keys=True, default=str)
+    except TypeError:
+        text = repr(payload)
+    if len(text) <= MAX_ACTION_DETAIL_CHARS:
+        return text
+    return text[: MAX_ACTION_DETAIL_CHARS - 3].rstrip() + "..."
+
+
+def _malformed(name: str, detail: str) -> PrimitiveDispatchRecord:
     return PrimitiveDispatchRecord(
         name=name,
         status="malformed",
-        detail=ACTION_NOT_SUPPORTED_REPLY,
+        detail=detail,
     )

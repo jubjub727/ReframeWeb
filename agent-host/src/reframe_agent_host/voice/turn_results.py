@@ -48,6 +48,58 @@ def mode_switch_turn_result(
     )
 
 
+def ignored_turn_result(
+    config: VoicePipelineConfig,
+    capture: CaptureResult,
+    conversation_mode: types.ConversationMode,
+    model_prepare_seconds: float,
+    total_started_at: float,
+) -> VoiceTurnResult:
+    return VoiceTurnResult(
+        mode=conversation_mode,
+        mode_switched=capture.mode_switched,
+        keyphrase_detection=capture.keyphrase_detection,
+        trigger_detection=None,
+        routed_transcript="",
+        ignored=True,
+        utterance=capture.utterance,
+        transcript=None,
+        task_choice=None,
+        memory_search_hints=None,
+        search_depths=None,
+        retrieved_memories=None,
+        relevance_decision=None,
+        relevant_memories=None,
+        task_prompt=None,
+        task_execution=None,
+        primitive_dispatch=None,
+        timings=turn_timings(
+            config,
+            model_prepare_seconds=model_prepare_seconds,
+            capture=capture,
+            total_started_at=total_started_at,
+            post_vad_transcript_seconds=0.0,
+            post_vad_task_choice_seconds=None,
+            post_vad_memory_search_seconds=None,
+            post_vad_search_depth_seconds=None,
+            post_vad_memory_retrieval_seconds=None,
+            post_vad_memory_relevance_seconds=None,
+            post_vad_task_prompt_seconds=None,
+            post_vad_task_execution_seconds=None,
+            post_vad_primitive_dispatch_seconds=None,
+            transcription_seconds=0.0,
+            task_choice_seconds=None,
+            memory_search_seconds=None,
+            search_depth_seconds=None,
+            memory_retrieval_seconds=None,
+            memory_relevance_seconds=None,
+            task_prompt_seconds=None,
+            task_execution_seconds=None,
+            primitive_dispatch_seconds=None,
+        ),
+    )
+
+
 def transcribed_turn_result(
     config: VoicePipelineConfig,
     conversation_mode: types.ConversationMode,

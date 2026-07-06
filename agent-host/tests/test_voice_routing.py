@@ -242,6 +242,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         cases = (
             "Java, do this.",
+            "Jarivs, do this.",
             "Travis, do this.",
             "Jervis, do this.",
             "Jar vice, do this.",

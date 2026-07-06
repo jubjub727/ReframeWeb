@@ -20,6 +20,7 @@ from reframe_agent_host.voice.conversation_mode import ConversationModeControlle
 from reframe_agent_host.voice.daemon_threads import run_in_daemon_thread
 from reframe_agent_host.task_execution import PrimitiveDispatcher
 from reframe_agent_host.voice.turn_results import (
+    ignored_turn_result,
     mode_switch_turn_result,
     transcribed_turn_result,
 )
@@ -29,6 +30,9 @@ from reframe_agent_host.voice.types import (
     VoicePipelineEventHandler,
     VoiceTurnControl,
     VoiceTurnResult,
+)
+from reframe_agent_host.voice.utterance_quality import (
+    should_ignore_continuous_utterance,
 )
 from reframe_memory import ConversationMessage, open_memory_database
 from reframe_memory.retrieved_context import RetrievedMemoryContext
@@ -85,6 +89,31 @@ class VoiceTurnProcessor:
 
         post_vad_started_at = time.perf_counter()
         utterance = capture.utterance
+        if _is_continuous_unprompted(conversation_mode, capture):
+            ignored, quality = should_ignore_continuous_utterance(
+                utterance.samples,
+                utterance.sample_rate,
+            )
+            if ignored:
+                await self._wait_until_committed(turn_control)
+                self._emit(
+                    on_event,
+                    "turn-ignored",
+                    (
+                        "continuous-mode noise gate "
+                        f"peak={quality.peak:.3f} "
+                        f"active_rms={quality.active_rms:.3f} "
+                        f"active_ms={quality.active_ms:.0f}"
+                    ),
+                )
+                return ignored_turn_result(
+                    self._config,
+                    capture,
+                    conversation_mode,
+                    model_prepare_seconds,
+                    total_started_at,
+                )
+
         self._emit(
             on_event,
             "transcribing",
@@ -641,3 +670,13 @@ class VoiceTurnProcessor:
     ) -> None:
         if on_event is not None:
             on_event(stage, message)
+
+
+def _is_continuous_unprompted(
+    conversation_mode: types.ConversationMode,
+    capture: CaptureResult,
+) -> bool:
+    return (
+        conversation_mode == types.ConversationMode.CONTINUOUS_CONVERSATION
+        and capture.keyphrase_detection is None
+    )

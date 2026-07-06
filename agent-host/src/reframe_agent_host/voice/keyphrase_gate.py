@@ -94,7 +94,10 @@ class VoiceKeyphraseGate:
                 ),
             ),
             gain=self._config.keyphrases.gain,
-            max_buffer_ms=self._config.keyphrases.conversation_on_confirm_window_ms,
+            max_buffer_ms=max(
+                self._config.keyphrases.carry_ms,
+                self._config.keyphrases.conversation_on_confirm_window_ms,
+            ),
             kws_threshold=self._config.keyphrases.kws_threshold,
         )
 

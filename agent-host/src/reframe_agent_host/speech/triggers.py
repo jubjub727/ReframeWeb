@@ -13,6 +13,7 @@ TRIGGER_PREFIX_ALIASES: dict[str, tuple[str, ...]] = {
         "java's",
         "javas",
         "javis",
+        "jarivs",
         "jar vice",
         "jar vis",
         "jar viss",

@@ -135,7 +135,7 @@ class KeyphraseSpotterTests(unittest.TestCase):
             DEFAULT_CASES,
         )
 
-    def test_parser_uses_stricter_wake_threshold_default(self):
+    def test_parser_uses_wake_detection_defaults(self):
         parser = build_parser()
 
         debug_args = parser.parse_args(["debug-wake-audio", "clip.wav"])
@@ -143,7 +143,8 @@ class KeyphraseSpotterTests(unittest.TestCase):
 
         self.assertEqual(debug_args.wake_threshold, 1e-30)
         self.assertEqual(voice_args.wake_threshold, 1e-30)
-        self.assertEqual(voice_args.wake_replay_pre_ms, 0)
+        self.assertEqual(voice_args.wake_replay_pre_ms, 500)
+        self.assertEqual(voice_args.wake_carry_ms, 3500)
 
     def test_phrase_sample_span_uses_first_and_last_phrase_words(self):
         segments = (

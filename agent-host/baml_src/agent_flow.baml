@@ -206,6 +206,8 @@ function ChooseInitialTask(
         Use the available task information and context to decide which task should
         run next.
 
+        Stop once you have the right task without thinking about it too much.
+
         Context sections:
         - Current user request: the request being routed now.
         - Conversation history: earlier human and agent messages from this session.

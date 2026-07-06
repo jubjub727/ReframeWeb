@@ -223,6 +223,9 @@ async def _process_captured_voice_turn(
     except asyncio.CancelledError:
         on_event("turn-cancelled", "discarded speculative voice flow")
         raise
+    except Exception as error:
+        on_event("turn-error", f"{type(error).__name__}: {error}")
+        return
     results.append(result)
     result_handler(result)
 

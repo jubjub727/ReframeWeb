@@ -36,8 +36,8 @@ class TaskPromptTests(unittest.TestCase):
 
         self.assertIsNotNone(match)
         body = match.group("body")
-        self.assertIn('model "kimi-k2.6"', body)
-        self.assertIn('reasoning_effort "none"', body)
+        self.assertIn('model: "kimi-k2.6"', body)
+        self.assertIn('reasoning_effort: "none"', body)
 
     def test_task_prompt_decision_has_optional_candidate_memory(self):
         decision = types.TaskPromptDecision(

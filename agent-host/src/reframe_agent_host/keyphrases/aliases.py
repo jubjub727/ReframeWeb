@@ -6,8 +6,11 @@ from reframe_agent_host.keyphrases.types import KeyphraseKind
 BUILT_IN_ALIASES: dict[str, tuple[str, ...]] = {
     "jarvis": (
         "gervais",
+        "java",
         "jervis",
+        "jarivs",
         "jar viss",
+        "travis",
     ),
     "conversation on": (
         "conversation one",

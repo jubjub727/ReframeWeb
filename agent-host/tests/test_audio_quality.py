@@ -102,6 +102,8 @@ class AudioQualityTests(unittest.TestCase):
         self.assertEqual(args.beam_size, DEFAULT_WHISPER_BEAM_SIZE)
         self.assertEqual(args.whisper_initial_prompt, DEFAULT_WHISPER_INITIAL_PROMPT)
         self.assertFalse(args.no_transcription_normalization)
+        self.assertEqual(args.wake_carry_ms, 3500)
+        self.assertEqual(args.wake_replay_pre_ms, 500)
 
     def test_whisper_config_normalizes_transcription_audio_by_default(self):
         config = WhisperTranscriberConfig()

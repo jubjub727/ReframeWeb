@@ -61,6 +61,14 @@ def listen_deadline(config: VoicePipelineConfig) -> float | None:
     return time.monotonic() + config.listen_timeout_seconds
 
 
+def listen_timed_out(deadline: float | None, state: CaptureState) -> bool:
+    if deadline is None:
+        return False
+    if state.keyphrase_detection is not None or state.speech_started_at is not None:
+        return False
+    return time.monotonic() >= deadline
+
+
 def timeout_message(state: CaptureState) -> str:
     if state.keyphrase_required and state.keyphrase_detection is None:
         return "No keyphrase was detected before timeout."

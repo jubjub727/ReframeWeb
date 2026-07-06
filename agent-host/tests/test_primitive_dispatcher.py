@@ -99,6 +99,30 @@ class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
             events,
         )
 
+    async def test_unsupported_action_reply_includes_name_and_payload(self):
+        database = FakeDatabase()
+        events = []
+        dispatcher = PrimitiveDispatcher(
+            database=database,
+            conversation_id="conversation:test",
+            on_event=lambda stage, message: events.append((stage, message)),
+        )
+        result = types.TaskExecutionResult(
+            returns=[
+                types.TaskReturnItem(
+                    name="website_open",
+                    payload={"url": "https://example.com", "reason": "test"},
+                )
+            ]
+        )
+
+        dispatch_result = await dispatcher.dispatch(result)
+
+        detail = dispatch_result.records[0].detail
+        self.assertIn("Action not supported: website_open", detail)
+        self.assertIn("https://example.com", detail)
+        self.assertIn(("agent-reply", detail), events)
+
 
 if __name__ == "__main__":
     unittest.main()

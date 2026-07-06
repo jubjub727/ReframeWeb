@@ -16,6 +16,7 @@ from reframe_agent_host.voice.capture_setup import (
     create_debug_audio,
     create_segmenter,
     listen_deadline,
+    listen_timed_out,
     timeout_message,
 )
 from reframe_agent_host.voice.conversation_mode import ConversationModeController
@@ -89,7 +90,7 @@ class VoiceTurnCapture:
                     if result is not None:
                         return result
 
-                    if deadline is not None and time.monotonic() >= deadline:
+                    if listen_timed_out(deadline, state):
                         debug_audio.save_and_emit(
                             "timeout",
                             self._emitter(on_event),
