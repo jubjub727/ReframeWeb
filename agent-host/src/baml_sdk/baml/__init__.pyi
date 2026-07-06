@@ -348,9 +348,22 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
         # Parameters
         - `length`: the number of elements to create. A negative or zero `length`
           produces an empty array.
-        - `value`: the value stored in every slot. The same value is shared by
-          every slot, so for reference types each slot refers to the *same*
-          object and mutating it is visible through all of them.
+        - `value`: the value stored in every slot.
+        
+        # Warning
+        `Array.filled` reuses the exact same `value` for every slot. For reference
+        types (arrays, maps, class instances), every slot aliases the same object.
+        Mutating one slot mutates all slots.
+        
+        Use a `while` loop to allocate independent mutable slots:
+        ```
+        let rows: int[][] = [];
+        let i = 0;
+        while (i < 3) {
+          rows.push([]);
+          i += 1;
+        }
+        ```
         
         # Returns
         A fresh `T[]` of length `max(length, 0)` with every element equal to
@@ -364,6 +377,7 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
         Array.filled(0, 0)     // []
         Array.filled(-1, 0)    // []
         Array.filled(2, "x")   // ["x", "x"]
+        Array.filled(3, [])    // aliases the same inner array in all 3 slots
         ```"""
     @staticmethod
     async def filled_async(length: int, value: T) -> typing.List[T]:
@@ -377,9 +391,22 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
         # Parameters
         - `length`: the number of elements to create. A negative or zero `length`
           produces an empty array.
-        - `value`: the value stored in every slot. The same value is shared by
-          every slot, so for reference types each slot refers to the *same*
-          object and mutating it is visible through all of them.
+        - `value`: the value stored in every slot.
+        
+        # Warning
+        `Array.filled` reuses the exact same `value` for every slot. For reference
+        types (arrays, maps, class instances), every slot aliases the same object.
+        Mutating one slot mutates all slots.
+        
+        Use a `while` loop to allocate independent mutable slots:
+        ```
+        let rows: int[][] = [];
+        let i = 0;
+        while (i < 3) {
+          rows.push([]);
+          i += 1;
+        }
+        ```
         
         # Returns
         A fresh `T[]` of length `max(length, 0)` with every element equal to
@@ -393,6 +420,7 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
         Array.filled(0, 0)     // []
         Array.filled(-1, 0)    // []
         Array.filled(2, "x")   // ["x", "x"]
+        Array.filled(3, [])    // aliases the same inner array in all 3 slots
         ```"""
     def length(self) -> int:
         """Returns the number of elements in the array."""
@@ -2029,6 +2057,8 @@ class String(pydantic.BaseModel):
         ```"""
     def char_at(self, index: int) -> str: ...
     async def char_at_async(self, index: int) -> str: ...
+    def code_point_at(self, index: int) -> int: ...
+    async def code_point_at_async(self, index: int) -> int: ...
     def repeat(self, count: int) -> str:
         """Returns a new string that repeats `self` the given number of times.
         Negative counts are treated as 0.
@@ -2362,6 +2392,44 @@ class String(pydantic.BaseModel):
         "hi".to_utf8()     // [0x68, 0x69]
         "é".to_utf8()      // [0xC3, 0xA9]
         "".to_utf8()       // []
+        ```"""
+    def to_code_points(self) -> typing.List[int]:
+        """Returns the string's Unicode code points as an array of `int`s.
+        
+        This is the exact inverse of `string.from_code_points`: for any string
+        `s`, `string.from_code_points(s.to_code_points())` equals `s`. The result
+        has one element per character (`self.length()` elements), each in
+        `[0, 0x10FFFF]`. Never throws.
+        
+        Use this for char → integer mappings (checksums, base-N encoding, hashing,
+        character classification) instead of indexing into a literal alphabet
+        string.
+        
+        # Examples
+        ```
+        "hi".to_code_points()    // [104, 105]
+        "é".to_code_points()     // [233]
+        "🐑".to_code_points()    // [128017]
+        "".to_code_points()      // []
+        ```"""
+    async def to_code_points_async(self) -> typing.List[int]:
+        """Returns the string's Unicode code points as an array of `int`s.
+        
+        This is the exact inverse of `string.from_code_points`: for any string
+        `s`, `string.from_code_points(s.to_code_points())` equals `s`. The result
+        has one element per character (`self.length()` elements), each in
+        `[0, 0x10FFFF]`. Never throws.
+        
+        Use this for char → integer mappings (checksums, base-N encoding, hashing,
+        character classification) instead of indexing into a literal alphabet
+        string.
+        
+        # Examples
+        ```
+        "hi".to_code_points()    // [104, 105]
+        "é".to_code_points()     // [233]
+        "🐑".to_code_points()    // [128017]
+        "".to_code_points()      // []
         ```"""
 
 

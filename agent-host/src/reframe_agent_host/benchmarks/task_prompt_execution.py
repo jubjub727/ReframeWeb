@@ -20,7 +20,10 @@ from reframe_agent_host.agent_flow.relevance_candidates import (
     filter_retrieved_memories,
 )
 from reframe_agent_host.agent_flow.search_depth import default_search_domains
-from reframe_agent_host.agent_flow.task_prompt import selected_memory_contexts
+from reframe_agent_host.agent_flow.task_prompt import (
+    build_task_prompt_decision,
+    selected_memory_contexts,
+)
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
 import baml_sdk as baml
 import baml_sdk as types
@@ -341,7 +344,7 @@ async def task_prompt(
     snapshot: TaskPromptSnapshot,
 ):
     started_at = time.perf_counter()
-    result = await baml.GenerateTaskPrompt_async(
+    composition = await baml.GenerateTaskPrompt_async(
         current_user_request=snapshot.case.current_user_request,
         session_conversations=snapshot.session_conversations,
         session_memories=snapshot.session_memories,
@@ -350,6 +353,7 @@ async def task_prompt(
         task_prompt_memories=snapshot.task_prompt_memories,
         **client_kwargs(client),
     )
+    result = build_task_prompt_decision(snapshot.selected_task.prompt, composition)
     return result, time.perf_counter() - started_at
 
 

@@ -29,7 +29,33 @@ async def trunc_async(value: float) -> int:
     """Truncates a float toward zero and returns the integer part."""
 
 
+def sum(values: typing.List[float]) -> float: ...
+async def sum_async(values: typing.List[float]) -> float: ...
+
+
+def mean(values: typing.List[float]) -> float:
+    """Raises:
+        InvalidArgument"""
+async def mean_async(values: typing.List[float]) -> float:
+    """Raises:
+        InvalidArgument"""
+
+
+def median(values: typing.List[float]) -> float:
+    """Raises:
+        InvalidArgument"""
+async def median_async(values: typing.List[float]) -> float:
+    """Raises:
+        InvalidArgument"""
+
+
 __all__ = [
     "trunc",
     "trunc_async",
+    "sum",
+    "sum_async",
+    "mean",
+    "mean_async",
+    "median",
+    "median_async",
 ]

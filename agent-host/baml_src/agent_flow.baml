@@ -181,6 +181,11 @@ class TaskPromptDecision {
     candidate_memory: CandidateMemory?,
 }
 
+class TaskPromptComposition {
+    task_input: string,
+    candidate_memory: CandidateMemory?,
+}
+
 class TaskReturnItem {
     name: string,
     payload: map<string, string>?,
@@ -199,14 +204,14 @@ function ChooseInitialTask(
 ) -> TaskChoiceDecision {
     client: TaskChoiceModel
     prompt: #"
-        {{ _.role("user") }}
+        {{ _.role("system") }}
 
         You choose one task for the current user request.
 
         Use the available task information and context to decide which task should
         run next.
 
-        Stop once you have the right task without thinking about it too much.
+        Stop once you have the right task without thinking about it too much. Don't waste time thinking about the agent_thought too much.
 
         Context sections:
         - Current user request: the request being routed now.
@@ -227,6 +232,8 @@ function ChooseInitialTask(
         - Do not invent task ids.
         - Do not perform the task. Only choose the task.
         - Use optional outputs only when they are useful.
+
+        {{ _.role("user") }}
 
         Current user request:
         {{ current_user_request }}
@@ -290,29 +297,23 @@ function GenerateTaskPrompt(
     selected_task: SelectedTaskContext,
     selected_memories: TaskPromptSelectedMemoryContext[],
     task_prompt_memories: TaskPromptMemoryContext[],
-) -> TaskPromptDecision {
+) -> TaskPromptComposition {
     client: TaskPromptModel
     prompt: #"
         {{ _.role("system") }}
 
-        Prepare the prompt text that will be sent to the selected task.
+        Prepare the input text that will be stitched under the selected task
+        prompt before it is sent to the selected task.
 
-        Return a compact prompt with exactly this shape:
-
-        Task:
-        <copy the selected task prompt exactly>
-
-        Input:
-        <write the task input from the supplied context>
+        Return compact task_input text from the supplied context.
 
         Guidance:
-        - Copy the selected task prompt exactly under Task:.
-        - Build Input from the current request, conversation, and remembered
+        - Build task_input from the current request, conversation, and remembered
           context.
         - Preserve the user's goal, useful wording, preferences, constraints, and
           unresolved details explicitly present in the supplied context.
         - Translate remembered context into concrete task-relevant guidance.
-        - Keep Input concise and natural. Use light bullets when they make it
+        - Keep task_input concise and natural. Use light bullets when they make it
           easier to read.
         - Write for the task runner using human-meaningful context rather than
           source bookkeeping.
@@ -356,7 +357,7 @@ function GenerateTaskPrompt(
           {{ memory.description }}
         {% endfor %}
 
-        Return the final task prompt decision.
+        Return the task prompt composition.
         {{ ctx.output_format }}
     "#
 }

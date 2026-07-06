@@ -129,7 +129,7 @@ class TaskPromptPlanner:
             selected_memory_ids=selected_memory_ids,
         ).build()
 
-        return await baml.GenerateTaskPrompt_async(
+        composition = await baml.GenerateTaskPrompt_async(
             current_user_request=current_user_request,
             session_conversations=context.session_conversations,
             session_memories=context.session_memories,
@@ -138,6 +138,7 @@ class TaskPromptPlanner:
             task_prompt_memories=context.task_prompt_memories,
             **client_kwargs(self._client_name),
         )
+        return build_task_prompt_decision(context.selected_task.prompt, composition)
 
     async def close(self) -> None:
         if self._database is not None and self._owns_database:
@@ -187,6 +188,23 @@ def selected_memory_contexts(
                 )
             contexts.extend(_message_context(message) for message in conversation.messages)
     return contexts
+
+
+def build_task_prompt_decision(
+    selected_task_prompt: str,
+    composition: types.TaskPromptComposition,
+) -> types.TaskPromptDecision:
+    return types.TaskPromptDecision(
+        full_task_prompt=compose_full_task_prompt(
+            selected_task_prompt,
+            composition.task_input,
+        ),
+        candidate_memory=composition.candidate_memory,
+    )
+
+
+def compose_full_task_prompt(selected_task_prompt: str, task_input: str) -> str:
+    return f"Task:\n{selected_task_prompt}\n\nInput:\n{task_input}"
 
 
 def _selected_task_context(task: TaskNode) -> types.SelectedTaskContext:

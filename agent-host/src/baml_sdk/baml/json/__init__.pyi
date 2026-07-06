@@ -81,10 +81,10 @@ async def to_string_async(v: T, *, _types: dict[str, type]) -> str:
 
 def to_json(v: T, *, _types: dict[str, type]) -> json:
     """Raises:
-        JsonSerializationError, JsonParseError"""
+        JsonSerializationError"""
 async def to_json_async(v: T, *, _types: dict[str, type]) -> json:
     """Raises:
-        JsonSerializationError, JsonParseError"""
+        JsonSerializationError"""
 
 
 def from_(value: T, *, _types: dict[str, type]) -> json:
@@ -172,7 +172,7 @@ def serialize(v: T, *, _types: dict[str, type]) -> str:
     compositions without a named landing pad.
     
     Raises:
-        JsonSerializationError, JsonParseError"""
+        JsonSerializationError"""
 async def serialize_async(v: T, *, _types: dict[str, type]) -> str:
     """Serialize `v` to JSON text, honoring user-defined `to_json` overrides on
     classes (via [`to_json<T>`]). Equivalent to `stringify(to_json<T>(v))`.
@@ -192,7 +192,7 @@ async def serialize_async(v: T, *, _types: dict[str, type]) -> str:
     compositions without a named landing pad.
     
     Raises:
-        JsonSerializationError, JsonParseError"""
+        JsonSerializationError"""
 
 
 def deserialize(s: str, *, _types: dict[str, type]) -> T:

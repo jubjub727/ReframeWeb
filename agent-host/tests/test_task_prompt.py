@@ -3,7 +3,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 import re
 
-from reframe_agent_host.agent_flow.task_prompt import selected_memory_contexts
+from reframe_agent_host.agent_flow.task_prompt import (
+    build_task_prompt_decision,
+    selected_memory_contexts,
+)
 import baml_sdk as types
 from reframe_memory import (
     Conversation,
@@ -53,6 +56,20 @@ class TaskPromptTests(unittest.TestCase):
                 ),
                 "candidate_memory": None,
             },
+        )
+
+    def test_task_prompt_decision_stitches_selected_prompt_without_llm_copy(self):
+        decision = build_task_prompt_decision(
+            selected_task_prompt="Ask only for what matters.",
+            composition=types.TaskPromptComposition(
+                task_input="Ask for the CSV path.",
+                candidate_memory=None,
+            ),
+        )
+
+        self.assertEqual(
+            decision.full_task_prompt,
+            "Task:\nAsk only for what matters.\n\nInput:\nAsk for the CSV path.",
         )
 
     def test_selected_memory_contexts_hide_task_implementation_fields(self):

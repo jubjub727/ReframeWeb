@@ -500,6 +500,8 @@ class String(pydantic.BaseModel):
     index_of_async = _define_function("baml.String.index_of", "async", ["self", "search"])
     char_at       = _define_function("baml.String.char_at", "sync",  ["self", "index"])
     char_at_async = _define_function("baml.String.char_at", "async", ["self", "index"])
+    code_point_at       = _define_function("baml.String.code_point_at", "sync",  ["self", "index"])
+    code_point_at_async = _define_function("baml.String.code_point_at", "async", ["self", "index"])
     repeat       = _define_function("baml.String.repeat", "sync",  ["self", "count"])
     repeat_async = _define_function("baml.String.repeat", "async", ["self", "count"])
     matches       = _define_function("baml.String.matches", "sync",  ["self", "substring"])
@@ -544,6 +546,8 @@ class String(pydantic.BaseModel):
     is_ascii_hex_async = _define_function("baml.String.is_ascii_hex", "async", ["self"])
     to_utf8       = _define_function("baml.String.to_utf8", "sync",  ["self"])
     to_utf8_async = _define_function("baml.String.to_utf8", "async", ["self"])
+    to_code_points       = _define_function("baml.String.to_code_points", "sync",  ["self"])
+    to_code_points_async = _define_function("baml.String.to_code_points", "async", ["self"])
 
 
 class TypeValue(pydantic.BaseModel):

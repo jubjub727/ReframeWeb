@@ -217,6 +217,11 @@ class TaskPromptDecision(pydantic.BaseModel):
     candidate_memory: typing.Optional[CandidateMemory]
 
 
+class TaskPromptComposition(pydantic.BaseModel):
+    task_input: str
+    candidate_memory: typing.Optional[CandidateMemory]
+
+
 class TaskReturnItem(pydantic.BaseModel):
     name: str
     payload: typing.Optional[typing.Dict[str, str]]
@@ -270,10 +275,10 @@ async def ChooseInitialTask_stream_async(current_user_request: str, session_conv
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-def GenerateTaskPrompt(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptDecision:
+def GenerateTaskPrompt(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptComposition:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def GenerateTaskPrompt_async(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptDecision:
+async def GenerateTaskPrompt_async(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptComposition:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 def GenerateTaskPrompt__build_request(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
@@ -288,16 +293,16 @@ def GenerateTaskPrompt__build_request_stream(current_user_request: str, session_
 async def GenerateTaskPrompt__build_request_stream_async(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def GenerateTaskPrompt__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptDecision:
+def GenerateTaskPrompt__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptComposition:
     """Raises:
         LlmClient"""
-async def GenerateTaskPrompt__parse_async(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptDecision:
+async def GenerateTaskPrompt__parse_async(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptComposition:
     """Raises:
         LlmClient"""
-def GenerateTaskPrompt__parse_stream(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptDecision], TaskPromptDecision]:
+def GenerateTaskPrompt__parse_stream(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptComposition], TaskPromptComposition]:
     """Raises:
         InvalidArgument, LlmClient"""
-async def GenerateTaskPrompt__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptDecision], TaskPromptDecision]:
+async def GenerateTaskPrompt__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptComposition], TaskPromptComposition]:
     """Raises:
         InvalidArgument, LlmClient"""
 def GenerateTaskPrompt__render_prompt(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
@@ -306,10 +311,10 @@ def GenerateTaskPrompt__render_prompt(current_user_request: str, session_convers
 async def GenerateTaskPrompt__render_prompt_async(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def GenerateTaskPrompt_stream(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptDecision], TaskPromptDecision]:
+def GenerateTaskPrompt_stream(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptComposition], TaskPromptComposition]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def GenerateTaskPrompt_stream_async(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptDecision], TaskPromptDecision]:
+async def GenerateTaskPrompt_stream_async(current_user_request: str, session_conversations: typing.List[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptComposition], TaskPromptComposition]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
@@ -514,6 +519,7 @@ __all__ = [
     "RelevantMemoryDecision",
     "TaskChoiceDecision",
     "TaskPromptDecision",
+    "TaskPromptComposition",
     "TaskReturnItem",
     "TaskExecutionResult",
     "ChooseInitialTask",

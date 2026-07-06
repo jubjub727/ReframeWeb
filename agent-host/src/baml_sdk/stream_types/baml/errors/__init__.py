@@ -29,6 +29,25 @@ from baml_core import (
 )
 
 
+class ErrorContext(pydantic.BaseModel):
+    """
+    The temporal context of a thrown error: the error value itself, where it
+    was thrown, and the error it superseded while the scope was unwinding (its
+    `cause`), if any. Bound by the second parameter of a `catch (e, ctx)`
+    handler.
+    
+    The chain runs newest → oldest through `cause`; `root_cause` walks to the
+    original failure at the tail, and `to_string` renders the whole chain
+    Python-style ("During handling of the above error, another error occurred").
+    """
+    model_config = pydantic.ConfigDict(extra="forbid")
+    error: typing.Any
+    stack_trace: typing.Optional[StackTrace]
+    cause: typing.Optional[ErrorContext]
+    to_string       = _define_function("baml.errors.ErrorContext$stream.to_string", "sync",  ["self"])
+    to_string_async = _define_function("baml.errors.ErrorContext$stream.to_string", "async", ["self"])
+
+
 class AccessError(pydantic.BaseModel):
     """Access to a resource was denied."""
     model_config = pydantic.ConfigDict(extra="forbid")
@@ -151,6 +170,7 @@ class StackTrace(pydantic.BaseModel):
 
 
 __all__ = [
+    "ErrorContext",
     "AccessError",
     "CompilationError",
     "DevOther",

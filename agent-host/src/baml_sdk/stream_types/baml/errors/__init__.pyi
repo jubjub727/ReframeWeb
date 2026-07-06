@@ -26,6 +26,14 @@ import pydantic
 from baml_core import BamlPyHandle as _BamlPyHandle
 
 
+class ErrorContext(pydantic.BaseModel):
+    error: typing.Any
+    stack_trace: typing.Optional[StackTrace]
+    cause: typing.Optional[ErrorContext]
+    def to_string(self) -> str: ...
+    async def to_string_async(self) -> str: ...
+
+
 class AccessError(pydantic.BaseModel):
     message: typing.Optional[str]
 
@@ -100,6 +108,7 @@ class StackTrace(pydantic.BaseModel):
 
 
 __all__ = [
+    "ErrorContext",
     "AccessError",
     "CompilationError",
     "DevOther",

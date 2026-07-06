@@ -214,6 +214,12 @@ class TaskExecutionResult(pydantic.BaseModel):
     returns: typing.List[TaskReturnItem]
 
 
+class TaskPromptComposition(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_input: typing.Optional[str]
+    candidate_memory: typing.Optional[CandidateMemory]
+
+
 class TaskPromptDecision(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     full_task_prompt: typing.Optional[str]
@@ -267,6 +273,7 @@ __all__ = [
     "TaskChoiceDecision",
     "TaskChoiceMemoryContext",
     "TaskExecutionResult",
+    "TaskPromptComposition",
     "TaskPromptDecision",
     "TaskPromptMemoryContext",
     "TaskPromptSelectedMemoryContext",

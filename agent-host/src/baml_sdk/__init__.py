@@ -256,6 +256,12 @@ class TaskPromptDecision(pydantic.BaseModel):
     candidate_memory: typing.Optional[CandidateMemory]
 
 
+class TaskPromptComposition(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_input: str
+    candidate_memory: typing.Optional[CandidateMemory]
+
+
 class TaskReturnItem(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     name: str
@@ -555,6 +561,7 @@ __all__ = [
     "RelevantMemoryDecision",
     "TaskChoiceDecision",
     "TaskPromptDecision",
+    "TaskPromptComposition",
     "TaskReturnItem",
     "TaskExecutionResult",
     "ChooseInitialTask",
