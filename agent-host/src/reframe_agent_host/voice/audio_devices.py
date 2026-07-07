@@ -5,6 +5,10 @@ from dataclasses import dataclass
 
 PREFERRED_HOST_APIS = (
     "Windows WASAPI",
+    "Core Audio",
+    "ALSA",
+    "PulseAudio",
+    "JACK Audio Connection Kit",
     "Windows DirectSound",
     "MME",
     "Windows WDM-KS",

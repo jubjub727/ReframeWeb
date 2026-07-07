@@ -7,6 +7,7 @@ from reframe_agent_host.commands.checks import (
     run_audio_devices,
     run_doctor,
     run_gpu_check,
+    run_transcription_check,
 )
 from reframe_agent_host.commands.conversation_evaluation import (
     run_analyze_conversation_evaluation_benchmark,
@@ -82,6 +83,9 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     if args.command == "gpu-check":
         raise SystemExit(run_gpu_check(args.whisper_compute_type))
+
+    if args.command == "transcription-check":
+        raise SystemExit(run_transcription_check(args))
 
     if args.command == "choose-task":
         if args.conversation_id is not None and args.session_id is None:

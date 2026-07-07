@@ -19,6 +19,18 @@ class AudioDeviceResolutionTests(unittest.TestCase):
                 (3, 2, 1),
             )
 
+    def test_default_duplicate_prefers_core_audio_on_macos(self):
+        devices = [
+            _device(4, "Mic", "Unknown", default=True),
+            _device(5, "Mic", "Core Audio"),
+        ]
+
+        with patch.object(audio_devices, "list_input_devices", return_value=devices):
+            self.assertEqual(
+                audio_devices.resolve_input_devices(None),
+                (5, 4),
+            )
+
     def test_missing_explicit_device_is_preserved(self):
         with patch.object(audio_devices, "list_input_devices", return_value=[]):
             self.assertEqual(audio_devices.resolve_input_devices(42), (42,))

@@ -90,9 +90,9 @@ More detail is tracked in [Technology](docs/technology.md).
 - **`pocketsphinx`** for local keyphrase spotting, including commands such as
   "jarvis do x" and a "conversation on" mode trigger.
 - **`silero-vad`** for voice activity detection.
-- **`faster-whisper`** for transcribing spoken prompts before they are passed
-  into the BAML-driven agentic flow.
-- **`kokoro`** for TTS playback, using the `af_heart` voice.
+- **`faster-whisper`** and **`whisper.cpp`** for transcribing spoken prompts
+  before they are passed into the BAML-driven agentic flow.
+- **`kokoro-onnx`** for TTS playback, using the `af_heart` voice.
 
 The audio layer should support cancelling spoken playback when the user starts
 talking without destroying the underlying work the agent was already performing.
@@ -108,7 +108,7 @@ Implemented pieces include:
 
 1. A `uv`-managed Python Agent Host with CLI commands for setup, checks, voice
    turns, memory seeding, and benchmarks.
-2. Local wake/phrase detection, VAD, GPU-backed Whisper transcription, and
+2. Local wake/phrase detection, VAD, local Whisper transcription, and
    turn recording into the memory graph.
 3. BAML stages for task choice, conversation memory-search hint generation, and
    per-domain search-depth selection.
@@ -123,7 +123,7 @@ Implemented pieces include:
 
 ## Agent Host Setup
 
-```powershell
+```shell
 cd agent-host
 uv sync
 uv run baml check
@@ -156,9 +156,9 @@ Current benchmarked OpenCode Go model IDs include:
 
 The first runnable microphone path is intentionally narrow and testable:
 
-```powershell
+```shell
 cd agent-host
-uv run reframe-agent-host gpu-check
+uv run reframe-agent-host transcription-check
 uv run reframe-agent-host audio-devices
 uv run reframe-agent-host voice-turn --device 1
 ```
@@ -167,21 +167,21 @@ The project config sets uv's package install link mode to `copy`, which avoids
 Windows hardlink warnings when uv's cache and this repository live on different
 drives.
 
-If `uv` is not on PATH, use the local Windows runner instead:
+If `uv` is not on PATH on Windows, use the local runner instead:
 
 ```powershell
 cd agent-host
-.\reframe-agent-host.cmd gpu-check
+.\reframe-agent-host.cmd transcription-check
 .\reframe-agent-host.cmd audio-devices
 .\reframe-agent-host.cmd voice-turn --device 1
 ```
 
 `voice-turn` listens for one utterance, detects the speech boundary, transcribes
-it with GPU-backed `faster-whisper`, records the current turn when session and
-conversation IDs are available, sends the transcript through the BAML control
-flow, retrieves graph memory context, and prints concise per-stage summaries and
-latencies. When memory retrieval runs, the CLI prints the retrieved memories
-directly instead of dumping the full turn result as JSON.
+it with the configured local Whisper backend, records the current turn when
+session and conversation IDs are available, sends the transcript through the
+BAML control flow, retrieves graph memory context, and prints concise per-stage
+summaries and latencies. When memory retrieval runs, the CLI prints the
+retrieved memories directly instead of dumping the full turn result as JSON.
 
 The current BAML control-flow path is:
 
@@ -205,10 +205,29 @@ wake-word service. Say the single-word trigger "jarvis" followed by the prompt.
 The phrase "conversation on" switches the host into continuous conversation
 mode. If more speech follows in the same utterance, such as "conversation on
 this is a test", the trigger audio is trimmed away and the remaining command
-audio is sent through VAD and GPU Whisper.
+audio is sent through VAD and local transcription.
+
+```shell
+uv run reframe-agent-host voice-turn --device 1 --no-task-choice
+```
+
+On Windows, Linux, and macOS, the default transcription backend tries CUDA
+`faster-whisper` first, then `whisper.cpp`, then CPU `faster-whisper`. CUDA is
+still supported when available. Non-CUDA GPU support comes through a
+`whisper.cpp` binary compiled for the target backend, such as Metal/Core ML on
+macOS, Vulkan or OpenVINO on Windows/Linux, and ROCm on Linux.
+
+Examples:
+
+```shell
+uv run reframe-agent-host transcription-check --transcriber whisper-cpp --transcriber-device metal --whisper-cpp-bin /path/to/whisper-cli --whisper-cpp-model /path/to/ggml-model.bin
+uv run reframe-agent-host voice-turn --transcriber whisper-cpp --transcriber-device vulkan --whisper-cpp-model /path/to/ggml-model.bin
+uv run reframe-agent-host voice-turn --transcriber faster-whisper --transcriber-device cpu --whisper-cpu-compute-type int8
+```
+
+Windows runner equivalent:
 
 ```powershell
-uv run reframe-agent-host voice-turn --device 1 --no-task-choice
 .\reframe-agent-host.cmd voice-turn --device 1 --no-task-choice
 ```
 
@@ -247,22 +266,30 @@ Useful tuning flags:
 - `--wake-carry-ms 220` keeps audio around wake detection so commands that start
   immediately after the wake word are not clipped.
 - `--energy-start-threshold 0.02` if the fallback detector starts too easily.
-- `--whisper-model large-v3` to trade slower transcription for more accuracy
-  than the default `turbo`.
-- `--whisper-compute-type int8_float16` to test lower memory use than the
+- `--transcriber faster-whisper` or `--transcriber whisper-cpp` to choose a
+  backend explicitly.
+- `--transcriber-device cuda`, `cpu`, `metal`, `coreml`, `vulkan`, `openvino`,
+  or `rocm` to choose the preferred local runtime.
+- `--whisper-model large-v3` to choose a faster-whisper model name or local
+  faster-whisper model path.
+- `--whisper-cpp-model /path/to/ggml-model.bin` to use a local whisper.cpp ggml
+  model.
+- `--whisper-cpp-bin /path/to/whisper-cli` when the whisper.cpp binary is not on
+  PATH.
+- `--whisper-compute-type int8_float16` to test lower CUDA memory use than the
   default `float16`.
-- `--whisper-model C:\path\to\model` to use a local faster-whisper model path.
+- `--whisper-cpu-compute-type int8` to choose the CPU fallback compute type.
+- `--no-cpu-fallback` to fail fast when the requested GPU backend is unavailable.
 
-Voice transcription is intentionally GPU-only. On Windows, the Agent Host checks
-for CUDA 12 cuBLAS DLLs before listening, including project-local
-`agent-host\.cuda\bin`, normal CUDA Toolkit installs, and NVIDIA Python wheel
-locations such as `nvidia-cublas-cu12`.
+On Windows, the CUDA faster-whisper path checks for CUDA 12 cuBLAS DLLs before
+listening, including project-local `agent-host\.cuda\bin`, normal CUDA Toolkit
+installs, and NVIDIA Python wheel locations such as `nvidia-cublas-cu12`.
 
 Saved debug WAVs can be replayed through the local wake recognizer without
 calling Whisper:
 
-```powershell
-uv run reframe-agent-host debug-wake-audio .debug-audio\*.wav
+```shell
+uv run reframe-agent-host debug-wake-audio ".debug-audio/*.wav"
 ```
 
 ## Development Philosophy

@@ -21,7 +21,7 @@ from reframe_agent_host.commands.voice_loop import run_voice_turn_loop
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
 from reframe_agent_host.voice.audio_calibration import load_audio_calibration
 from reframe_agent_host.speech.transcription import (
-    WhisperGpuRuntimeError,
+    TranscriptionRuntimeError,
     WhisperTranscriberConfig,
 )
 from reframe_agent_host.speech.triggers import TriggerPhraseConfig
@@ -79,8 +79,8 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
         if debug_output and results:
             print_timing_summary(results)
         return 2
-    except WhisperGpuRuntimeError as error:
-        print(f"[gpu] {error}", file=sys.stderr)
+    except TranscriptionRuntimeError as error:
+        print(f"[transcription] {error}", file=sys.stderr)
         return 3
     except Exception as error:
         print(f"[error] {type(error).__name__}: {error}", file=sys.stderr)
@@ -688,7 +688,14 @@ def _keyphrase_config(args: argparse.Namespace) -> KeyphraseSpotterConfig:
 def _transcription_config(args: argparse.Namespace) -> WhisperTranscriberConfig:
     return WhisperTranscriberConfig(
         model_size_or_path=args.whisper_model,
+        backend=args.transcriber,
+        device=args.transcriber_device,
         compute_type=args.whisper_compute_type,
+        cpu_compute_type=args.whisper_cpu_compute_type,
+        allow_cpu_fallback=not args.no_cpu_fallback,
+        whisper_cpp_bin=args.whisper_cpp_bin,
+        whisper_cpp_model=args.whisper_cpp_model,
+        whisper_cpp_extra_args=tuple(args.whisper_cpp_extra_args),
         language=args.language,
         beam_size=args.beam_size,
         initial_prompt=args.whisper_initial_prompt or None,

@@ -53,8 +53,8 @@ The planned audio pipeline uses:
   including "jarvis do x" and conversation mode triggers such as "conversation
   on".
 - `silero-vad` for voice activity detection.
-- `faster-whisper` for speech transcription.
-- `kokoro` for TTS playback using the `af_heart` voice.
+- `faster-whisper` and `whisper.cpp` for speech transcription.
+- `kokoro-onnx` for TTS playback using the `af_heart` voice.
 
 Audio playback should be cancellable when the user starts talking, without
 destroying the underlying agent task that was already in progress.

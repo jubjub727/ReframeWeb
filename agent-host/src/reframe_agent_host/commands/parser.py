@@ -6,8 +6,10 @@ from reframe_agent_host import __version__
 import baml_sdk as types
 from reframe_agent_host.commands.voice_args import add_voice_turn_args
 from reframe_agent_host.speech.transcription import (
-    DEFAULT_GPU_COMPUTE_TYPE,
-    GPU_COMPUTE_TYPES,
+    DEFAULT_CPU_COMPUTE_TYPE,
+    TRANSCRIPTION_BACKENDS,
+    TRANSCRIPTION_COMPUTE_TYPES,
+    TRANSCRIPTION_DEVICES,
 )
 
 
@@ -32,7 +34,7 @@ def build_parser() -> argparse.ArgumentParser:
         "list-opencode-go-models",
         help="List the OpenCode Go model inventory used by BAML providers.",
     )
-    _add_gpu_check_parser(subparsers)
+    _add_transcription_check_parser(subparsers)
     _add_audio_quality_test_parser(subparsers)
     _add_choose_task_parser(subparsers)
     _add_benchmark_task_choice_parser(subparsers)
@@ -49,15 +51,44 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _add_gpu_check_parser(subparsers) -> None:
-    gpu_check = subparsers.add_parser(
-        "gpu-check",
-        help="Verify the required CUDA faster-whisper runtime.",
+def _add_transcription_check_parser(subparsers) -> None:
+    check = subparsers.add_parser(
+        "transcription-check",
+        aliases=["gpu-check"],
+        help="Verify the configured local transcription runtime.",
     )
-    gpu_check.add_argument(
+    check.add_argument(
+        "--transcriber",
+        choices=TRANSCRIPTION_BACKENDS,
+        default="auto",
+    )
+    check.add_argument(
+        "--transcriber-device",
+        choices=TRANSCRIPTION_DEVICES,
+        default="auto",
+    )
+    check.add_argument(
         "--whisper-compute-type",
-        choices=GPU_COMPUTE_TYPES,
-        default=DEFAULT_GPU_COMPUTE_TYPE,
+        choices=TRANSCRIPTION_COMPUTE_TYPES,
+        default="auto",
+    )
+    check.add_argument(
+        "--whisper-cpu-compute-type",
+        choices=TRANSCRIPTION_COMPUTE_TYPES,
+        default=DEFAULT_CPU_COMPUTE_TYPE,
+    )
+    check.add_argument(
+        "--whisper-cpp-bin",
+        help="Path to whisper.cpp whisper-cli. Defaults to PATH discovery.",
+    )
+    check.add_argument(
+        "--whisper-cpp-model",
+        help="Path to a whisper.cpp ggml .bin model.",
+    )
+    check.add_argument(
+        "--no-cpu-fallback",
+        action="store_true",
+        help="Fail instead of falling back to faster-whisper CPU transcription.",
     )
 
 

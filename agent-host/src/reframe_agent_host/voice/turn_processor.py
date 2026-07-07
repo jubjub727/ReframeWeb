@@ -13,7 +13,7 @@ from reframe_agent_host.agent_flow.search_depth import SearchDepthPlanner
 from reframe_agent_host.agent_flow.task_choice import TaskChoicePlanner
 from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
 import baml_sdk as types
-from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
+from reframe_agent_host.speech.transcription import Transcriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
 from reframe_agent_host.speech.tts import NoopSpeaker, TextSpeaker
 from reframe_agent_host.voice.conversation_mode import ConversationModeController
@@ -42,7 +42,7 @@ class VoiceTurnProcessor:
     def __init__(
         self,
         config: VoicePipelineConfig,
-        transcriber: FasterWhisperTranscriber,
+        transcriber: Transcriber,
         trigger_matcher: TriggerPhraseMatcher,
         planner: TaskChoicePlanner,
         conversation_evaluation: ConversationEvaluationPlanner,
@@ -117,7 +117,7 @@ class VoiceTurnProcessor:
         self._emit(
             on_event,
             "transcribing",
-            f"{utterance.duration_seconds:.2f}s utterance with faster-whisper",
+            f"{utterance.duration_seconds:.2f}s utterance with {_transcriber_label(self._transcriber)}",
         )
         transcription_started_at = time.perf_counter()
         transcript = await run_in_daemon_thread(
@@ -677,3 +677,7 @@ def _is_continuous_unprompted(
         conversation_mode == types.ConversationMode.CONTINUOUS_CONVERSATION
         and capture.keyphrase_detection is None
     )
+
+
+def _transcriber_label(transcriber: Transcriber) -> str:
+    return str(getattr(transcriber, "label", "configured transcriber"))

@@ -7,8 +7,10 @@ import sys
 from reframe_agent_host import __version__
 from reframe_agent_host.voice.audio_devices import list_input_devices
 from reframe_agent_host.speech.transcription import (
-    WhisperGpuRuntimeError,
+    TranscriptionRuntimeError,
+    WhisperTranscriberConfig,
     validate_whisper_gpu_runtime,
+    validate_transcription_runtime,
 )
 
 
@@ -19,7 +21,6 @@ DEPENDENCY_IMPORTS: tuple[tuple[str, str], ...] = (
     ("pocketsphinx", "pocketsphinx"),
     ("silero-vad", "silero_vad"),
     ("faster-whisper", "faster_whisper"),
-    ("kokoro", "kokoro"),
     ("kokoro-onnx", "kokoro_onnx"),
 )
 
@@ -29,14 +30,16 @@ def run_doctor() -> int:
     print(f"reframe-agent-host {__version__}")
     _print_dependency_status(missing)
     _print_environment_status()
-    _print_gpu_status(missing)
+    _print_transcription_status(missing)
     return 1 if missing else 0
 
 
 def run_gpu_check(compute_type: str) -> int:
+    if compute_type in {"auto", "default"}:
+        compute_type = "float16"
     try:
         status = validate_whisper_gpu_runtime(compute_type)
-    except WhisperGpuRuntimeError as error:
+    except TranscriptionRuntimeError as error:
         print(f"[missing] CUDA faster-whisper runtime: {error}", file=sys.stderr)
         return 1
 
@@ -44,6 +47,26 @@ def run_gpu_check(compute_type: str) -> int:
     print(f"devices: {status.cuda_device_count}")
     print(f"compute_type: {status.compute_type}")
     print(f"supported_compute_types: {', '.join(status.supported_compute_types)}")
+    return 0
+
+
+def run_transcription_check(args) -> int:
+    config = WhisperTranscriberConfig(
+        backend=args.transcriber,
+        device=args.transcriber_device,
+        compute_type=args.whisper_compute_type,
+        cpu_compute_type=args.whisper_cpu_compute_type,
+        allow_cpu_fallback=not args.no_cpu_fallback,
+        whisper_cpp_bin=args.whisper_cpp_bin,
+        whisper_cpp_model=args.whisper_cpp_model,
+    )
+    try:
+        status = validate_transcription_runtime(config)
+    except TranscriptionRuntimeError as error:
+        print(f"[missing] transcription runtime: {error}", file=sys.stderr)
+        return 1
+
+    _print_runtime_status("transcription runtime ready", status)
     return 0
 
 
@@ -82,17 +105,30 @@ def _print_environment_status() -> None:
         print(f"[env]     {env_name}: {status}")
 
 
-def _print_gpu_status(missing: list[str]) -> None:
+def _print_transcription_status(missing: list[str]) -> None:
     try:
-        status = validate_whisper_gpu_runtime()
-    except WhisperGpuRuntimeError as error:
-        missing.append("CUDA faster-whisper runtime")
-        print(f"[missing] CUDA faster-whisper runtime: {error}")
+        status = validate_transcription_runtime(WhisperTranscriberConfig())
+    except TranscriptionRuntimeError as error:
+        missing.append("transcription runtime")
+        print(f"[missing] transcription runtime: {error}")
         return
 
-    print(
-        "[ok]      CUDA faster-whisper runtime: "
-        f"{status.cuda_device_count} device(s), "
-        f"{status.compute_type}, "
-        f"supported={', '.join(status.supported_compute_types)}"
-    )
+    _print_runtime_status("[ok]      transcription runtime", status)
+
+
+def _print_runtime_status(prefix: str, status) -> None:
+    parts = [
+        f"{prefix}: {status.backend}",
+        f"device={status.device}",
+    ]
+    if status.compute_type is not None:
+        parts.append(f"compute_type={status.compute_type}")
+    if status.cuda_device_count:
+        parts.append(f"cuda_devices={status.cuda_device_count}")
+    if status.supported_compute_types:
+        parts.append(f"supported={', '.join(status.supported_compute_types)}")
+    if status.binary:
+        parts.append(f"binary={status.binary}")
+    if status.model:
+        parts.append(f"model={status.model}")
+    print(" ".join(parts))

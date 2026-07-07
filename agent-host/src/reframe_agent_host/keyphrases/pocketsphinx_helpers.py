@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 import re
 
@@ -17,7 +18,7 @@ def decoder_config():
     config["dict"] = str(model_path / "cmudict-en-us.dict")
     config["lm"] = str(model_path / "en-us.lm.bin")
     config["samprate"] = 16_000
-    config["logfn"] = "NUL"
+    config["logfn"] = os.devnull
     return config
 
 

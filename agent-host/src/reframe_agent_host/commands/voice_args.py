@@ -3,13 +3,15 @@ from __future__ import annotations
 import argparse
 
 from reframe_agent_host.speech.transcription import (
-    DEFAULT_GPU_COMPUTE_TYPE,
+    DEFAULT_CPU_COMPUTE_TYPE,
     DEFAULT_TRANSCRIPTION_MAX_GAIN,
     DEFAULT_TRANSCRIPTION_TARGET_RMS,
     DEFAULT_WHISPER_BEAM_SIZE,
     DEFAULT_WHISPER_INITIAL_PROMPT,
     DEFAULT_WHISPER_MODEL,
-    GPU_COMPUTE_TYPES,
+    TRANSCRIPTION_BACKENDS,
+    TRANSCRIPTION_COMPUTE_TYPES,
+    TRANSCRIPTION_DEVICES,
 )
 
 
@@ -156,9 +158,51 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument("--whisper-model", default=DEFAULT_WHISPER_MODEL)
     parser.add_argument(
+        "--transcriber",
+        choices=TRANSCRIPTION_BACKENDS,
+        default="auto",
+        help="Transcription backend. auto prefers CUDA, then whisper.cpp, then CPU.",
+    )
+    parser.add_argument(
+        "--transcriber-device",
+        choices=TRANSCRIPTION_DEVICES,
+        default="auto",
+        help=(
+            "Preferred local transcription device. Use whisper.cpp for metal, "
+            "coreml, vulkan, openvino, or rocm."
+        ),
+    )
+    parser.add_argument(
         "--whisper-compute-type",
-        choices=GPU_COMPUTE_TYPES,
-        default=DEFAULT_GPU_COMPUTE_TYPE,
+        choices=TRANSCRIPTION_COMPUTE_TYPES,
+        default="auto",
+        help="CTranslate2 compute type for faster-whisper.",
+    )
+    parser.add_argument(
+        "--whisper-cpu-compute-type",
+        choices=TRANSCRIPTION_COMPUTE_TYPES,
+        default=DEFAULT_CPU_COMPUTE_TYPE,
+        help="CTranslate2 compute type when faster-whisper uses CPU fallback.",
+    )
+    parser.add_argument(
+        "--no-cpu-fallback",
+        action="store_true",
+        help="Fail instead of using faster-whisper CPU when GPU backends are unavailable.",
+    )
+    parser.add_argument(
+        "--whisper-cpp-bin",
+        help="Path to whisper.cpp whisper-cli. Defaults to PATH discovery.",
+    )
+    parser.add_argument(
+        "--whisper-cpp-model",
+        help="Path to a whisper.cpp ggml .bin model.",
+    )
+    parser.add_argument(
+        "--whisper-cpp-extra-arg",
+        action="append",
+        default=[],
+        dest="whisper_cpp_extra_args",
+        help="Extra argument passed to whisper.cpp. Repeat for multiple args.",
     )
     parser.add_argument("--language", default="en")
     parser.add_argument("--beam-size", type=int, default=DEFAULT_WHISPER_BEAM_SIZE)

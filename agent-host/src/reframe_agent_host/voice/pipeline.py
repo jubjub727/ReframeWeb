@@ -12,7 +12,7 @@ from reframe_agent_host.agent_flow.search_depth import SearchDepthPlanner
 from reframe_agent_host.agent_flow.task_choice import TaskChoicePlanner
 from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
 from reframe_agent_host.agent_flow.task_prompt import TaskPromptPlanner
-from reframe_agent_host.speech.transcription import FasterWhisperTranscriber
+from reframe_agent_host.speech.transcription import create_transcriber
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
 from reframe_agent_host.speech.kokoro_onnx import KokoroOnnxSpeaker
 from reframe_agent_host.voice.conversation_mode import ConversationModeController
@@ -32,7 +32,7 @@ class VoiceTurnPipeline:
     def __init__(self, config: VoicePipelineConfig) -> None:
         self._config = config
         self._conversation_mode = ConversationModeController(config.conversation_mode)
-        self._transcriber = FasterWhisperTranscriber(config.transcription)
+        self._transcriber = create_transcriber(config.transcription)
         self._trigger_matcher = TriggerPhraseMatcher(config.triggers)
         self._speaker = KokoroOnnxSpeaker()
         self._prepared = False
