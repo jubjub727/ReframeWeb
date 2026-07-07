@@ -98,7 +98,7 @@ class ConversationEvaluationPlanner:
             selected_task_id=selected_task_id,
         ).build()
 
-        return await baml.EvaluateConversationForMemorySearch_async(
+        return await baml.ChooseMemorySearch_async(
             current_user_request=current_user_request,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,

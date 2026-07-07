@@ -350,7 +350,7 @@ async def task_prompt(
     snapshot: TaskPromptSnapshot,
 ):
     started_at = time.perf_counter()
-    composition = await baml.GenerateTaskPrompt_async(
+    composition = await baml.ComposeTaskInput_async(
         current_user_request=snapshot.case.current_user_request,
         current_conversation=snapshot.current_conversation,
         session_memories=snapshot.session_memories,
@@ -561,7 +561,7 @@ async def _choose_task(
     task_choice_memories,
 ):
     started_at = time.perf_counter()
-    result = await baml.ChooseInitialTask_async(
+    result = await baml.ChooseTask_async(
         current_user_request=case.current_user_request,
         current_conversation=current_conversation,
         session_memories=session_memories,
@@ -581,7 +581,7 @@ async def _memory_search_hints(
     selected_task,
 ):
     started_at = time.perf_counter()
-    result = await baml.EvaluateConversationForMemorySearch_async(
+    result = await baml.ChooseMemorySearch_async(
         current_user_request=case.current_user_request,
         current_conversation=current_conversation,
         session_memories=session_memories,
@@ -605,7 +605,7 @@ async def _search_depths(
     memory_search_hints,
 ):
     started_at = time.perf_counter()
-    result = await baml.EvaluateSearchDepths_async(
+    result = await baml.ChooseMemorySearchDepths_async(
         current_timestamp=current_timestamp,
         current_user_request=case.current_user_request,
         current_conversation=current_conversation,
@@ -647,7 +647,7 @@ async def _relevance_decision(
     retrieved_memories,
 ):
     started_at = time.perf_counter()
-    result = await baml.EvaluateRelevantMemories_async(
+    result = await baml.SelectRelevantMemories_async(
         current_user_request=case.current_user_request,
         current_conversation=current_conversation,
         session_memories=session_memories,

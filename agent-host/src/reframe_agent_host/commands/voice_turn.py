@@ -7,7 +7,6 @@ import os
 import sys
 import time
 
-from reframe_agent_host.agent_flow.task_prompt import selected_memory_contexts
 from reframe_agent_host.voice.microphone import AudioInputConfig
 import baml_sdk as types
 from reframe_agent_host.commands.timing import print_timing_summary
@@ -267,13 +266,22 @@ class _VoiceTurnEventPrinter:
             "keyphrase",
             "speech",
             "task-choice",
+            "task-chosen",
             "memory-search",
+            "memory-search-hints",
             "search-depth",
+            "search-depths",
             "memory-retrieval",
             "memory-relevance",
+            "memory-relevance-decision",
             "task-prompt",
+            "task-prompt-generated",
             "task-execution",
+            "task-executed",
             "primitive-dispatch",
+            "primitive-dispatched",
+            "turn-understanding",
+            "turn-continuation",
             "agent-reply",
             "agent-thought",
             "conversation-mode",
@@ -355,10 +363,7 @@ def _print_turn_result(
     if result.relevant_memories is not None:
         selected_counts = _selected_memory_counts(result, config.session_id)
         print(f"selected_memories_by_type: {selected_counts}")
-        context_summary = _task_prompt_selected_context_summary(
-            result,
-            current_session_id=config.session_id,
-        )
+        context_summary = _task_prompt_selected_context_summary(result)
         if context_summary is not None:
             print(f"task_prompt_selected_contexts: {context_summary}")
         if verbose_context:
@@ -403,23 +408,9 @@ def _selected_memory_counts(
     return None
 
 
-def _task_prompt_selected_context_summary(
-    result,
-    current_session_id: str | None = None,
-) -> str | None:
-    relevant_memories = getattr(result, "relevant_memories", None)
-    if relevant_memories is None:
-        return None
-
-    relevance_decision = getattr(result, "relevance_decision", None)
-    selected_ids = getattr(relevance_decision, "kept_memory_ids", ())
-    try:
-        contexts = selected_memory_contexts(
-            relevant_memories,
-            selected_memory_ids=selected_ids,
-            current_session_id=current_session_id,
-        )
-    except AttributeError:
+def _task_prompt_selected_context_summary(result) -> str | None:
+    contexts = getattr(result, "selected_memory_contexts", None)
+    if contexts is None:
         return None
 
     titles = Counter(context.title for context in contexts)

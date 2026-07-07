@@ -11,6 +11,7 @@ from reframe_agent_host.agent_flow.baml_clients import (
 from reframe_agent_host.benchmarks.task_choice_provider_index import (
     model_id_for_surface,
 )
+from reframe_agent_host.memory_seed import opencode_go_model_inventory
 from reframe_memory import ProviderNode
 
 
@@ -21,7 +22,18 @@ OPENCODE_GO_REASONING_EFFORT_CANDIDATES = (
     "medium",
     "high",
     "xhigh",
+    "max",
 )
+
+
+def opencode_reasoning_effort_candidates(
+    provider: ProviderNode,
+    candidates: tuple[str, ...],
+) -> tuple[str, ...]:
+    supported = _reasoning_efforts_for_surface(provider.content.baml_surface)
+    if supported is None:
+        return candidates
+    return tuple(candidate for candidate in candidates if candidate in supported)
 
 
 def opencode_reasoning_effort_client(
@@ -69,6 +81,13 @@ def _client_name(surface: str, effort: str) -> str:
     parts = re.split(r"[^A-Za-z0-9]+", effort)
     suffix = "".join(part.capitalize() for part in parts if part) or "Default"
     return _identifier(surface) + "Reasoning" + suffix
+
+
+def _reasoning_efforts_for_surface(surface: str) -> tuple[str, ...] | None:
+    for reference in opencode_go_model_inventory():
+        if reference.direct_baml_surface == surface:
+            return reference.reasoning_efforts
+    return None
 
 
 def _identifier(value: str) -> str:

@@ -104,7 +104,7 @@ class MemoryRelevancePlanner:
             retrieved_memories=retrieved_memories,
         ).build()
 
-        return await baml.EvaluateRelevantMemories_async(
+        return await baml.SelectRelevantMemories_async(
             current_user_request=current_user_request,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,

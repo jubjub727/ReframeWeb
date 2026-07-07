@@ -197,7 +197,7 @@ async def warmup_search_depth(
 
 async def choose_task(client, case: ControlFlowBenchmarkCase):
     started_at = time.perf_counter()
-    result = await baml.ChooseInitialTask_async(
+    result = await baml.ChooseTask_async(
         current_user_request=case.current_user_request,
         current_conversation=_current_conversation(case_conversation_context(case)),
         session_memories=case_session_memory_context(case),
@@ -214,7 +214,7 @@ def _current_conversation(conversations):
 
 async def search_hints(client, case: ControlFlowBenchmarkCase, selected_task):
     started_at = time.perf_counter()
-    result = await baml.EvaluateConversationForMemorySearch_async(
+    result = await baml.ChooseMemorySearch_async(
         current_user_request=case.current_user_request,
         current_conversation=_current_conversation(case_conversation_context(case)),
         session_memories=case_session_memory_context(case),
@@ -232,7 +232,7 @@ async def search_depths(
     snapshot: ControlFlowSnapshot,
 ):
     started_at = time.perf_counter()
-    result = await baml.EvaluateSearchDepths_async(
+    result = await baml.ChooseMemorySearchDepths_async(
         current_timestamp=snapshot.case.current_timestamp,
         current_user_request=snapshot.case.current_user_request,
         current_conversation=_current_conversation(snapshot.session_conversations),

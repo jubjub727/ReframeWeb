@@ -41,80 +41,6 @@ class StubTranscriber:
         )
 
 
-class RecordingPlanner:
-    def __init__(self, agent_thought=None):
-        self.current_user_request = None
-        self.agent_thought = agent_thought
-
-    async def choose_initial_task(self, current_user_request):
-        self.current_user_request = current_user_request
-        return types.TaskChoiceDecision(
-            selected_task_id="task:needs_more_information",
-            confidence=1.0,
-            reason="test",
-            agent_thought=self.agent_thought,
-            candidate_memory=None,
-        )
-
-
-class RecordingConversationEvaluation:
-    def __init__(self):
-        self.current_user_request = None
-        self.selected_task_id = None
-
-    async def evaluate_for_memory_search(
-        self,
-        current_user_request,
-        selected_task_id,
-    ):
-        self.current_user_request = current_user_request
-        self.selected_task_id = selected_task_id
-        return types.ConversationMemorySearchHints(
-            tags=types.MemoryTagSearch(
-                any_of=["test"],
-                all_of=[],
-                none_of=[],
-            ),
-            strings=types.MemoryStringSearch(
-                contains=["do this"],
-                equals=[],
-            ),
-            candidate_memory=None,
-        )
-
-
-class RecordingSearchDepth:
-    def __init__(self):
-        self.current_user_request = None
-        self.selected_task_id = None
-        self.memory_search_hints = None
-
-    async def evaluate_search_depths(
-        self,
-        current_user_request,
-        selected_task_id,
-        memory_search_hints,
-    ):
-        self.current_user_request = current_user_request
-        self.selected_task_id = selected_task_id
-        self.memory_search_hints = memory_search_hints
-        return types.SearchDepthDecision(
-            depths={
-                "task_catalog": types.SearchDepthTimestamps(
-                    created_after="2026-01-01T00:00:00Z",
-                    read_after="2026-01-01T00:00:00Z",
-                    updated_after="2026-01-01T00:00:00Z",
-                ),
-                "past_conversation_context": types.SearchDepthTimestamps(
-                    created_after="2026-07-01T00:00:00Z",
-                    read_after="2026-07-01T00:00:00Z",
-                    updated_after="2026-07-01T00:00:00Z",
-                ),
-            },
-            candidate_memory=None,
-        )
-
-
 class RecordingMemoryRetrieval:
     def __init__(self):
         self.memory_search_hints = None
@@ -126,48 +52,86 @@ class RecordingMemoryRetrieval:
         return RetrievedMemoryContext()
 
 
-class RecordingMemoryRelevance:
-    def __init__(self):
-        self.current_user_request = None
-        self.selected_task_id = None
-        self.retrieved_memories = None
+class RecordingBamlTurnFlow:
+    def __init__(self, agent_thought=None):
+        self.agent_thought = agent_thought
+        self.understanding_request = None
+        self.continuation_request = None
 
-    async def evaluate_relevant_memories(
-        self,
-        current_user_request,
-        selected_task_id,
-        retrieved_memories,
-    ):
-        self.current_user_request = current_user_request
-        self.selected_task_id = selected_task_id
-        self.retrieved_memories = retrieved_memories
-        return types.RelevantMemoryDecision(
-            kept_memory_ids=[],
+    async def understand_prompt(self, current_user_request):
+        self.understanding_request = current_user_request
+        task_choice = types.TaskChoiceDecision(
+            selected_task_id="task:needs_more_information",
+            confidence=1.0,
+            agent_thought=self.agent_thought,
             candidate_memory=None,
         )
+        return types.VoicePromptUnderstanding(
+            task_choice=task_choice,
+            selected_task=types.SelectedTaskContext(
+                id="task:needs_more_information",
+                name="Needs more information",
+                description="Ask for the missing detail.",
+                input="User request",
+                output="Question",
+                prompt="Ask only for what matters.",
+                provider_id="provider:test",
+                created_at="2026-01-01T00:00:00Z",
+                updated_at="2026-01-01T00:00:00Z",
+                read_at="2026-01-01T00:00:00Z",
+            ),
+            memory_search_hints=types.ConversationMemorySearchHints(
+                tags=types.MemoryTagSearch(any_of=["test"], all_of=[], none_of=[]),
+                strings=types.MemoryStringSearch(contains=["do this"], equals=[]),
+                candidate_memory=None,
+            ),
+            search_depths=types.SearchDepthDecision(
+                depths={
+                    "task_catalog": types.SearchDepthTimestamps(
+                        created_after="2026-01-01T00:00:00Z",
+                        read_after="2026-01-01T00:00:00Z",
+                        updated_after="2026-01-01T00:00:00Z",
+                    )
+                },
+                candidate_memory=None,
+            ),
+            timings=types.VoicePromptUnderstandingTimings(
+                task_choice_ms=5264,
+                memory_search_ms=120,
+                search_depth_ms=85,
+            ),
+        )
 
-
-class RecordingTaskPrompt:
-    def __init__(self):
-        self.current_user_request = None
-        self.selected_task_id = None
-        self.selected_memories = None
-        self.selected_memory_ids = None
-
-    async def generate_task_prompt(
+    async def continue_prompt(
         self,
         current_user_request,
-        selected_task_id,
-        selected_memories,
-        selected_memory_ids=(),
+        selected_task,
+        retrieved_memories,
     ):
-        self.current_user_request = current_user_request
-        self.selected_task_id = selected_task_id
-        self.selected_memories = selected_memories
-        self.selected_memory_ids = tuple(selected_memory_ids)
-        return types.TaskPromptDecision(
-            full_task_prompt="Task:\nAsk only for what matters.\n\nInput:\nDo this.",
-            candidate_memory=None,
+        self.continuation_request = (
+            current_user_request,
+            selected_task.id,
+            retrieved_memories,
+        )
+        return types.VoicePromptContinuation(
+            relevance_decision=types.RelevantMemoryDecision(
+                kept_memory_ids=[],
+                candidate_memory=None,
+            ),
+            selected_memories=types.RetrievedMemoryGraph(
+                task_catalog=[],
+                past_sessions=[],
+                current_session_memories=[],
+            ),
+            selected_memory_contexts=[],
+            task_prompt=types.TaskPromptDecision(
+                full_task_prompt="Task:\nAsk only for what matters.\n\nInput:\nDo this.",
+                candidate_memory=None,
+            ),
+            timings=types.VoicePromptContinuationTimings(
+                memory_relevance_ms=90,
+                task_prompt_ms=240,
+            ),
         )
 
 
@@ -289,23 +253,15 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(detection)
         self.assertEqual(detection.routed_transcript, "just tell me a joke")
 
-    async def test_task_choice_receives_routed_transcript(self):
-        planner = RecordingPlanner()
-        conversation_evaluation = RecordingConversationEvaluation()
-        search_depth = RecordingSearchDepth()
+    async def test_baml_turn_flow_receives_routed_transcript(self):
+        turn_flow = RecordingBamlTurnFlow()
         memory_retrieval = RecordingMemoryRetrieval()
-        memory_relevance = RecordingMemoryRelevance()
-        task_prompt = RecordingTaskPrompt()
         processor = VoiceTurnProcessor(
             config=_voice_config(),
             transcriber=StubTranscriber(),
             trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
-            planner=planner,
-            conversation_evaluation=conversation_evaluation,
-            search_depth=search_depth,
             memory_retrieval=memory_retrieval,
-            memory_relevance=memory_relevance,
-            task_prompt=task_prompt,
+            turn_flow=turn_flow,
         )
 
         result = await processor.process(
@@ -318,15 +274,10 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(result.transcript.text, "jarvis do this")
         self.assertEqual(result.routed_transcript, "do this")
-        self.assertEqual(planner.current_user_request, "do this")
-        self.assertEqual(conversation_evaluation.current_user_request, "do this")
-        self.assertEqual(
-            conversation_evaluation.selected_task_id,
-            "task:needs_more_information",
-        )
+        self.assertEqual(turn_flow.understanding_request, "do this")
+        self.assertEqual(turn_flow.continuation_request[0], "do this")
+        self.assertEqual(turn_flow.continuation_request[1], "task:needs_more_information")
         self.assertEqual(result.memory_search_hints.strings.contains, ["do this"])
-        self.assertEqual(search_depth.current_user_request, "do this")
-        self.assertEqual(search_depth.selected_task_id, "task:needs_more_information")
         self.assertEqual(
             result.search_depths.depths["task_catalog"].created_after,
             "2026-01-01T00:00:00Z",
@@ -337,18 +288,40 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             result.retrieved_memories.to_dict(),
             RetrievedMemoryContext().to_dict(),
         )
-        self.assertEqual(memory_relevance.current_user_request, "do this")
-        self.assertEqual(memory_relevance.selected_task_id, "task:needs_more_information")
-        self.assertIs(memory_relevance.retrieved_memories, result.retrieved_memories)
         self.assertEqual(result.relevance_decision.kept_memory_ids, [])
         self.assertEqual(
             result.relevant_memories.to_dict(),
             RetrievedMemoryContext().to_dict(),
         )
-        self.assertEqual(task_prompt.current_user_request, "do this")
-        self.assertEqual(task_prompt.selected_task_id, "task:needs_more_information")
-        self.assertIs(task_prompt.selected_memories, result.relevant_memories)
-        self.assertEqual(task_prompt.selected_memory_ids, ())
+        self.assertIn("Task:\nAsk only for what matters.", result.task_prompt.full_task_prompt)
+
+    async def test_baml_turn_flow_owns_task_and_prompt_flow_when_present(self):
+        turn_flow = RecordingBamlTurnFlow()
+        memory_retrieval = RecordingMemoryRetrieval()
+        processor = VoiceTurnProcessor(
+            config=_voice_config(),
+            transcriber=StubTranscriber(),
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            memory_retrieval=memory_retrieval,
+            turn_flow=turn_flow,
+        )
+
+        result = await processor.process(
+            capture=_capture_result(),
+            conversation_mode=types.ConversationMode.WAKE_COMMAND,
+            model_prepare_seconds=0.0,
+            total_started_at=time.perf_counter(),
+            on_event=None,
+        )
+
+        self.assertEqual(turn_flow.understanding_request, "do this")
+        self.assertEqual(turn_flow.continuation_request[0], "do this")
+        self.assertEqual(
+            turn_flow.continuation_request[1],
+            "task:needs_more_information",
+        )
+        self.assertIs(memory_retrieval.memory_search_hints, result.memory_search_hints)
+        self.assertEqual(result.relevance_decision.kept_memory_ids, [])
         self.assertIn("Task:\nAsk only for what matters.", result.task_prompt.full_task_prompt)
 
     async def test_speculative_turn_emits_human_reply_after_commit(self):
@@ -357,12 +330,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             config=_voice_config(task_choice_enabled=False),
             transcriber=StubTranscriber("Okay, nice."),
             trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
-            planner=RecordingPlanner(),
-            conversation_evaluation=RecordingConversationEvaluation(),
-            search_depth=RecordingSearchDepth(),
             memory_retrieval=RecordingMemoryRetrieval(),
-            memory_relevance=RecordingMemoryRelevance(),
-            task_prompt=RecordingTaskPrompt(),
         )
         control = VoiceTurnControl()
         task = asyncio.create_task(
@@ -385,18 +353,14 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(events.count(("human-reply", "Okay, nice.")), 1)
 
     async def test_speculative_turn_waits_for_commit_before_task_choice(self):
-        planner = RecordingPlanner()
+        turn_flow = RecordingBamlTurnFlow()
         events = []
         processor = VoiceTurnProcessor(
             config=_voice_config(),
             transcriber=StubTranscriber("Jarvis, do this."),
             trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
-            planner=planner,
-            conversation_evaluation=RecordingConversationEvaluation(),
-            search_depth=RecordingSearchDepth(),
             memory_retrieval=RecordingMemoryRetrieval(),
-            memory_relevance=RecordingMemoryRelevance(),
-            task_prompt=RecordingTaskPrompt(),
+            turn_flow=turn_flow,
         )
         control = VoiceTurnControl()
         task = asyncio.create_task(
@@ -411,28 +375,24 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         )
 
         await asyncio.sleep(0.05)
-        self.assertIsNone(planner.current_user_request)
+        self.assertIsNone(turn_flow.understanding_request)
 
         control.commit()
         await task
 
-        self.assertEqual(planner.current_user_request, "do this")
+        self.assertEqual(turn_flow.understanding_request, "do this")
         stages = [stage for stage, _message in events]
-        self.assertLess(stages.index("human-reply"), stages.index("task-choice"))
+        self.assertLess(stages.index("human-reply"), stages.index("turn-understanding"))
 
     async def test_speculative_turn_emits_task_choice_thought_before_memory_search(self):
-        planner = RecordingPlanner(agent_thought="Task-choice thought.")
+        turn_flow = RecordingBamlTurnFlow(agent_thought="Task-choice thought.")
         events = []
         processor = VoiceTurnProcessor(
             config=_voice_config(),
             transcriber=StubTranscriber("Jarvis, do this."),
             trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
-            planner=planner,
-            conversation_evaluation=RecordingConversationEvaluation(),
-            search_depth=RecordingSearchDepth(),
             memory_retrieval=RecordingMemoryRetrieval(),
-            memory_relevance=RecordingMemoryRelevance(),
-            task_prompt=RecordingTaskPrompt(),
+            turn_flow=turn_flow,
         )
         control = VoiceTurnControl()
         task = asyncio.create_task(
@@ -450,7 +410,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         await task
 
         stages = [stage for stage, _message in events]
-        self.assertLess(stages.index("agent-thought"), stages.index("memory-search"))
+        self.assertLess(stages.index("agent-thought"), stages.index("memory-search-hints"))
         self.assertEqual(events[stages.index("agent-thought")][1], "Task-choice thought.")
 
     def test_cli_prints_input_lifecycle_events_in_normal_mode(self):
@@ -499,6 +459,26 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(output.getvalue().splitlines(), [
             "selected: Reply to user",
             "[task_choice 5.264s]",
+        ])
+
+    def test_cli_prints_prompt_layer_latencies_from_baml_flow_events(self):
+        output = io.StringIO()
+        printer = _VoiceTurnEventPrinter(
+            debug_output=False,
+            turn_started_at=time.perf_counter(),
+        )
+
+        with contextlib.redirect_stdout(output):
+            printer("memory-search-hints", "{} (0.120s)")
+            printer("search-depths", "{} (0.085s)")
+            printer("memory-relevance-decision", "{} (0.090s)")
+            printer("task-prompt-generated", "64 chars (0.240s)")
+
+        self.assertEqual(output.getvalue().splitlines(), [
+            "[memory_search 120ms]",
+            "[search_depth 85ms]",
+            "[memory_relevance 90ms]",
+            "[task_prompt 240ms]",
         ])
 
     async def test_voice_context_setup_does_not_seed_core_tasks_by_default(self):

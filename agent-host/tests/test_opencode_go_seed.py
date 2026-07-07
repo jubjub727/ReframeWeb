@@ -16,6 +16,20 @@ def test_direct_provider_can_omit_reasoning_effort() -> None:
 
 def test_default_direct_provider_is_not_pruned() -> None:
     assert ("OpenCodeGoModelKimiK26", "kimi-k2.6", None) in _allowed_provider_keys()
+    assert ("OpenCodeGoModelKimiK26", "kimi-k2.6", "xhigh") in _allowed_provider_keys()
+
+
+def test_deepseek_flash_uses_max_instead_of_xhigh() -> None:
+    assert (
+        "OpenCodeGoModelDeepseekV4Flash",
+        "deepseek-v4-flash",
+        "max",
+    ) in _allowed_provider_keys()
+    assert (
+        "OpenCodeGoModelDeepseekV4Flash",
+        "deepseek-v4-flash",
+        "xhigh",
+    ) not in _allowed_provider_keys()
 
 
 def _kimi_reference() -> OpenCodeGoModelReference:

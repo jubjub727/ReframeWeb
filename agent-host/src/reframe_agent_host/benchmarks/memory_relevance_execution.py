@@ -215,7 +215,7 @@ async def relevant_memories(
     snapshot: MemoryRelevanceSnapshot,
 ):
     started_at = time.perf_counter()
-    result = await baml.EvaluateRelevantMemories_async(
+    result = await baml.SelectRelevantMemories_async(
         current_user_request=snapshot.case.current_user_request,
         current_conversation=_current_conversation(
             snapshot.control_flow.session_conversations

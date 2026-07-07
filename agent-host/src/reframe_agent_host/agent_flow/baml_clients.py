@@ -3,20 +3,21 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from baml_sdk import baml as baml_std
 from reframe_memory import ProviderNode
 
 
-BamlClient = dict[str, Any]
+BamlClient = baml_std.llm.Client
 
 
 def compiled_client(name: str) -> BamlClient:
-    return {
-        "name": name,
-        "client_type": "Primitive",
-        "sub_clients": [],
-        "retry": None,
-        "counter": 0,
-    }
+    return baml_std.llm.Client(
+        name=name,
+        client_type=baml_std.llm.ClientType.Primitive,
+        sub_clients=[],
+        retry=None,
+        counter=0,
+    )
 
 
 def client_kwargs(client: BamlClient | str | None) -> dict[str, Any]:

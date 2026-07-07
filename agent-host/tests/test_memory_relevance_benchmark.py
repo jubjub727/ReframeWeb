@@ -51,6 +51,7 @@ class MemoryRelevanceBenchmarkTests(unittest.TestCase):
         )
         self.assertIn("none", config.reasoning_effort_candidates)
         self.assertIn("xhigh", config.reasoning_effort_candidates)
+        self.assertIn("max", config.reasoning_effort_candidates)
 
     def test_select_cases_uses_real_control_flow_cases(self):
         cases = _select_cases(control_flow_cases(), ("hacker_news_compact_panel",))

@@ -6,6 +6,7 @@ import baml_sdk as baml
 import baml_sdk as types
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_agent_host.benchmarks.reasoning_efforts import (
+    opencode_reasoning_effort_candidates,
     opencode_reasoning_effort_client,
     unsupported_reasoning_effort_error,
 )
@@ -15,7 +16,7 @@ from reframe_memory import MemoryNode, MemoryTimestamps, Provider
 
 class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
     async def test_default_task_choice_client_uses_kimi_k25_high(self):
-        request = await baml.ChooseInitialTask__build_request_async(
+        request = await baml.ChooseTask__build_request_async(
             current_user_request="Install the missing GPU driver for me.",
             current_conversation=None,
             session_memories=[],
@@ -46,7 +47,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
             "low",
         )
 
-        request = await baml.ChooseInitialTask__build_request_async(
+        request = await baml.ChooseTask__build_request_async(
             current_user_request="Test routing.",
             current_conversation=None,
             session_memories=[],
@@ -73,13 +74,31 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(body["model"], "deepseek-v4-pro")
         self.assertEqual(body["reasoning_effort"], "low")
 
+    def test_reasoning_effort_candidates_are_model_specific(self):
+        candidates = ("high", "xhigh", "max")
+
+        self.assertEqual(
+            opencode_reasoning_effort_candidates(
+                _provider("OpenCodeGoModelKimiK26"),
+                candidates,
+            ),
+            ("high", "xhigh"),
+        )
+        self.assertEqual(
+            opencode_reasoning_effort_candidates(
+                _provider("OpenCodeGoModelDeepseekV4Flash"),
+                candidates,
+            ),
+            ("high", "max"),
+        )
+
     async def test_compiled_client_adds_reasoning_effort_to_search_depth_request(self):
         client, client_name = opencode_reasoning_effort_client(
             _provider("OpenCodeGoModelGlm51"),
             "high",
         )
 
-        request = await baml.EvaluateSearchDepths__build_request_async(
+        request = await baml.ChooseMemorySearchDepths__build_request_async(
             current_timestamp="2026-07-03T15:00:00Z",
             current_user_request="Open Hacker News compactly.",
             current_conversation=None,
@@ -119,7 +138,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(body["reasoning_effort"], "high")
 
     async def test_default_relevance_client_uses_glm51_none(self):
-        request = await baml.EvaluateRelevantMemories__build_request_async(
+        request = await baml.SelectRelevantMemories__build_request_async(
             current_user_request="Open Hacker News compactly.",
             current_conversation=None,
             session_memories=[],

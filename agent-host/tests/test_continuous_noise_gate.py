@@ -33,50 +33,9 @@ class CountingTranscriber:
         )
 
 
-class NoopPlanner:
-    async def choose_initial_task(self, _current_user_request):
-        raise AssertionError("noise should not reach task choice")
-
-
-class NoopConversationEvaluation:
-    async def evaluate_for_memory_search(self, _current_user_request, _selected_task_id):
-        raise AssertionError("noise should not reach memory search")
-
-
-class NoopSearchDepth:
-    async def evaluate_search_depths(
-        self,
-        _current_user_request,
-        _selected_task_id,
-        _memory_search_hints,
-    ):
-        raise AssertionError("noise should not reach search depth")
-
-
 class NoopMemoryRetrieval:
     async def retrieve(self, _memory_search_hints, _search_depths):
         return RetrievedMemoryContext()
-
-
-class NoopMemoryRelevance:
-    async def evaluate_relevant_memories(
-        self,
-        _current_user_request,
-        _selected_task_id,
-        _retrieved_memories,
-    ):
-        raise AssertionError("noise should not reach memory relevance")
-
-
-class NoopTaskPrompt:
-    async def generate_task_prompt(
-        self,
-        _current_user_request,
-        _selected_task_id,
-        _selected_memories,
-        selected_memory_ids=(),
-    ):
-        raise AssertionError("noise should not reach task prompt")
 
 
 class ContinuousNoiseGateTests(unittest.IsolatedAsyncioTestCase):
@@ -127,12 +86,7 @@ def _processor(transcriber):
         config=_voice_config(),
         transcriber=transcriber,
         trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
-        planner=NoopPlanner(),
-        conversation_evaluation=NoopConversationEvaluation(),
-        search_depth=NoopSearchDepth(),
         memory_retrieval=NoopMemoryRetrieval(),
-        memory_relevance=NoopMemoryRelevance(),
-        task_prompt=NoopTaskPrompt(),
     )
 
 

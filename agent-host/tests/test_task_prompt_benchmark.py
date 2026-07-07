@@ -285,7 +285,6 @@ def _snapshot():
     task_choice = types.TaskChoiceDecision(
         selected_task_id=selected_task.id,
         confidence=1.0,
-        reason="test",
         agent_thought=None,
         candidate_memory=None,
     )

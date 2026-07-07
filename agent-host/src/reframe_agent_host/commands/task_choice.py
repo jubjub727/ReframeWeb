@@ -150,6 +150,7 @@ def run_list_opencode_go_models() -> int:
                     "model_id": reference.model_id,
                     "direct_baml_surface": reference.direct_baml_surface,
                     "workspace_baml_surface": reference.workspace_baml_surface,
+                    "reasoning_efforts": list(reference.reasoning_efforts),
                 }
                 for reference in opencode_go_model_inventory()
             ],

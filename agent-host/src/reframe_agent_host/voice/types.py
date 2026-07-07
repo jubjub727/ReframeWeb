@@ -160,6 +160,7 @@ class VoiceTurnResult:
     retrieved_memories: RetrievedMemoryContext | None
     relevance_decision: types.RelevantMemoryDecision | None
     relevant_memories: RetrievedMemoryContext | None
+    selected_memory_contexts: list[types.TaskPromptSelectedMemoryContext] | None
     task_prompt: types.TaskPromptDecision | None
     task_execution: types.TaskExecutionResult | None
     primitive_dispatch: PrimitiveDispatchResult | None
@@ -238,6 +239,14 @@ class VoiceTurnResult:
             "relevant_memories": (
                 self.relevant_memories.to_dict()
                 if self.relevant_memories is not None
+                else None
+            ),
+            "selected_memory_contexts": (
+                [
+                    context.model_dump(mode="json")
+                    for context in self.selected_memory_contexts
+                ]
+                if self.selected_memory_contexts is not None
                 else None
             ),
             "task_prompt": (

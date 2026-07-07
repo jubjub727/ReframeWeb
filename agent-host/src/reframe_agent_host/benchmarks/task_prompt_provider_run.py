@@ -9,6 +9,7 @@ from baml_core import Collector
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     collector_stop_reason,
     collector_usage,
+    opencode_reasoning_effort_candidates,
     opencode_reasoning_effort_client,
     unsupported_reasoning_effort_error,
 )
@@ -39,7 +40,10 @@ async def discover_task_prompt_reasoning_efforts(
 
     supported = []
     results = []
-    for effort in config.reasoning_effort_candidates:
+    for effort in opencode_reasoning_effort_candidates(
+        provider,
+        config.reasoning_effort_candidates,
+    ):
         result = await _probe_task_prompt_reasoning_effort(provider, snapshots, effort)
         results.append(result)
         if result["supported"]:

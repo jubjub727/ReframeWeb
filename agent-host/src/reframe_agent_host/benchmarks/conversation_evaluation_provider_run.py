@@ -23,6 +23,7 @@ from reframe_agent_host.benchmarks.conversation_evaluation_context import (
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     collector_stop_reason,
     collector_usage,
+    opencode_reasoning_effort_candidates,
     opencode_reasoning_effort_client,
     unsupported_reasoning_effort_error,
 )
@@ -44,7 +45,10 @@ async def discover_conversation_evaluation_reasoning_efforts(
 
     supported = []
     results = []
-    for effort in config.reasoning_effort_candidates:
+    for effort in opencode_reasoning_effort_candidates(
+        provider,
+        config.reasoning_effort_candidates,
+    ):
         result = await _probe_conversation_evaluation_reasoning_effort(
             provider,
             cases,
@@ -120,7 +124,7 @@ async def _run_case(
         )
     )
     try:
-        hints = await baml.EvaluateConversationForMemorySearch_async(
+        hints = await baml.ChooseMemorySearch_async(
             current_user_request=case.current_user_request,
             current_conversation=_current_conversation(
                 conversation_context(case.session_conversations)
@@ -174,7 +178,7 @@ async def _probe_conversation_evaluation_reasoning_effort(
     )
     started_at = time.perf_counter()
     try:
-        await baml.EvaluateConversationForMemorySearch_async(
+        await baml.ChooseMemorySearch_async(
             current_user_request=case.current_user_request,
             current_conversation=_current_conversation(
                 conversation_context(case.session_conversations)
@@ -222,7 +226,7 @@ async def _warmup(
     for _ in range(config.warmup_runs):
         try:
             case = cases[0]
-            await baml.EvaluateConversationForMemorySearch_async(
+            await baml.ChooseMemorySearch_async(
                 current_user_request=case.current_user_request,
                 current_conversation=_current_conversation(
                     conversation_context(case.session_conversations)

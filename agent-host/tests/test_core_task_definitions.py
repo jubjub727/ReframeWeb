@@ -49,16 +49,25 @@ class CoreTaskDefinitionTests(unittest.TestCase):
             tasks["Turn conversation mode off"].tags,
             ("conversation-mode", "conversation-off"),
         )
-        self.assertEqual(tasks["Turn conversation mode off"].model_id, "kimi-k2.6")
+        self.assertEqual(
+            tasks["Turn conversation mode off"].model_id,
+            "kimi-k2.6",
+        )
         self.assertEqual(
             tasks["Turn conversation mode off"].reasoning_effort,
             "none",
         )
         self.assertEqual(tasks["Reply to user"].tags, ("reply",))
-        self.assertEqual(tasks["Reply to user"].model_id, "kimi-k2.6")
+        self.assertEqual(tasks["Reply to user"].model_id, "glm-5.1")
         self.assertEqual(tasks["Reply to user"].reasoning_effort, "none")
 
     def test_every_core_task_declares_its_provider_choice(self):
+        expected = {
+            "Explain request cannot be handled": ("glm-5.1", "none"),
+            "Request more information from the user": ("glm-5.1", "none"),
+            "Turn conversation mode off": ("kimi-k2.6", "none"),
+            "Reply to user": ("glm-5.1", "none"),
+        }
         for task in CORE_TASKS:
             with self.subTest(task=task.name):
                 self.assertIsInstance(task.model_id, str)
@@ -66,6 +75,10 @@ class CoreTaskDefinitionTests(unittest.TestCase):
                 if task.reasoning_effort is not None:
                     self.assertIsInstance(task.reasoning_effort, str)
                     self.assertTrue(task.reasoning_effort)
+                self.assertEqual(
+                    (task.model_id, task.reasoning_effort),
+                    expected[task.name],
+                )
 
         field_defaults = {field.name: field.default for field in fields(CoreTaskDefinition)}
         self.assertIs(field_defaults["model_id"], MISSING)

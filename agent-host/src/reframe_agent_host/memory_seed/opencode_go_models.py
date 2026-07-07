@@ -12,6 +12,14 @@ OPENCODE_GO_REASONING_EFFORTS = (
     "high",
     "xhigh",
 )
+OPENCODE_GO_DEEPSEEK_V4_FLASH_REASONING_EFFORTS = (
+    "none",
+    "minimal",
+    "low",
+    "medium",
+    "high",
+    "max",
+)
 
 
 @dataclass(frozen=True)
@@ -19,6 +27,7 @@ class OpenCodeGoModelReference:
     model_id: str
     direct_baml_surface: str
     workspace_baml_surface: str
+    reasoning_efforts: tuple[str, ...] = OPENCODE_GO_REASONING_EFFORTS
 
 
 def opencode_go_model_inventory() -> tuple[OpenCodeGoModelReference, ...]:
@@ -57,6 +66,7 @@ def opencode_go_model_inventory() -> tuple[OpenCodeGoModelReference, ...]:
             "deepseek-v4-flash",
             "OpenCodeGoModelDeepseekV4Flash",
             "OpenCodeWorkspaceModelDeepseekV4Flash",
+            OPENCODE_GO_DEEPSEEK_V4_FLASH_REASONING_EFFORTS,
         ),
         OpenCodeGoModelReference(
             "mimo-v2.5-pro",

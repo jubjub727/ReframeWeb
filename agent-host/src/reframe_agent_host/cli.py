@@ -236,6 +236,13 @@ def main(argv: Sequence[str] | None = None) -> None:
         raise SystemExit(run_record_wake_audio(args))
 
     if args.command == "voice-turn":
-        raise SystemExit(asyncio.run(run_voice_turn(args)))
+        raise SystemExit(_run_voice_turn(args))
 
     parser.error(f"Unknown command: {args.command}")
+
+
+def _run_voice_turn(args) -> int:
+    try:
+        return asyncio.run(run_voice_turn(args))
+    except KeyboardInterrupt:
+        return 130

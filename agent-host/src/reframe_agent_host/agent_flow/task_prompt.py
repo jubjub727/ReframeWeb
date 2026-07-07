@@ -117,7 +117,7 @@ class TaskPromptPlanner:
             selected_memory_ids=selected_memory_ids,
         ).build()
 
-        composition = await baml.GenerateTaskPrompt_async(
+        composition = await baml.ComposeTaskInput_async(
             current_user_request=current_user_request,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,

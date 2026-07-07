@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 from reframe_agent_host.memory_seed.opencode_go_models import (
     OPENCODE_GO_BASE_URL,
-    OPENCODE_GO_REASONING_EFFORTS,
     OpenCodeGoModelReference,
     opencode_go_model_inventory,
 )
@@ -42,7 +41,7 @@ async def ensure_opencode_go_providers(
         )
         _record_seed_result(direct_default, created_provider_ids, existing_provider_ids)
 
-        for effort in OPENCODE_GO_REASONING_EFFORTS:
+        for effort in reference.reasoning_efforts:
             direct = await _ensure_provider(
                 database,
                 _direct_provider(reference, effort),
@@ -164,7 +163,7 @@ def _allowed_provider_keys() -> set[tuple[str, str | None, str | None]]:
     keys: set[tuple[str, str | None, str | None]] = set()
     for reference in opencode_go_model_inventory():
         keys.add((reference.direct_baml_surface, reference.model_id, None))
-        for effort in OPENCODE_GO_REASONING_EFFORTS:
+        for effort in reference.reasoning_efforts:
             keys.add((reference.direct_baml_surface, reference.model_id, effort))
         keys.add((reference.workspace_baml_surface, reference.model_id, None))
     return keys

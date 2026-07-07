@@ -135,7 +135,7 @@ class SearchDepthPlanner:
             selected_task_id=selected_task_id,
         ).build()
 
-        return await baml.EvaluateSearchDepths_async(
+        return await baml.ChooseMemorySearchDepths_async(
             current_timestamp=current_timestamp(),
             current_user_request=current_user_request,
             current_conversation=context.current_conversation,

@@ -194,7 +194,6 @@ class TaskChoiceDecision(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     selected_task_id: typing.Optional[str]
     confidence: typing.Optional[float]
-    reason: typing.Optional[str]
     agent_thought: typing.Optional[str]
     candidate_memory: typing.Optional[CandidateMemory]
 
@@ -252,6 +251,117 @@ class TaskReturnItem(pydantic.BaseModel):
     payload: typing.Optional[typing.Dict[str, str]]
 
 
+class RetrievedConversationGraph(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    conversation: typing.Optional[RetrievedConversationNode]
+    matched: typing.Optional[bool]
+    messages: typing.List[RetrievedConversationMessageNode]
+    matched_message_ids: typing.List[str]
+
+
+class RetrievedConversationMessageNode(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    id: typing.Optional[str]
+    role: typing.Optional[str]
+    content: typing.Optional[str]
+    tags: typing.List[str]
+    created_at: typing.Optional[str]
+    updated_at: typing.Optional[str]
+    read_at: typing.Optional[str]
+
+
+class RetrievedConversationNode(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    id: typing.Optional[str]
+    name: typing.Optional[str]
+    tags: typing.List[str]
+    created_at: typing.Optional[str]
+    updated_at: typing.Optional[str]
+    read_at: typing.Optional[str]
+
+
+class RetrievedMemoryGraph(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_catalog: typing.List[RetrievedTaskNode]
+    past_sessions: typing.List[RetrievedSessionGraph]
+    current_session_memories: typing.List[RetrievedSessionMemoryNode]
+
+
+class RetrievedSessionGraph(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    session: typing.Optional[RetrievedSessionNode]
+    matched: typing.Optional[bool]
+    conversations: typing.List[RetrievedConversationGraph]
+    session_memories: typing.List[RetrievedSessionMemoryNode]
+
+
+class RetrievedSessionMemoryNode(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    id: typing.Optional[str]
+    title: typing.Optional[str]
+    description: typing.Optional[str]
+    tags: typing.List[str]
+    created_at: typing.Optional[str]
+    updated_at: typing.Optional[str]
+    read_at: typing.Optional[str]
+
+
+class RetrievedSessionNode(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    id: typing.Optional[str]
+    name: typing.Optional[str]
+    tags: typing.List[str]
+    created_at: typing.Optional[str]
+    updated_at: typing.Optional[str]
+    read_at: typing.Optional[str]
+
+
+class RetrievedTaskNode(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    id: typing.Optional[str]
+    name: typing.Optional[str]
+    description: typing.Optional[str]
+    input: typing.Optional[str]
+    output: typing.Optional[str]
+    prompt: typing.Optional[str]
+    provider_id: typing.Optional[str]
+    tags: typing.List[str]
+    created_at: typing.Optional[str]
+    updated_at: typing.Optional[str]
+    read_at: typing.Optional[str]
+
+
+class VoicePromptContinuation(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    relevance_decision: typing.Optional[RelevantMemoryDecision]
+    selected_memories: typing.Optional[RetrievedMemoryGraph]
+    selected_memory_contexts: typing.List[TaskPromptSelectedMemoryContext]
+    task_prompt: typing.Optional[TaskPromptDecision]
+    timings: typing.Optional[VoicePromptContinuationTimings]
+
+
+class VoicePromptContinuationTimings(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    memory_relevance_ms: typing.Optional[int]
+    task_prompt_ms: typing.Optional[int]
+
+
+class VoicePromptUnderstanding(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_choice: typing.Optional[TaskChoiceDecision]
+    selected_task: typing.Optional[SelectedTaskContext]
+    memory_search_hints: typing.Optional[ConversationMemorySearchHints]
+    search_depths: typing.Optional[SearchDepthDecision]
+    timings: typing.Optional[VoicePromptUnderstandingTimings]
+
+
+class VoicePromptUnderstandingTimings(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_choice_ms: typing.Optional[int]
+    memory_search_ms: typing.Optional[int]
+    search_depth_ms: typing.Optional[int]
+
+
 __all__ = [
     "AvailableTask",
     "CandidateMemory",
@@ -278,4 +388,16 @@ __all__ = [
     "TaskPromptMemoryContext",
     "TaskPromptSelectedMemoryContext",
     "TaskReturnItem",
+    "RetrievedConversationGraph",
+    "RetrievedConversationMessageNode",
+    "RetrievedConversationNode",
+    "RetrievedMemoryGraph",
+    "RetrievedSessionGraph",
+    "RetrievedSessionMemoryNode",
+    "RetrievedSessionNode",
+    "RetrievedTaskNode",
+    "VoicePromptContinuation",
+    "VoicePromptContinuationTimings",
+    "VoicePromptUnderstanding",
+    "VoicePromptUnderstandingTimings",
 ]

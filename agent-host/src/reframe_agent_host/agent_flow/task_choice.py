@@ -101,7 +101,7 @@ class TaskChoicePlanner:
             conversation_id=self._conversation_id,
         ).build()
 
-        return await baml.ChooseInitialTask_async(
+        return await baml.ChooseTask_async(
             current_user_request=current_user_request,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,

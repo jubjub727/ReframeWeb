@@ -19,6 +19,7 @@ agent-host/.venv/
 .debug-audio/
 .debug-audio-quality/
 .debug-wake*/
+agent-host/debug-dumps/
 .reframe-audio-calibration.json
 *.wav
 *.mp3

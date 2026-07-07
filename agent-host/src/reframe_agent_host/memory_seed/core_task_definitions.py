@@ -56,8 +56,8 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "user preference."
         ),
         tags=("limitation", "boundary"),
-        model_id="deepseek-v4-flash",
-        reasoning_effort="xhigh",
+        model_id="glm-5.1",
+        reasoning_effort="none",
     ),
     CoreTaskDefinition(
         name="Request more information from the user",
@@ -87,8 +87,8 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "user preference."
         ),
         tags=("needs-information",),
-        model_id="deepseek-v4-flash",
-        reasoning_effort="xhigh",
+        model_id="glm-5.1",
+        reasoning_effort="none",
     ),
     CoreTaskDefinition(
         name="Turn conversation mode off",
@@ -138,7 +138,7 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "user preference."
         ),
         tags=("reply",),
-        model_id="kimi-k2.6",
+        model_id="glm-5.1",
         reasoning_effort="none",
     ),
 )

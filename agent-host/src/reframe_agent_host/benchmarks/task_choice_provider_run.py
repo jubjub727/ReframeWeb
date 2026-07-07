@@ -11,6 +11,7 @@ from reframe_agent_host.agent_flow.baml_clients import client_kwargs
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     collector_stop_reason,
     collector_usage,
+    opencode_reasoning_effort_candidates,
     opencode_reasoning_effort_client,
     unsupported_reasoning_effort_error,
 )
@@ -35,7 +36,10 @@ async def discover_task_choice_reasoning_efforts(
 
     supported = []
     results = []
-    for effort in config.reasoning_effort_candidates:
+    for effort in opencode_reasoning_effort_candidates(
+        provider,
+        config.reasoning_effort_candidates,
+    ):
         result = await _probe_task_choice_reasoning_effort(
             provider,
             cases,
@@ -124,7 +128,7 @@ async def _probe_task_choice_reasoning_effort(
     collector = Collector(name=f"task-choice-discovery-{provider.id}-{effort}")
     started_at = time.perf_counter()
     try:
-        await baml.ChooseInitialTask_async(
+        await baml.ChooseTask_async(
             current_user_request=cases[0].transcript,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,
@@ -171,7 +175,7 @@ async def _run_case(
         name=f"task-choice-{provider.id}-{reasoning_effort}-{case.id}-{run_index}"
     )
     try:
-        decision = await baml.ChooseInitialTask_async(
+        decision = await baml.ChooseTask_async(
             current_user_request=case.transcript,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,
@@ -203,7 +207,6 @@ async def _run_case(
         "selected_task_name": selected_name,
         "correct": decision.selected_task_id == expected_task_id,
         "confidence": decision.confidence,
-        "reason": decision.reason,
         "latency_seconds": time.perf_counter() - started_at,
         "usage": collector_usage(collector),
         "stop_reason": collector_stop_reason(collector),
@@ -217,7 +220,7 @@ async def _warmup(client, cases, context, config: TaskChoiceBenchmarkConfig) -> 
 
     for _ in range(config.warmup_runs):
         try:
-            await baml.ChooseInitialTask_async(
+            await baml.ChooseTask_async(
                 current_user_request=cases[0].transcript,
                 current_conversation=context.current_conversation,
                 session_memories=context.session_memories,
