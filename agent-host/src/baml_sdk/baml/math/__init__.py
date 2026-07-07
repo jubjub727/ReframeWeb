@@ -31,6 +31,10 @@ sum       = _define_function("baml.math.sum", "sync",  ["values"])
 sum_async = _define_function("baml.math.sum", "async", ["values"])
 
 
+_sum_int       = _define_function("baml.math._sum_int", "sync",  ["values"])
+_sum_int_async = _define_function("baml.math._sum_int", "async", ["values"])
+
+
 mean       = _define_function("baml.math.mean", "sync",  ["values"])
 mean.__doc__ = """Raises:
     InvalidArgument"""
