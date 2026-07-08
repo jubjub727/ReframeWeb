@@ -3,6 +3,8 @@ from __future__ import annotations
 from reframe_memory.config import MemoryConfig
 from reframe_memory.database import MemoryDatabase, open_memory_database
 from reframe_memory.models import (
+    Action,
+    ActionNode,
     Conversation,
     ConversationEvaluationMemory,
     ConversationEvaluationMemoryNode,
@@ -17,6 +19,8 @@ from reframe_memory.models import (
     RelevanceMemoryNode,
     SearchDepthMemory,
     SearchDepthMemoryNode,
+    SessionAction,
+    SessionActionNode,
     Session,
     SessionMemory,
     SessionMemoryNode,
@@ -24,6 +28,10 @@ from reframe_memory.models import (
     Task,
     TaskChoiceMemory,
     TaskChoiceMemoryNode,
+    TaskHistory,
+    TaskHistoryMemoryNode,
+    TaskHistoryNode,
+    TaskHistoryNodeMemoryNode,
     TaskPromptMemory,
     TaskPromptMemoryNode,
     TaskNode,
@@ -69,12 +77,15 @@ from reframe_memory.task_prompt_memories import (
     TaskPromptMemorySearch,
     TaskPromptMemoryStore,
 )
+from reframe_memory.task_history import TaskHistoryStore
 from reframe_memory.user_preferences import (
     UserPreferenceMemorySearch,
     UserPreferenceMemoryStore,
 )
 
 __all__ = [
+    "Action",
+    "ActionNode",
     "Conversation",
     "ConversationEvaluationMemory",
     "ConversationEvaluationMemoryNode",
@@ -111,6 +122,8 @@ __all__ = [
     "SearchDepthMemorySearch",
     "SearchDepthMemoryStore",
     "SCHEMA_STATEMENTS",
+    "SessionAction",
+    "SessionActionNode",
     "Session",
     "SessionMemory",
     "SessionMemoryNode",
@@ -127,6 +140,11 @@ __all__ = [
     "TaskChoiceMemoryNode",
     "TaskChoiceMemorySearch",
     "TaskChoiceMemoryStore",
+    "TaskHistory",
+    "TaskHistoryMemoryNode",
+    "TaskHistoryNode",
+    "TaskHistoryNodeMemoryNode",
+    "TaskHistoryStore",
     "TaskMemory",
     "TaskNode",
     "TaskPromptMemory",

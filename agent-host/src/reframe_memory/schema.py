@@ -17,4 +17,9 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     "DEFINE TABLE IF NOT EXISTS has_message TYPE RELATION IN memory_node OUT memory_node;",
     "DEFINE FIELD IF NOT EXISTS position ON TABLE has_message TYPE int;",
     "DEFINE TABLE IF NOT EXISTS has_session_memory TYPE RELATION IN memory_node OUT memory_node;",
+    "DEFINE TABLE IF NOT EXISTS history TYPE RELATION IN memory_node OUT memory_node;",
+    "DEFINE FIELD IF NOT EXISTS position ON TABLE history TYPE int;",
+    "DEFINE TABLE IF NOT EXISTS actions TYPE RELATION IN memory_node OUT memory_node;",
+    "DEFINE FIELD IF NOT EXISTS position ON TABLE actions TYPE int;",
+    "DEFINE TABLE IF NOT EXISTS action TYPE RELATION IN memory_node OUT memory_node;",
 )

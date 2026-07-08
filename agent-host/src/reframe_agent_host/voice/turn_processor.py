@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 
+from reframe_agent_host.agent_flow.action_history import ActionHistorySummarizer
 from reframe_agent_host.agent_flow.retrieved_memory_graph import (
     BamlRetrievedMemoryContext,
 )
@@ -216,6 +217,7 @@ class VoiceTurnProcessor:
                 task_prompt=None,
                 task_execution=None,
                 primitive_dispatch=None,
+                action_history_summary=None,
                 timings={
                     "model_prepare_seconds": model_prepare_seconds,
                     "total_started_at": total_started_at,
@@ -228,6 +230,7 @@ class VoiceTurnProcessor:
                     "post_vad_task_prompt_seconds": None,
                     "post_vad_task_execution_seconds": None,
                     "post_vad_primitive_dispatch_seconds": None,
+                    "post_vad_action_history_summary_seconds": None,
                     "transcription_seconds": transcription_seconds,
                     "task_choice_seconds": None,
                     "memory_search_seconds": None,
@@ -237,6 +240,7 @@ class VoiceTurnProcessor:
                     "task_prompt_seconds": None,
                     "task_execution_seconds": None,
                     "primitive_dispatch_seconds": None,
+                    "action_history_summary_seconds": None,
                 },
             )
 
@@ -260,6 +264,7 @@ class VoiceTurnProcessor:
                 task_prompt=None,
                 task_execution=None,
                 primitive_dispatch=None,
+                action_history_summary=None,
                 timings={
                     "model_prepare_seconds": model_prepare_seconds,
                     "total_started_at": total_started_at,
@@ -272,6 +277,7 @@ class VoiceTurnProcessor:
                     "post_vad_task_prompt_seconds": None,
                     "post_vad_task_execution_seconds": None,
                     "post_vad_primitive_dispatch_seconds": None,
+                    "post_vad_action_history_summary_seconds": None,
                     "transcription_seconds": transcription_seconds,
                     "task_choice_seconds": None,
                     "memory_search_seconds": None,
@@ -281,6 +287,7 @@ class VoiceTurnProcessor:
                     "task_prompt_seconds": None,
                     "task_execution_seconds": None,
                     "primitive_dispatch_seconds": None,
+                    "action_history_summary_seconds": None,
                 },
             )
 
@@ -315,8 +322,9 @@ class VoiceTurnProcessor:
             "task-chosen",
             f"selected: {selected_task.name} ({task_choice_seconds:.3f}s)",
         )
-        if task_choice.agent_thought:
-            self._emit(on_event, "agent-thought", task_choice.agent_thought)
+        agent_thought = (task_choice.agent_thought or "").strip()
+        if agent_thought:
+            self._emit(on_event, "agent-thought", agent_thought)
         self._emit(
             on_event,
             "memory-search-hints",
@@ -407,6 +415,17 @@ class VoiceTurnProcessor:
             on_event,
         )
         await self._checkpoint(turn_control)
+        (
+            action_history_summary,
+            action_history_summary_seconds,
+            post_vad_action_history_summary_seconds,
+        ) = await self._maybe_summarize_action_history(
+            primitive_dispatch,
+            task_choice,
+            post_vad_started_at,
+            on_event,
+        )
+        await self._checkpoint(turn_control)
         post_vad_transcript_seconds = time.perf_counter() - post_vad_started_at
         return transcribed_turn_result(
             config=self._config,
@@ -425,6 +444,7 @@ class VoiceTurnProcessor:
             task_prompt=task_prompt,
             task_execution=task_execution,
             primitive_dispatch=primitive_dispatch,
+            action_history_summary=action_history_summary,
             timings={
                 "model_prepare_seconds": model_prepare_seconds,
                 "total_started_at": total_started_at,
@@ -443,6 +463,9 @@ class VoiceTurnProcessor:
                 "post_vad_primitive_dispatch_seconds": (
                     post_vad_primitive_dispatch_seconds
                 ),
+                "post_vad_action_history_summary_seconds": (
+                    post_vad_action_history_summary_seconds
+                ),
                 "transcription_seconds": transcription_seconds,
                 "task_choice_seconds": task_choice_seconds,
                 "memory_search_seconds": memory_search_seconds,
@@ -452,6 +475,7 @@ class VoiceTurnProcessor:
                 "task_prompt_seconds": task_prompt_seconds,
                 "task_execution_seconds": task_execution_seconds,
                 "primitive_dispatch_seconds": primitive_dispatch_seconds,
+                "action_history_summary_seconds": action_history_summary_seconds,
             },
         )
 
@@ -475,13 +499,17 @@ class VoiceTurnProcessor:
                     content=routed_transcript,
                 ),
             )
-            thought = (task_choice.agent_thought or "").strip() if task_choice else ""
-            if thought:
+            agent_thought = (
+                (task_choice.agent_thought or "").strip()
+                if task_choice is not None
+                else ""
+            )
+            if agent_thought:
                 await database.conversations.add_message(
                     self._config.conversation_id,
                     ConversationMessage(
                         role="agent_thought",
-                        content=thought,
+                        content=agent_thought,
                     ),
                 )
         finally:
@@ -551,6 +579,44 @@ class VoiceTurnProcessor:
             on_event,
             "task-executed",
             f"{len(result.returns)} return items ({seconds:.3f}s)",
+        )
+        return result, seconds, time.perf_counter() - post_vad_started_at
+
+    async def _maybe_summarize_action_history(
+        self,
+        primitive_dispatch,
+        task_choice: types.TaskChoiceDecision | None,
+        post_vad_started_at: float,
+        on_event: VoicePipelineEventHandler | None,
+    ):
+        if primitive_dispatch is None or primitive_dispatch.task_history_id is None:
+            return None, None, None
+
+        self._emit(
+            on_event,
+            "action-history-summary",
+            "summarizing recorded action history",
+        )
+        started_at = time.perf_counter()
+        summarizer = ActionHistorySummarizer(
+            session_id=self._config.session_id,
+            conversation_id=self._config.conversation_id,
+        )
+        try:
+            result = await summarizer.summarize(
+                primitive_dispatch.task_history_id,
+                selected_task_id=(
+                    task_choice.selected_task_id if task_choice is not None else None
+                ),
+                prompt_layer_debug=getattr(self._turn_flow, "prompt_layer_debug", None),
+            )
+        finally:
+            await summarizer.close()
+        seconds = time.perf_counter() - started_at
+        self._emit(
+            on_event,
+            "action-history-summarized",
+            f"{len(result)} chars ({seconds:.3f}s)",
         )
         return result, seconds, time.perf_counter() - post_vad_started_at
 

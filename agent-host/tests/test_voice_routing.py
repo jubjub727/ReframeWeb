@@ -324,6 +324,34 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.relevance_decision.kept_memory_ids, [])
         self.assertIn("Task:\nAsk only for what matters.", result.task_prompt.full_task_prompt)
 
+    async def test_task_choice_agent_thought_is_emitted(self):
+        turn_flow = RecordingBamlTurnFlow(agent_thought="Route this through the info task.")
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(),
+            transcriber=StubTranscriber(),
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            memory_retrieval=RecordingMemoryRetrieval(),
+            turn_flow=turn_flow,
+        )
+
+        result = await processor.process(
+            capture=_capture_result(),
+            conversation_mode=types.ConversationMode.WAKE_COMMAND,
+            model_prepare_seconds=0.0,
+            total_started_at=time.perf_counter(),
+            on_event=lambda stage, message: events.append((stage, message)),
+        )
+
+        self.assertEqual(
+            result.task_choice.agent_thought,
+            "Route this through the info task.",
+        )
+        self.assertIn(
+            ("agent-thought", "Route this through the info task."),
+            events,
+        )
+
     async def test_speculative_turn_emits_human_reply_after_commit(self):
         events = []
         processor = VoiceTurnProcessor(
@@ -383,35 +411,6 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(turn_flow.understanding_request, "do this")
         stages = [stage for stage, _message in events]
         self.assertLess(stages.index("human-reply"), stages.index("turn-understanding"))
-
-    async def test_speculative_turn_emits_task_choice_thought_before_memory_search(self):
-        turn_flow = RecordingBamlTurnFlow(agent_thought="Task-choice thought.")
-        events = []
-        processor = VoiceTurnProcessor(
-            config=_voice_config(),
-            transcriber=StubTranscriber("Jarvis, do this."),
-            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
-            memory_retrieval=RecordingMemoryRetrieval(),
-            turn_flow=turn_flow,
-        )
-        control = VoiceTurnControl()
-        task = asyncio.create_task(
-            processor.process(
-                capture=_capture_result(),
-                conversation_mode=types.ConversationMode.WAKE_COMMAND,
-                model_prepare_seconds=0.0,
-                total_started_at=time.perf_counter(),
-                on_event=lambda stage, message: events.append((stage, message)),
-                turn_control=control,
-            )
-        )
-
-        control.commit()
-        await task
-
-        stages = [stage for stage, _message in events]
-        self.assertLess(stages.index("agent-thought"), stages.index("memory-search-hints"))
-        self.assertEqual(events[stages.index("agent-thought")][1], "Task-choice thought.")
 
     def test_cli_prints_input_lifecycle_events_in_normal_mode(self):
         output = io.StringIO()
@@ -473,12 +472,14 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             printer("search-depths", "{} (0.085s)")
             printer("memory-relevance-decision", "{} (0.090s)")
             printer("task-prompt-generated", "64 chars (0.240s)")
+            printer("action-history-summarized", "42 chars (0.110s)")
 
         self.assertEqual(output.getvalue().splitlines(), [
             "[memory_search 120ms]",
             "[search_depth 85ms]",
             "[memory_relevance 90ms]",
             "[task_prompt 240ms]",
+            "[action_history_summary 110ms]",
         ])
 
     async def test_voice_context_setup_does_not_seed_core_tasks_by_default(self):

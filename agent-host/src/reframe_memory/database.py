@@ -138,6 +138,12 @@ class MemoryDatabase:
 
         return UserPreferenceMemoryStore(self)
 
+    @property
+    def task_history(self) -> "TaskHistoryStore":
+        from reframe_memory.task_history import TaskHistoryStore
+
+        return TaskHistoryStore(self)
+
 
 async def open_memory_database(config: MemoryConfig | None = None) -> MemoryDatabase:
     return await MemoryDatabase.open(config)

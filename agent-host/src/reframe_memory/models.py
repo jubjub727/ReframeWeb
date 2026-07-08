@@ -109,6 +109,29 @@ class TaskPromptMemory:
     description: str
 
 
+@dataclass(frozen=True)
+class TaskHistory:
+    pass
+
+
+@dataclass(frozen=True)
+class TaskHistoryNode:
+    session: str
+    conversation: str
+
+
+@dataclass(frozen=True)
+class SessionAction:
+    pass
+
+
+@dataclass(frozen=True)
+class Action:
+    name: str
+    input: object
+    output: object
+
+
 ProviderNode: TypeAlias = MemoryNode[Provider]
 TaskNode: TypeAlias = MemoryNode[Task]
 SessionNode: TypeAlias = MemoryNode[Session]
@@ -121,3 +144,7 @@ ConversationEvaluationMemoryNode: TypeAlias = MemoryNode[ConversationEvaluationM
 SearchDepthMemoryNode: TypeAlias = MemoryNode[SearchDepthMemory]
 RelevanceMemoryNode: TypeAlias = MemoryNode[RelevanceMemory]
 TaskPromptMemoryNode: TypeAlias = MemoryNode[TaskPromptMemory]
+TaskHistoryMemoryNode: TypeAlias = MemoryNode[TaskHistory]
+TaskHistoryNodeMemoryNode: TypeAlias = MemoryNode[TaskHistoryNode]
+SessionActionNode: TypeAlias = MemoryNode[SessionAction]
+ActionNode: TypeAlias = MemoryNode[Action]

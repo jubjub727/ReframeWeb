@@ -536,18 +536,22 @@ async def _record_current_turn(
     database: MemoryDatabase,
     conversation_id: str,
     case: TaskPromptBenchmarkCase,
-    task_choice: types.TaskChoiceDecision,
+    task_choice: types.TaskChoiceDecision | None,
 ) -> None:
     await database.conversations.add_message(
         conversation_id,
         ConversationMessage(role="human", content=case.current_user_request),
         tags=("benchmark", "task-prompt", case.id),
     )
-    thought = (task_choice.agent_thought or "").strip()
-    if thought:
+    agent_thought = (
+        (task_choice.agent_thought or "").strip()
+        if task_choice is not None
+        else ""
+    )
+    if agent_thought:
         await database.conversations.add_message(
             conversation_id,
-            ConversationMessage(role="agent_thought", content=thought),
+            ConversationMessage(role="agent_thought", content=agent_thought),
             tags=("benchmark", "task-prompt", case.id),
         )
 

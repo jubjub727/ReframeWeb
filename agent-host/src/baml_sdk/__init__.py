@@ -51,6 +51,50 @@ if typing.TYPE_CHECKING:
 from baml_core import define_function as _define_function
 
 
+SummariseActionHistory       = _define_function("user.SummariseActionHistory", "sync",  ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+SummariseActionHistory_async = _define_function("user.SummariseActionHistory", "async", ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory_async.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+SummariseActionHistory__build_request       = _define_function("user.SummariseActionHistory$build_request", "sync",  ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__build_request.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SummariseActionHistory__build_request_async = _define_function("user.SummariseActionHistory$build_request", "async", ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__build_request_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SummariseActionHistory__build_request_stream       = _define_function("user.SummariseActionHistory$build_request_stream", "sync",  ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__build_request_stream.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SummariseActionHistory__build_request_stream_async = _define_function("user.SummariseActionHistory$build_request_stream", "async", ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__build_request_stream_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SummariseActionHistory__parse       = _define_function("user.SummariseActionHistory$parse", "sync",  ["json"], ["client"])
+SummariseActionHistory__parse.__doc__ = """Raises:
+    LlmClient"""
+SummariseActionHistory__parse_async = _define_function("user.SummariseActionHistory$parse", "async", ["json"], ["client"])
+SummariseActionHistory__parse_async.__doc__ = """Raises:
+    LlmClient"""
+SummariseActionHistory__parse_stream       = _define_function("user.SummariseActionHistory$parse_stream", "sync",  ["sse"], ["client"])
+SummariseActionHistory__parse_stream.__doc__ = """Raises:
+    InvalidArgument, LlmClient"""
+SummariseActionHistory__parse_stream_async = _define_function("user.SummariseActionHistory$parse_stream", "async", ["sse"], ["client"])
+SummariseActionHistory__parse_stream_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient"""
+SummariseActionHistory__render_prompt       = _define_function("user.SummariseActionHistory$render_prompt", "sync",  ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__render_prompt.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SummariseActionHistory__render_prompt_async = _define_function("user.SummariseActionHistory$render_prompt", "async", ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__render_prompt_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SummariseActionHistory_stream       = _define_function("user.SummariseActionHistory$stream", "sync",  ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory_stream.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+SummariseActionHistory_stream_async = _define_function("user.SummariseActionHistory$stream", "async", ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory_stream_async.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
 class ConversationMode(str, enum.Enum):
     WAKE_COMMAND = "WAKE_COMMAND"
     CONTINUOUS_CONVERSATION = "CONTINUOUS_CONVERSATION"
@@ -768,6 +812,20 @@ ContinueVoicePrompt_async.__doc__ = """Raises:
 
 
 __all__ = [
+    "SummariseActionHistory",
+    "SummariseActionHistory_async",
+    "SummariseActionHistory__build_request",
+    "SummariseActionHistory__build_request_async",
+    "SummariseActionHistory__build_request_stream",
+    "SummariseActionHistory__build_request_stream_async",
+    "SummariseActionHistory__parse",
+    "SummariseActionHistory__parse_async",
+    "SummariseActionHistory__parse_stream",
+    "SummariseActionHistory__parse_stream_async",
+    "SummariseActionHistory__render_prompt",
+    "SummariseActionHistory__render_prompt_async",
+    "SummariseActionHistory_stream",
+    "SummariseActionHistory_stream_async",
     "ConversationMode",
     "AvailableTask",
     "ConversationHistoryMessage",

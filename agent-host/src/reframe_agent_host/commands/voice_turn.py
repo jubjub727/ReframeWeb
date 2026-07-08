@@ -192,6 +192,8 @@ class _VoiceTurnEventPrinter:
     _DISPLAY_NAMES = {
         "primitive-dispatch": "response-items",
         "primitive-dispatched": "response-items",
+        "action-history-summary": "action-history-summary",
+        "action-history-summarized": "action-history-summary",
     }
     _LATENCY_STAGES = {
         "task-chosen": "task_choice",
@@ -200,6 +202,7 @@ class _VoiceTurnEventPrinter:
         "memory-relevance-decision": "memory_relevance",
         "task-prompt-generated": "task_prompt",
         "task-executed": "task_execution",
+        "action-history-summarized": "action_history_summary",
     }
 
     def __init__(self, *, debug_output: bool, turn_started_at: float) -> None:
@@ -280,6 +283,8 @@ class _VoiceTurnEventPrinter:
             "task-executed",
             "primitive-dispatch",
             "primitive-dispatched",
+            "action-history-summary",
+            "action-history-summarized",
             "turn-understanding",
             "turn-continuation",
             "agent-reply",
@@ -329,10 +334,11 @@ def _print_turn_result(
             f"confidence={result.task_choice.confidence:.2f} "
             f"latency={_latency(result.timings.task_choice_seconds)}"
         )
-        if result.task_choice.agent_thought:
+        agent_thought = (result.task_choice.agent_thought or "").strip()
+        if agent_thought:
             print(
                 "agent_thought: "
-                f"{_single_line(result.task_choice.agent_thought, limit=None)}"
+                f"{_single_line(agent_thought, limit=None)}"
             )
     if result.memory_search_hints is not None:
         print(
@@ -386,7 +392,19 @@ def _print_turn_result(
             f"records={len(result.primitive_dispatch.records)} "
             f"latency={_latency(result.timings.primitive_dispatch_seconds)}"
         )
+        if result.primitive_dispatch.task_history_id is not None:
+            print(
+                "task_history: "
+                f"id={result.primitive_dispatch.task_history_id} "
+                f"node={result.primitive_dispatch.task_history_node_id or 'NONE'}"
+            )
         _print_conversation_returns(result.primitive_dispatch.records)
+    if result.action_history_summary is not None:
+        print(
+            "action_history_summary: "
+            f"chars={len(result.action_history_summary)} "
+            f"latency={_latency(result.timings.action_history_summary_seconds)}"
+        )
 
 
 def _selected_memory_counts(
@@ -451,10 +469,15 @@ def _print_conversation_lines(result) -> None:
     if result.routed_transcript:
         print(f"human_reply: {_single_line(result.routed_transcript, limit=None)}")
 
-    if result.task_choice is not None and result.task_choice.agent_thought:
+    agent_thought = (
+        (result.task_choice.agent_thought or "").strip()
+        if result.task_choice is not None
+        else ""
+    )
+    if agent_thought:
         print(
             "agent_thought: "
-            f"{_single_line(result.task_choice.agent_thought, limit=None)}"
+            f"{_single_line(agent_thought, limit=None)}"
         )
 
     if result.primitive_dispatch is not None:

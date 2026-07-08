@@ -13,7 +13,7 @@ function SelectRelevantMemories(
         Your job is to select which memories are relevant to performing the task
         with respect to the user's request.
 
-        Stop once you have a good set of relevant memories without thinking about it too much.
+        Make sure to include all relevant memories in a timely manner. This task should be both quick and thorough.
 
         Optional output:
         - candidate_memory: an observational memory to create when something seems

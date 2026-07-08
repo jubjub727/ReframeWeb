@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from inspect import Parameter, signature
 from threading import Thread
 from typing import Any
@@ -46,11 +46,14 @@ class PrimitiveDispatchRecord:
     name: str
     status: str
     detail: str
+    output: Mapping[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
 class PrimitiveDispatchResult:
     records: tuple[PrimitiveDispatchRecord, ...] = ()
+    task_history_id: str | None = None
+    task_history_node_id: str | None = None
 
 
 @dataclass
@@ -58,6 +61,7 @@ class PrimitiveDispatcher:
     database: MemoryDatabase
     session_id: str | None = None
     conversation_id: str | None = None
+    task_history_id: str | None = None
     speaker: TextSpeaker | None = None
     on_event: Callable[[str, str], None] | None = None
     on_conversation_mode_off: Callable[[], None] | None = None
@@ -70,9 +74,23 @@ class PrimitiveDispatcher:
             return PrimitiveDispatchResult()
 
         records = []
+        session_action_ids: list[str] = []
+        task_history_id = await self._ensure_task_history()
         for call in result.returns:
-            records.append(await self._dispatch_call(call))
-        return PrimitiveDispatchResult(records=tuple(records))
+            record = await self._dispatch_call(call)
+            records.append(record)
+            session_action_id = await self._record_action(call, record)
+            if session_action_id is not None:
+                session_action_ids.append(session_action_id)
+        task_history_node_id = await self._append_task_history_node(
+            task_history_id,
+            session_action_ids,
+        )
+        return PrimitiveDispatchResult(
+            records=tuple(records),
+            task_history_id=task_history_id,
+            task_history_node_id=task_history_node_id,
+        )
 
     async def _dispatch_call(
         self,
@@ -81,30 +99,53 @@ class PrimitiveDispatcher:
         name = call.name.strip()
         if name in UNSUPPORTED_PRIMITIVES or name not in SUPPORTED_PRIMITIVES:
             detail = _action_not_supported_detail(name, call.payload)
-            await self._agent_reply(detail)
+            message_id = await self._agent_reply(detail)
             return PrimitiveDispatchRecord(
                 name=name or "<empty>",
                 status="unsupported",
                 detail=detail,
+                output={
+                    "status": "unsupported",
+                    "detail": detail,
+                    "message": message_id,
+                },
             )
 
         if name == "agent_reply":
             text = _payload_text(call.payload, "text", "message", "reply")
             if not text:
                 detail = _malformed_detail(name, call.payload)
-                await self._agent_reply(detail)
-                return _malformed(name, detail)
-            await self._agent_reply(text)
-            return PrimitiveDispatchRecord(name=name, status="ok", detail=text)
+                message_id = await self._agent_reply(detail)
+                return _malformed(name, detail, message_id=message_id)
+            message_id = await self._agent_reply(text)
+            return PrimitiveDispatchRecord(
+                name=name,
+                status="ok",
+                detail=text,
+                output={
+                    "status": "ok",
+                    "message": message_id,
+                    "text": text,
+                },
+            )
 
         if name == "agent_thought":
             text = _payload_text(call.payload, "text", "thought", "message")
             if not text:
                 detail = _malformed_detail(name, call.payload)
-                await self._agent_reply(detail)
-                return _malformed(name, detail)
-            await self._agent_thought(text)
-            return PrimitiveDispatchRecord(name=name, status="ok", detail=text)
+                message_id = await self._agent_reply(detail)
+                return _malformed(name, detail, message_id=message_id)
+            message_id = await self._agent_thought(text)
+            return PrimitiveDispatchRecord(
+                name=name,
+                status="ok",
+                detail=text,
+                output={
+                    "status": "ok",
+                    "message": message_id,
+                    "text": text,
+                },
+            )
 
         if name == "conversation_mode_off":
             if self.on_conversation_mode_off is not None:
@@ -114,6 +155,10 @@ class PrimitiveDispatcher:
                 name=name,
                 status="ok",
                 detail="continuous conversation off",
+                output={
+                    "status": "ok",
+                    "conversation_mode": "off",
+                },
             )
 
         if name == "session_memory":
@@ -123,53 +168,133 @@ class PrimitiveDispatcher:
                     call.payload,
                     reason="missing session_id",
                 )
-                await self._agent_reply(detail)
+                message_id = await self._agent_reply(detail)
                 return PrimitiveDispatchRecord(
                     name=name,
                     status="unsupported",
                     detail=detail,
+                    output={
+                        "status": "unsupported",
+                        "detail": detail,
+                        "message": message_id,
+                    },
                 )
             title, description = _memory_payload(call.payload, "Session memory")
-            await self.database.session_memories.create(
+            memory = await self.database.session_memories.create(
                 self.session_id,
                 SessionMemory(title=title, description=description),
                 tags=("task-execution", "session-memory"),
             )
-            return PrimitiveDispatchRecord(name=name, status="ok", detail=title)
+            return PrimitiveDispatchRecord(
+                name=name,
+                status="ok",
+                detail=title,
+                output={
+                    "status": "ok",
+                    "memory": memory.id,
+                    "title": title,
+                    "description": description,
+                },
+            )
 
         if name == "user_preference":
             title, description = _memory_payload(call.payload, "User preference")
-            await self.database.user_preferences.create(
+            memory = await self.database.user_preferences.create(
                 UserPreferenceMemory(title=title, description=description),
                 tags=("task-execution", "user-preference"),
             )
-            return PrimitiveDispatchRecord(name=name, status="ok", detail=title)
+            return PrimitiveDispatchRecord(
+                name=name,
+                status="ok",
+                detail=title,
+                output={
+                    "status": "ok",
+                    "memory": memory.id,
+                    "title": title,
+                    "description": description,
+                },
+            )
 
         detail = _action_not_supported_detail(name, call.payload)
-        await self._agent_reply(detail)
+        message_id = await self._agent_reply(detail)
         return PrimitiveDispatchRecord(
             name=name,
             status="unsupported",
             detail=detail,
+            output={
+                "status": "unsupported",
+                "detail": detail,
+                "message": message_id,
+            },
         )
 
-    async def _agent_reply(self, text: str) -> None:
+    async def _agent_reply(self, text: str) -> str | None:
+        message_id = None
         if self.conversation_id is not None:
-            await self.database.conversations.add_message(
+            message = await self.database.conversations.add_message(
                 self.conversation_id,
                 ConversationMessage(role="agent", content=text),
             )
+            message_id = getattr(message, "id", None)
         self._emit("agent-reply", text)
         self._speak_in_background(text)
+        return message_id
 
-    async def _agent_thought(self, text: str) -> None:
+    async def _agent_thought(self, text: str) -> str | None:
         if self.conversation_id is None:
-            return
-        await self.database.conversations.add_message(
+            return None
+        message = await self.database.conversations.add_message(
             self.conversation_id,
             ConversationMessage(role="agent_thought", content=text),
         )
         self._emit("agent-thought", text)
+        return getattr(message, "id", None)
+
+    async def _ensure_task_history(self) -> str | None:
+        if self.session_id is None or self.conversation_id is None:
+            return None
+        if self.task_history_id is not None:
+            return self.task_history_id
+        task_history = await self.database.task_history.create(
+            tags=("task-execution",),
+        )
+        self.task_history_id = task_history.id
+        return task_history.id
+
+    async def _record_action(
+        self,
+        call: types.TaskReturnItem,
+        record: PrimitiveDispatchRecord,
+    ) -> str | None:
+        if self.task_history_id is None:
+            return None
+        session_action = await self.database.task_history.record_action(
+            name=record.name,
+            input=call.payload or {},
+            output=dict(record.output),
+            tags=("task-execution",),
+        )
+        return session_action.id
+
+    async def _append_task_history_node(
+        self,
+        task_history_id: str | None,
+        session_action_ids: list[str],
+    ) -> str | None:
+        if (
+            task_history_id is None
+            or self.session_id is None
+            or self.conversation_id is None
+        ):
+            return None
+        node = await self.database.task_history.append_node(
+            task_history_id,
+            session_id=self.session_id,
+            conversation_id=self.conversation_id,
+            actions=session_action_ids,
+            tags=("task-execution",),
+        )
+        return node.id
 
     def _emit(self, stage: str, message: str) -> None:
         if self.on_event is not None:
@@ -254,11 +379,21 @@ def _payload_preview(payload: Any) -> str:
     return text[: MAX_ACTION_DETAIL_CHARS - 3].rstrip() + "..."
 
 
-def _malformed(name: str, detail: str) -> PrimitiveDispatchRecord:
+def _malformed(
+    name: str,
+    detail: str,
+    *,
+    message_id: str | None,
+) -> PrimitiveDispatchRecord:
     return PrimitiveDispatchRecord(
         name=name,
         status="malformed",
         detail=detail,
+        output={
+            "status": "malformed",
+            "detail": detail,
+            "message": message_id,
+        },
     )
 
 

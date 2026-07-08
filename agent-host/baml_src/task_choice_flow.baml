@@ -14,7 +14,7 @@ function ChooseTask(
         Use the available task information and context to decide which task should
         run next.
 
-        Stop once you have the right task without thinking about it too much. Don't waste time thinking about the agent_thought too much.
+        Stop once you have the right task.
 
         Context sections:
         - Current user request: the request being routed now.
@@ -24,8 +24,8 @@ function ChooseTask(
         - Task-choice memories: remembered observations about choosing tasks.
 
         Optional outputs available in this step:
-        - agent_thought: private context to add to the conversation without
-          notifying the human.
+        - agent_thought: compact routing context to add to the conversation when
+          it helps later layers interpret the selected task or the user request.
         - candidate_memory: a vague remembered observation that could be useful to
           preserve.
 
@@ -35,8 +35,10 @@ function ChooseTask(
         - Do not invent task ids.
         - Do not perform the task. Only choose the task.
         - Use optional outputs only when they are useful.
+        - Keep agent_thought concise when it is useful.
         - User request may be related to memories that this layer is not yet aware of, simply finish your task without thinking too much if that seems to be the case.
         - Do not generate misleading agent_thoughts that would only be relevant to your lack of memory capabilities.
+        - Do not make confident assertions in agent_thoughts only use them to provide observations.
 
         {{ _.role("user") }}
 

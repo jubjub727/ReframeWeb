@@ -30,6 +30,7 @@ def mode_switch_timings(
         post_vad_task_prompt_seconds=None,
         post_vad_task_execution_seconds=None,
         post_vad_primitive_dispatch_seconds=None,
+        post_vad_action_history_summary_seconds=None,
         estimated_user_stop_to_transcript_seconds=None,
         estimated_user_stop_to_task_choice_seconds=None,
         estimated_user_stop_to_memory_search_seconds=None,
@@ -39,6 +40,7 @@ def mode_switch_timings(
         estimated_user_stop_to_task_prompt_seconds=None,
         estimated_user_stop_to_task_execution_seconds=None,
         estimated_user_stop_to_primitive_dispatch_seconds=None,
+        estimated_user_stop_to_action_history_summary_seconds=None,
         transcription_seconds=None,
         task_choice_seconds=None,
         memory_search_seconds=None,
@@ -48,6 +50,7 @@ def mode_switch_timings(
         task_prompt_seconds=None,
         task_execution_seconds=None,
         primitive_dispatch_seconds=None,
+        action_history_summary_seconds=None,
         total_seconds=time.perf_counter() - total_started_at,
     )
 
@@ -66,6 +69,7 @@ def turn_timings(
     post_vad_task_prompt_seconds: float | None,
     post_vad_task_execution_seconds: float | None,
     post_vad_primitive_dispatch_seconds: float | None,
+    post_vad_action_history_summary_seconds: float | None,
     transcription_seconds: float,
     task_choice_seconds: float | None,
     memory_search_seconds: float | None,
@@ -75,6 +79,7 @@ def turn_timings(
     task_prompt_seconds: float | None,
     task_execution_seconds: float | None,
     primitive_dispatch_seconds: float | None,
+    action_history_summary_seconds: float | None,
 ) -> VoiceTurnTimings:
     vad_delay_seconds = config.voice_activity.min_silence_ms / 1000
     return VoiceTurnTimings(
@@ -93,6 +98,9 @@ def turn_timings(
         post_vad_task_prompt_seconds=post_vad_task_prompt_seconds,
         post_vad_task_execution_seconds=post_vad_task_execution_seconds,
         post_vad_primitive_dispatch_seconds=post_vad_primitive_dispatch_seconds,
+        post_vad_action_history_summary_seconds=(
+            post_vad_action_history_summary_seconds
+        ),
         estimated_user_stop_to_transcript_seconds=(
             vad_delay_seconds + post_vad_transcript_seconds
         ),
@@ -136,6 +144,11 @@ def turn_timings(
             if post_vad_primitive_dispatch_seconds is not None
             else None
         ),
+        estimated_user_stop_to_action_history_summary_seconds=(
+            vad_delay_seconds + post_vad_action_history_summary_seconds
+            if post_vad_action_history_summary_seconds is not None
+            else None
+        ),
         transcription_seconds=transcription_seconds,
         task_choice_seconds=task_choice_seconds,
         memory_search_seconds=memory_search_seconds,
@@ -145,5 +158,6 @@ def turn_timings(
         task_prompt_seconds=task_prompt_seconds,
         task_execution_seconds=task_execution_seconds,
         primitive_dispatch_seconds=primitive_dispatch_seconds,
+        action_history_summary_seconds=action_history_summary_seconds,
         total_seconds=time.perf_counter() - total_started_at,
     )

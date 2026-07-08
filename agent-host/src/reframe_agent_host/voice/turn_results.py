@@ -41,6 +41,7 @@ def mode_switch_turn_result(
         task_prompt=None,
         task_execution=None,
         primitive_dispatch=None,
+        action_history_summary=None,
         timings=mode_switch_timings(
             model_prepare_seconds,
             capture,
@@ -75,6 +76,7 @@ def ignored_turn_result(
         task_prompt=None,
         task_execution=None,
         primitive_dispatch=None,
+        action_history_summary=None,
         timings=turn_timings(
             config,
             model_prepare_seconds=model_prepare_seconds,
@@ -89,6 +91,7 @@ def ignored_turn_result(
             post_vad_task_prompt_seconds=None,
             post_vad_task_execution_seconds=None,
             post_vad_primitive_dispatch_seconds=None,
+            post_vad_action_history_summary_seconds=None,
             transcription_seconds=0.0,
             task_choice_seconds=None,
             memory_search_seconds=None,
@@ -98,6 +101,7 @@ def ignored_turn_result(
             task_prompt_seconds=None,
             task_execution_seconds=None,
             primitive_dispatch_seconds=None,
+            action_history_summary_seconds=None,
         ),
     )
 
@@ -119,6 +123,7 @@ def transcribed_turn_result(
     task_prompt: types.TaskPromptDecision | None,
     task_execution: types.TaskExecutionResult | None,
     primitive_dispatch: PrimitiveDispatchResult | None,
+    action_history_summary: str | None,
     timings: dict[str, float | None],
 ) -> VoiceTurnResult:
     return VoiceTurnResult(
@@ -140,6 +145,7 @@ def transcribed_turn_result(
         task_prompt=task_prompt,
         task_execution=task_execution,
         primitive_dispatch=primitive_dispatch,
+        action_history_summary=action_history_summary,
         timings=turn_timings(
             config,
             model_prepare_seconds=timings["model_prepare_seconds"],
@@ -162,6 +168,9 @@ def transcribed_turn_result(
             post_vad_primitive_dispatch_seconds=timings[
                 "post_vad_primitive_dispatch_seconds"
             ],
+            post_vad_action_history_summary_seconds=timings[
+                "post_vad_action_history_summary_seconds"
+            ],
             transcription_seconds=timings["transcription_seconds"],
             task_choice_seconds=timings["task_choice_seconds"],
             memory_search_seconds=timings["memory_search_seconds"],
@@ -171,5 +180,8 @@ def transcribed_turn_result(
             task_prompt_seconds=timings["task_prompt_seconds"],
             task_execution_seconds=timings["task_execution_seconds"],
             primitive_dispatch_seconds=timings["primitive_dispatch_seconds"],
+            action_history_summary_seconds=timings[
+                "action_history_summary_seconds"
+            ],
         ),
     )

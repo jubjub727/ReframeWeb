@@ -64,6 +64,17 @@ client<llm> TaskExecutionModel {
     },
 }
 
+client<llm> ActionHistorySummaryModel {
+    provider: openai-generic,
+    retry_policy: AgentFlowRetry,
+    options: {
+        base_url: "https://opencode.ai/zen/go/v1",
+        model: "glm-5.1",
+        reasoning_effort: "none",
+        api_key: env.OPENCODE_GO_API_KEY,
+    },
+}
+
 retry_policy AgentFlowRetry {
     max_retries: 2,
     initial_delay_ms: 300,

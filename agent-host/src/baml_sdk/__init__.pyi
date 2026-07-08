@@ -34,6 +34,50 @@ if typing.TYPE_CHECKING:
     from .baml import UNSET as UNSET
 
 
+def SummariseActionHistory(current_conversation: typing.Optional[ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> str:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def SummariseActionHistory_async(current_conversation: typing.Optional[ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> str:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+def SummariseActionHistory__build_request(current_conversation: typing.Optional[ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def SummariseActionHistory__build_request_async(current_conversation: typing.Optional[ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def SummariseActionHistory__build_request_stream(current_conversation: typing.Optional[ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def SummariseActionHistory__build_request_stream_async(current_conversation: typing.Optional[ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def SummariseActionHistory__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> str:
+    """Raises:
+        LlmClient"""
+async def SummariseActionHistory__parse_async(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> str:
+    """Raises:
+        LlmClient"""
+def SummariseActionHistory__parse_stream(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[str], str]:
+    """Raises:
+        InvalidArgument, LlmClient"""
+async def SummariseActionHistory__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[str], str]:
+    """Raises:
+        InvalidArgument, LlmClient"""
+def SummariseActionHistory__render_prompt(current_conversation: typing.Optional[ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def SummariseActionHistory__render_prompt_async(current_conversation: typing.Optional[ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def SummariseActionHistory_stream(current_conversation: typing.Optional[ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[str], str]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def SummariseActionHistory_stream_async(current_conversation: typing.Optional[ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[str], str]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
 class ConversationMode(str, enum.Enum):
     WAKE_COMMAND = "WAKE_COMMAND"
     CONTINUOUS_CONVERSATION = "CONTINUOUS_CONVERSATION"
@@ -714,6 +758,20 @@ async def ContinueVoicePrompt_async(current_user_request: str, current_conversat
 
 
 __all__ = [
+    "SummariseActionHistory",
+    "SummariseActionHistory_async",
+    "SummariseActionHistory__build_request",
+    "SummariseActionHistory__build_request_async",
+    "SummariseActionHistory__build_request_stream",
+    "SummariseActionHistory__build_request_stream_async",
+    "SummariseActionHistory__parse",
+    "SummariseActionHistory__parse_async",
+    "SummariseActionHistory__parse_stream",
+    "SummariseActionHistory__parse_stream_async",
+    "SummariseActionHistory__render_prompt",
+    "SummariseActionHistory__render_prompt_async",
+    "SummariseActionHistory_stream",
+    "SummariseActionHistory_stream_async",
     "ConversationMode",
     "AvailableTask",
     "ConversationHistoryMessage",

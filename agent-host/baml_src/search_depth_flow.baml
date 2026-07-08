@@ -12,7 +12,7 @@ function ChooseMemorySearchDepths(
     prompt: #"
         {{ _.role("system") }}
 
-        Choose timestamp cutoffs for each listed search domain.
+        Choose timestamp cutoffs for each listed search domain. Your job is to quickly decide an appropriate cutoff date based on current context.
 
         Stop once you have timestamps that look good enough for the request without thinking about it too much.
 

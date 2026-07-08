@@ -17,6 +17,52 @@ class FakeConversations:
 class FakeDatabase:
     def __init__(self):
         self.conversations = FakeConversations()
+        self.task_history = FakeTaskHistory()
+
+
+class FakeTaskHistory:
+    def __init__(self):
+        self.recorded = []
+        self.appended = []
+
+    async def create(self, tags=()):
+        return FakeNode("memory_node:task_history")
+
+    async def record_action(self, *, name, input, output, tags=()):
+        self.recorded.append(
+            {
+                "name": name,
+                "input": input,
+                "output": output,
+                "tags": tags,
+            }
+        )
+        return FakeNode(f"memory_node:session_action_{len(self.recorded)}")
+
+    async def append_node(
+        self,
+        task_history_id,
+        *,
+        session_id,
+        conversation_id,
+        actions,
+        tags=(),
+    ):
+        self.appended.append(
+            {
+                "task_history_id": task_history_id,
+                "session_id": session_id,
+                "conversation_id": conversation_id,
+                "actions": list(actions),
+                "tags": tags,
+            }
+        )
+        return FakeNode("memory_node:task_history_node")
+
+
+class FakeNode:
+    def __init__(self, node_id):
+        self.id = node_id
 
 
 class BlockingSpeaker:
@@ -160,6 +206,60 @@ class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("Action not supported: website_open", detail)
         self.assertIn("https://example.com", detail)
         self.assertIn(("agent-reply", detail), events)
+
+    async def test_dispatch_records_task_history_actions(self):
+        database = FakeDatabase()
+        dispatcher = PrimitiveDispatcher(
+            database=database,
+            session_id="memory_node:session",
+            conversation_id="memory_node:conversation",
+        )
+
+        dispatch_result = await dispatcher.dispatch(
+            types.TaskExecutionResult(
+                returns=[
+                    types.TaskReturnItem(
+                        name="agent_reply",
+                        payload={"text": "done"},
+                    ),
+                    types.TaskReturnItem(
+                        name="conversation_mode_off",
+                        payload={},
+                    ),
+                ]
+            )
+        )
+
+        self.assertEqual(dispatch_result.task_history_id, "memory_node:task_history")
+        self.assertEqual(
+            dispatch_result.task_history_node_id,
+            "memory_node:task_history_node",
+        )
+        self.assertEqual(
+            [record["name"] for record in database.task_history.recorded],
+            ["agent_reply", "conversation_mode_off"],
+        )
+        self.assertEqual(
+            database.task_history.recorded[0]["input"],
+            {"text": "done"},
+        )
+        self.assertEqual(
+            database.task_history.recorded[0]["output"]["text"],
+            "done",
+        )
+        self.assertEqual(
+            database.task_history.appended[0],
+            {
+                "task_history_id": "memory_node:task_history",
+                "session_id": "memory_node:session",
+                "conversation_id": "memory_node:conversation",
+                "actions": [
+                    "memory_node:session_action_1",
+                    "memory_node:session_action_2",
+                ],
+                "tags": ("task-execution",),
+            },
+        )
 
 
 if __name__ == "__main__":
