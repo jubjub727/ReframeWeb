@@ -401,6 +401,7 @@ _ENUM_ENTRIES = {
     "baml.csv.CsvErrorKind": ("baml_sdk.baml.csv", "CsvErrorKind"),
     "baml.future.FutureState": ("baml_sdk.baml.future", "FutureState"),
     "baml.llm.ClientType": ("baml_sdk.baml.llm", "ClientType"),
+    "user.CompletionResult": ("baml_sdk", "CompletionResult"),
     "user.ConversationMode": ("baml_sdk", "ConversationMode"),
 }
 

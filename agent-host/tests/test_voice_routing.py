@@ -35,6 +35,10 @@ from reframe_agent_host.voice.types import (
     VoicePipelineConfig,
     VoiceTurnControl,
 )
+from reframe_agent_host.task_execution import (
+    PrimitiveDispatchRecord,
+    PrimitiveDispatchResult,
+)
 from reframe_memory import RetrievedMemoryContext
 
 
@@ -259,6 +263,23 @@ class RecordingTurnMemoryDatabase:
 
     async def close(self):
         self.closed.set()
+
+
+class ClosingOnlyDatabase:
+    async def close(self):
+        return None
+
+
+class RecordingTaskExecution:
+    async def execute_task(self, **_kwargs):
+        return types.TaskExecutionResult(
+            returns=[
+                types.TaskReturnItem(
+                    name="agent_reply",
+                    payload={"text": "What detail should I use?"},
+                ),
+            ],
+        )
 
 
 class FakeInterruptSpeaker:
@@ -618,6 +639,103 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result, (None, None, None))
         self.assertNotIn("primitive-dispatch", [stage for stage, _message in events])
 
+    async def test_completion_review_runs_after_dispatched_primitives_and_summary(self):
+        order = []
+        completion_inputs = {}
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(),
+            transcriber=StubTranscriber("Jarvis, do this."),
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            memory_retrieval=RecordingMemoryRetrieval(),
+            task_execution=RecordingTaskExecution(),
+            turn_flow=RecordingBamlTurnFlow(),
+        )
+
+        class OrderedPrimitiveDispatcher:
+            def __init__(self, **_kwargs):
+                pass
+
+            async def dispatch(self, _result):
+                order.append("dispatch-start")
+                await asyncio.sleep(0)
+                order.append("dispatch-end")
+                return PrimitiveDispatchResult(
+                    records=(
+                        PrimitiveDispatchRecord(
+                            name="agent_reply",
+                            status="ok",
+                            detail="What detail should I use?",
+                            output={"status": "ok"},
+                        ),
+                    ),
+                    task_history_id="memory_node:task_history",
+                    task_history_node_id="memory_node:task_history_node",
+                )
+
+        class OrderedActionHistorySummarizer:
+            def __init__(self, **_kwargs):
+                pass
+
+            async def summarize(self, *_args, **_kwargs):
+                order.append("summary-start")
+                await asyncio.sleep(0)
+                order.append("summary-end")
+                return "The recorded actions asked the user a question."
+
+            async def close(self):
+                order.append("summary-close")
+
+        class OrderedTaskCompletionChecker:
+            async def check(self, **kwargs):
+                order.append("review-start")
+                completion_inputs.update(kwargs)
+                await asyncio.sleep(0)
+                order.append("review-end")
+                return types.CompletionResult.PASS
+
+        async def fake_open_memory_database():
+            return ClosingOnlyDatabase()
+
+        with patch(
+            "reframe_agent_host.voice.turn_processor.PrimitiveDispatcher",
+            OrderedPrimitiveDispatcher,
+        ):
+            with patch(
+                "reframe_agent_host.voice.turn_processor.ActionHistorySummarizer",
+                OrderedActionHistorySummarizer,
+            ):
+                with patch(
+                    "reframe_agent_host.voice.turn_processor.TaskCompletionChecker",
+                    OrderedTaskCompletionChecker,
+                ):
+                    with patch(
+                        "reframe_agent_host.voice.turn_processor.open_memory_database",
+                        fake_open_memory_database,
+                    ):
+                        result = await processor.process(
+                            capture=_capture_result(),
+                            conversation_mode=types.ConversationMode.WAKE_COMMAND,
+                            model_prepare_seconds=0.0,
+                            total_started_at=time.perf_counter(),
+                            on_event=lambda stage, message: events.append(
+                                (stage, message),
+                            ),
+                        )
+
+        self.assertLess(order.index("dispatch-end"), order.index("summary-start"))
+        self.assertLess(order.index("summary-end"), order.index("review-start"))
+        self.assertEqual(completion_inputs["completion_string"], "Question")
+        self.assertEqual(
+            completion_inputs["output_summary"],
+            "The recorded actions asked the user a question.",
+        )
+        self.assertEqual(result.task_completion, types.CompletionResult.PASS)
+        self.assertEqual(
+            [stage for stage, _message in events if stage.endswith("reviewed")],
+            ["task-completion-reviewed"],
+        )
+
     async def test_conversation_on_confirmation_turns_mode_on_without_human_reply(self):
         transcriber = StubTranscriber("conversation on")
         mode_controller = ConversationModeController(types.ConversationMode.WAKE_COMMAND)
@@ -820,6 +938,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             printer("memory-relevance-decision", "{} (0.090s)")
             printer("task-prompt-generated", "64 chars (0.240s)")
             printer("action-history-summarized", "42 chars (0.110s)")
+            printer("task-completion-reviewed", "PASS (0.075s)")
 
         self.assertEqual(output.getvalue().splitlines(), [
             "[memory_search 120ms]",
@@ -827,6 +946,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             "[memory_relevance 90ms]",
             "[task_prompt 240ms]",
             "[action_history_summary 110ms]",
+            "[task_completion 75ms]",
         ])
 
     async def test_voice_context_setup_does_not_seed_core_tasks_by_default(self):

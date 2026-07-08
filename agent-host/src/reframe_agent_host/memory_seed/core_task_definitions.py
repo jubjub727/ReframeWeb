@@ -37,8 +37,9 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
         ),
         input="The user's request.",
         output=(
-            "Named return items that give the user a clear limitation or next "
-            "step."
+            "The user received a clear explanation that the request cannot be "
+            "handled, including the relevant limitation or boundary and a "
+            "useful next step when available."
         ),
         prompt=(
             "Give the human a clear, brief explanation of the relevant "
@@ -68,8 +69,8 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
         ),
         input="The user's request.",
         output=(
-            "Named return items that ask for the information needed to "
-            "continue."
+            "The user was asked for the specific missing information needed "
+            "to continue the task."
         ),
         prompt=(
             "Ask the human for the information needed to continue. Ask for the "
@@ -98,7 +99,7 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "continuous conversation or to wait until they address it again."
         ),
         input="The user's request to end continuous conversation.",
-        output="Named return items that end continuous conversation.",
+        output="Continuous conversation mode was turned off.",
         prompt=(
             "End continuous conversation so the assistant goes quiet until the "
             "user addresses it again. Give a short confirmation when that "
@@ -123,8 +124,8 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
         ),
         input="The user's request or conversational context.",
         output=(
-            "Named non-spoken return items that record useful thought, session "
-            "context, or durable user preference."
+            "Useful non-spoken context was preserved as an internal thought, "
+            "session memory, or user preference."
         ),
         prompt=(
             "Think privately about the supplied request or context. Use this "
@@ -152,7 +153,7 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "and record nothing."
         ),
         input="The user's request or conversational context.",
-        output="An empty returns array.",
+        output="",
         prompt=(
             "Do nothing. Return an empty returns array.\n"
         ),
@@ -167,7 +168,10 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "conversational opener."
         ),
         input="The user's greeting or conversational opener.",
-        output="A named return item that greets the user naturally.",
+        output=(
+            "The user received a brief, natural greeting or conversational "
+            "acknowledgement."
+        ),
         prompt=(
             "Respond naturally to the human's greeting or conversational "
             "opener. Keep it brief, warm, and style-matched. Do not turn a "
@@ -190,7 +194,10 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "simply for the sake of replying."
         ),
         input="The user's message.",
-        output="Named return items that reply to the user.",
+        output=(
+            "The user received a useful spoken reply that answered or "
+            "responded to their message."
+        ),
         prompt=(
             "Answer the human directly using the supplied request. Keep the "
             "reply concise, conversational, and useful.\n"

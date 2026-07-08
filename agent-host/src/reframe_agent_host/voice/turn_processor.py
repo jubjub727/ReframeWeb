@@ -9,6 +9,7 @@ from reframe_agent_host.agent_flow.live_conversation import LiveConversationCont
 from reframe_agent_host.agent_flow.retrieved_memory_graph import (
     BamlRetrievedMemoryContext,
 )
+from reframe_agent_host.agent_flow.task_completion import TaskCompletionChecker
 from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
 import baml_sdk as types
 from reframe_agent_host.speech.transcription import (
@@ -259,6 +260,7 @@ class VoiceTurnProcessor:
                 task_execution=None,
                 primitive_dispatch=None,
                 action_history_summary=None,
+                task_completion=None,
                 timings={
                     "model_prepare_seconds": model_prepare_seconds,
                     "total_started_at": total_started_at,
@@ -272,6 +274,7 @@ class VoiceTurnProcessor:
                     "post_vad_task_execution_seconds": None,
                     "post_vad_primitive_dispatch_seconds": None,
                     "post_vad_action_history_summary_seconds": None,
+                    "post_vad_task_completion_seconds": None,
                     "transcription_seconds": transcription_seconds,
                     "task_choice_seconds": None,
                     "memory_search_seconds": None,
@@ -282,6 +285,7 @@ class VoiceTurnProcessor:
                     "task_execution_seconds": None,
                     "primitive_dispatch_seconds": None,
                     "action_history_summary_seconds": None,
+                    "task_completion_seconds": None,
                 },
             )
 
@@ -306,6 +310,7 @@ class VoiceTurnProcessor:
                 task_execution=None,
                 primitive_dispatch=None,
                 action_history_summary=None,
+                task_completion=None,
                 timings={
                     "model_prepare_seconds": model_prepare_seconds,
                     "total_started_at": total_started_at,
@@ -319,6 +324,7 @@ class VoiceTurnProcessor:
                     "post_vad_task_execution_seconds": None,
                     "post_vad_primitive_dispatch_seconds": None,
                     "post_vad_action_history_summary_seconds": None,
+                    "post_vad_task_completion_seconds": None,
                     "transcription_seconds": transcription_seconds,
                     "task_choice_seconds": None,
                     "memory_search_seconds": None,
@@ -329,6 +335,7 @@ class VoiceTurnProcessor:
                     "task_execution_seconds": None,
                     "primitive_dispatch_seconds": None,
                     "action_history_summary_seconds": None,
+                    "task_completion_seconds": None,
                 },
             )
 
@@ -462,6 +469,17 @@ class VoiceTurnProcessor:
             on_event,
         )
         await self._checkpoint(turn_control)
+        (
+            task_completion,
+            task_completion_seconds,
+            post_vad_task_completion_seconds,
+        ) = await self._maybe_check_task_completion(
+            selected_task,
+            action_history_summary,
+            post_vad_started_at,
+            on_event,
+        )
+        await self._checkpoint(turn_control)
         post_vad_transcript_seconds = time.perf_counter() - post_vad_started_at
         return transcribed_turn_result(
             config=self._config,
@@ -481,6 +499,7 @@ class VoiceTurnProcessor:
             task_execution=task_execution,
             primitive_dispatch=primitive_dispatch,
             action_history_summary=action_history_summary,
+            task_completion=task_completion,
             timings={
                 "model_prepare_seconds": model_prepare_seconds,
                 "total_started_at": total_started_at,
@@ -502,6 +521,9 @@ class VoiceTurnProcessor:
                 "post_vad_action_history_summary_seconds": (
                     post_vad_action_history_summary_seconds
                 ),
+                "post_vad_task_completion_seconds": (
+                    post_vad_task_completion_seconds
+                ),
                 "transcription_seconds": transcription_seconds,
                 "task_choice_seconds": task_choice_seconds,
                 "memory_search_seconds": memory_search_seconds,
@@ -512,6 +534,7 @@ class VoiceTurnProcessor:
                 "task_execution_seconds": task_execution_seconds,
                 "primitive_dispatch_seconds": primitive_dispatch_seconds,
                 "action_history_summary_seconds": action_history_summary_seconds,
+                "task_completion_seconds": task_completion_seconds,
             },
         )
 
@@ -748,6 +771,35 @@ class VoiceTurnProcessor:
             on_event,
             "action-history-summarized",
             f"{len(result)} chars ({seconds:.3f}s)",
+        )
+        return result, seconds, time.perf_counter() - post_vad_started_at
+
+    async def _maybe_check_task_completion(
+        self,
+        selected_task: types.SelectedTaskContext | None,
+        action_history_summary: str | None,
+        post_vad_started_at: float,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> tuple[types.CompletionResult | None, float | None, float | None]:
+        if selected_task is None or action_history_summary is None:
+            return None, None, None
+
+        self._emit(
+            on_event,
+            "task-completion-review",
+            "checking task completion",
+        )
+        started_at = time.perf_counter()
+        result = await TaskCompletionChecker().check(
+            completion_string=selected_task.output,
+            output_summary=action_history_summary,
+            prompt_layer_debug=getattr(self._turn_flow, "prompt_layer_debug", None),
+        )
+        seconds = time.perf_counter() - started_at
+        self._emit(
+            on_event,
+            "task-completion-reviewed",
+            f"{result.value} ({seconds:.3f}s)",
         )
         return result, seconds, time.perf_counter() - post_vad_started_at
 

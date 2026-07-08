@@ -283,7 +283,7 @@ def _do_nothing_task_node() -> MemoryNode[Task]:
             name="Do nothing",
             description="Do nothing.",
             input="The user's request or conversational context.",
-            output="An empty returns array.",
+            output="",
             prompt="Do nothing. Return an empty returns array.\n",
             provider_id="memory_node:magic_provider",
         ),

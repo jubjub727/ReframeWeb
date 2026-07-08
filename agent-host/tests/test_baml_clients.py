@@ -52,6 +52,27 @@ class BamlClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("agent_reply", prompt_text)
         self.assertNotIn("Current task", prompt_text)
 
+    async def test_task_completion_prompt_uses_glm51_pass_fail_gate(self):
+        request = await baml.CheckTaskCompletion__build_request_async(
+            completion_string=(
+                "The user received a useful spoken reply that answered or "
+                "responded to their message."
+            ),
+            output_summary="The recorded actions replied to the user.",
+        )
+        body = json.loads(request.body)
+        prompt_text = json.dumps(body["messages"])
+
+        self.assertEqual(body["model"], "glm-5.1")
+        self.assertEqual(body["reasoning_effort"], "none")
+        self.assertIn("You are a task completion checker.", prompt_text)
+        self.assertIn("Completion requirement", prompt_text)
+        self.assertIn("Task output summary", prompt_text)
+        self.assertIn("Return exactly one token", prompt_text)
+        self.assertIn("PASS or FAIL", prompt_text)
+        self.assertNotIn("confidence", prompt_text.lower())
+        self.assertNotIn("too vague", prompt_text.lower())
+
 
 if __name__ == "__main__":
     unittest.main()

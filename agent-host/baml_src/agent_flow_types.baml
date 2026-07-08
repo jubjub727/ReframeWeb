@@ -3,6 +3,11 @@ enum ConversationMode {
     CONTINUOUS_CONVERSATION,
 }
 
+enum CompletionResult {
+    PASS,
+    FAIL,
+}
+
 class AvailableTask {
     id: string,
     name: string,

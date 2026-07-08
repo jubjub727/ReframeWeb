@@ -58,6 +58,7 @@ class VoiceTurnTimings:
     post_vad_task_execution_seconds: float | None
     post_vad_primitive_dispatch_seconds: float | None
     post_vad_action_history_summary_seconds: float | None
+    post_vad_task_completion_seconds: float | None
     estimated_user_stop_to_transcript_seconds: float | None
     estimated_user_stop_to_task_choice_seconds: float | None
     estimated_user_stop_to_memory_search_seconds: float | None
@@ -68,6 +69,7 @@ class VoiceTurnTimings:
     estimated_user_stop_to_task_execution_seconds: float | None
     estimated_user_stop_to_primitive_dispatch_seconds: float | None
     estimated_user_stop_to_action_history_summary_seconds: float | None
+    estimated_user_stop_to_task_completion_seconds: float | None
     transcription_seconds: float | None
     task_choice_seconds: float | None
     memory_search_seconds: float | None
@@ -78,6 +80,7 @@ class VoiceTurnTimings:
     task_execution_seconds: float | None
     primitive_dispatch_seconds: float | None
     action_history_summary_seconds: float | None
+    task_completion_seconds: float | None
     total_seconds: float
 
     def to_dict(self) -> dict[str, float | None]:
@@ -110,6 +113,9 @@ class VoiceTurnTimings:
             "post_vad_action_history_summary_seconds": (
                 self.post_vad_action_history_summary_seconds
             ),
+            "post_vad_task_completion_seconds": (
+                self.post_vad_task_completion_seconds
+            ),
             "estimated_user_stop_to_transcript_seconds": (
                 self.estimated_user_stop_to_transcript_seconds
             ),
@@ -140,6 +146,9 @@ class VoiceTurnTimings:
             "estimated_user_stop_to_action_history_summary_seconds": (
                 self.estimated_user_stop_to_action_history_summary_seconds
             ),
+            "estimated_user_stop_to_task_completion_seconds": (
+                self.estimated_user_stop_to_task_completion_seconds
+            ),
             "transcription_seconds": self.transcription_seconds,
             "task_choice_seconds": self.task_choice_seconds,
             "memory_search_seconds": self.memory_search_seconds,
@@ -150,6 +159,7 @@ class VoiceTurnTimings:
             "task_execution_seconds": self.task_execution_seconds,
             "primitive_dispatch_seconds": self.primitive_dispatch_seconds,
             "action_history_summary_seconds": self.action_history_summary_seconds,
+            "task_completion_seconds": self.task_completion_seconds,
             "total_seconds": self.total_seconds,
         }
 
@@ -175,6 +185,7 @@ class VoiceTurnResult:
     task_execution: types.TaskExecutionResult | None
     primitive_dispatch: PrimitiveDispatchResult | None
     action_history_summary: str | None
+    task_completion: types.CompletionResult | None
     timings: VoiceTurnTimings
 
     def to_dict(self) -> dict[str, object]:
@@ -292,6 +303,11 @@ class VoiceTurnResult:
             "action_history_summary": (
                 self.action_history_summary
                 if self.action_history_summary is not None
+                else None
+            ),
+            "task_completion": (
+                self.task_completion.value
+                if self.task_completion is not None
                 else None
             ),
             "timings": self.timings.to_dict(),

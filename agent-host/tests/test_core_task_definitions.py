@@ -87,7 +87,27 @@ class CoreTaskDefinitionTests(unittest.TestCase):
             tasks["Thinking"].prompt,
         )
         self.assertIn("empty returns array", tasks["Thinking"].prompt)
-        self.assertEqual(tasks["Do nothing"].output, "An empty returns array.")
+        self.assertEqual(
+            tasks["Explain request cannot be handled"].output,
+            "The user received a clear explanation that the request cannot be "
+            "handled, including the relevant limitation or boundary and a "
+            "useful next step when available.",
+        )
+        self.assertEqual(
+            tasks["Request more information from the user"].output,
+            "The user was asked for the specific missing information needed "
+            "to continue the task.",
+        )
+        self.assertEqual(
+            tasks["Turn conversation mode off"].output,
+            "Continuous conversation mode was turned off.",
+        )
+        self.assertEqual(
+            tasks["Thinking"].output,
+            "Useful non-spoken context was preserved as an internal thought, "
+            "session memory, or user preference.",
+        )
+        self.assertEqual(tasks["Do nothing"].output, "")
         self.assertIn("Return an empty returns array", tasks["Do nothing"].prompt)
         self.assertIn(
             'agent_reply with payload {"text": "..."}',
@@ -95,7 +115,13 @@ class CoreTaskDefinitionTests(unittest.TestCase):
         )
         self.assertEqual(
             tasks["Greeting"].output,
-            "A named return item that greets the user naturally.",
+            "The user received a brief, natural greeting or conversational "
+            "acknowledgement.",
+        )
+        self.assertEqual(
+            tasks["Reply to user"].output,
+            "The user received a useful spoken reply that answered or "
+            "responded to their message.",
         )
         self.assertNotIn(
             'agent_thought with payload {"text": "..."}',

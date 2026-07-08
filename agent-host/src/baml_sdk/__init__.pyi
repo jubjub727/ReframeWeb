@@ -83,6 +83,11 @@ class ConversationMode(str, enum.Enum):
     CONTINUOUS_CONVERSATION = "CONTINUOUS_CONVERSATION"
 
 
+class CompletionResult(str, enum.Enum):
+    PASS = "PASS"
+    FAIL = "FAIL"
+
+
 class AvailableTask(pydantic.BaseModel):
     id: str
     name: str
@@ -653,6 +658,50 @@ async def ChooseTask_stream_async(current_user_request: str, current_conversatio
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
+def CheckTaskCompletion(completion_string: str, output_summary: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CompletionResult:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def CheckTaskCompletion_async(completion_string: str, output_summary: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CompletionResult:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+def CheckTaskCompletion__build_request(completion_string: str, output_summary: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def CheckTaskCompletion__build_request_async(completion_string: str, output_summary: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def CheckTaskCompletion__build_request_stream(completion_string: str, output_summary: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def CheckTaskCompletion__build_request_stream_async(completion_string: str, output_summary: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def CheckTaskCompletion__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CompletionResult:
+    """Raises:
+        LlmClient"""
+async def CheckTaskCompletion__parse_async(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CompletionResult:
+    """Raises:
+        LlmClient"""
+def CheckTaskCompletion__parse_stream(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[CompletionResult], CompletionResult]:
+    """Raises:
+        InvalidArgument, LlmClient"""
+async def CheckTaskCompletion__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[CompletionResult], CompletionResult]:
+    """Raises:
+        InvalidArgument, LlmClient"""
+def CheckTaskCompletion__render_prompt(completion_string: str, output_summary: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def CheckTaskCompletion__render_prompt_async(completion_string: str, output_summary: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def CheckTaskCompletion_stream(completion_string: str, output_summary: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[CompletionResult], CompletionResult]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def CheckTaskCompletion_stream_async(completion_string: str, output_summary: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[CompletionResult], CompletionResult]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
 def PerformTask(full_task_prompt: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskExecutionResult:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
@@ -820,6 +869,7 @@ __all__ = [
     "SummariseActionHistory_stream",
     "SummariseActionHistory_stream_async",
     "ConversationMode",
+    "CompletionResult",
     "AvailableTask",
     "ConversationHistoryMessage",
     "ConversationHistory",
@@ -958,6 +1008,20 @@ __all__ = [
     "ChooseTask__render_prompt_async",
     "ChooseTask_stream",
     "ChooseTask_stream_async",
+    "CheckTaskCompletion",
+    "CheckTaskCompletion_async",
+    "CheckTaskCompletion__build_request",
+    "CheckTaskCompletion__build_request_async",
+    "CheckTaskCompletion__build_request_stream",
+    "CheckTaskCompletion__build_request_stream_async",
+    "CheckTaskCompletion__parse",
+    "CheckTaskCompletion__parse_async",
+    "CheckTaskCompletion__parse_stream",
+    "CheckTaskCompletion__parse_stream_async",
+    "CheckTaskCompletion__render_prompt",
+    "CheckTaskCompletion__render_prompt_async",
+    "CheckTaskCompletion_stream",
+    "CheckTaskCompletion_stream_async",
     "PerformTask",
     "PerformTask_async",
     "PerformTask__build_request",

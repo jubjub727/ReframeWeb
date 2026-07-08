@@ -204,6 +204,8 @@ class _VoiceTurnEventPrinter:
         "primitive-dispatched": "response-items",
         "action-history-summary": "action-history-summary",
         "action-history-summarized": "action-history-summary",
+        "task-completion-review": "task-completion",
+        "task-completion-reviewed": "task-completion",
     }
     _LATENCY_STAGES = {
         "task-chosen": "task_choice",
@@ -213,6 +215,7 @@ class _VoiceTurnEventPrinter:
         "task-prompt-generated": "task_prompt",
         "task-executed": "task_execution",
         "action-history-summarized": "action_history_summary",
+        "task-completion-reviewed": "task_completion",
     }
 
     def __init__(self, *, debug_output: bool, turn_started_at: float) -> None:
@@ -308,6 +311,8 @@ class _VoiceTurnEventPrinter:
             "primitive-dispatched",
             "action-history-summary",
             "action-history-summarized",
+            "task-completion-review",
+            "task-completion-reviewed",
             "turn-understanding",
             "turn-continuation",
             "agent-reply",
@@ -424,6 +429,12 @@ def _print_turn_result(
             "action_history_summary: "
             f"chars={len(result.action_history_summary)} "
             f"latency={_latency(result.timings.action_history_summary_seconds)}"
+        )
+    if result.task_completion is not None:
+        print(
+            "task_completion: "
+            f"{result.task_completion.value} "
+            f"latency={_latency(result.timings.task_completion_seconds)}"
         )
 
 
