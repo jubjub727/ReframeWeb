@@ -43,6 +43,7 @@ class SessionMemoryContext {
 }
 
 class UserPreferenceMemoryContext {
+    id: string,
     title: string,
     description: string,
     tags: string[],

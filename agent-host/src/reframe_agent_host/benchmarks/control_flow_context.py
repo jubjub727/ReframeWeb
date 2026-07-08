@@ -56,6 +56,7 @@ def user_preference_context(
 ) -> list[types.UserPreferenceMemoryContext]:
     return [
         types.UserPreferenceMemoryContext(
+            id=f"memory_node:user_preference_{index}",
             title=memory.title,
             description=memory.description,
             tags=list(memory.tags),
@@ -63,7 +64,7 @@ def user_preference_context(
             updated_at=memory.updated_at,
             read_at=memory.read_at,
         )
-        for memory in memories
+        for index, memory in enumerate(memories)
     ]
 
 

@@ -95,6 +95,52 @@ class MemoryRelevanceTests(unittest.TestCase):
             ],
         )
 
+    def test_candidate_contexts_include_all_user_preferences(self):
+        candidates = candidate_contexts(
+            RetrievedMemoryContext(),
+            user_preferences=[
+                types.UserPreferenceMemoryContext(
+                    id="memory_node:pref1",
+                    title="Interface density",
+                    description="Prefer compact, information-dense interfaces.",
+                    tags=["compact", "ui"],
+                    created_at="2026-02-01T00:00:00Z",
+                    updated_at="2026-02-01T00:00:00Z",
+                    read_at="NONE",
+                ),
+                types.UserPreferenceMemoryContext(
+                    id="memory_node:pref2",
+                    title="Reply style",
+                    description="Keep CLI output terse.",
+                    tags=["cli"],
+                    created_at="2026-02-01T00:00:00Z",
+                    updated_at="2026-02-01T00:00:00Z",
+                    read_at="NONE",
+                ),
+            ],
+        )
+
+        self.assertEqual(
+            [
+                (
+                    candidate.id,
+                    candidate.kind,
+                    candidate.title,
+                    candidate.retrieval_matched,
+                )
+                for candidate in candidates
+            ],
+            [
+                (
+                    "memory_node:pref1",
+                    "user_preference",
+                    "Interface density",
+                    False,
+                ),
+                ("memory_node:pref2", "user_preference", "Reply style", False),
+            ],
+        )
+
     def test_filter_keeps_child_memories_with_parent_wrappers(self):
         memories = _retrieved_memories()
 

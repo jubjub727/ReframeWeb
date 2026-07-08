@@ -66,7 +66,21 @@ test "candidate contexts flatten retrieved memory graph" {
             },
         ],
     };
-    let candidates = MemoryCandidates(graph, "memory_node:current");
+    let candidates = MemoryCandidates(
+        graph,
+        "memory_node:current",
+        [
+            UserPreferenceMemoryContext {
+                id: "memory_node:pref1",
+                title: "Global density preference",
+                description: "Prefer compact interfaces.",
+                tags: ["compact"],
+                created_at: "2026-02-01T00:00:00Z",
+                updated_at: "2026-02-01T00:00:00Z",
+                read_at: "NONE",
+            },
+        ],
+    );
     assert
         .equal(
             candidates
@@ -78,6 +92,7 @@ test "candidate contexts flatten retrieved memory graph" {
             [
                 "memory_node:task1",
                 "memory_node:currentmemory",
+                "memory_node:pref1",
                 "memory_node:session1",
                 "memory_node:conversation1",
                 "memory_node:message1",

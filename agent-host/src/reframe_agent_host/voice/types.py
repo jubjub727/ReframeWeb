@@ -332,6 +332,33 @@ class VoiceTurnControl:
         if self._cancelled.is_set():
             raise asyncio.CancelledError
 
+    async def wait_for_commit_or_cancel(self, timeout_seconds: float) -> bool:
+        if self._committed.is_set():
+            await self.checkpoint()
+            return True
+
+        commit_task = asyncio.create_task(self._committed.wait())
+        cancel_task = asyncio.create_task(self._cancelled.wait())
+        try:
+            done, pending = await asyncio.wait(
+                {commit_task, cancel_task},
+                timeout=max(0.0, timeout_seconds),
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+            for task in pending:
+                task.cancel()
+            if cancel_task in done:
+                raise asyncio.CancelledError
+            if commit_task in done:
+                await self.checkpoint()
+                return True
+            await self.checkpoint()
+            return False
+        finally:
+            for task in (commit_task, cancel_task):
+                if not task.done():
+                    task.cancel()
+
     async def wait_until_committed(self) -> None:
         if self._committed.is_set():
             await self.checkpoint()

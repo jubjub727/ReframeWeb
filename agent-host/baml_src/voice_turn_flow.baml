@@ -90,6 +90,7 @@ function ContinueVoicePrompt(
     current_user_request: string,
     current_conversation: ConversationHistory?,
     session_memories: SessionMemoryContext[],
+    user_preferences: UserPreferenceMemoryContext[],
     selected_task: SelectedTaskContext,
     retrieved_memories: RetrievedMemoryGraph,
     current_session_id: string?,
@@ -103,13 +104,13 @@ function ContinueVoicePrompt(
         current_conversation,
         session_memories,
         selected_task,
-        MemoryCandidates(retrieved_memories, current_session_id),
+        MemoryCandidates(retrieved_memories, current_session_id, user_preferences),
         relevance_memories,
         machine_state,
     );
     let memory_relevance_ms = memory_relevance_started_at.elapsed().to_milliseconds();
     let selected_memories = RelevantMemoryGraph(retrieved_memories, relevance_decision);
-    let selected_memory_contexts = TaskPromptMemoryContexts(selected_memories, relevance_decision.kept_memory_ids, current_session_id);
+    let selected_memory_contexts = TaskPromptMemoryContexts(selected_memories, relevance_decision.kept_memory_ids, current_session_id, user_preferences);
     let task_prompt_started_at = baml.time.Instant.now();
     let composition = ComposeTaskInput(
         current_user_request,

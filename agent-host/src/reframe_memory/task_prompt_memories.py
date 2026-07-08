@@ -71,7 +71,6 @@ class TaskPromptMemoryStore:
         memory: TaskPromptMemory,
         tags: Sequence[str] = (),
     ) -> TaskPromptMemoryNode:
-        await self.ensure_root()
         result = await self.database.query(
             """
             CREATE memory_node SET

@@ -15,6 +15,8 @@ class QueuedAudioOutput:
         self._lock = Lock()
         self._queued_samples = 0
         self._played_samples = 0
+        self._recent_samples = np.empty(0, dtype=np.float32)
+        self._recent_sample_limit = max(1, sample_rate * 2)
 
     def start(self, sounddevice) -> None:
         if self._stream is not None:
@@ -34,12 +36,22 @@ class QueuedAudioOutput:
         with self._lock:
             return self._played_samples
 
+    @property
+    def sample_rate(self) -> int:
+        return self._sample_rate
+
+    def recent_samples(self, seconds: float = 1.0) -> np.ndarray:
+        sample_count = max(1, int(self._sample_rate * seconds))
+        with self._lock:
+            return self._recent_samples[-sample_count:].copy()
+
     def clear(self, *, reset_played_samples: bool = False) -> None:
         with self._lock:
             self._chunks.clear()
             self._queued_samples = 0
             if reset_played_samples:
                 self._played_samples = 0
+                self._recent_samples = np.empty(0, dtype=np.float32)
 
     def enqueue(self, samples) -> int:
         audio = np.asarray(samples, dtype=np.float32).reshape(-1)
@@ -74,4 +86,10 @@ class QueuedAudioOutput:
                     self._chunks.popleft()
                 else:
                     self._chunks[0] = chunk[count:]
+            self._append_recent_locked(output)
         outdata[:] = output.reshape(-1, 1)
+
+    def _append_recent_locked(self, samples: np.ndarray) -> None:
+        self._recent_samples = np.concatenate((self._recent_samples, samples))
+        if len(self._recent_samples) > self._recent_sample_limit:
+            self._recent_samples = self._recent_samples[-self._recent_sample_limit :]

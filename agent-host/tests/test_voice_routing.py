@@ -5,15 +5,19 @@ import time
 import unittest
 from argparse import Namespace
 from dataclasses import dataclass
+from threading import Event
 from unittest.mock import patch
 
 import numpy as np
 
 import baml_sdk as types
+from reframe_agent_host.agent_flow.live_conversation import LiveConversationContext
 from reframe_agent_host.commands.voice_turn import (
     _VoiceTurnEventPrinter,
     _ensure_voice_memory_context,
+    run_voice_turn,
 )
+from reframe_agent_host.memory_readiness import MemoryReadinessError
 from reframe_agent_host.keyphrases import KeyphraseDetection, KeyphraseSpotterConfig
 from reframe_agent_host.speech.transcription import (
     CONVERSATION_ON_CONFIRMATION_PROMPT,
@@ -50,6 +54,16 @@ class StubTranscriber:
     def transcribe_with_prompt(self, samples, sample_rate, initial_prompt):
         self.prompts.append(initial_prompt)
         return self.transcribe(samples, sample_rate)
+
+
+class CountingStubTranscriber(StubTranscriber):
+    def __init__(self, text="jarvis do this"):
+        super().__init__(text)
+        self.calls = 0
+
+    def transcribe(self, samples, sample_rate):
+        self.calls += 1
+        return super().transcribe(samples, sample_rate)
 
 
 class RecordingMemoryRetrieval:
@@ -159,17 +173,32 @@ class FakeVoiceContextConversations:
         return FakeNode(f"{session_id}:conversation")
 
 
+class FakeCatalogStore:
+    def __init__(self, ready):
+        self.ready = ready
+
+    async def search(self, mark_read=True):
+        return [FakeNode("memory_node:catalog")] if self.ready else []
+
+
 class MinimalVoiceMemoryDatabase:
-    def __init__(self):
+    def __init__(self, *, roots_ready=True, catalog_ready=True):
         self.sessions = FakeSessions()
         self.conversations = FakeVoiceContextConversations()
+        self.providers = FakeCatalogStore(catalog_ready)
+        self.tasks = FakeCatalogStore(catalog_ready)
         self.closed = False
+        self.roots_ready = roots_ready
+        self.setup_calls = []
+
+    async def query(self, _statement, _variables=None):
+        return [{"id": "memory_root:test"}] if self.roots_ready else []
 
     async def apply_schema(self):
-        return None
+        self.setup_calls.append("apply_schema")
 
     async def ensure_roots(self):
-        return None
+        self.setup_calls.append("ensure_roots")
 
     async def close(self):
         self.closed = True
@@ -190,7 +219,37 @@ class ExistingVoiceContextSessions:
 class ExistingVoiceMemoryDatabase:
     def __init__(self):
         self.sessions = ExistingVoiceContextSessions()
+        self.providers = FakeCatalogStore(True)
+        self.tasks = FakeCatalogStore(True)
         self.closed = False
+
+    async def query(self, _statement, _variables=None):
+        return [{"id": "memory_root:test"}]
+
+    async def apply_schema(self):
+        raise AssertionError("runtime should not apply memory schema")
+
+    async def ensure_roots(self):
+        raise AssertionError("runtime should not ensure memory roots")
+
+    async def close(self):
+        self.closed = True
+
+
+class RecordingConversationMessages:
+    def __init__(self):
+        self.messages = []
+        self.message_added = Event()
+
+    async def add_message(self, conversation_id, message):
+        self.messages.append((conversation_id, message.role, message.content))
+        self.message_added.set()
+
+
+class RecordingTurnMemoryDatabase:
+    def __init__(self):
+        self.conversations = RecordingConversationMessages()
+        self.closed = Event()
 
     async def apply_schema(self):
         return None
@@ -199,7 +258,7 @@ class ExistingVoiceMemoryDatabase:
         return None
 
     async def close(self):
-        self.closed = True
+        self.closed.set()
 
 
 class FakeInterruptSpeaker:
@@ -220,7 +279,7 @@ class FakeBargeInDetector:
     def __init__(self):
         self.calls = []
 
-    def accept(self, frame, *, tts_active):
+    def accept(self, frame, *, tts_active, **_kwargs):
         self.calls.append((len(frame), tts_active))
         return tts_active
 
@@ -415,6 +474,149 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(turn_flow.understanding_request, "do this")
         stages = [stage for stage, _message in events]
         self.assertLess(stages.index("human-reply"), stages.index("turn-understanding"))
+
+    async def test_cancelled_speculative_turn_does_not_start_transcription_during_grace(self):
+        transcriber = CountingStubTranscriber("Jarvis, do this.")
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(task_choice_enabled=False),
+            transcriber=transcriber,
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            memory_retrieval=RecordingMemoryRetrieval(),
+        )
+        control = VoiceTurnControl()
+
+        with patch(
+            "reframe_agent_host.voice.turn_processor."
+            "SPECULATIVE_TRANSCRIPTION_GRACE_SECONDS",
+            0.1,
+        ):
+            task = asyncio.create_task(
+                processor.process(
+                    capture=_capture_result(),
+                    conversation_mode=types.ConversationMode.WAKE_COMMAND,
+                    model_prepare_seconds=0.0,
+                    total_started_at=time.perf_counter(),
+                    on_event=lambda stage, message: events.append((stage, message)),
+                    turn_control=control,
+                )
+            )
+
+            await asyncio.sleep(0.02)
+            control.cancel()
+
+            with self.assertRaises(asyncio.CancelledError):
+                await task
+
+        self.assertEqual(transcriber.calls, 0)
+        self.assertNotIn("transcribing", [stage for stage, _message in events])
+
+    async def test_human_reply_outputs_before_background_database_write(self):
+        database = RecordingTurnMemoryDatabase()
+        turn_flow = RecordingBamlTurnFlow()
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(
+                session_id="memory_node:session",
+                conversation_id="memory_node:conversation",
+            ),
+            transcriber=StubTranscriber("Jarvis, do this."),
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            memory_retrieval=RecordingMemoryRetrieval(),
+            turn_flow=turn_flow,
+        )
+
+        async def fake_open_memory_database():
+            return database
+
+        with patch(
+            "reframe_agent_host.voice.turn_processor.open_memory_database",
+            fake_open_memory_database,
+        ):
+            await processor.process(
+                capture=_capture_result(),
+                conversation_mode=types.ConversationMode.WAKE_COMMAND,
+                model_prepare_seconds=0.0,
+                total_started_at=time.perf_counter(),
+                on_event=lambda stage, message: events.append((stage, message)),
+            )
+            self.assertTrue(database.conversations.message_added.wait(timeout=1))
+            self.assertTrue(database.closed.wait(timeout=1))
+
+        stages = [stage for stage, _message in events]
+        self.assertLess(
+            stages.index("human-reply"),
+            stages.index("turn-understanding"),
+        )
+        self.assertEqual(
+            database.conversations.messages,
+            [("memory_node:conversation", "human", "do this")],
+        )
+
+    async def test_live_conversation_sees_human_reply_before_task_choice(self):
+        database = RecordingTurnMemoryDatabase()
+        live_conversation = LiveConversationContext()
+        turn_flow = RecordingBamlTurnFlow()
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(
+                session_id="memory_node:session",
+                conversation_id="memory_node:conversation",
+            ),
+            transcriber=StubTranscriber("Jarvis, do this."),
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            memory_retrieval=RecordingMemoryRetrieval(),
+            turn_flow=turn_flow,
+            live_conversation=live_conversation,
+        )
+
+        async def fake_open_memory_database():
+            return database
+
+        with patch(
+            "reframe_agent_host.voice.turn_processor.open_memory_database",
+            fake_open_memory_database,
+        ):
+            await processor.process(
+                capture=_capture_result(),
+                conversation_mode=types.ConversationMode.WAKE_COMMAND,
+                model_prepare_seconds=0.0,
+                total_started_at=time.perf_counter(),
+                on_event=lambda stage, message: events.append((stage, message)),
+            )
+            self.assertTrue(database.conversations.message_added.wait(timeout=1))
+
+        conversation = live_conversation.merge(None, "memory_node:conversation")
+        self.assertIsNotNone(conversation)
+        self.assertEqual(
+            [(message.role, message.content) for message in conversation.messages],
+            [("human", "do this")],
+        )
+
+    async def test_empty_task_execution_result_skips_later_dispatch_layers(self):
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(),
+            transcriber=StubTranscriber("Jarvis, do this."),
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            memory_retrieval=RecordingMemoryRetrieval(),
+        )
+
+        async def fail_open_memory_database():
+            raise AssertionError("empty task result should not dispatch primitives")
+
+        with patch(
+            "reframe_agent_host.voice.turn_processor.open_memory_database",
+            fail_open_memory_database,
+        ):
+            result = await processor._maybe_dispatch_primitives(
+                types.TaskExecutionResult(returns=[]),
+                time.perf_counter(),
+                lambda stage, message: events.append((stage, message)),
+            )
+
+        self.assertEqual(result, (None, None, None))
+        self.assertNotIn("primitive-dispatch", [stage for stage, _message in events])
 
     async def test_conversation_on_confirmation_turns_mode_on_without_human_reply(self):
         transcriber = StubTranscriber("conversation on")
@@ -651,6 +853,50 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             "memory_node:session:conversation",
         )
         self.assertTrue(database.closed)
+        self.assertEqual(database.setup_calls, [])
+
+    async def test_voice_context_reports_unprepared_memory_without_setup(self):
+        database = MinimalVoiceMemoryDatabase(roots_ready=False)
+        args = Namespace(
+            session_id=None,
+            conversation_id=None,
+            debug_output=False,
+            verbose_context=False,
+        )
+
+        async def fake_open_memory_database():
+            return database
+
+        with patch(
+            "reframe_agent_host.commands.voice_turn.open_memory_database",
+            fake_open_memory_database,
+        ):
+            with self.assertRaises(MemoryReadinessError):
+                await _ensure_voice_memory_context(args)
+
+        self.assertTrue(database.closed)
+        self.assertEqual(database.setup_calls, [])
+
+    async def test_voice_turn_prints_memory_readiness_error_and_quits(self):
+        args = Namespace(
+            turns=1,
+            debug_output=False,
+            verbose_context=False,
+        )
+
+        async def fail_config(_args):
+            raise MemoryReadinessError("database is not ready")
+
+        stderr = io.StringIO()
+        with patch(
+            "reframe_agent_host.commands.voice_turn._prepared_voice_pipeline_config",
+            fail_config,
+        ):
+            with contextlib.redirect_stderr(stderr):
+                code = await run_voice_turn(args)
+
+        self.assertEqual(code, 5)
+        self.assertEqual(stderr.getvalue().strip(), "[memory] database is not ready")
 
     async def test_voice_context_rejects_half_resume(self):
         args = Namespace(
@@ -687,7 +933,11 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(database.closed)
 
 
-def _voice_config(task_choice_enabled=True):
+def _voice_config(
+    task_choice_enabled=True,
+    session_id=None,
+    conversation_id=None,
+):
     return VoicePipelineConfig(
         audio=AudioInputConfig(),
         voice_activity=VoiceActivityConfig(),
@@ -696,6 +946,8 @@ def _voice_config(task_choice_enabled=True):
         transcription=WhisperTranscriberConfig(),
         conversation_mode=types.ConversationMode.WAKE_COMMAND,
         task_choice_enabled=task_choice_enabled,
+        session_id=session_id,
+        conversation_id=conversation_id,
     )
 
 

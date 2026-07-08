@@ -13,6 +13,7 @@ from reframe_agent_host.benchmarks.conversation_evaluation_result_analysis impor
     ConversationEvaluationReply,
     conversation_evaluation_case_analyses,
 )
+from reframe_agent_host.memory_readiness import require_memory_ready
 from reframe_memory import open_memory_database
 
 
@@ -29,8 +30,7 @@ async def run_benchmark_conversation_evaluation(
 ) -> int:
     database = await open_memory_database()
     try:
-        await database.apply_schema()
-        await database.ensure_roots()
+        await require_memory_ready(database, require_task_catalog=True)
         config_kwargs = {
             "runs": runs,
             "warmup_runs": warmup_runs,

@@ -71,7 +71,6 @@ class RelevanceMemoryStore:
         memory: RelevanceMemory,
         tags: Sequence[str] = (),
     ) -> RelevanceMemoryNode:
-        await self.ensure_root()
         result = await self.database.query(
             """
             CREATE memory_node SET

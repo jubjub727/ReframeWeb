@@ -284,6 +284,7 @@ class TaskReturnItem(pydantic.BaseModel):
 
 class UserPreferenceMemoryContext(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
+    id: typing.Optional[str]
     title: typing.Optional[str]
     description: typing.Optional[str]
     tags: typing.List[str]

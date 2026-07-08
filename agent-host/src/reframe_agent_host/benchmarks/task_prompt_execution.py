@@ -206,6 +206,7 @@ async def _build_live_task_prompt_snapshot(
             session_id,
             current_conversation,
             session_memories,
+            user_preferences,
             selected_task,
             retrieved_memories,
         )
@@ -218,6 +219,7 @@ async def _build_live_task_prompt_snapshot(
         selected_contexts = selected_memory_contexts(
             selected_memories,
             relevance_decision.kept_memory_ids,
+            user_preferences=user_preferences,
         )
         task_prompt_memories = await _task_prompt_memories(database)
     except Exception as exc:
@@ -645,6 +647,7 @@ async def _relevance_decision(
     session_id,
     current_conversation,
     session_memories,
+    user_preferences,
     selected_task,
     retrieved_memories,
 ):
@@ -657,6 +660,7 @@ async def _relevance_decision(
         candidate_memories=candidate_contexts(
             retrieved_memories,
             current_session_id=session_id,
+            user_preferences=user_preferences,
         ),
         relevance_memories=await _relevance_memories(database),
         machine_state=local_machine_state_context("Benchmark machine state"),
@@ -733,6 +737,7 @@ async def _user_preferences(database) -> list[types.UserPreferenceMemoryContext]
     memories = await database.user_preferences.search()
     return [
         types.UserPreferenceMemoryContext(
+            id=memory.id,
             title=memory.content.title,
             description=memory.content.description,
             tags=list(memory.tags),

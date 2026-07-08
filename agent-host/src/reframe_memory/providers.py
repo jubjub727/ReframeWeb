@@ -83,7 +83,6 @@ class ProviderMemory:
         provider: Provider,
         tags: Sequence[str] = (),
     ) -> ProviderNode:
-        await self.ensure_root()
         result = await self.database.query(
             """
             CREATE memory_node SET

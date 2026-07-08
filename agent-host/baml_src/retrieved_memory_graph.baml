@@ -73,6 +73,7 @@ class RetrievedMemoryGraph {
 function MemoryCandidates(
     memories: RetrievedMemoryGraph,
     current_session_id: string?,
+    user_preferences: UserPreferenceMemoryContext[],
 ) -> RetrievedMemoryCandidate[] {
     let candidates: RetrievedMemoryCandidate[] = [];
 
@@ -82,6 +83,10 @@ function MemoryCandidates(
 
     for (let memory in memories.current_session_memories) {
         let _ = candidates.push(CurrentSessionMemoryCandidate(memory, current_session_id));
+    }
+
+    for (let preference in user_preferences) {
+        let _ = candidates.push(UserPreferenceCandidate(preference));
     }
 
     for (let session in memories.past_sessions) {
@@ -140,6 +145,7 @@ function TaskPromptMemoryContexts(
     memories: RetrievedMemoryGraph,
     selected_memory_ids: string[],
     current_session_id: string?,
+    user_preferences: UserPreferenceMemoryContext[],
 ) -> TaskPromptSelectedMemoryContext[] {
     let contexts: TaskPromptSelectedMemoryContext[] = [];
 
@@ -149,6 +155,12 @@ function TaskPromptMemoryContexts(
 
     for (let memory in memories.current_session_memories) {
         let _ = contexts.push(TaskPromptContextFromSessionMemory(memory));
+    }
+
+    for (let preference in user_preferences) {
+        if (selected_memory_ids.includes(preference.id)) {
+            let _ = contexts.push(TaskPromptContextFromUserPreference(preference));
+        }
     }
 
     for (let session in memories.past_sessions) {
@@ -269,6 +281,22 @@ function CurrentSessionMemoryCandidate(
         read_at: memory.read_at,
         retrieval_matched: false,
         parent_session_id: current_session_id,
+        parent_conversation_id: null,
+    }
+}
+
+function UserPreferenceCandidate(preference: UserPreferenceMemoryContext) -> RetrievedMemoryCandidate {
+    RetrievedMemoryCandidate {
+        id: preference.id,
+        kind: "user_preference",
+        title: preference.title,
+        description: preference.description,
+        tags: preference.tags,
+        created_at: preference.created_at,
+        updated_at: preference.updated_at,
+        read_at: preference.read_at,
+        retrieval_matched: false,
+        parent_session_id: null,
         parent_conversation_id: null,
     }
 }
@@ -427,6 +455,19 @@ function TaskPromptContextFromSessionMemory(
         created_at: memory.created_at,
         updated_at: memory.updated_at,
         read_at: memory.read_at,
+    }
+}
+
+function TaskPromptContextFromUserPreference(
+    preference: UserPreferenceMemoryContext,
+) -> TaskPromptSelectedMemoryContext {
+    TaskPromptSelectedMemoryContext {
+        title: preference.title,
+        description: preference.description,
+        tags: preference.tags,
+        created_at: preference.created_at,
+        updated_at: preference.updated_at,
+        read_at: preference.read_at,
     }
 }
 

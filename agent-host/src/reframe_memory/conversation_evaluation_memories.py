@@ -76,7 +76,6 @@ class ConversationEvaluationMemoryStore:
         memory: ConversationEvaluationMemory,
         tags: Sequence[str] = (),
     ) -> ConversationEvaluationMemoryNode:
-        await self.ensure_root()
         result = await self.database.query(
             """
             CREATE memory_node SET

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from reframe_agent_host.magic_providers import MAGIC_DO_NOTHING_MODEL_ID
 from reframe_memory import Task
 
 
@@ -115,16 +116,90 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
         reasoning_effort="none",
     ),
     CoreTaskDefinition(
+        name="Thinking",
+        description=(
+            "Use when the useful work is private thinking, recording context, "
+            "or updating memory without speaking to the user."
+        ),
+        input="The user's request or conversational context.",
+        output=(
+            "Named non-spoken return items that record useful thought, session "
+            "context, or durable user preference."
+        ),
+        prompt=(
+            "Think privately about the supplied request or context. Use this "
+            "task only for useful non-spoken work: preserving internal context, "
+            "noting a relevant thought, or recording memory. If there is "
+            "nothing useful to record, return an empty returns array.\n\n"
+            "Allowed return items:\n"
+            "- agent_thought with payload {\"text\": \"...\"} for useful "
+            "private context that belongs in the conversation.\n"
+            "- session_memory with payload {\"title\": \"...\", "
+            "\"description\": \"...\"} when the exchange reveals useful "
+            "context for this session.\n"
+            "- user_preference with payload {\"title\": \"...\", "
+            "\"description\": \"...\"} when the exchange reveals a durable "
+            "user preference or user-relevant information."
+        ),
+        tags=("thinking", "silent", "memory"),
+        model_id="glm-5.1",
+        reasoning_effort="none",
+    ),
+    CoreTaskDefinition(
+        name="Do nothing",
+        description=(
+            "Use when the correct response is to take no action, say nothing, "
+            "and record nothing."
+        ),
+        input="The user's request or conversational context.",
+        output="An empty returns array.",
+        prompt=(
+            "Do nothing. Return an empty returns array.\n"
+        ),
+        tags=("nothing", "silent"),
+        model_id=MAGIC_DO_NOTHING_MODEL_ID,
+        reasoning_effort=None,
+    ),
+    CoreTaskDefinition(
+        name="Greeting",
+        description=(
+            "Use when the user's message is a simple greeting, check-in, or "
+            "conversational opener."
+        ),
+        input="The user's greeting or conversational opener.",
+        output="A named return item that greets the user naturally.",
+        prompt=(
+            "Respond naturally to the human's greeting or conversational "
+            "opener. Keep it brief, warm, and style-matched. Do not turn a "
+            "simple greeting into a broad follow-up unless that would clearly "
+            "be useful.\n\n"
+            "Allowed return items only:\n"
+            "- agent_reply with payload {\"text\": \"...\"} for the greeting "
+            "the user should hear.\n"
+            "Use only the item type listed above."
+        ),
+        tags=("greeting", "reply"),
+        model_id="glm-5.1",
+        reasoning_effort="none",
+    ),
+    CoreTaskDefinition(
         name="Reply to user",
         description=(
             "Use when the user wants a conversational answer and the useful "
-            "result is simply something said back to them. Do not reply simply for the sake of replying."
+            "result is simply something said back to them. Do not reply "
+            "simply for the sake of replying."
         ),
         input="The user's message.",
         output="Named return items that reply to the user.",
         prompt=(
             "Answer the human directly using the supplied request. Keep the "
-            "reply concise, conversational, and useful.\n\n"
+            "reply concise, conversational, and useful.\n"
+            "Do not return agent_reply just to acknowledge that a request was "
+            "heard. Only return agent_reply when there is a useful spoken "
+            "message for the human. If no spoken reply is useful, return only "
+            "the relevant non-spoken items, or an empty returns array when "
+            "there is nothing useful to record. Only reply when it's "
+            "appropriate.\n\n"
             "Allowed return items:\n"
             "- agent_reply with payload {\"text\": \"...\"} for the message "
             "the user should hear.\n"

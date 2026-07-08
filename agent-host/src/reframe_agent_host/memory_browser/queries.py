@@ -8,13 +8,13 @@ from reframe_memory.ids import memory_node_record_id
 
 from reframe_agent_host.memory_browser.catalog import RELATION_TABLES
 from reframe_agent_host.memory_browser.json_tools import json_ready
+from reframe_agent_host.memory_readiness import require_memory_ready
 
 
 class BrowserDatabase:
     async def __aenter__(self):
         self.database = await open_memory_database()
-        await self.database.apply_schema()
-        await self.database.ensure_roots()
+        await require_memory_ready(self.database)
         return self.database
 
     async def __aexit__(self, exc_type, exc, traceback) -> None:

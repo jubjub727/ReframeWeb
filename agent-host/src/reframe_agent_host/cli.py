@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 from typing import Sequence
 
 from reframe_agent_host.commands.checks import (
@@ -36,9 +37,18 @@ from reframe_agent_host.commands.task_choice import (
 from reframe_agent_host.commands.voice_turn import run_voice_turn
 from reframe_agent_host.commands.debug_wake_audio import run_debug_wake_audio
 from reframe_agent_host.commands.record_wake_audio import run_record_wake_audio
+from reframe_agent_host.memory_readiness import MemoryReadinessError
 
 
 def main(argv: Sequence[str] | None = None) -> None:
+    try:
+        _main(argv)
+    except MemoryReadinessError as error:
+        print(f"[memory] {error}", file=sys.stderr)
+        raise SystemExit(5) from None
+
+
+def _main(argv: Sequence[str] | None = None) -> None:
     parser = build_parser()
     args = parser.parse_args(argv)
 

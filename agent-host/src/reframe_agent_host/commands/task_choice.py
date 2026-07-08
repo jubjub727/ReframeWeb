@@ -19,6 +19,7 @@ from reframe_agent_host.memory_seed import (
     ensure_opencode_go_providers,
     opencode_go_model_inventory,
 )
+from reframe_agent_host.memory_readiness import require_memory_ready
 from reframe_memory import open_memory_database
 
 
@@ -30,8 +31,7 @@ async def run_choose_task(
 ) -> int:
     database = await open_memory_database()
     try:
-        await database.apply_schema()
-        await database.ensure_roots()
+        await require_memory_ready(database, require_task_catalog=True)
         result = await TaskChoicePlanner(
             database=database,
             session_id=session_id,
@@ -58,8 +58,7 @@ async def run_benchmark_task_choice(
 ) -> int:
     database = await open_memory_database()
     try:
-        await database.apply_schema()
-        await database.ensure_roots()
+        await require_memory_ready(database, require_task_catalog=True)
         config_kwargs = {
             "session_id": session_id,
             "runs": runs,

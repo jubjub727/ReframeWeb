@@ -70,7 +70,6 @@ class UserPreferenceMemoryStore:
         memory: UserPreferenceMemory,
         tags: Sequence[str] = (),
     ) -> UserPreferenceMemoryNode:
-        await self.ensure_root()
         result = await self.database.query(
             """
             CREATE memory_node SET

@@ -192,6 +192,11 @@ class KokoroOnnxSpeaker:
         with self._playback_lock:
             return self._playback is not None and not self._playback.interrupted
 
+    def recent_output_audio(self, seconds: float = 1.0) -> tuple[np.ndarray, int]:
+        if self._output is None:
+            return np.empty(0, dtype=np.float32), 24_000
+        return self._output.recent_samples(seconds), self._output.sample_rate
+
     def _get_kokoro(self):
         if self._kokoro is None:
             from kokoro_onnx import Kokoro

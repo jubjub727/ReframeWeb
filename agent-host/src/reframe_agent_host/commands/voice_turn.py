@@ -19,6 +19,10 @@ from reframe_agent_host.commands.memory_output import (
 from reframe_agent_host.commands.voice_loop import run_voice_turn_loop
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
 from reframe_agent_host.agent_flow.machine_state import MachineStateError
+from reframe_agent_host.memory_readiness import (
+    MemoryReadinessError,
+    require_memory_ready,
+)
 from reframe_agent_host.voice.audio_calibration import load_audio_calibration
 from reframe_agent_host.speech.transcription import (
     TranscriptionRuntimeError,
@@ -49,10 +53,11 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
 
     debug_output = args.debug_output or args.verbose_context
     _configure_baml_logging(debug_output)
-    config = await _prepared_voice_pipeline_config(args)
-    pipeline = VoiceTurnPipeline(config)
     results = []
+    config = None
     try:
+        config = await _prepared_voice_pipeline_config(args)
+        pipeline = VoiceTurnPipeline(config)
         await run_voice_turn_loop(
             turns=args.turns,
             pipeline=pipeline,
@@ -85,6 +90,9 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
     except MachineStateError as error:
         print(f"[machine-state] {error}", file=sys.stderr)
         return 4
+    except MemoryReadinessError as error:
+        print(f"[memory] {error}", file=sys.stderr)
+        return 5
     except Exception as error:
         print(f"[error] {type(error).__name__}: {error}", file=sys.stderr)
         if debug_output and results:
@@ -121,8 +129,7 @@ async def _ensure_voice_memory_context(args: argparse.Namespace) -> None:
 
     database = await open_memory_database()
     try:
-        await database.apply_schema()
-        await database.ensure_roots()
+        await require_memory_ready(database, require_task_catalog=True)
 
         if args.session_id is None:
             session = await database.sessions.create(
@@ -154,8 +161,7 @@ async def _validate_voice_memory_context(
 ) -> None:
     database = await open_memory_database()
     try:
-        await database.apply_schema()
-        await database.ensure_roots()
+        await require_memory_ready(database, require_task_catalog=True)
         try:
             session = await database.sessions.get(session_id, mark_read=False)
             expected_conversation_id = memory_node_record_id(conversation_id)

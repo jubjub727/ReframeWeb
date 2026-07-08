@@ -15,6 +15,10 @@ from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
 from reframe_agent_host.agent_flow.task_execution_debug import (
     TaskExecutionDebugDump,
 )
+from reframe_agent_host.magic_providers import (
+    MAGIC_DO_NOTHING_BAML_SURFACE,
+    MAGIC_DO_NOTHING_MODEL_ID,
+)
 from reframe_memory import MemoryNode, MemoryTimestamps, Provider, Task
 
 
@@ -186,6 +190,30 @@ class TaskExecutionDebugDumpTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(layer["result"]["returns"][0]["name"], "agent_reply")
         self.assertEqual(layer["request"]["summary"]["reasoning_effort"], "max")
 
+    async def test_magic_do_nothing_provider_returns_empty_without_baml_call(self) -> None:
+        planner = TaskExecutionPlanner(
+            database=_FakeTaskExecutionDatabase(
+                task=_do_nothing_task_node(),
+                provider=_magic_provider_node(),
+            ),
+        )
+
+        with mock.patch(
+            "reframe_agent_host.agent_flow.task_execution.baml."
+            "PerformTask__build_request_async",
+        ) as build_request:
+            with mock.patch(
+                "reframe_agent_host.agent_flow.task_execution.baml.PerformTask_async",
+            ) as perform_task:
+                result = await planner.execute_task(
+                    "memory_node:do_nothing_task",
+                    "Task:\nDo nothing.\n\nInput:\n...",
+                )
+
+        self.assertEqual(result.returns, [])
+        build_request.assert_not_called()
+        perform_task.assert_not_called()
+
 
 class _Request:
     def __init__(self, *, body: str, headers: dict[str, str]) -> None:
@@ -194,19 +222,25 @@ class _Request:
 
 
 class _FakeTaskExecutionDatabase:
-    def __init__(self) -> None:
-        self.tasks = _FakeTasks()
-        self.providers = _FakeProviders()
+    def __init__(self, *, task=None, provider=None) -> None:
+        self.tasks = _FakeTasks(task or _task_node())
+        self.providers = _FakeProviders(provider or _provider_node())
 
 
 class _FakeTasks:
+    def __init__(self, task) -> None:
+        self._task = task
+
     async def get(self, _task_id: str):
-        return _task_node()
+        return self._task
 
 
 class _FakeProviders:
+    def __init__(self, provider) -> None:
+        self._provider = provider
+
     async def get(self, _provider_id: str):
-        return _provider_node()
+        return self._provider
 
 
 def _task_node() -> MemoryNode[Task]:
@@ -236,6 +270,36 @@ def _provider_node() -> MemoryNode[Provider]:
             baml_surface="OpenCodeGoModelDeepseekV4Flash",
             model_id="deepseek-v4-flash",
             reasoning_effort="max",
+        ),
+    )
+
+
+def _do_nothing_task_node() -> MemoryNode[Task]:
+    return MemoryNode(
+        id="memory_node:do_nothing_task",
+        tags=("nothing", "silent"),
+        timestamps=_timestamps(),
+        content=Task(
+            name="Do nothing",
+            description="Do nothing.",
+            input="The user's request or conversational context.",
+            output="An empty returns array.",
+            prompt="Do nothing. Return an empty returns array.\n",
+            provider_id="memory_node:magic_provider",
+        ),
+    )
+
+
+def _magic_provider_node() -> MemoryNode[Provider]:
+    return MemoryNode(
+        id="memory_node:magic_provider",
+        tags=("magic-provider", "do-nothing", "silent"),
+        timestamps=_timestamps(),
+        content=Provider(
+            name="Magic provider: do nothing",
+            description="No-op provider.",
+            baml_surface=MAGIC_DO_NOTHING_BAML_SURFACE,
+            model_id=MAGIC_DO_NOTHING_MODEL_ID,
         ),
     )
 

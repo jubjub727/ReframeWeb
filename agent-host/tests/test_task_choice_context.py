@@ -74,6 +74,7 @@ class TaskChoiceContextTests(unittest.IsolatedAsyncioTestCase):
             session_memories=[],
             user_preferences=[
                 baml.UserPreferenceMemoryContext(
+                    id="memory_node:pref1",
                     title="Interface density",
                     description="Prefer compact, information-dense interfaces.",
                     tags=["compact", "ui"],

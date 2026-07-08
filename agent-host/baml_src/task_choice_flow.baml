@@ -16,6 +16,8 @@ function ChooseTask(
         Use the available task information and context to decide which task should
         run next.
 
+        When the usual appropriate task would violate a user preference either follow that preferences guidance or simply do nothing.
+
         Stop once you have the right task.
 
         Context sections:

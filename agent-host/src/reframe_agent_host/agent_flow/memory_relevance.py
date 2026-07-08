@@ -41,6 +41,7 @@ class MemoryRelevanceContextBuilder:
             candidate_memories=candidate_contexts(
                 self.retrieved_memories,
                 current_session_id=self.session_id,
+                user_preferences=await self._user_preferences(),
             ),
             relevance_memories=await self._relevance_memories(),
         )
@@ -67,6 +68,19 @@ class MemoryRelevanceContextBuilder:
         memories = await self.database.relevance_memories.search()
         return [
             types.RelevanceMemoryContext(
+                title=memory.content.title,
+                description=memory.content.description,
+                tags=list(memory.tags),
+                **timestamp_fields(memory),
+            )
+            for memory in memories
+        ]
+
+    async def _user_preferences(self) -> list[types.UserPreferenceMemoryContext]:
+        memories = await self.database.user_preferences.search()
+        return [
+            types.UserPreferenceMemoryContext(
+                id=memory.id,
                 title=memory.content.title,
                 description=memory.content.description,
                 tags=list(memory.tags),
@@ -126,8 +140,6 @@ class MemoryRelevancePlanner:
     async def _get_database(self) -> MemoryDatabase:
         if self._database is None:
             self._database = await open_memory_database()
-            await self._database.apply_schema()
-            await self._database.ensure_roots()
         return self._database
 
 

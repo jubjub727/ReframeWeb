@@ -248,6 +248,7 @@ class TaskReturnItem(pydantic.BaseModel):
 
 
 class UserPreferenceMemoryContext(pydantic.BaseModel):
+    id: typing.Optional[str]
     title: typing.Optional[str]
     description: typing.Optional[str]
     tags: typing.List[str]

@@ -70,7 +70,6 @@ class SearchDepthMemoryStore:
         memory: SearchDepthMemory,
         tags: Sequence[str] = (),
     ) -> SearchDepthMemoryNode:
-        await self.ensure_root()
         result = await self.database.query(
             """
             CREATE memory_node SET

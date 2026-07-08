@@ -26,6 +26,9 @@ from reframe_agent_host.benchmarks.control_flow_execution import (
     build_control_flow_snapshot,
     search_depths,
 )
+from reframe_agent_host.benchmarks.control_flow_context import (
+    user_preference_context,
+)
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     collector_stop_reason,
     collector_usage,
@@ -101,6 +104,7 @@ async def build_memory_relevance_snapshot(
         candidates = candidate_contexts(
             retrieved,
             current_session_id=_session_node_id(case),
+            user_preferences=user_preference_context(case.user_preferences),
         )
     except Exception as exc:
         return MemoryRelevanceSnapshot(

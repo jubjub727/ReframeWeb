@@ -73,7 +73,6 @@ class SessionMemoryStore:
         memory: SessionMemory,
         tags: Sequence[str] = (),
     ) -> SessionMemoryNode:
-        await self.ensure_root()
         session_record_id = await self._ensure_session(session_id)
         result = await self.database.query(
             """

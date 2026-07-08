@@ -4,6 +4,7 @@ import time
 from threading import Event
 
 from reframe_agent_host.agent_flow.machine_state import MachineStateProvider
+from reframe_agent_host.agent_flow.live_conversation import LiveConversationContext
 from reframe_agent_host.agent_flow.memory_retrieval import MemoryRetrievalPlanner
 from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
 from reframe_agent_host.agent_flow.voice_turn_flow import BamlVoiceTurnFlow
@@ -34,6 +35,7 @@ class VoiceTurnPipeline:
         self._speaker = QueuedTextSpeaker(KokoroOnnxSpeaker())
         self._barge_in_detector = TtsBargeInDetector(config.voice_activity)
         self._machine_state = MachineStateProvider()
+        self._live_conversation = LiveConversationContext()
         self._prepared = False
 
     async def run_once(
@@ -153,14 +155,18 @@ class VoiceTurnPipeline:
             self._config,
             self._transcriber,
             self._trigger_matcher,
-            MemoryRetrievalPlanner(session_id=self._config.session_id),
+            MemoryRetrievalPlanner(
+                session_id=self._config.session_id,
+            ),
             TaskExecutionPlanner(),
             self._speaker,
             mode_controller=self._conversation_mode,
+            live_conversation=self._live_conversation,
             turn_flow=BamlVoiceTurnFlow(
                 session_id=self._config.session_id,
                 conversation_id=self._config.conversation_id,
                 machine_state_provider=self._machine_state,
+                live_conversation=self._live_conversation,
             ),
         )
 
@@ -178,9 +184,18 @@ class VoiceTurnPipeline:
         frame,
         on_event: VoicePipelineEventHandler | None,
     ) -> None:
+        reference_audio = None
+        reference_sample_rate = None
+        recent_output_audio = getattr(self._speaker, "recent_output_audio", None)
+        if recent_output_audio is not None:
+            output = recent_output_audio(0.75)
+            if output is not None:
+                reference_audio, reference_sample_rate = output
         if self._barge_in_detector.accept(
             frame,
             tts_active=self._speaker.is_speaking(),
+            reference_audio=reference_audio,
+            reference_sample_rate=reference_sample_rate,
         ):
             if self._speaker.interrupt("human voice"):
                 self._emit(on_event, "barge-in", "human voice")

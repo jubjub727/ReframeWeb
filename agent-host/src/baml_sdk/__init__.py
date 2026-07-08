@@ -145,6 +145,7 @@ class SessionMemoryContext(pydantic.BaseModel):
 
 class UserPreferenceMemoryContext(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
+    id: str
     title: str
     description: str
     tags: typing.List[str]
@@ -525,16 +526,16 @@ class RetrievedMemoryGraph(pydantic.BaseModel):
     current_session_memories: typing.List[RetrievedSessionMemoryNode]
 
 
-MemoryCandidates       = _define_function("user.MemoryCandidates", "sync",  ["memories", "current_session_id"])
-MemoryCandidates_async = _define_function("user.MemoryCandidates", "async", ["memories", "current_session_id"])
+MemoryCandidates       = _define_function("user.MemoryCandidates", "sync",  ["memories", "current_session_id", "user_preferences"])
+MemoryCandidates_async = _define_function("user.MemoryCandidates", "async", ["memories", "current_session_id", "user_preferences"])
 
 
 RelevantMemoryGraph       = _define_function("user.RelevantMemoryGraph", "sync",  ["memories", "decision"])
 RelevantMemoryGraph_async = _define_function("user.RelevantMemoryGraph", "async", ["memories", "decision"])
 
 
-TaskPromptMemoryContexts       = _define_function("user.TaskPromptMemoryContexts", "sync",  ["memories", "selected_memory_ids", "current_session_id"])
-TaskPromptMemoryContexts_async = _define_function("user.TaskPromptMemoryContexts", "async", ["memories", "selected_memory_ids", "current_session_id"])
+TaskPromptMemoryContexts       = _define_function("user.TaskPromptMemoryContexts", "sync",  ["memories", "selected_memory_ids", "current_session_id", "user_preferences"])
+TaskPromptMemoryContexts_async = _define_function("user.TaskPromptMemoryContexts", "async", ["memories", "selected_memory_ids", "current_session_id", "user_preferences"])
 
 
 RelevantSessionGraph       = _define_function("user.RelevantSessionGraph", "sync",  ["session", "kept_ids"])
@@ -551,6 +552,10 @@ TaskCandidate_async = _define_function("user.TaskCandidate", "async", ["task"])
 
 CurrentSessionMemoryCandidate       = _define_function("user.CurrentSessionMemoryCandidate", "sync",  ["memory", "current_session_id"])
 CurrentSessionMemoryCandidate_async = _define_function("user.CurrentSessionMemoryCandidate", "async", ["memory", "current_session_id"])
+
+
+UserPreferenceCandidate       = _define_function("user.UserPreferenceCandidate", "sync",  ["preference"])
+UserPreferenceCandidate_async = _define_function("user.UserPreferenceCandidate", "async", ["preference"])
 
 
 SessionCandidate       = _define_function("user.SessionCandidate", "sync",  ["session", "is_current_session"])
@@ -583,6 +588,10 @@ TaskPromptContextFromConversation_async = _define_function("user.TaskPromptConte
 
 TaskPromptContextFromSessionMemory       = _define_function("user.TaskPromptContextFromSessionMemory", "sync",  ["memory"])
 TaskPromptContextFromSessionMemory_async = _define_function("user.TaskPromptContextFromSessionMemory", "async", ["memory"])
+
+
+TaskPromptContextFromUserPreference       = _define_function("user.TaskPromptContextFromUserPreference", "sync",  ["preference"])
+TaskPromptContextFromUserPreference_async = _define_function("user.TaskPromptContextFromUserPreference", "async", ["preference"])
 
 
 TaskPromptContextFromMessage       = _define_function("user.TaskPromptContextFromMessage", "sync",  ["message"])
@@ -844,10 +853,10 @@ UnderstandVoicePrompt_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-ContinueVoicePrompt       = _define_function("user.ContinueVoicePrompt", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "retrieved_memories", "current_session_id", "relevance_memories", "task_prompt_memories", "machine_state"])
+ContinueVoicePrompt       = _define_function("user.ContinueVoicePrompt", "sync",  ["current_user_request", "current_conversation", "session_memories", "user_preferences", "selected_task", "retrieved_memories", "current_session_id", "relevance_memories", "task_prompt_memories", "machine_state"])
 ContinueVoicePrompt.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-ContinueVoicePrompt_async = _define_function("user.ContinueVoicePrompt", "async", ["current_user_request", "current_conversation", "session_memories", "selected_task", "retrieved_memories", "current_session_id", "relevance_memories", "task_prompt_memories", "machine_state"])
+ContinueVoicePrompt_async = _define_function("user.ContinueVoicePrompt", "async", ["current_user_request", "current_conversation", "session_memories", "user_preferences", "selected_task", "retrieved_memories", "current_session_id", "relevance_memories", "task_prompt_memories", "machine_state"])
 ContinueVoicePrompt_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
@@ -946,6 +955,8 @@ __all__ = [
     "TaskCandidate_async",
     "CurrentSessionMemoryCandidate",
     "CurrentSessionMemoryCandidate_async",
+    "UserPreferenceCandidate",
+    "UserPreferenceCandidate_async",
     "SessionCandidate",
     "SessionCandidate_async",
     "SessionMemoryCandidate",
@@ -962,6 +973,8 @@ __all__ = [
     "TaskPromptContextFromConversation_async",
     "TaskPromptContextFromSessionMemory",
     "TaskPromptContextFromSessionMemory_async",
+    "TaskPromptContextFromUserPreference",
+    "TaskPromptContextFromUserPreference_async",
     "TaskPromptContextFromMessage",
     "TaskPromptContextFromMessage_async",
     "TaskCandidateDescription",

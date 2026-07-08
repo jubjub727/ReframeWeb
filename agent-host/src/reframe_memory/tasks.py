@@ -90,7 +90,6 @@ class TaskMemory:
         )
 
     async def create(self, task: Task, tags: Sequence[str] = ()) -> TaskNode:
-        await self.ensure_root()
         provider_record_id = await self._ensure_provider(task.provider_id)
         result = await self.database.query(
             """
@@ -123,7 +122,6 @@ class TaskMemory:
         task: Task,
         tags: Sequence[str] = (),
     ) -> TaskNode:
-        await self.ensure_root()
         provider_record_id = await self._ensure_provider(task.provider_id)
         task_record_id = memory_node_record_id(task_id)
         result = await self.database.query(

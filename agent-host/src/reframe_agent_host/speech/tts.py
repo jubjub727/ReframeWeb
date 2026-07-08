@@ -74,14 +74,19 @@ class QueuedTextSpeaker:
 
     def interrupt(self, reason: str = "human voice") -> bool:
         interrupted = self._speaker.interrupt(reason)
-        if interrupted:
-            self._clear_pending()
-        return interrupted
+        cleared_pending = self._clear_pending()
+        return interrupted or cleared_pending
 
     def is_speaking(self) -> bool:
         with self._lock:
             active = self._active
-        return active or self._speaker.is_speaking()
+        return active or not self._jobs.empty() or self._speaker.is_speaking()
+
+    def recent_output_audio(self, seconds: float = 1.0):
+        recent_output_audio = getattr(self._speaker, "recent_output_audio", None)
+        if recent_output_audio is None:
+            return None
+        return recent_output_audio(seconds)
 
     def speak(
         self,
@@ -115,12 +120,14 @@ class QueuedTextSpeaker:
             if self._inter_reply_delay_seconds > 0 and not self._jobs.empty():
                 time.sleep(self._inter_reply_delay_seconds)
 
-    def _clear_pending(self) -> None:
+    def _clear_pending(self) -> bool:
+        cleared = False
         while True:
             try:
                 self._jobs.get_nowait()
             except Empty:
-                return
+                return cleared
+            cleared = True
             self._jobs.task_done()
 
 

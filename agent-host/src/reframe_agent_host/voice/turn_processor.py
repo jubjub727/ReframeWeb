@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import asyncio
 import time
+from threading import Thread
 
 from reframe_agent_host.agent_flow.action_history import ActionHistorySummarizer
+from reframe_agent_host.agent_flow.live_conversation import LiveConversationContext
 from reframe_agent_host.agent_flow.retrieved_memory_graph import (
     BamlRetrievedMemoryContext,
 )
@@ -37,6 +40,9 @@ from reframe_memory import ConversationMessage, open_memory_database
 from reframe_memory.retrieved_context import RetrievedMemoryContext
 
 
+SPECULATIVE_TRANSCRIPTION_GRACE_SECONDS = 0.25
+
+
 class VoiceTurnProcessor:
     def __init__(
         self,
@@ -48,6 +54,7 @@ class VoiceTurnProcessor:
         speaker: TextSpeaker | None = None,
         mode_controller: ConversationModeController | None = None,
         turn_flow=None,
+        live_conversation: LiveConversationContext | None = None,
     ) -> None:
         self._config = config
         self._transcriber = transcriber
@@ -57,6 +64,7 @@ class VoiceTurnProcessor:
         self._speaker = speaker or NoopSpeaker()
         self._mode_controller = mode_controller
         self._turn_flow = turn_flow
+        self._live_conversation = live_conversation
 
     async def process(
         self,
@@ -115,6 +123,7 @@ class VoiceTurnProcessor:
                 turn_control=turn_control,
             )
 
+        await self._wait_for_speculative_transcription_start(turn_control)
         self._emit(
             on_event,
             "transcribing",
@@ -150,18 +159,17 @@ class VoiceTurnProcessor:
                 total_started_at,
             )
 
-        defer_public_events = turn_control is not None
-        if routed_transcript and not defer_public_events:
+        await self._wait_until_committed(turn_control)
+        if routed_transcript:
+            self._remember_live_human_reply(routed_transcript)
             self._emit(on_event, "human-reply", routed_transcript)
+            self._record_human_reply_in_background(routed_transcript, on_event)
         if trigger_detection is not None:
             self._emit(
                 on_event,
                 "trigger",
                 f"{trigger_detection.kind} {trigger_detection.phrase!r}",
             )
-        await self._wait_until_committed(turn_control)
-        if routed_transcript and defer_public_events:
-            self._emit(on_event, "human-reply", routed_transcript)
 
         return await self._process_with_baml_flow(
             capture=capture,
@@ -196,6 +204,15 @@ class VoiceTurnProcessor:
     ) -> None:
         if turn_control is not None:
             await turn_control.wait_until_committed()
+
+    async def _wait_for_speculative_transcription_start(
+        self,
+        turn_control: VoiceTurnControl | None,
+    ) -> None:
+        if turn_control is not None:
+            await turn_control.wait_for_commit_or_cancel(
+                SPECULATIVE_TRANSCRIPTION_GRACE_SECONDS,
+            )
 
     async def close(self) -> None:
         for component in (
@@ -406,15 +423,13 @@ class VoiceTurnProcessor:
         self._emit(
             on_event,
             "task-prompt-generated",
-            f"{len(task_prompt.full_task_prompt)} chars ({task_prompt_seconds:.3f}s)",
+            (
+                f"{len(task_prompt.full_task_prompt)} chars "
+                f"({task_prompt_seconds:.3f}s)"
+            ),
         )
         await self._checkpoint(turn_control)
 
-        await self._record_current_turn_context(
-            routed_transcript,
-            task_choice,
-            on_event,
-        )
         (
             task_execution,
             task_execution_seconds,
@@ -514,6 +529,7 @@ class VoiceTurnProcessor:
         assert capture.keyphrase_detection is not None
 
         utterance = capture.utterance
+        await self._wait_for_speculative_transcription_start(turn_control)
         self._emit(
             on_event,
             "transcribing",
@@ -581,10 +597,38 @@ class VoiceTurnProcessor:
             self._emit(on_event, "conversation-mode", mode.value)
         return mode
 
-    async def _record_current_turn_context(
+    def _remember_live_human_reply(self, routed_transcript: str) -> None:
+        if self._live_conversation is None:
+            return
+        self._live_conversation.add_message(
+            self._config.conversation_id,
+            role="human",
+            content=routed_transcript,
+        )
+
+    def _record_human_reply_in_background(
         self,
         routed_transcript: str,
-        task_choice: types.TaskChoiceDecision | None,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> None:
+        if self._config.conversation_id is None or not routed_transcript:
+            return
+
+        def record() -> None:
+            try:
+                asyncio.run(self._record_human_reply(routed_transcript, on_event))
+            except Exception as exc:
+                self._emit(
+                    on_event,
+                    "warning",
+                    f"failed to record human reply: {exc}",
+                )
+
+        Thread(target=record, daemon=True).start()
+
+    async def _record_human_reply(
+        self,
+        routed_transcript: str,
         on_event: VoicePipelineEventHandler | None,
     ) -> None:
         if self._config.conversation_id is None or not routed_transcript:
@@ -592,8 +636,6 @@ class VoiceTurnProcessor:
 
         database = await open_memory_database()
         try:
-            await database.apply_schema()
-            await database.ensure_roots()
             await database.conversations.add_message(
                 self._config.conversation_id,
                 ConversationMessage(
@@ -715,15 +757,13 @@ class VoiceTurnProcessor:
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
     ):
-        if task_execution is None:
+        if task_execution is None or not task_execution.returns:
             return None, None, None
 
         self._emit(on_event, "primitive-dispatch", "handling task return items")
         started_at = time.perf_counter()
         database = await open_memory_database()
         try:
-            await database.apply_schema()
-            await database.ensure_roots()
             result = await PrimitiveDispatcher(
                 database=database,
                 session_id=self._config.session_id,

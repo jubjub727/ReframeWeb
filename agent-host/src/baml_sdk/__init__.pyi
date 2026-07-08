@@ -123,6 +123,7 @@ class SessionMemoryContext(pydantic.BaseModel):
 
 
 class UserPreferenceMemoryContext(pydantic.BaseModel):
+    id: str
     title: str
     description: str
     tags: typing.List[str]
@@ -472,16 +473,16 @@ class RetrievedMemoryGraph(pydantic.BaseModel):
     current_session_memories: typing.List[RetrievedSessionMemoryNode]
 
 
-def MemoryCandidates(memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str]) -> typing.List[RetrievedMemoryCandidate]: ...
-async def MemoryCandidates_async(memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str]) -> typing.List[RetrievedMemoryCandidate]: ...
+def MemoryCandidates(memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str], user_preferences: typing.List[UserPreferenceMemoryContext]) -> typing.List[RetrievedMemoryCandidate]: ...
+async def MemoryCandidates_async(memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str], user_preferences: typing.List[UserPreferenceMemoryContext]) -> typing.List[RetrievedMemoryCandidate]: ...
 
 
 def RelevantMemoryGraph(memories: RetrievedMemoryGraph, decision: RelevantMemoryDecision) -> RetrievedMemoryGraph: ...
 async def RelevantMemoryGraph_async(memories: RetrievedMemoryGraph, decision: RelevantMemoryDecision) -> RetrievedMemoryGraph: ...
 
 
-def TaskPromptMemoryContexts(memories: RetrievedMemoryGraph, selected_memory_ids: typing.List[str], current_session_id: typing.Optional[str]) -> typing.List[TaskPromptSelectedMemoryContext]: ...
-async def TaskPromptMemoryContexts_async(memories: RetrievedMemoryGraph, selected_memory_ids: typing.List[str], current_session_id: typing.Optional[str]) -> typing.List[TaskPromptSelectedMemoryContext]: ...
+def TaskPromptMemoryContexts(memories: RetrievedMemoryGraph, selected_memory_ids: typing.List[str], current_session_id: typing.Optional[str], user_preferences: typing.List[UserPreferenceMemoryContext]) -> typing.List[TaskPromptSelectedMemoryContext]: ...
+async def TaskPromptMemoryContexts_async(memories: RetrievedMemoryGraph, selected_memory_ids: typing.List[str], current_session_id: typing.Optional[str], user_preferences: typing.List[UserPreferenceMemoryContext]) -> typing.List[TaskPromptSelectedMemoryContext]: ...
 
 
 def RelevantSessionGraph(session: RetrievedSessionGraph, kept_ids: typing.List[str]) -> typing.Optional[RetrievedSessionGraph]: ...
@@ -498,6 +499,10 @@ async def TaskCandidate_async(task: RetrievedTaskNode) -> RetrievedMemoryCandida
 
 def CurrentSessionMemoryCandidate(memory: RetrievedSessionMemoryNode, current_session_id: typing.Optional[str]) -> RetrievedMemoryCandidate: ...
 async def CurrentSessionMemoryCandidate_async(memory: RetrievedSessionMemoryNode, current_session_id: typing.Optional[str]) -> RetrievedMemoryCandidate: ...
+
+
+def UserPreferenceCandidate(preference: UserPreferenceMemoryContext) -> RetrievedMemoryCandidate: ...
+async def UserPreferenceCandidate_async(preference: UserPreferenceMemoryContext) -> RetrievedMemoryCandidate: ...
 
 
 def SessionCandidate(session: RetrievedSessionGraph, is_current_session: bool) -> RetrievedMemoryCandidate: ...
@@ -530,6 +535,10 @@ async def TaskPromptContextFromConversation_async(session: RetrievedSessionGraph
 
 def TaskPromptContextFromSessionMemory(memory: RetrievedSessionMemoryNode) -> TaskPromptSelectedMemoryContext: ...
 async def TaskPromptContextFromSessionMemory_async(memory: RetrievedSessionMemoryNode) -> TaskPromptSelectedMemoryContext: ...
+
+
+def TaskPromptContextFromUserPreference(preference: UserPreferenceMemoryContext) -> TaskPromptSelectedMemoryContext: ...
+async def TaskPromptContextFromUserPreference_async(preference: UserPreferenceMemoryContext) -> TaskPromptSelectedMemoryContext: ...
 
 
 def TaskPromptContextFromMessage(message: RetrievedConversationMessageNode) -> TaskPromptSelectedMemoryContext: ...
@@ -787,10 +796,10 @@ async def UnderstandVoicePrompt_async(current_timestamp: str, current_user_reque
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-def ContinueVoicePrompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, retrieved_memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[RelevanceMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext) -> VoicePromptContinuation:
+def ContinueVoicePrompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], selected_task: SelectedTaskContext, retrieved_memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[RelevanceMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext) -> VoicePromptContinuation:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def ContinueVoicePrompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, retrieved_memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[RelevanceMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext) -> VoicePromptContinuation:
+async def ContinueVoicePrompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], selected_task: SelectedTaskContext, retrieved_memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[RelevanceMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext) -> VoicePromptContinuation:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
@@ -889,6 +898,8 @@ __all__ = [
     "TaskCandidate_async",
     "CurrentSessionMemoryCandidate",
     "CurrentSessionMemoryCandidate_async",
+    "UserPreferenceCandidate",
+    "UserPreferenceCandidate_async",
     "SessionCandidate",
     "SessionCandidate_async",
     "SessionMemoryCandidate",
@@ -905,6 +916,8 @@ __all__ = [
     "TaskPromptContextFromConversation_async",
     "TaskPromptContextFromSessionMemory",
     "TaskPromptContextFromSessionMemory_async",
+    "TaskPromptContextFromUserPreference",
+    "TaskPromptContextFromUserPreference_async",
     "TaskPromptContextFromMessage",
     "TaskPromptContextFromMessage_async",
     "TaskCandidateDescription",

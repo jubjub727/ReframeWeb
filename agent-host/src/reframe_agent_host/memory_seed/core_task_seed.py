@@ -6,6 +6,11 @@ from reframe_agent_host.memory_seed.core_task_definitions import (
     CORE_TASKS,
     CoreTaskDefinition,
 )
+from reframe_agent_host.magic_providers import (
+    MAGIC_DO_NOTHING_MODEL_ID,
+    MAGIC_DO_NOTHING_TAGS,
+    magic_do_nothing_provider,
+)
 from reframe_agent_host.memory_seed.opencode_go import (
     DIRECT_MODEL_TAGS,
     ensure_opencode_go_providers,
@@ -30,6 +35,7 @@ class CoreTaskSeedResult:
 
 async def ensure_core_tasks(database: MemoryDatabase) -> CoreTaskSeedResult:
     await ensure_opencode_go_providers(database)
+    await _ensure_magic_providers(database)
     providers: dict[tuple[str, str | None], ProviderNode] = {}
     created_task_ids: list[str] = []
     existing_task_ids: list[str] = []
@@ -72,6 +78,9 @@ async def _provider_for_definition(
     database: MemoryDatabase,
     definition: CoreTaskDefinition,
 ) -> ProviderNode:
+    if definition.model_id == MAGIC_DO_NOTHING_MODEL_ID:
+        return await _magic_do_nothing_provider(database)
+
     providers = await database.providers.search(
         ProviderSearch.build(
             tags=TagSearch.build(
@@ -94,6 +103,51 @@ async def _provider_for_definition(
         f"{definition.model_id}/{definition.reasoning_effort or 'default'}"
     )
     raise ValueError(msg)
+
+
+async def _ensure_magic_providers(database: MemoryDatabase) -> None:
+    provider = magic_do_nothing_provider()
+    existing = await database.providers.search(
+        ProviderSearch.build(
+            model_ids=(MAGIC_DO_NOTHING_MODEL_ID,),
+        ),
+        mark_read=False,
+    )
+    for node in existing:
+        if (
+            node.content.baml_surface == provider.baml_surface
+            and node.content.model_id == provider.model_id
+            and node.content.reasoning_effort == provider.reasoning_effort
+        ):
+            if node.content != provider or tuple(node.tags) != MAGIC_DO_NOTHING_TAGS:
+                await database.providers.update(
+                    node.id,
+                    provider,
+                    tags=MAGIC_DO_NOTHING_TAGS,
+                )
+            return
+
+    await database.providers.create(provider, tags=MAGIC_DO_NOTHING_TAGS)
+
+
+async def _magic_do_nothing_provider(database: MemoryDatabase) -> ProviderNode:
+    providers = await database.providers.search(
+        ProviderSearch.build(
+            tags=TagSearch.build(all_of=MAGIC_DO_NOTHING_TAGS),
+            model_ids=(MAGIC_DO_NOTHING_MODEL_ID,),
+        ),
+        mark_read=False,
+    )
+    expected = magic_do_nothing_provider()
+    for provider in providers:
+        if (
+            provider.content.baml_surface == expected.baml_surface
+            and provider.content.model_id == expected.model_id
+            and provider.content.reasoning_effort == expected.reasoning_effort
+        ):
+            return provider
+
+    raise ValueError("magic do-nothing provider was not seeded")
 
 
 def _reasoning_effort_search(reasoning_effort: str | None) -> tuple[str, ...]:

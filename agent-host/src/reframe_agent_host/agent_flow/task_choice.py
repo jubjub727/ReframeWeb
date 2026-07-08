@@ -54,6 +54,7 @@ class TaskChoiceContextBuilder:
         memories = await self.database.user_preferences.search()
         return [
             types.UserPreferenceMemoryContext(
+                id=memory.id,
                 title=memory.content.title,
                 description=memory.content.description,
                 tags=list(memory.tags),
@@ -144,6 +145,4 @@ class TaskChoicePlanner:
     async def _get_database(self) -> MemoryDatabase:
         if self._database is None:
             self._database = await open_memory_database()
-            await self._database.apply_schema()
-            await self._database.ensure_roots()
         return self._database

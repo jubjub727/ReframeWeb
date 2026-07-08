@@ -70,7 +70,6 @@ class TaskChoiceMemoryStore:
         memory: TaskChoiceMemory,
         tags: Sequence[str] = (),
     ) -> TaskChoiceMemoryNode:
-        await self.ensure_root()
         result = await self.database.query(
             """
             CREATE memory_node SET

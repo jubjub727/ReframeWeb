@@ -63,7 +63,6 @@ class SessionStore:
         )
 
     async def create(self, session: Session, tags: Sequence[str] = ()) -> SessionNode:
-        await self.ensure_root()
         result = await self.database.query(
             """
             CREATE memory_node SET

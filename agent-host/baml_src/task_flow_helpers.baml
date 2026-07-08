@@ -2,7 +2,7 @@ function MemorySearchDomains() -> SearchDepthDomain[] {
     [
         SearchDepthDomain {
             id: "task_catalog",
-            description: "Historic task catalog records. Use this domain when older task definitions may help interpret or run the selected task.",
+            description: "Task catalog records. Use this domain when task definitions may help interpret or run the selected task.",
             searches: "Task memory nodes only.",
             hydrates: "Matched Task nodes only.",
         },

@@ -181,6 +181,38 @@ class TaskPromptTests(unittest.TestCase):
             ],
         )
 
+    def test_selected_user_preferences_are_included_in_task_prompt_context(self):
+        contexts = selected_memory_contexts(
+            RetrievedMemoryContext(),
+            selected_memory_ids=("memory_node:pref1",),
+            user_preferences=[
+                types.UserPreferenceMemoryContext(
+                    id="memory_node:pref1",
+                    title="Interface density",
+                    description="Prefer compact, information-dense interfaces.",
+                    tags=["compact", "ui"],
+                    created_at="2026-02-01T00:00:00Z",
+                    updated_at="2026-02-01T00:00:00Z",
+                    read_at="NONE",
+                ),
+                types.UserPreferenceMemoryContext(
+                    id="memory_node:pref2",
+                    title="Reply style",
+                    description="Keep output terse.",
+                    tags=["cli"],
+                    created_at="2026-02-01T00:00:00Z",
+                    updated_at="2026-02-01T00:00:00Z",
+                    read_at="NONE",
+                ),
+            ],
+        )
+
+        self.assertEqual([context.title for context in contexts], ["Interface density"])
+        self.assertEqual(
+            contexts[0].description,
+            "Prefer compact, information-dense interfaces.",
+        )
+
 
 def _retrieved_memories():
     task = _task("memory_node:task1", name="Prepare visual panel")

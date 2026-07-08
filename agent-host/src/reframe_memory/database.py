@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+import asyncio
 from collections.abc import Mapping
-from typing import Any
+from dataclasses import dataclass
+from threading import Event, Lock, Thread
+from typing import Any, Awaitable
 
 from surrealdb import AsyncSurreal
 
@@ -18,10 +20,16 @@ class MemoryDatabase:
     @classmethod
     async def open(cls, config: MemoryConfig | None = None) -> "MemoryDatabase":
         resolved = config or MemoryConfig.from_env()
-        client = AsyncSurreal(resolved.url)
-        await client.connect()
-        await client.use(resolved.namespace, resolved.database)
-        return cls(config=resolved, client=client)
+        if _uses_embedded_surrealkv(resolved):
+            return cls(config=resolved, client=_surrealkv_client(resolved))
+
+        async def connect_client() -> AsyncSurreal:
+            client = AsyncSurreal(resolved.url)
+            await client.connect()
+            await client.use(resolved.namespace, resolved.database)
+            return client
+
+        return cls(config=resolved, client=await connect_client())
 
     async def close(self) -> None:
         await self.client.close()
@@ -147,6 +155,96 @@ class MemoryDatabase:
 
 async def open_memory_database(config: MemoryConfig | None = None) -> MemoryDatabase:
     return await MemoryDatabase.open(config)
+
+
+_SURREALKV_WORKERS: dict[MemoryConfig, "_SurrealKvWorker"] = {}
+_SURREALKV_WORKERS_LOCK = Lock()
+
+
+def _uses_embedded_surrealkv(config: MemoryConfig) -> bool:
+    return config.url.lower().startswith("surrealkv://")
+
+
+def _surrealkv_client(config: MemoryConfig) -> "_QueuedSurrealKvClient":
+    with _SURREALKV_WORKERS_LOCK:
+        worker = _SURREALKV_WORKERS.get(config)
+        if worker is None:
+            worker = _SurrealKvWorker(config)
+            _SURREALKV_WORKERS[config] = worker
+    return _QueuedSurrealKvClient(worker)
+
+
+@dataclass(frozen=True)
+class _QueuedSurrealKvClient:
+    worker: "_SurrealKvWorker"
+
+    async def query(
+        self,
+        statement: str,
+        variables: dict[str, Any] | None = None,
+    ) -> Any:
+        return await self.worker.query(statement, variables)
+
+    async def close(self) -> None:
+        return None
+
+
+class _SurrealKvWorker:
+    def __init__(self, config: MemoryConfig) -> None:
+        self._config = config
+        self._ready = Event()
+        self._loop: asyncio.AbstractEventLoop | None = None
+        self._operation_lock: asyncio.Lock | None = None
+        self._client: AsyncSurreal | None = None
+        self._thread = Thread(
+            target=self._run_loop,
+            name="reframe-memory-surrealkv",
+            daemon=True,
+        )
+        self._thread.start()
+        self._ready.wait()
+
+    async def query(
+        self,
+        statement: str,
+        variables: dict[str, Any] | None = None,
+    ) -> Any:
+        return await self._submit(self._query(statement, variables))
+
+    async def _submit(self, operation: Awaitable[Any]) -> Any:
+        if self._loop is None:
+            raise RuntimeError("SurrealKV worker loop is not ready")
+        future = asyncio.run_coroutine_threadsafe(operation, self._loop)
+        return await asyncio.wrap_future(future)
+
+    def _run_loop(self) -> None:
+        loop = asyncio.new_event_loop()
+        self._loop = loop
+        asyncio.set_event_loop(loop)
+        self._operation_lock = asyncio.Lock()
+        self._ready.set()
+        loop.run_forever()
+
+    async def _query(
+        self,
+        statement: str,
+        variables: dict[str, Any] | None,
+    ) -> Any:
+        if self._operation_lock is None:
+            raise RuntimeError("SurrealKV worker operation queue is not ready")
+        async with self._operation_lock:
+            client = await self._connected_client()
+            return await client.query(statement, variables)
+
+    async def _connected_client(self) -> AsyncSurreal:
+        if self._client is not None:
+            return self._client
+
+        client = AsyncSurreal(self._config.url)
+        await client.connect()
+        await client.use(self._config.namespace, self._config.database)
+        self._client = client
+        return client
 
 
 def _records(result: Any) -> list[Mapping[str, Any]]:

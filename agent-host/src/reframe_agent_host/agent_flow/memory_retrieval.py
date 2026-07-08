@@ -51,8 +51,6 @@ class MemoryRetrievalPlanner:
     async def _get_database(self) -> MemoryDatabase:
         if self.database is None:
             self.database = await open_memory_database()
-            await self.database.apply_schema()
-            await self.database.ensure_roots()
         return self.database
 
 

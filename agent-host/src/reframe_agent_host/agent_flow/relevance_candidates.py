@@ -16,10 +16,12 @@ from reframe_memory.retrieved_context import (
 def candidate_contexts(
     memories: RetrievedMemoryContext,
     current_session_id: str | None = None,
+    user_preferences: Iterable[types.UserPreferenceMemoryContext] = (),
 ) -> list[types.RetrievedMemoryCandidate]:
     candidates: list[types.RetrievedMemoryCandidate] = []
     candidates.extend(_task_candidates(memories))
     candidates.extend(_current_session_memory_candidates(memories, current_session_id))
+    candidates.extend(_user_preference_candidates(user_preferences))
     candidates.extend(_past_conversation_candidates(memories, current_session_id))
     return candidates
 
@@ -85,6 +87,25 @@ def _current_session_memory_candidates(
             parent_session_id=current_session_id,
             parent_conversation_id=None,
             **timestamp_fields(memory),
+        )
+
+
+def _user_preference_candidates(
+    user_preferences: Iterable[types.UserPreferenceMemoryContext],
+) -> Iterable[types.RetrievedMemoryCandidate]:
+    for preference in user_preferences:
+        yield types.RetrievedMemoryCandidate(
+            id=preference.id,
+            kind="user_preference",
+            title=preference.title,
+            description=preference.description,
+            tags=list(preference.tags),
+            retrieval_matched=False,
+            parent_session_id=None,
+            parent_conversation_id=None,
+            created_at=preference.created_at,
+            updated_at=preference.updated_at,
+            read_at=preference.read_at,
         )
 
 

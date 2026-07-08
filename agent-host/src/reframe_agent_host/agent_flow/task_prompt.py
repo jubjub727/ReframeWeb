@@ -40,6 +40,7 @@ class TaskPromptContextBuilder:
                 self.selected_memories,
                 self.selected_memory_ids,
                 current_session_id=self.session_id,
+                user_preferences=await self._user_preferences(),
             ),
             task_prompt_memories=await self._task_prompt_memories(),
         )
@@ -78,6 +79,19 @@ class TaskPromptContextBuilder:
         memories = await self.database.task_prompt_memories.search()
         return [
             types.TaskPromptMemoryContext(
+                title=memory.content.title,
+                description=memory.content.description,
+                tags=list(memory.tags),
+                **timestamp_fields(memory),
+            )
+            for memory in memories
+        ]
+
+    async def _user_preferences(self) -> list[types.UserPreferenceMemoryContext]:
+        memories = await self.database.user_preferences.search()
+        return [
+            types.UserPreferenceMemoryContext(
+                id=memory.id,
                 title=memory.content.title,
                 description=memory.content.description,
                 tags=list(memory.tags),
@@ -140,8 +154,6 @@ class TaskPromptPlanner:
     async def _get_database(self) -> MemoryDatabase:
         if self._database is None:
             self._database = await open_memory_database()
-            await self._database.apply_schema()
-            await self._database.ensure_roots()
         return self._database
 
 
@@ -149,6 +161,7 @@ def selected_memory_contexts(
     memories: RetrievedMemoryContext,
     selected_memory_ids: Collection[str] = (),
     current_session_id: str | None = None,
+    user_preferences: Collection[types.UserPreferenceMemoryContext] = (),
 ) -> list[types.TaskPromptSelectedMemoryContext]:
     selected_ids = set(selected_memory_ids)
     contexts: list[types.TaskPromptSelectedMemoryContext] = []
@@ -156,6 +169,11 @@ def selected_memory_contexts(
     contexts.extend(
         _session_memory_context(memory)
         for memory in memories.current_session_memories
+    )
+    contexts.extend(
+        _user_preference_context(preference)
+        for preference in user_preferences
+        if preference.id in selected_ids
     )
     for session in memories.past_conversation_context.sessions:
         is_current_session = _is_current_session(session, current_session_id)
@@ -269,6 +287,19 @@ def _session_memory_context(memory) -> types.TaskPromptSelectedMemoryContext:
         title=memory.content.title,
         description=memory.content.description,
         node=memory,
+    )
+
+
+def _user_preference_context(
+    preference: types.UserPreferenceMemoryContext,
+) -> types.TaskPromptSelectedMemoryContext:
+    return types.TaskPromptSelectedMemoryContext(
+        title=preference.title,
+        description=preference.description,
+        tags=list(preference.tags),
+        created_at=preference.created_at,
+        updated_at=preference.updated_at,
+        read_at=preference.read_at,
     )
 
 
