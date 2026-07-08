@@ -1,6 +1,7 @@
 import asyncio
 from threading import Event
 import unittest
+from unittest.mock import patch
 
 import baml_sdk as types
 from reframe_agent_host.task_execution import PrimitiveDispatcher
@@ -9,15 +10,21 @@ from reframe_agent_host.task_execution import PrimitiveDispatcher
 class FakeConversations:
     def __init__(self):
         self.messages = []
+        self.message_added = Event()
 
     async def add_message(self, conversation_id, message):
         self.messages.append((conversation_id, message))
+        self.message_added.set()
 
 
 class FakeDatabase:
     def __init__(self):
         self.conversations = FakeConversations()
         self.task_history = FakeTaskHistory()
+        self.closed = Event()
+
+    async def close(self):
+        self.closed.set()
 
 
 class FakeTaskHistory:
@@ -91,6 +98,22 @@ class EventSpeaker:
         self.finished.set()
 
 
+class InterruptingSpeaker:
+    def __init__(self):
+        self.finished = Event()
+
+    def prepare(self):
+        return None
+
+    def speak(self, text, *, on_event=None):
+        if on_event is not None:
+            on_event(
+                "tts-interrupted",
+                "Last fully spoken word beta at character 10",
+            )
+        self.finished.set()
+
+
 class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
     async def test_agent_reply_speech_does_not_block_later_items(self):
         database = FakeDatabase()
@@ -154,6 +177,57 @@ class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertTrue(speaker.finished.wait(timeout=1))
         self.assertIn(("tts-first-audio", "text=spoken reply"), events)
+
+    async def test_agent_reply_interruption_is_emitted_and_recorded(self):
+        database = FakeDatabase()
+        background_database = FakeDatabase()
+        speaker = InterruptingSpeaker()
+        events = []
+        dispatcher = PrimitiveDispatcher(
+            database=database,
+            conversation_id="conversation:test",
+            speaker=speaker,
+            on_event=lambda stage, message: events.append((stage, message)),
+        )
+
+        async def fake_open_memory_database():
+            return background_database
+
+        with patch(
+            "reframe_agent_host.task_execution.primitives.open_memory_database",
+            fake_open_memory_database,
+        ):
+            await dispatcher.dispatch(
+                types.TaskExecutionResult(
+                    returns=[
+                        types.TaskReturnItem(
+                            name="agent_reply",
+                            payload={"text": "spoken reply"},
+                        )
+                    ]
+                )
+            )
+
+            self.assertTrue(speaker.finished.wait(timeout=1))
+            self.assertTrue(background_database.closed.wait(timeout=1))
+
+        self.assertIn(
+            ("agent-reply-interrupted", "Last fully spoken word beta at character 10"),
+            events,
+        )
+        self.assertEqual(
+            [
+                (conversation_id, message.role, message.content)
+                for conversation_id, message in background_database.conversations.messages
+            ],
+            [
+                (
+                    "conversation:test",
+                    "agent_reply_interrupted",
+                    "Last fully spoken word beta at character 10",
+                )
+            ],
+        )
 
     async def test_conversation_mode_off_invokes_host_callback(self):
         database = FakeDatabase()

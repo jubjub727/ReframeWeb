@@ -8,6 +8,7 @@ from baml_core import Collector
 
 import baml_sdk as baml
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     collector_stop_reason,
     collector_usage,
@@ -132,8 +133,10 @@ async def _probe_task_choice_reasoning_effort(
             current_user_request=cases[0].transcript,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,
+            user_preferences=context.user_preferences,
             available_tasks=context.available_tasks,
             task_choice_memories=context.task_choice_memories,
+            machine_state=local_machine_state_context("Benchmark machine state"),
             **client_kwargs(client),
         )
     except Exception as exc:
@@ -179,8 +182,10 @@ async def _run_case(
             current_user_request=case.transcript,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,
+            user_preferences=context.user_preferences,
             available_tasks=context.available_tasks,
             task_choice_memories=context.task_choice_memories,
+            machine_state=local_machine_state_context("Benchmark machine state"),
             **client_kwargs(client),
         )
     except Exception as exc:
@@ -224,8 +229,10 @@ async def _warmup(client, cases, context, config: TaskChoiceBenchmarkConfig) -> 
                 current_user_request=cases[0].transcript,
                 current_conversation=context.current_conversation,
                 session_memories=context.session_memories,
+                user_preferences=context.user_preferences,
                 available_tasks=context.available_tasks,
                 task_choice_memories=context.task_choice_memories,
+                machine_state=local_machine_state_context("Benchmark machine state"),
                 **client_kwargs(client),
             )
         except Exception:

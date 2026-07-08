@@ -8,7 +8,11 @@ from reframe_agent_host.agent_flow.retrieved_memory_graph import (
 )
 from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
 import baml_sdk as types
-from reframe_agent_host.speech.transcription import Transcriber
+from reframe_agent_host.speech.transcription import (
+    CONVERSATION_ON_CONFIRMATION_PROMPT,
+    Transcriber,
+    transcribe_with_initial_prompt,
+)
 from reframe_agent_host.speech.triggers import TriggerPhraseMatcher
 from reframe_agent_host.speech.tts import NoopSpeaker, TextSpeaker
 from reframe_agent_host.voice.conversation_mode import ConversationModeController
@@ -101,6 +105,16 @@ class VoiceTurnProcessor:
                     total_started_at,
                 )
 
+        if _is_conversation_on_confirmation(capture):
+            return await self._process_conversation_on_confirmation(
+                capture=capture,
+                conversation_mode=conversation_mode,
+                model_prepare_seconds=model_prepare_seconds,
+                total_started_at=total_started_at,
+                on_event=on_event,
+                turn_control=turn_control,
+            )
+
         self._emit(
             on_event,
             "transcribing",
@@ -126,6 +140,16 @@ class VoiceTurnProcessor:
             if trigger_detection is not None
             else transcript.text
         )
+        if _is_conversation_on_trigger_only(trigger_detection):
+            await self._wait_until_committed(turn_control)
+            mode = self._turn_on_conversation_mode(on_event)
+            return mode_switch_turn_result(
+                _mode_switch_capture(capture, mode),
+                mode,
+                model_prepare_seconds,
+                total_started_at,
+            )
+
         defer_public_events = turn_control is not None
         if routed_transcript and not defer_public_events:
             self._emit(on_event, "human-reply", routed_transcript)
@@ -322,9 +346,6 @@ class VoiceTurnProcessor:
             "task-chosen",
             f"selected: {selected_task.name} ({task_choice_seconds:.3f}s)",
         )
-        agent_thought = (task_choice.agent_thought or "").strip()
-        if agent_thought:
-            self._emit(on_event, "agent-thought", agent_thought)
         self._emit(
             on_event,
             "memory-search-hints",
@@ -479,6 +500,87 @@ class VoiceTurnProcessor:
             },
         )
 
+    async def _process_conversation_on_confirmation(
+        self,
+        *,
+        capture: CaptureResult,
+        conversation_mode: types.ConversationMode,
+        model_prepare_seconds: float,
+        total_started_at: float,
+        on_event: VoicePipelineEventHandler | None,
+        turn_control: VoiceTurnControl | None,
+    ) -> VoiceTurnResult:
+        assert capture.utterance is not None
+        assert capture.keyphrase_detection is not None
+
+        utterance = capture.utterance
+        self._emit(
+            on_event,
+            "transcribing",
+            (
+                f"{utterance.duration_seconds:.2f}s conversation-mode "
+                f"confirmation with {_transcriber_label(self._transcriber)}"
+            ),
+        )
+        transcription_started_at = time.perf_counter()
+        transcript = await run_in_daemon_thread(
+            transcribe_with_initial_prompt,
+            self._transcriber,
+            utterance.samples,
+            utterance.sample_rate,
+            CONVERSATION_ON_CONFIRMATION_PROMPT,
+        )
+        transcription_seconds = time.perf_counter() - transcription_started_at
+        await self._checkpoint(turn_control)
+        self._emit(
+            on_event,
+            "transcript",
+            f"{transcript.text or '<empty>'} ({transcription_seconds:.3f}s)",
+        )
+
+        trigger_detection = self._trigger_matcher.match_confirmed(
+            transcript.text,
+            "conversation_on",
+            capture.keyphrase_detection.phrase,
+        )
+        await self._wait_until_committed(turn_control)
+        if _is_conversation_on_trigger_only(trigger_detection):
+            mode = self._turn_on_conversation_mode(on_event)
+            return mode_switch_turn_result(
+                _mode_switch_capture(capture, mode),
+                mode,
+                model_prepare_seconds,
+                total_started_at,
+            )
+
+        self._emit(
+            on_event,
+            "turn-ignored",
+            (
+                "conversation-mode confirmation rejected "
+                f"heard={transcript.text or '<empty>'!r}"
+            ),
+        )
+        return ignored_turn_result(
+            self._config,
+            capture,
+            conversation_mode,
+            model_prepare_seconds,
+            total_started_at,
+        )
+
+    def _turn_on_conversation_mode(
+        self,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> types.ConversationMode:
+        mode = types.ConversationMode.CONTINUOUS_CONVERSATION
+        changed = True
+        if self._mode_controller is not None:
+            changed = self._mode_controller.set(mode)
+        if changed:
+            self._emit(on_event, "conversation-mode", mode.value)
+        return mode
+
     async def _record_current_turn_context(
         self,
         routed_transcript: str,
@@ -499,19 +601,6 @@ class VoiceTurnProcessor:
                     content=routed_transcript,
                 ),
             )
-            agent_thought = (
-                (task_choice.agent_thought or "").strip()
-                if task_choice is not None
-                else ""
-            )
-            if agent_thought:
-                await database.conversations.add_message(
-                    self._config.conversation_id,
-                    ConversationMessage(
-                        role="agent_thought",
-                        content=agent_thought,
-                    ),
-                )
         finally:
             await database.close()
 
@@ -674,6 +763,38 @@ def _is_continuous_unprompted(
     return (
         conversation_mode == types.ConversationMode.CONTINUOUS_CONVERSATION
         and capture.keyphrase_detection is None
+    )
+
+
+def _is_conversation_on_confirmation(capture: CaptureResult) -> bool:
+    return (
+        capture.keyphrase_detection is not None
+        and capture.keyphrase_detection.kind == "conversation_on"
+        and not capture.mode_switched
+    )
+
+
+def _is_conversation_on_trigger_only(trigger_detection) -> bool:
+    return (
+        trigger_detection is not None
+        and trigger_detection.kind == "conversation_on"
+        and not trigger_detection.routed_transcript
+    )
+
+
+def _mode_switch_capture(
+    capture: CaptureResult,
+    mode: types.ConversationMode,
+) -> CaptureResult:
+    return CaptureResult(
+        conversation_mode=mode,
+        keyphrase_detection=capture.keyphrase_detection,
+        utterance=None,
+        mode_switched=True,
+        keyphrase_wait_seconds=capture.keyphrase_wait_seconds,
+        listen_seconds=capture.listen_seconds,
+        wait_for_speech_seconds=None,
+        speech_capture_wall_seconds=None,
     )
 
 

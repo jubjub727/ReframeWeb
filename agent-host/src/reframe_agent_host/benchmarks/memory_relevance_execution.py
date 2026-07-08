@@ -13,6 +13,7 @@ from reframe_agent_host.agent_flow.memory_retrieval import (
     _search_hints,
     _timestamp_breadths,
 )
+from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.agent_flow.relevance_candidates import candidate_contexts
 import baml_sdk as baml
 import baml_sdk as types
@@ -224,6 +225,7 @@ async def relevant_memories(
         selected_task=snapshot.control_flow.selected_task,
         candidate_memories=snapshot.candidate_memories,
         relevance_memories=snapshot.relevance_memories,
+        machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at

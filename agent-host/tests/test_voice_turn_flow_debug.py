@@ -49,6 +49,7 @@ class VoiceTurnFlowDebugTests(unittest.IsolatedAsyncioTestCase):
 class _FakeDatabase:
     def __init__(self) -> None:
         self.tasks = _SearchStore([_task_node()])
+        self.user_preferences = _SearchStore([])
         self.task_choice_memories = _SearchStore([])
         self.conversation_evaluation_memories = _SearchStore([])
         self.search_depth_memories = _SearchStore([])
@@ -131,7 +132,6 @@ async def _understand(**_kwargs):
         task_choice=types.TaskChoiceDecision(
             selected_task_id="memory_node:reply",
             confidence=1.0,
-            agent_thought=None,
             candidate_memory=None,
         ),
         selected_task=_selected_task(),

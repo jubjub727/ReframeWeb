@@ -53,7 +53,7 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "context for this session.\n"
             "- user_preference with payload {\"title\": \"...\", "
             "\"description\": \"...\"} when the request reveals a durable "
-            "user preference."
+            "user preference or user-relevant information."
         ),
         tags=("limitation", "boundary"),
         model_id="glm-5.1",
@@ -84,7 +84,7 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "context for this session.\n"
             "- user_preference with payload {\"title\": \"...\", "
             "\"description\": \"...\"} when the request reveals a durable "
-            "user preference."
+            "user preference or user-relevant information."
         ),
         tags=("needs-information",),
         model_id="glm-5.1",
@@ -118,7 +118,7 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
         name="Reply to user",
         description=(
             "Use when the user wants a conversational answer and the useful "
-            "result is simply something said back to them."
+            "result is simply something said back to them. Do not reply simply for the sake of replying."
         ),
         input="The user's message.",
         output="Named return items that reply to the user.",
@@ -135,7 +135,7 @@ CORE_TASKS: tuple[CoreTaskDefinition, ...] = (
             "context for this session.\n"
             "- user_preference with payload {\"title\": \"...\", "
             "\"description\": \"...\"} when the exchange reveals a durable "
-            "user preference."
+            "user preference or user-relevant information."
         ),
         tags=("reply",),
         model_id="glm-5.1",

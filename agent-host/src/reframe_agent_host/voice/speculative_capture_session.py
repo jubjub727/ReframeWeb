@@ -5,6 +5,7 @@ from collections.abc import Callable
 from threading import Event
 
 import baml_sdk as types
+import numpy as np
 from reframe_agent_host.voice.activity import UtteranceSegmenter
 from reframe_agent_host.voice.capture_finish import finish_with_debug_audio
 from reframe_agent_host.voice.capture_flow import VoiceCaptureFlow
@@ -29,6 +30,7 @@ from reframe_agent_host.voice.types import (
 
 
 CaptureStreamEventHandler = Callable[[CaptureStreamEvent], None]
+AudioFrameHandler = Callable[[np.ndarray, VoicePipelineEventHandler | None], None]
 
 
 class SpeculativeCaptureSession:
@@ -37,10 +39,12 @@ class SpeculativeCaptureSession:
         config: VoicePipelineConfig,
         conversation_mode: types.ConversationMode,
         mode_controller: ConversationModeController | None = None,
+        audio_frame_handler: AudioFrameHandler | None = None,
     ) -> None:
         self._config = config
         self._conversation_mode = conversation_mode
         self._mode_controller = mode_controller
+        self._audio_frame_handler = audio_frame_handler
         self._mode_version = (
             mode_controller.snapshot()[1] if mode_controller is not None else 0
         )
@@ -104,6 +108,7 @@ class SpeculativeCaptureSession:
                     if stop_event is not None and stop_event.is_set():
                         raise InterruptedError("Voice capture was stopped.")
 
+                    self._handle_audio_frame(frame, on_event)
                     if self._sync_external_mode_change(state, on_event):
                         pending_turn_id = None
                         pending_capture = None
@@ -285,7 +290,6 @@ class SpeculativeCaptureSession:
             return False
 
         self._conversation_mode = mode
-        self._emit(on_event, "conversation-mode", mode.value)
         return True
 
     def _accept_keyphrase_frame(
@@ -314,10 +318,9 @@ class SpeculativeCaptureSession:
             {"hypstr": result.detection.hypstr, "kind": result.detection.kind},
         )
         if result.conversation_enabled:
-            return self._flow.enable_conversation_mode(
+            return self._flow.finish_conversation_mode_confirmation(
                 result,
                 state,
-                segmenter,
                 microphone,
                 listen_started_at,
                 on_event,
@@ -409,6 +412,14 @@ class SpeculativeCaptureSession:
         on_event: VoicePipelineEventHandler | None,
     ) -> None:
         self._emit(on_event, "input-stopped", "microphone stream closed")
+
+    def _handle_audio_frame(
+        self,
+        frame: np.ndarray,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> None:
+        if self._audio_frame_handler is not None:
+            self._audio_frame_handler(frame, on_event)
 
 
 def _channel_label(channel: int) -> str:

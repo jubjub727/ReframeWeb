@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from tempfile import TemporaryDirectory
 
 import baml_sdk as baml
+from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.benchmarks.conversation_evaluation_config import (
     CONVERSATION_EVALUATION_DEFAULT_MODEL_ID,
     CONVERSATION_EVALUATION_DEFAULT_REASONING_EFFORT,
@@ -210,6 +211,7 @@ class ConversationEvaluationClientTests(unittest.IsolatedAsyncioTestCase):
             conversation_evaluation_memories=conversation_evaluation_memory_context(
                 case.conversation_evaluation_memories
             ),
+            machine_state=local_machine_state_context("test"),
         )
         body = json.loads(request.body)
 

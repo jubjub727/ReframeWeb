@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import baml_sdk as baml
 import baml_sdk as types
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.agent_flow.session_context import (
     current_conversation_history,
     session_memory_contexts,
@@ -105,6 +106,9 @@ class ConversationEvaluationPlanner:
             selected_task=context.selected_task,
             conversation_evaluation_memories=(
                 context.conversation_evaluation_memories
+            ),
+            machine_state=local_machine_state_context(
+                "No voice startup machine state provider"
             ),
             **client_kwargs(self._client_name),
         )

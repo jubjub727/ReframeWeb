@@ -29,6 +29,7 @@ class ControlFlowBenchmarkCase:
     available_tasks: tuple[BenchmarkSelectedTask, ...]
     session: BenchmarkSession
     task_choice_memories: tuple[BenchmarkMemory, ...] = ()
+    user_preferences: tuple[BenchmarkMemory, ...] = ()
     conversation_evaluation_memories: tuple[BenchmarkMemory, ...] = ()
     search_depth_memories: tuple[BenchmarkMemory, ...] = ()
     task_prompt_memories: tuple[BenchmarkMemory, ...] = ()

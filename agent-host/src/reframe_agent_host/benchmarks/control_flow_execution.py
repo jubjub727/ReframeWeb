@@ -7,6 +7,7 @@ from typing import Any
 
 from baml_core import Collector
 
+from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.agent_flow.search_depth import default_search_domains
 import baml_sdk as baml
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
@@ -23,6 +24,7 @@ from reframe_agent_host.benchmarks.control_flow_context import (
     search_depth_memory_context,
     selected_task_from_case,
     task_choice_memory_context,
+    user_preference_context,
 )
 from reframe_agent_host.benchmarks.control_flow_time import cutoff_age
 from reframe_agent_host.benchmarks.conversation_evaluation_context import (
@@ -201,8 +203,10 @@ async def choose_task(client, case: ControlFlowBenchmarkCase):
         current_user_request=case.current_user_request,
         current_conversation=_current_conversation(case_conversation_context(case)),
         session_memories=case_session_memory_context(case),
+        user_preferences=user_preference_context(case.user_preferences),
         available_tasks=available_task_context(case.available_tasks),
         task_choice_memories=task_choice_memory_context(case.task_choice_memories),
+        machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
@@ -222,6 +226,7 @@ async def search_hints(client, case: ControlFlowBenchmarkCase, selected_task):
         conversation_evaluation_memories=conversation_evaluation_memory_context(
             case.conversation_evaluation_memories
         ),
+        machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
@@ -241,6 +246,7 @@ async def search_depths(
         memory_search_hints=snapshot.search_hints,
         search_domains=snapshot.search_domains,
         search_depth_memories=snapshot.search_depth_memories,
+        machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at

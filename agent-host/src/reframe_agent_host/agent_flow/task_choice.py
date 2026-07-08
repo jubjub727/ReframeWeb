@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import baml_sdk as baml
 import baml_sdk as types
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.agent_flow.session_context import (
     current_conversation_history,
     session_memory_contexts,
@@ -17,6 +18,7 @@ from reframe_memory import MemoryDatabase, open_memory_database
 class TaskChoiceContext:
     current_conversation: types.ConversationHistory | None
     session_memories: list[types.SessionMemoryContext]
+    user_preferences: list[types.UserPreferenceMemoryContext]
     available_tasks: list[types.AvailableTask]
     task_choice_memories: list[types.TaskChoiceMemoryContext]
 
@@ -31,6 +33,7 @@ class TaskChoiceContextBuilder:
         return TaskChoiceContext(
             current_conversation=await self._current_conversation(),
             session_memories=await self._session_memories(),
+            user_preferences=await self._user_preferences(),
             available_tasks=await self._available_tasks(),
             task_choice_memories=await self._task_choice_memories(),
         )
@@ -46,6 +49,18 @@ class TaskChoiceContextBuilder:
 
     async def _session_memories(self) -> list[types.SessionMemoryContext]:
         return await session_memory_contexts(self.database, self.session_id)
+
+    async def _user_preferences(self) -> list[types.UserPreferenceMemoryContext]:
+        memories = await self.database.user_preferences.search()
+        return [
+            types.UserPreferenceMemoryContext(
+                title=memory.content.title,
+                description=memory.content.description,
+                tags=list(memory.tags),
+                **timestamp_fields(memory),
+            )
+            for memory in memories
+        ]
 
     async def _available_tasks(self) -> list[types.AvailableTask]:
         tasks = await self.database.tasks.search()
@@ -105,8 +120,12 @@ class TaskChoicePlanner:
             current_user_request=current_user_request,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,
+            user_preferences=context.user_preferences,
             available_tasks=context.available_tasks,
             task_choice_memories=context.task_choice_memories,
+            machine_state=local_machine_state_context(
+                "No voice startup machine state provider"
+            ),
             **client_kwargs(self._client_name),
         )
 

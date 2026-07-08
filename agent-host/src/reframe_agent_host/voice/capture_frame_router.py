@@ -84,10 +84,9 @@ class CaptureFrameRouter:
             {"hypstr": result.detection.hypstr, "kind": result.detection.kind},
         )
         if result.conversation_enabled:
-            return self._flow.enable_conversation_mode(
+            return self._flow.finish_conversation_mode_confirmation(
                 result,
                 state,
-                segmenter,
                 microphone,
                 listen_started_at,
                 on_event,

@@ -71,7 +71,10 @@ class VoiceKeyphraseGate:
         if state.keyphrase_spotter is None:
             return []
         if detection.kind == "conversation_on":
-            return []
+            return state.keyphrase_spotter.confirmation_frames_for_detection(
+                detection,
+                self._config.keyphrases.conversation_on_confirm_window_ms,
+            )
         return state.keyphrase_spotter.replay_frames_for_detection(
             detection,
             self._config.keyphrases.replay_pre_ms,

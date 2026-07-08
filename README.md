@@ -235,10 +235,10 @@ Useful tuning flags:
 
 - `--wake-keyword jarvis` to configure local wake keyphrases.
 - `--conversation-on-phrase "conversation on"` to configure the local
-  conversation-mode trigger.
+  conversation-mode trigger. The phrase is treated as control input only, not
+  as a user request.
 - `--conversation-on-confirm-window-ms 2000` to tune how much recent audio is
-  replayed and how long the host waits to confirm the full phrase after hearing
-  "conversation".
+  sent to Whisper for the second-layer confirmation.
 - `--wake-gain 1.0` to tune local phrase detector gain without changing the
   audio sent to Whisper.
 - `--wake-threshold 1e-30` to tune local PocketSphinx KWS confirmation for
@@ -251,8 +251,6 @@ Useful tuning flags:
   for those debug clips.
 - `--debug-audio-period-seconds 5` to opt in to saving rolling clips every few
   seconds while waiting for a wake phrase.
-- `--post-activation-command-window-ms 700` to tune how briefly the host waits
-  for command speech after a bare "conversation on" mode switch.
 - `--vad silero` to require Silero VAD, or `--vad energy` to use the simple RMS
   fallback.
 - `--vad-threshold 0.35` to tune Silero sensitivity for quieter microphone

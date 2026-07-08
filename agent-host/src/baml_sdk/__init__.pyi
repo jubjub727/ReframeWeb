@@ -122,6 +122,45 @@ class SessionMemoryContext(pydantic.BaseModel):
     read_at: str
 
 
+class UserPreferenceMemoryContext(pydantic.BaseModel):
+    title: str
+    description: str
+    tags: typing.List[str]
+    created_at: str
+    updated_at: str
+    read_at: str
+
+
+class MachineMonitorContext(pydantic.BaseModel):
+    horizontal_resolution: int
+    vertical_resolution: int
+
+
+class MachineStateContext(pydantic.BaseModel):
+    captured_at_utc: str
+    current_local_time: str
+    current_utc_time: str
+    timezone_name: str
+    utc_offset: str
+    os_architecture: str
+    monitor_count: int
+    monitors: typing.List[MachineMonitorContext]
+    geolocation_status: str
+    geolocation_source: typing.Optional[str]
+    ip_address: typing.Optional[str]
+    country: typing.Optional[str]
+    country_code: typing.Optional[str]
+    region: typing.Optional[str]
+    city: typing.Optional[str]
+    postal_code: typing.Optional[str]
+    latitude: typing.Optional[str]
+    longitude: typing.Optional[str]
+    geolocation_timezone: typing.Optional[str]
+    organization: typing.Optional[str]
+    asn: typing.Optional[str]
+    geolocation_error: typing.Optional[str]
+
+
 class TaskChoiceMemoryContext(pydantic.BaseModel):
     title: str
     description: str
@@ -251,7 +290,6 @@ class RelevantMemoryDecision(pydantic.BaseModel):
 class TaskChoiceDecision(pydantic.BaseModel):
     selected_task_id: str
     confidence: float
-    agent_thought: typing.Optional[str]
     candidate_memory: typing.Optional[CandidateMemory]
 
 
@@ -274,22 +312,22 @@ class TaskExecutionResult(pydantic.BaseModel):
     returns: typing.List[TaskReturnItem]
 
 
-def SelectRelevantMemories(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> RelevantMemoryDecision:
+def SelectRelevantMemories(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> RelevantMemoryDecision:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def SelectRelevantMemories_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> RelevantMemoryDecision:
+async def SelectRelevantMemories_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> RelevantMemoryDecision:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-def SelectRelevantMemories__build_request(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def SelectRelevantMemories__build_request(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def SelectRelevantMemories__build_request_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def SelectRelevantMemories__build_request_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def SelectRelevantMemories__build_request_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def SelectRelevantMemories__build_request_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def SelectRelevantMemories__build_request_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def SelectRelevantMemories__build_request_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
 def SelectRelevantMemories__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> RelevantMemoryDecision:
@@ -304,36 +342,36 @@ def SelectRelevantMemories__parse_stream(sse: baml.http.SseStream, *, client: ty
 async def SelectRelevantMemories__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.RelevantMemoryDecision], RelevantMemoryDecision]:
     """Raises:
         InvalidArgument, LlmClient"""
-def SelectRelevantMemories__render_prompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+def SelectRelevantMemories__render_prompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def SelectRelevantMemories__render_prompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+async def SelectRelevantMemories__render_prompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def SelectRelevantMemories_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.RelevantMemoryDecision], RelevantMemoryDecision]:
+def SelectRelevantMemories_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.RelevantMemoryDecision], RelevantMemoryDecision]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def SelectRelevantMemories_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.RelevantMemoryDecision], RelevantMemoryDecision]:
+async def SelectRelevantMemories_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.RelevantMemoryDecision], RelevantMemoryDecision]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-def ChooseMemorySearch(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> ConversationMemorySearchHints:
+def ChooseMemorySearch(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> ConversationMemorySearchHints:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def ChooseMemorySearch_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> ConversationMemorySearchHints:
+async def ChooseMemorySearch_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> ConversationMemorySearchHints:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-def ChooseMemorySearch__build_request(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def ChooseMemorySearch__build_request(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ChooseMemorySearch__build_request_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def ChooseMemorySearch__build_request_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def ChooseMemorySearch__build_request_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def ChooseMemorySearch__build_request_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ChooseMemorySearch__build_request_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def ChooseMemorySearch__build_request_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
 def ChooseMemorySearch__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> ConversationMemorySearchHints:
@@ -348,16 +386,16 @@ def ChooseMemorySearch__parse_stream(sse: baml.http.SseStream, *, client: typing
 async def ChooseMemorySearch__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.ConversationMemorySearchHints], ConversationMemorySearchHints]:
     """Raises:
         InvalidArgument, LlmClient"""
-def ChooseMemorySearch__render_prompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+def ChooseMemorySearch__render_prompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ChooseMemorySearch__render_prompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+async def ChooseMemorySearch__render_prompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def ChooseMemorySearch_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.ConversationMemorySearchHints], ConversationMemorySearchHints]:
+def ChooseMemorySearch_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.ConversationMemorySearchHints], ConversationMemorySearchHints]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def ChooseMemorySearch_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.ConversationMemorySearchHints], ConversationMemorySearchHints]:
+async def ChooseMemorySearch_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.ConversationMemorySearchHints], ConversationMemorySearchHints]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
@@ -518,22 +556,22 @@ def IsCurrentSession(session: RetrievedSessionGraph, current_session_id: typing.
 async def IsCurrentSession_async(session: RetrievedSessionGraph, current_session_id: typing.Optional[str]) -> bool: ...
 
 
-def ChooseMemorySearchDepths(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> SearchDepthDecision:
+def ChooseMemorySearchDepths(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> SearchDepthDecision:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def ChooseMemorySearchDepths_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> SearchDepthDecision:
+async def ChooseMemorySearchDepths_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> SearchDepthDecision:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-def ChooseMemorySearchDepths__build_request(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def ChooseMemorySearchDepths__build_request(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ChooseMemorySearchDepths__build_request_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def ChooseMemorySearchDepths__build_request_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def ChooseMemorySearchDepths__build_request_stream(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def ChooseMemorySearchDepths__build_request_stream(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ChooseMemorySearchDepths__build_request_stream_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def ChooseMemorySearchDepths__build_request_stream_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
 def ChooseMemorySearchDepths__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> SearchDepthDecision:
@@ -548,36 +586,36 @@ def ChooseMemorySearchDepths__parse_stream(sse: baml.http.SseStream, *, client: 
 async def ChooseMemorySearchDepths__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.SearchDepthDecision], SearchDepthDecision]:
     """Raises:
         InvalidArgument, LlmClient"""
-def ChooseMemorySearchDepths__render_prompt(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+def ChooseMemorySearchDepths__render_prompt(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ChooseMemorySearchDepths__render_prompt_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+async def ChooseMemorySearchDepths__render_prompt_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def ChooseMemorySearchDepths_stream(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.SearchDepthDecision], SearchDepthDecision]:
+def ChooseMemorySearchDepths_stream(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.SearchDepthDecision], SearchDepthDecision]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def ChooseMemorySearchDepths_stream_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.SearchDepthDecision], SearchDepthDecision]:
+async def ChooseMemorySearchDepths_stream_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, memory_search_hints: ConversationMemorySearchHints, search_domains: typing.List[SearchDepthDomain], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.SearchDepthDecision], SearchDepthDecision]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-def ChooseTask(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskChoiceDecision:
+def ChooseTask(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskChoiceDecision:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def ChooseTask_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskChoiceDecision:
+async def ChooseTask_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskChoiceDecision:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-def ChooseTask__build_request(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def ChooseTask__build_request(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ChooseTask__build_request_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def ChooseTask__build_request_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def ChooseTask__build_request_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def ChooseTask__build_request_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ChooseTask__build_request_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def ChooseTask__build_request_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
 def ChooseTask__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskChoiceDecision:
@@ -592,16 +630,16 @@ def ChooseTask__parse_stream(sse: baml.http.SseStream, *, client: typing.Union[b
 async def ChooseTask__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskChoiceDecision], TaskChoiceDecision]:
     """Raises:
         InvalidArgument, LlmClient"""
-def ChooseTask__render_prompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+def ChooseTask__render_prompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ChooseTask__render_prompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+async def ChooseTask__render_prompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def ChooseTask_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskChoiceDecision], TaskChoiceDecision]:
+def ChooseTask_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskChoiceDecision], TaskChoiceDecision]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def ChooseTask_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskChoiceDecision], TaskChoiceDecision]:
+async def ChooseTask_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskChoiceDecision], TaskChoiceDecision]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
@@ -670,22 +708,22 @@ def FinishTaskPrompt(selected_task_prompt: str, composition: TaskPromptCompositi
 async def FinishTaskPrompt_async(selected_task_prompt: str, composition: TaskPromptComposition) -> TaskPromptDecision: ...
 
 
-def ComposeTaskInput(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptComposition:
+def ComposeTaskInput(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptComposition:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def ComposeTaskInput_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptComposition:
+async def ComposeTaskInput_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptComposition:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-def ComposeTaskInput__build_request(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def ComposeTaskInput__build_request(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ComposeTaskInput__build_request_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def ComposeTaskInput__build_request_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def ComposeTaskInput__build_request_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def ComposeTaskInput__build_request_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ComposeTaskInput__build_request_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def ComposeTaskInput__build_request_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
 def ComposeTaskInput__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptComposition:
@@ -700,16 +738,16 @@ def ComposeTaskInput__parse_stream(sse: baml.http.SseStream, *, client: typing.U
 async def ComposeTaskInput__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptComposition], TaskPromptComposition]:
     """Raises:
         InvalidArgument, LlmClient"""
-def ComposeTaskInput__render_prompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+def ComposeTaskInput__render_prompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def ComposeTaskInput__render_prompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+async def ComposeTaskInput__render_prompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def ComposeTaskInput_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptComposition], TaskPromptComposition]:
+def ComposeTaskInput_stream(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptComposition], TaskPromptComposition]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def ComposeTaskInput_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptComposition], TaskPromptComposition]:
+async def ComposeTaskInput_stream_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.TaskPromptComposition], TaskPromptComposition]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
@@ -741,18 +779,18 @@ class VoicePromptContinuationTimings(pydantic.BaseModel):
     task_prompt_ms: int
 
 
-def UnderstandVoicePrompt(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], search_depth_memories: typing.List[SearchDepthMemoryContext]) -> VoicePromptUnderstanding:
+def UnderstandVoicePrompt(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext) -> VoicePromptUnderstanding:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def UnderstandVoicePrompt_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], search_depth_memories: typing.List[SearchDepthMemoryContext]) -> VoicePromptUnderstanding:
+async def UnderstandVoicePrompt_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], user_preferences: typing.List[UserPreferenceMemoryContext], available_tasks: typing.List[AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], conversation_evaluation_memories: typing.List[ConversationEvaluationMemoryContext], search_depth_memories: typing.List[SearchDepthMemoryContext], machine_state: MachineStateContext) -> VoicePromptUnderstanding:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-def ContinueVoicePrompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, retrieved_memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[RelevanceMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext]) -> VoicePromptContinuation:
+def ContinueVoicePrompt(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, retrieved_memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[RelevanceMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext) -> VoicePromptContinuation:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def ContinueVoicePrompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, retrieved_memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[RelevanceMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext]) -> VoicePromptContinuation:
+async def ContinueVoicePrompt_async(current_user_request: str, current_conversation: typing.Optional[ConversationHistory], session_memories: typing.List[SessionMemoryContext], selected_task: SelectedTaskContext, retrieved_memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[RelevanceMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: MachineStateContext) -> VoicePromptContinuation:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
@@ -777,6 +815,9 @@ __all__ = [
     "ConversationHistoryMessage",
     "ConversationHistory",
     "SessionMemoryContext",
+    "UserPreferenceMemoryContext",
+    "MachineMonitorContext",
+    "MachineStateContext",
     "TaskChoiceMemoryContext",
     "ConversationEvaluationMemoryContext",
     "SearchDepthMemoryContext",

@@ -18,6 +18,7 @@ from reframe_agent_host.commands.memory_output import (
 )
 from reframe_agent_host.commands.voice_loop import run_voice_turn_loop
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
+from reframe_agent_host.agent_flow.machine_state import MachineStateError
 from reframe_agent_host.voice.audio_calibration import load_audio_calibration
 from reframe_agent_host.speech.transcription import (
     TranscriptionRuntimeError,
@@ -81,6 +82,9 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
     except TranscriptionRuntimeError as error:
         print(f"[transcription] {error}", file=sys.stderr)
         return 3
+    except MachineStateError as error:
+        print(f"[machine-state] {error}", file=sys.stderr)
+        return 4
     except Exception as error:
         print(f"[error] {type(error).__name__}: {error}", file=sys.stderr)
         if debug_output and results:
@@ -209,6 +213,7 @@ class _VoiceTurnEventPrinter:
         self._debug_output = debug_output
         self._turn_started_at = turn_started_at
         self._startup_reported = False
+        self._last_conversation_mode_line: str | None = None
 
     def __call__(self, stage: str, message: str) -> None:
         if stage == "input-started":
@@ -235,12 +240,23 @@ class _VoiceTurnEventPrinter:
                 self._print_live(f"agent_thought: {_single_line(message, limit=None)}")
             elif stage == "agent-reply":
                 self._print_live(f"agent_reply: {_single_line(message, limit=None)}")
+            elif stage == "agent-reply-interrupted":
+                detail = _single_line(message, limit=None)
+                if detail:
+                    self._print_live(f"agent_reply_interrupted: {detail}")
+                else:
+                    self._print_live("agent_reply_interrupted")
             elif stage == "conversation-mode":
-                self._print_live(
-                    f"conversation_mode: {_single_line(message, limit=None)}"
-                )
+                line = _conversation_mode_status_line(message)
+                if line != self._last_conversation_mode_line:
+                    self._last_conversation_mode_line = line
+                    self._print_live(line)
             elif stage in {"turn-error", "capture-error", "warning", "tts-error"}:
                 self._print_live(f"[{stage}] {_single_line(message, limit=None)}")
+            elif stage == "startup-error":
+                self._print_live(f"[startup-error] {_single_line(message, limit=None)}")
+            elif stage == "barge-in":
+                self._print_live(f"[barge-in] {_single_line(message, limit=None)}")
             elif stage == "turn-ignored":
                 self._print_live(f"[ignored] {_single_line(message, limit=None)}")
             elif stage == "task-chosen":
@@ -260,6 +276,7 @@ class _VoiceTurnEventPrinter:
         if stage in {
             "preparing",
             "ready",
+            "machine-state",
             "listening",
             "audio",
             "transcribing",
@@ -288,9 +305,12 @@ class _VoiceTurnEventPrinter:
             "turn-understanding",
             "turn-continuation",
             "agent-reply",
+            "agent-reply-interrupted",
             "agent-thought",
             "conversation-mode",
+            "barge-in",
             "tts-error",
+            "startup-error",
             "turn-error",
             "turn-ignored",
             "capture-error",
@@ -334,12 +354,6 @@ def _print_turn_result(
             f"confidence={result.task_choice.confidence:.2f} "
             f"latency={_latency(result.timings.task_choice_seconds)}"
         )
-        agent_thought = (result.task_choice.agent_thought or "").strip()
-        if agent_thought:
-            print(
-                "agent_thought: "
-                f"{_single_line(agent_thought, limit=None)}"
-            )
     if result.memory_search_hints is not None:
         print(
             "memory_search_terms: "
@@ -449,6 +463,9 @@ def _task_prompt_selected_context_summary(result) -> str | None:
         "human_message": titles.get("human message", 0),
         "agent_message": titles.get("agent message", 0),
         "agent_thought_message": titles.get("agent_thought message", 0),
+        "agent_reply_interrupted_message": (
+            titles.get("agent_reply_interrupted message", 0)
+        ),
     }
     other = len(contexts) - message_contexts
     description_chars = sum(len(context.description) for context in contexts)
@@ -460,6 +477,8 @@ def _task_prompt_selected_context_summary(result) -> str | None:
         f"human_message={role_counts['human_message']} "
         f"agent_message={role_counts['agent_message']} "
         f"agent_thought_message={role_counts['agent_thought_message']} "
+        "agent_reply_interrupted_message="
+        f"{role_counts['agent_reply_interrupted_message']} "
         f"other={other} "
         f"description_chars={description_chars}"
     )
@@ -468,17 +487,6 @@ def _task_prompt_selected_context_summary(result) -> str | None:
 def _print_conversation_lines(result) -> None:
     if result.routed_transcript:
         print(f"human_reply: {_single_line(result.routed_transcript, limit=None)}")
-
-    agent_thought = (
-        (result.task_choice.agent_thought or "").strip()
-        if result.task_choice is not None
-        else ""
-    )
-    if agent_thought:
-        print(
-            "agent_thought: "
-            f"{_single_line(agent_thought, limit=None)}"
-        )
 
     if result.primitive_dispatch is not None:
         _print_conversation_returns(result.primitive_dispatch.records)
@@ -587,6 +595,25 @@ def _single_line(value: str, limit: int | None = 180) -> str:
     if len(text) <= limit:
         return text
     return text[: limit - 3].rstrip() + "..."
+
+
+def _conversation_mode_status_line(message: str) -> str:
+    normalized = _single_line(message, limit=None).lower().replace("_", " ").strip()
+    if normalized in {
+        "continuous conversation",
+        "continuous conversation on",
+        "conversation on",
+        "on",
+    }:
+        return "[conversation mode] On"
+    if normalized in {
+        "wake command",
+        "continuous conversation off",
+        "conversation off",
+        "off",
+    }:
+        return "[conversation mode] Off"
+    return f"[conversation mode] {_single_line(message, limit=None)}"
 
 
 def _latency(value: float | None) -> str:

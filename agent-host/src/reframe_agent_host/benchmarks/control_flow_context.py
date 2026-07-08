@@ -51,6 +51,22 @@ def task_choice_memory_context(
     ]
 
 
+def user_preference_context(
+    memories: tuple[BenchmarkMemory, ...],
+) -> list[types.UserPreferenceMemoryContext]:
+    return [
+        types.UserPreferenceMemoryContext(
+            title=memory.title,
+            description=memory.description,
+            tags=list(memory.tags),
+            created_at=memory.created_at,
+            updated_at=memory.updated_at,
+            read_at=memory.read_at,
+        )
+        for memory in memories
+    ]
+
+
 def search_depth_memory_context(
     memories: tuple[BenchmarkMemory, ...],
 ) -> list[types.SearchDepthMemoryContext]:
@@ -100,4 +116,5 @@ __all__ = [
     "search_depth_memory_context",
     "selected_task_from_case",
     "task_choice_memory_context",
+    "user_preference_context",
 ]

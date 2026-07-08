@@ -33,7 +33,6 @@ class PromptLayerDebugSessionTests(unittest.TestCase):
                     result=TaskChoiceDecision(
                         selected_task_id="task:reply",
                         confidence=1.0,
-                        agent_thought=None,
                         candidate_memory=None,
                     ),
                     request=_Request(

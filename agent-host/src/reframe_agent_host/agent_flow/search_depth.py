@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
+from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 import baml_sdk as baml
 import baml_sdk as types
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
@@ -144,6 +145,9 @@ class SearchDepthPlanner:
             memory_search_hints=memory_search_hints,
             search_domains=context.search_domains,
             search_depth_memories=context.search_depth_memories,
+            machine_state=local_machine_state_context(
+                "No voice startup machine state provider"
+            ),
             **client_kwargs(self._client_name),
         )
 

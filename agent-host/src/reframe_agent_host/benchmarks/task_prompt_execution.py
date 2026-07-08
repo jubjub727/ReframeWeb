@@ -15,6 +15,7 @@ from reframe_agent_host.agent_flow.memory_retrieval import (
     _search_hints,
     _timestamp_breadths,
 )
+from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.agent_flow.relevance_candidates import (
     candidate_contexts,
     filter_retrieved_memories,
@@ -141,12 +142,14 @@ async def _build_live_task_prompt_snapshot(
         session_memories = await _session_memories(database, session_id)
         available_tasks = await _core_available_tasks(database)
         task_choice_memories = await _task_choice_memories(database)
+        user_preferences = await _user_preferences(database)
 
         task_choice, latency = await _choose_task(
             client,
             case,
             current_conversation,
             session_memories,
+            user_preferences,
             available_tasks,
             task_choice_memories,
         )
@@ -357,6 +360,7 @@ async def task_prompt(
         selected_task=snapshot.selected_task,
         selected_memories=snapshot.selected_memory_contexts,
         task_prompt_memories=snapshot.task_prompt_memories,
+        machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
     result = build_task_prompt_decision(snapshot.selected_task.prompt, composition)
@@ -543,17 +547,6 @@ async def _record_current_turn(
         ConversationMessage(role="human", content=case.current_user_request),
         tags=("benchmark", "task-prompt", case.id),
     )
-    agent_thought = (
-        (task_choice.agent_thought or "").strip()
-        if task_choice is not None
-        else ""
-    )
-    if agent_thought:
-        await database.conversations.add_message(
-            conversation_id,
-            ConversationMessage(role="agent_thought", content=agent_thought),
-            tags=("benchmark", "task-prompt", case.id),
-        )
 
 
 async def _choose_task(
@@ -561,6 +554,7 @@ async def _choose_task(
     case,
     current_conversation,
     session_memories,
+    user_preferences,
     available_tasks,
     task_choice_memories,
 ):
@@ -569,8 +563,10 @@ async def _choose_task(
         current_user_request=case.current_user_request,
         current_conversation=current_conversation,
         session_memories=session_memories,
+        user_preferences=user_preferences,
         available_tasks=available_tasks,
         task_choice_memories=task_choice_memories,
+        machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
@@ -593,6 +589,7 @@ async def _memory_search_hints(
         conversation_evaluation_memories=await _conversation_evaluation_memories(
             database
         ),
+        machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
@@ -618,6 +615,7 @@ async def _search_depths(
         memory_search_hints=memory_search_hints,
         search_domains=default_search_domains(),
         search_depth_memories=await _search_depth_memories(database),
+        machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
@@ -661,6 +659,7 @@ async def _relevance_decision(
             current_session_id=session_id,
         ),
         relevance_memories=await _relevance_memories(database),
+        machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
     return result, time.perf_counter() - started_at
@@ -721,6 +720,19 @@ async def _task_choice_memories(database) -> list[types.TaskChoiceMemoryContext]
     memories = await database.task_choice_memories.search()
     return [
         types.TaskChoiceMemoryContext(
+            title=memory.content.title,
+            description=memory.content.description,
+            tags=list(memory.tags),
+            **timestamp_fields(memory),
+        )
+        for memory in memories
+    ]
+
+
+async def _user_preferences(database) -> list[types.UserPreferenceMemoryContext]:
+    memories = await database.user_preferences.search()
+    return [
+        types.UserPreferenceMemoryContext(
             title=memory.content.title,
             description=memory.content.description,
             tags=list(memory.tags),

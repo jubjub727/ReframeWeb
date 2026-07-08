@@ -5,10 +5,10 @@ import time
 import numpy as np
 
 from reframe_agent_host.voice.microphone import MicrophoneStream
-import baml_sdk as types
 from reframe_agent_host.voice.activity import DetectedUtterance, UtteranceSegmenter
 from reframe_agent_host.voice.vad_types import UtteranceEvent
 from reframe_agent_host.voice.capture_results import (
+    emit_microphone_warnings,
     finish_mode_switch_result,
     finish_with_utterance_result,
 )
@@ -25,48 +25,45 @@ class VoiceCaptureFlow:
     def __init__(self, config: VoicePipelineConfig) -> None:
         self._config = config
 
-    def enable_conversation_mode(
+    def finish_conversation_mode_confirmation(
         self,
         result: KeyphraseGateResult,
         state: CaptureState,
-        segmenter: UtteranceSegmenter,
         microphone: MicrophoneStream,
         listen_started_at: float,
         on_event: VoicePipelineEventHandler | None,
     ) -> CaptureResult | None:
-        state.conversation_mode = types.ConversationMode.CONTINUOUS_CONVERSATION
-        state.keyphrase_required = False
-        state.mode_switched = True
-        state.keyphrase_carry_frames.clear()
-        state.post_activation_deadline = time.perf_counter() + (
-            self._config.post_activation_command_window_ms / 1000
-        )
-        self._emit(on_event, "keyphrase", "conversation mode enabled")
-
         if not result.replay_frames:
+            self._emit(on_event, "keyphrase", "no confirmation audio to transcribe")
             return None
 
-        self._emit(
-            on_event,
-            "keyphrase",
-            f"replaying {self._duration(result.replay_frames):.2f}s after trigger to VAD",
+        self._emit(on_event, "keyphrase", "confirming conversation mode phrase")
+        samples = np.concatenate(
+            [
+                np.asarray(frame, dtype=np.float32).reshape(-1)
+                for frame in result.replay_frames
+            ]
         )
-        for replay_frame in result.replay_frames:
-            utterance = self.accept_speech_frame(
-                replay_frame,
-                segmenter,
-                state,
-                on_event,
-            )
-            if utterance is not None:
-                return self.finish_with_utterance(
-                    state,
-                    utterance,
-                    microphone,
-                    listen_started_at,
-                    on_event,
-                )
-        return None
+        ended_at = time.perf_counter()
+        emit_microphone_warnings(
+            microphone,
+            lambda stage, message: self._emit(on_event, stage, message),
+        )
+        return CaptureResult(
+            conversation_mode=state.conversation_mode,
+            keyphrase_detection=state.keyphrase_detection,
+            utterance=DetectedUtterance(
+                samples=samples,
+                sample_rate=self._config.audio.sample_rate,
+                duration_seconds=len(samples) / self._config.audio.sample_rate,
+                forced_end=True,
+            ),
+            mode_switched=False,
+            keyphrase_wait_seconds=state.keyphrase_wait_seconds,
+            listen_seconds=ended_at - listen_started_at,
+            wait_for_speech_seconds=None,
+            speech_capture_wall_seconds=len(samples) / self._config.audio.sample_rate,
+        )
 
     def replay_wake_audio(
         self,
@@ -105,7 +102,11 @@ class VoiceCaptureFlow:
         if segmenter.is_recording and not state.was_recording:
             state.speech_started_at = time.perf_counter()
             state.post_activation_deadline = None
-            self._emit(on_event, "speech", "started")
+            self._emit(
+                on_event,
+                "speech",
+                f"started detector={segmenter.detector_name}",
+            )
         state.was_recording = segmenter.is_recording
         return utterance
 
@@ -120,9 +121,17 @@ class VoiceCaptureFlow:
         if segmenter.is_recording and not state.was_recording:
             state.speech_started_at = time.perf_counter()
             state.post_activation_deadline = None
-            self._emit(on_event, "speech", "started")
+            self._emit(
+                on_event,
+                "speech",
+                f"started detector={segmenter.detector_name}",
+            )
         if event is not None and event.kind == "resumed":
-            self._emit(on_event, "speech", "resumed")
+            self._emit(
+                on_event,
+                "speech",
+                f"resumed detector={segmenter.detector_name}",
+            )
         state.was_recording = segmenter.is_recording
         return event
 

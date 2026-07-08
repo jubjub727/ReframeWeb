@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
@@ -14,6 +15,7 @@ from reframe_memory import (
     MemoryDatabase,
     SessionMemory,
     UserPreferenceMemory,
+    open_memory_database,
 )
 
 
@@ -303,13 +305,50 @@ class PrimitiveDispatcher:
     def _speak_in_background(self, text: str) -> None:
         speaker = self.speaker or NoopSpeaker()
 
+        def on_speech_event(stage: str, message: str) -> None:
+            if stage == "tts-interrupted":
+                detail = _single_line(message)
+                self._emit("agent-reply-interrupted", detail)
+                self._record_agent_reply_interrupted_in_background(detail)
+            self._emit(stage, message)
+
         def speak() -> None:
             try:
-                _speak_with_events(speaker, text, self._emit)
+                _speak_with_events(speaker, text, on_speech_event)
             except Exception as exc:
                 self._emit("tts-error", str(exc))
 
         Thread(target=speak, daemon=True).start()
+
+    def _record_agent_reply_interrupted_in_background(self, detail: str) -> None:
+        if self.conversation_id is None:
+            return
+
+        def record() -> None:
+            try:
+                asyncio.run(self._record_agent_reply_interrupted(detail))
+            except Exception as exc:
+                self._emit(
+                    "warning",
+                    f"failed to record interrupted agent reply: {exc}",
+                )
+
+        Thread(target=record, daemon=True).start()
+
+    async def _record_agent_reply_interrupted(self, detail: str) -> None:
+        if self.conversation_id is None:
+            return
+        database = await open_memory_database()
+        try:
+            await database.conversations.add_message(
+                self.conversation_id,
+                ConversationMessage(
+                    role="agent_reply_interrupted",
+                    content=detail,
+                ),
+            )
+        finally:
+            await database.close()
 
 
 def _payload_text(payload: Any, *keys: str) -> str:
@@ -323,6 +362,10 @@ def _payload_text(payload: Any, *keys: str) -> str:
                 if text:
                     return text
     return ""
+
+
+def _single_line(value: str) -> str:
+    return " ".join(value.split())
 
 
 def _memory_payload(payload: Any, default_title: str) -> tuple[str, str]:

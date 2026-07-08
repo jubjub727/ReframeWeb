@@ -4,6 +4,7 @@ function ChooseMemorySearch(
     session_memories: SessionMemoryContext[],
     selected_task: SelectedTaskContext,
     conversation_evaluation_memories: ConversationEvaluationMemoryContext[],
+    machine_state: MachineStateContext,
 ) -> ConversationMemorySearchHints {
     client: ConversationEvaluationModel
     prompt: #"
@@ -90,6 +91,34 @@ function ChooseMemorySearch(
           read_at: {{ memory.read_at }}
           {{ memory.description }}
         {% endfor %}
+
+        Machine state:
+          captured_at_utc: {{ machine_state.captured_at_utc }}
+          current_local_time: {{ machine_state.current_local_time }}
+          current_utc_time: {{ machine_state.current_utc_time }}
+          timezone_name: {{ machine_state.timezone_name }}
+          utc_offset: {{ machine_state.utc_offset }}
+          os_architecture: {{ machine_state.os_architecture }}
+          monitor_count: {{ machine_state.monitor_count }}
+          monitors:
+        {% for monitor in machine_state.monitors %}
+          - horizontal_resolution: {{ monitor.horizontal_resolution }}
+            vertical_resolution: {{ monitor.vertical_resolution }}
+        {% endfor %}
+          geolocation_status: {{ machine_state.geolocation_status }}
+          geolocation_source: {{ machine_state.geolocation_source }}
+          ip_address: {{ machine_state.ip_address }}
+          country: {{ machine_state.country }}
+          country_code: {{ machine_state.country_code }}
+          region: {{ machine_state.region }}
+          city: {{ machine_state.city }}
+          postal_code: {{ machine_state.postal_code }}
+          latitude: {{ machine_state.latitude }}
+          longitude: {{ machine_state.longitude }}
+          geolocation_timezone: {{ machine_state.geolocation_timezone }}
+          organization: {{ machine_state.organization }}
+          asn: {{ machine_state.asn }}
+          geolocation_error: {{ machine_state.geolocation_error }}
 
         Return only the memory search hints and optional candidate memory.
         {{ ctx.output_format }}

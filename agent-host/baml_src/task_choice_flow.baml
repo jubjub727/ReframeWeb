@@ -2,8 +2,10 @@ function ChooseTask(
     current_user_request: string,
     current_conversation: ConversationHistory?,
     session_memories: SessionMemoryContext[],
+    user_preferences: UserPreferenceMemoryContext[],
     available_tasks: AvailableTask[],
     task_choice_memories: TaskChoiceMemoryContext[],
+    machine_state: MachineStateContext,
 ) -> TaskChoiceDecision {
     client: TaskChoiceModel
     prompt: #"
@@ -20,12 +22,13 @@ function ChooseTask(
         - Current user request: the request being routed now.
         - Conversation history: earlier human and agent messages.
         - Session memories: remembered observations for this session.
+        - User preferences: durable user preferences that should influence routing.
         - Available tasks: the only tasks that may be selected.
         - Task-choice memories: remembered observations about choosing tasks.
+        - Machine state: current non-stored local time, timezone, OS/architecture,
+          monitor resolutions, and IP geolocation.
 
-        Optional outputs available in this step:
-        - agent_thought: compact routing context to add to the conversation when
-          it helps later layers interpret the selected task or the user request.
+        Optional output available in this step:
         - candidate_memory: a vague remembered observation that could be useful to
           preserve.
 
@@ -35,10 +38,7 @@ function ChooseTask(
         - Do not invent task ids.
         - Do not perform the task. Only choose the task.
         - Use optional outputs only when they are useful.
-        - Keep agent_thought concise when it is useful.
         - User request may be related to memories that this layer is not yet aware of, simply finish your task without thinking too much if that seems to be the case.
-        - Do not generate misleading agent_thoughts that would only be relevant to your lack of memory capabilities.
-        - Do not make confident assertions in agent_thoughts only use them to provide observations.
 
         {{ _.role("user") }}
 
@@ -68,6 +68,16 @@ function ChooseTask(
           {{ memory.description }}
         {% endfor %}
 
+        User preferences:
+        {% for preference in user_preferences %}
+        - {{ preference.title }}
+          Tags: {{ preference.tags }}
+          created_at: {{ preference.created_at }}
+          updated_at: {{ preference.updated_at }}
+          read_at: {{ preference.read_at }}
+          {{ preference.description }}
+        {% endfor %}
+
         Available tasks:
         {% for task in available_tasks %}
         - id: {{ task.id }}
@@ -91,6 +101,34 @@ function ChooseTask(
           read_at: {{ memory.read_at }}
           {{ memory.description }}
         {% endfor %}
+
+        Machine state:
+          captured_at_utc: {{ machine_state.captured_at_utc }}
+          current_local_time: {{ machine_state.current_local_time }}
+          current_utc_time: {{ machine_state.current_utc_time }}
+          timezone_name: {{ machine_state.timezone_name }}
+          utc_offset: {{ machine_state.utc_offset }}
+          os_architecture: {{ machine_state.os_architecture }}
+          monitor_count: {{ machine_state.monitor_count }}
+          monitors:
+        {% for monitor in machine_state.monitors %}
+          - horizontal_resolution: {{ monitor.horizontal_resolution }}
+            vertical_resolution: {{ monitor.vertical_resolution }}
+        {% endfor %}
+          geolocation_status: {{ machine_state.geolocation_status }}
+          geolocation_source: {{ machine_state.geolocation_source }}
+          ip_address: {{ machine_state.ip_address }}
+          country: {{ machine_state.country }}
+          country_code: {{ machine_state.country_code }}
+          region: {{ machine_state.region }}
+          city: {{ machine_state.city }}
+          postal_code: {{ machine_state.postal_code }}
+          latitude: {{ machine_state.latitude }}
+          longitude: {{ machine_state.longitude }}
+          geolocation_timezone: {{ machine_state.geolocation_timezone }}
+          organization: {{ machine_state.organization }}
+          asn: {{ machine_state.asn }}
+          geolocation_error: {{ machine_state.geolocation_error }}
 
         Return only the task choice decision.
         {{ ctx.output_format }}

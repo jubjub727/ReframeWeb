@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import baml_sdk as baml
 import baml_sdk as types
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     opencode_reasoning_effort_candidates,
     opencode_reasoning_effort_client,
@@ -20,6 +21,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
             current_user_request="Install the missing GPU driver for me.",
             current_conversation=None,
             session_memories=[],
+            user_preferences=[],
             available_tasks=[
                 types.AvailableTask(
                     id="task:cannot_handle",
@@ -35,6 +37,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 )
             ],
             task_choice_memories=[],
+            machine_state=local_machine_state_context("test"),
         )
         body = json.loads(request.body)
 
@@ -51,6 +54,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
             current_user_request="Test routing.",
             current_conversation=None,
             session_memories=[],
+            user_preferences=[],
             available_tasks=[
                 types.AvailableTask(
                     id="task:test",
@@ -66,6 +70,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 )
             ],
             task_choice_memories=[],
+            machine_state=local_machine_state_context("test"),
             **client_kwargs(client),
         )
         body = json.loads(request.body)
@@ -129,6 +134,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 )
             ],
             search_depth_memories=[],
+            machine_state=local_machine_state_context("test"),
             **client_kwargs(client),
         )
         body = json.loads(request.body)
@@ -170,6 +176,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 )
             ],
             relevance_memories=[],
+            machine_state=local_machine_state_context("test"),
         )
         body = json.loads(request.body)
 

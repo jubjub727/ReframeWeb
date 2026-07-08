@@ -14,6 +14,7 @@ class QueuedAudioOutput:
         self._chunks: deque[np.ndarray] = deque()
         self._lock = Lock()
         self._queued_samples = 0
+        self._played_samples = 0
 
     def start(self, sounddevice) -> None:
         if self._stream is not None:
@@ -28,10 +29,17 @@ class QueuedAudioOutput:
         stream.start()
         self._stream = stream
 
-    def clear(self) -> None:
+    @property
+    def played_samples(self) -> int:
+        with self._lock:
+            return self._played_samples
+
+    def clear(self, *, reset_played_samples: bool = False) -> None:
         with self._lock:
             self._chunks.clear()
             self._queued_samples = 0
+            if reset_played_samples:
+                self._played_samples = 0
 
     def enqueue(self, samples) -> int:
         audio = np.asarray(samples, dtype=np.float32).reshape(-1)
@@ -61,6 +69,7 @@ class QueuedAudioOutput:
                 output[offset : offset + count] = chunk[:count]
                 offset += count
                 self._queued_samples -= count
+                self._played_samples += count
                 if count == len(chunk):
                     self._chunks.popleft()
                 else:

@@ -8,6 +8,7 @@ from baml_core import Collector
 
 import baml_sdk as baml
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.benchmarks.conversation_evaluation_case_types import (
     ConversationEvaluationBenchmarkCase,
 )
@@ -134,6 +135,7 @@ async def _run_case(
             conversation_evaluation_memories=conversation_evaluation_memory_context(
                 case.conversation_evaluation_memories
             ),
+            machine_state=local_machine_state_context("Benchmark machine state"),
             **client_kwargs(client),
         )
     except Exception as exc:
@@ -188,6 +190,7 @@ async def _probe_conversation_evaluation_reasoning_effort(
             conversation_evaluation_memories=conversation_evaluation_memory_context(
                 case.conversation_evaluation_memories
             ),
+            machine_state=local_machine_state_context("Benchmark machine state"),
             **client_kwargs(client),
         )
     except Exception as exc:
@@ -236,6 +239,7 @@ async def _warmup(
                 conversation_evaluation_memories=conversation_evaluation_memory_context(
                     case.conversation_evaluation_memories
                 ),
+                machine_state=local_machine_state_context("Benchmark machine state"),
                 **client_kwargs(client),
             )
         except Exception:

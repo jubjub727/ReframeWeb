@@ -4,6 +4,7 @@ import time
 from collections.abc import Callable
 from threading import Event
 
+import numpy as np
 from reframe_agent_host.voice.microphone import MicrophoneStream
 import baml_sdk as types
 from reframe_agent_host.voice.activity import (
@@ -33,6 +34,7 @@ from reframe_agent_host.voice.types import (
 
 
 CaptureStreamEventHandler = Callable[[CaptureStreamEvent], None]
+AudioFrameHandler = Callable[[np.ndarray, VoicePipelineEventHandler | None], None]
 
 
 class VoiceTurnCapture:
@@ -41,10 +43,12 @@ class VoiceTurnCapture:
         config: VoicePipelineConfig,
         conversation_mode: types.ConversationMode,
         mode_controller: ConversationModeController | None = None,
+        audio_frame_handler: AudioFrameHandler | None = None,
     ) -> None:
         self._config = config
         self._conversation_mode = conversation_mode
         self._mode_controller = mode_controller
+        self._audio_frame_handler = audio_frame_handler
         self._flow = VoiceCaptureFlow(config)
         self._router = CaptureFrameRouter(config, self._flow)
 
@@ -74,6 +78,7 @@ class VoiceTurnCapture:
                 for frame in microphone.frames(stop_event=stop_event):
                     if stop_event is not None and stop_event.is_set():
                         raise InterruptedError("Voice capture was stopped.")
+                    self._handle_audio_frame(frame, on_event)
                     debug_audio.append(frame)
                     debug_audio.maybe_save_periodic(self._emitter(on_event))
                     result = self._router.accept_frame(
@@ -129,6 +134,7 @@ class VoiceTurnCapture:
             self._config,
             self._conversation_mode,
             mode_controller=self._mode_controller,
+            audio_frame_handler=self._audio_frame_handler,
         ).run(
             on_event,
             on_capture_event,
@@ -191,6 +197,14 @@ class VoiceTurnCapture:
         on_event: VoicePipelineEventHandler | None,
     ) -> None:
         self._emit(on_event, "input-stopped", "microphone stream closed")
+
+    def _handle_audio_frame(
+        self,
+        frame: np.ndarray,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> None:
+        if self._audio_frame_handler is not None:
+            self._audio_frame_handler(frame, on_event)
 
 
 def _channel_label(channel: int) -> str:

@@ -83,7 +83,7 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
         "--conversation-on-confirm-window-ms",
         type=int,
         default=2000,
-        help="Rolling audio window used to confirm the full phrase.",
+        help="Maximum detected phrase audio sent to Whisper for confirmation.",
     )
     parser.add_argument(
         "--wake-check-ms",
@@ -151,10 +151,7 @@ def add_voice_turn_args(parser: argparse.ArgumentParser) -> None:
         "--post-activation-command-window-ms",
         type=int,
         default=700,
-        help=(
-            "After 'conversation on', wait this long for same-utterance command "
-            "speech before returning a mode-only switch."
-        ),
+        help=argparse.SUPPRESS,
     )
     parser.add_argument("--whisper-model", default=DEFAULT_WHISPER_MODEL)
     parser.add_argument(

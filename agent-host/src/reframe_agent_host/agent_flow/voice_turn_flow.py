@@ -7,6 +7,10 @@ from typing import Any, Awaitable, Callable, Mapping
 import baml_sdk as baml
 import baml_sdk as types
 from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from reframe_agent_host.agent_flow.machine_state import (
+    MachineStateProvider,
+    local_machine_state_context,
+)
 from reframe_agent_host.agent_flow.prompt_layer_debug import (
     PromptLayerDebugSession,
 )
@@ -29,6 +33,7 @@ class BamlVoiceTurnFlow:
     session_id: str | None = None
     conversation_id: str | None = None
     client_name: str | None = None
+    machine_state_provider: MachineStateProvider | None = None
     _owns_database: bool = field(init=False)
     _prompt_debug: PromptLayerDebugSession | None = field(
         init=False,
@@ -57,21 +62,25 @@ class BamlVoiceTurnFlow:
             database,
             self.session_id,
         )
+        user_preferences = await self._user_preferences(database)
         available_tasks = await self._available_tasks(database)
         task_choice_memories = await self._task_choice_memories(database)
         conversation_evaluation_memories = (
             await self._conversation_evaluation_memories(database)
         )
         search_depth_memories = await self._search_depth_memories(database)
+        machine_state = self._machine_state_context()
         inputs = {
             "current_timestamp": timestamp,
             "current_user_request": current_user_request,
             "current_conversation": conversation,
             "session_memories": session_memories,
+            "user_preferences": user_preferences,
             "available_tasks": available_tasks,
             "task_choice_memories": task_choice_memories,
             "conversation_evaluation_memories": conversation_evaluation_memories,
             "search_depth_memories": search_depth_memories,
+            "machine_state": machine_state,
         }
         self._prompt_debug = PromptLayerDebugSession.begin(
             current_user_request=current_user_request,
@@ -125,6 +134,7 @@ class BamlVoiceTurnFlow:
         retrieved_graph = retrieved_memory_graph(retrieved_memories)
         relevance_memories = await self._relevance_memories(database)
         task_prompt_memories = await self._task_prompt_memories(database)
+        machine_state = self._machine_state_context()
         inputs = {
             "current_user_request": current_user_request,
             "current_conversation": conversation,
@@ -134,6 +144,7 @@ class BamlVoiceTurnFlow:
             "current_session_id": self.session_id,
             "relevance_memories": relevance_memories,
             "task_prompt_memories": task_prompt_memories,
+            "machine_state": machine_state,
         }
         if self._prompt_debug is None:
             self._prompt_debug = PromptLayerDebugSession.begin(
@@ -179,8 +190,10 @@ class BamlVoiceTurnFlow:
             "current_user_request": inputs["current_user_request"],
             "current_conversation": inputs["current_conversation"],
             "session_memories": inputs["session_memories"],
+            "user_preferences": inputs["user_preferences"],
             "available_tasks": inputs["available_tasks"],
             "task_choice_memories": inputs["task_choice_memories"],
+            "machine_state": inputs["machine_state"],
         }
         await self._write_prompt_layer(
             1,
@@ -202,6 +215,7 @@ class BamlVoiceTurnFlow:
             "conversation_evaluation_memories": (
                 inputs["conversation_evaluation_memories"]
             ),
+            "machine_state": inputs["machine_state"],
         }
         await self._write_prompt_layer(
             2,
@@ -224,6 +238,7 @@ class BamlVoiceTurnFlow:
             "memory_search_hints": result.memory_search_hints,
             "search_domains": await baml.MemorySearchDomains_async(),
             "search_depth_memories": inputs["search_depth_memories"],
+            "machine_state": inputs["machine_state"],
         }
         await self._write_prompt_layer(
             3,
@@ -254,6 +269,7 @@ class BamlVoiceTurnFlow:
             "selected_task": inputs["selected_task"],
             "candidate_memories": candidate_memories,
             "relevance_memories": inputs["relevance_memories"],
+            "machine_state": inputs["machine_state"],
         }
         await self._write_prompt_layer(
             5,
@@ -275,6 +291,7 @@ class BamlVoiceTurnFlow:
             "selected_task": inputs["selected_task"],
             "selected_memories": result.selected_memory_contexts,
             "task_prompt_memories": inputs["task_prompt_memories"],
+            "machine_state": inputs["machine_state"],
         }
         await self._write_prompt_layer(
             6,
@@ -361,6 +378,11 @@ class BamlVoiceTurnFlow:
             await self.database.ensure_roots()
         return self.database
 
+    def _machine_state_context(self) -> types.MachineStateContext:
+        if self.machine_state_provider is None:
+            return local_machine_state_context("No voice startup machine state provider")
+        return self.machine_state_provider.context()
+
     async def _available_tasks(
         self,
         database: MemoryDatabase,
@@ -387,6 +409,21 @@ class BamlVoiceTurnFlow:
         memories = await database.task_choice_memories.search()
         return [
             types.TaskChoiceMemoryContext(
+                title=memory.content.title,
+                description=memory.content.description,
+                tags=list(memory.tags),
+                **timestamp_fields(memory),
+            )
+            for memory in memories
+        ]
+
+    async def _user_preferences(
+        self,
+        database: MemoryDatabase,
+    ) -> list[types.UserPreferenceMemoryContext]:
+        memories = await database.user_preferences.search()
+        return [
+            types.UserPreferenceMemoryContext(
                 title=memory.content.title,
                 description=memory.content.description,
                 tags=list(memory.tags),

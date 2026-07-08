@@ -11,6 +11,7 @@ from reframe_agent_host.keyphrases import KeyphraseDetection
 from reframe_agent_host.keyphrases.pocketsphinx_helpers import phrase_sample_span
 from reframe_agent_host.keyphrases.pocketsphinx_phrase import (
     PocketSphinxPhraseSpotter,
+    trim_frames_between_samples,
     trim_frames_from_sample,
 )
 from reframe_agent_host.speech.transcription import WhisperTranscriberConfig
@@ -54,6 +55,7 @@ class FakeReplaySpotter:
     def __init__(self, detection):
         self.detection = detection
         self.replay_pre_ms = None
+        self.confirmation_window_ms = None
         self.closed = False
 
     def append(self, _frame):
@@ -65,6 +67,10 @@ class FakeReplaySpotter:
     def replay_frames_for_detection(self, _detection, pre_roll_ms):
         self.replay_pre_ms = pre_roll_ms
         return [np.array([float(pre_roll_ms)], dtype=np.float32)]
+
+    def confirmation_frames_for_detection(self, _detection, window_ms):
+        self.confirmation_window_ms = window_ms
+        return [np.array([float(window_ms)], dtype=np.float32)]
 
     def close(self):
         self.closed = True
@@ -98,7 +104,7 @@ class KeyphraseSpotterTests(unittest.TestCase):
         self.assertEqual(detection.phrase_start_sample, 0)
         self.assertEqual(detection.phrase_end_sample, 512)
 
-    def test_conversation_on_candidate_still_uses_phrase_match(self):
+    def test_conversation_on_candidate_uses_phrase_match_for_whisper_confirmation(self):
         spotter = _spotter_with_decoder("conversation on")
         spotter._keyword_spotted = lambda _phrase: None
 
@@ -170,6 +176,20 @@ class KeyphraseSpotterTests(unittest.TestCase):
             [[7.0, 8.0, 9.0], [10.0, 11.0, 12.0, 13.0, 14.0]],
         )
 
+    def test_confirmation_frames_are_trimmed_to_phrase_span(self):
+        frames = [
+            np.arange(0, 5, dtype=np.float32),
+            np.arange(5, 10, dtype=np.float32),
+            np.arange(10, 15, dtype=np.float32),
+        ]
+
+        trimmed = trim_frames_between_samples(frames, 4, 12)
+
+        self.assertEqual(
+            [frame.tolist() for frame in trimmed],
+            [[4.0], [5.0, 6.0, 7.0, 8.0, 9.0], [10.0, 11.0]],
+        )
+
     def test_spotter_replay_starts_at_wake_phrase_end_by_default(self):
         spotter = _spotter_with_decoder("jarvis")
         spotter._frames = [
@@ -218,7 +238,7 @@ class KeyphraseSpotterTests(unittest.TestCase):
         self.assertEqual(segmenter.frames, [])
         self.assertEqual(len(state.keyphrase_carry_frames), 0)
 
-    def test_conversation_on_replays_no_buffered_audio(self):
+    def test_conversation_on_returns_confirmation_audio(self):
         detection = KeyphraseDetection(
             kind="conversation_on",
             phrase="conversation on",
@@ -241,9 +261,10 @@ class KeyphraseSpotterTests(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertTrue(result.conversation_enabled)
         self.assertIsNone(spotter.replay_pre_ms)
-        self.assertEqual(result.replay_frames, [])
+        self.assertEqual(spotter.confirmation_window_ms, 2000)
+        self.assertEqual([frame.tolist() for frame in result.replay_frames], [[2000.0]])
 
-    def test_conversation_on_without_phrase_boundary_replays_nothing(self):
+    def test_conversation_on_without_phrase_boundary_uses_confirmation_buffer(self):
         detection = KeyphraseDetection(
             kind="conversation_on",
             phrase="conversation on",
@@ -266,7 +287,8 @@ class KeyphraseSpotterTests(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertTrue(result.conversation_enabled)
         self.assertIsNone(spotter.replay_pre_ms)
-        self.assertEqual(result.replay_frames, [])
+        self.assertEqual(spotter.confirmation_window_ms, 2000)
+        self.assertEqual([frame.tolist() for frame in result.replay_frames], [[2000.0]])
 
 
 def _spotter_with_decoder(hypstr):

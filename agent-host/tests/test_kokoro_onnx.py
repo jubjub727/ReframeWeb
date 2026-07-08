@@ -1,4 +1,5 @@
 import tempfile
+from threading import Event, Thread
 import unittest
 from unittest.mock import patch
 
@@ -45,10 +46,45 @@ class KokoroOnnxSpeakerTests(unittest.TestCase):
         self.assertTrue(any(event[0] == "tts-first-audio" for event in events))
         self.assertIn(("tts-started", "backend=kokoro-onnx chunks=1"), events)
 
+    def test_interrupt_stops_active_playback_and_emits_event(self):
+        speaker = KokoroOnnxSpeaker()
+        speaker._kokoro = FakeKokoro(sample_count=2200)
+        speaker._output = BlockingOutput()
+        events = []
+
+        with patch.object(kokoro_onnx, "_sounddevice", return_value=FakeSoundDevice()):
+            thread = Thread(
+                target=lambda: speaker.speak(
+                    "alpha beta gamma delta",
+                    on_event=lambda stage, message: events.append((stage, message)),
+                )
+            )
+            thread.start()
+            self.assertTrue(speaker._output.waiting.wait(timeout=1))
+            speaker._output.played_samples_value = 2200
+            with speaker._playback_lock:
+                speaker._playback.playback_started_at = (
+                    kokoro_onnx.time.perf_counter() - (1100 / 24_000)
+                )
+
+            self.assertTrue(speaker.interrupt("human voice"))
+
+            thread.join(timeout=1)
+
+        self.assertFalse(thread.is_alive())
+        self.assertIn(
+            ("tts-interrupted", "Last fully spoken word beta at character 10"),
+            events,
+        )
+        self.assertFalse(any(event[0] == "tts-finished" for event in events))
+
 
 class FakeKokoro:
+    def __init__(self, sample_count=16):
+        self.sample_count = sample_count
+
     def create(self, _text, **_kwargs):
-        return np.zeros(16, dtype=np.float32), 24_000
+        return np.zeros(self.sample_count, dtype=np.float32), 24_000
 
 
 class FakeOutput:
@@ -58,15 +94,43 @@ class FakeOutput:
     def start(self, _sounddevice):
         return None
 
-    def clear(self):
+    @property
+    def played_samples(self):
+        return 0
+
+    def clear(self, *, reset_played_samples=False):
         return None
 
     def enqueue(self, _samples):
         self.enqueues += 1
-        return 16
+        return len(_samples)
 
     def wait_until_drained(self):
         return None
+
+
+class BlockingOutput(FakeOutput):
+    def __init__(self):
+        super().__init__()
+        self.clear_count = 0
+        self.interrupted = Event()
+        self.waiting = Event()
+        self.played_samples_value = 0
+
+    @property
+    def played_samples(self):
+        return self.played_samples_value
+
+    def clear(self, *, reset_played_samples=False):
+        self.clear_count += 1
+        if reset_played_samples:
+            self.played_samples_value = 0
+        if self.clear_count > 1:
+            self.interrupted.set()
+
+    def wait_until_drained(self):
+        self.waiting.set()
+        self.interrupted.wait(timeout=2)
 
 
 class FakeSoundDevice:

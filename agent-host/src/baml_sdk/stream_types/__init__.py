@@ -91,6 +91,38 @@ class ConversationMemorySearchHints(pydantic.BaseModel):
     candidate_memory: typing.Optional[CandidateMemory]
 
 
+class MachineMonitorContext(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    horizontal_resolution: typing.Optional[int]
+    vertical_resolution: typing.Optional[int]
+
+
+class MachineStateContext(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    captured_at_utc: typing.Optional[str]
+    current_local_time: typing.Optional[str]
+    current_utc_time: typing.Optional[str]
+    timezone_name: typing.Optional[str]
+    utc_offset: typing.Optional[str]
+    os_architecture: typing.Optional[str]
+    monitor_count: typing.Optional[int]
+    monitors: typing.List[MachineMonitorContext]
+    geolocation_status: typing.Optional[str]
+    geolocation_source: typing.Optional[str]
+    ip_address: typing.Optional[str]
+    country: typing.Optional[str]
+    country_code: typing.Optional[str]
+    region: typing.Optional[str]
+    city: typing.Optional[str]
+    postal_code: typing.Optional[str]
+    latitude: typing.Optional[str]
+    longitude: typing.Optional[str]
+    geolocation_timezone: typing.Optional[str]
+    organization: typing.Optional[str]
+    asn: typing.Optional[str]
+    geolocation_error: typing.Optional[str]
+
+
 class MemoryStringSearch(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     contains: typing.List[str]
@@ -194,7 +226,6 @@ class TaskChoiceDecision(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     selected_task_id: typing.Optional[str]
     confidence: typing.Optional[float]
-    agent_thought: typing.Optional[str]
     candidate_memory: typing.Optional[CandidateMemory]
 
 
@@ -249,6 +280,16 @@ class TaskReturnItem(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     name: typing.Optional[str]
     payload: typing.Optional[typing.Dict[str, str]]
+
+
+class UserPreferenceMemoryContext(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    title: typing.Optional[str]
+    description: typing.Optional[str]
+    tags: typing.List[str]
+    created_at: typing.Optional[str]
+    updated_at: typing.Optional[str]
+    read_at: typing.Optional[str]
 
 
 class RetrievedConversationGraph(pydantic.BaseModel):
@@ -369,6 +410,8 @@ __all__ = [
     "ConversationHistory",
     "ConversationHistoryMessage",
     "ConversationMemorySearchHints",
+    "MachineMonitorContext",
+    "MachineStateContext",
     "MemoryStringSearch",
     "MemoryTagSearch",
     "RelevanceMemoryContext",
@@ -388,6 +431,7 @@ __all__ = [
     "TaskPromptMemoryContext",
     "TaskPromptSelectedMemoryContext",
     "TaskReturnItem",
+    "UserPreferenceMemoryContext",
     "RetrievedConversationGraph",
     "RetrievedConversationMessageNode",
     "RetrievedConversationNode",

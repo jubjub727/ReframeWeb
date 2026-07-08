@@ -15,10 +15,16 @@ from reframe_agent_host.commands.voice_turn import (
     _ensure_voice_memory_context,
 )
 from reframe_agent_host.keyphrases import KeyphraseDetection, KeyphraseSpotterConfig
-from reframe_agent_host.speech.transcription import Transcript, WhisperTranscriberConfig
+from reframe_agent_host.speech.transcription import (
+    CONVERSATION_ON_CONFIRMATION_PROMPT,
+    Transcript,
+    WhisperTranscriberConfig,
+)
 from reframe_agent_host.speech.triggers import TriggerPhraseConfig, TriggerPhraseMatcher
 from reframe_agent_host.voice.activity import DetectedUtterance, VoiceActivityConfig
+from reframe_agent_host.voice.conversation_mode import ConversationModeController
 from reframe_agent_host.voice.microphone import AudioInputConfig
+from reframe_agent_host.voice.pipeline import VoiceTurnPipeline
 from reframe_agent_host.voice.turn_processor import VoiceTurnProcessor
 from reframe_agent_host.voice.types import (
     CaptureResult,
@@ -31,6 +37,7 @@ from reframe_memory import RetrievedMemoryContext
 class StubTranscriber:
     def __init__(self, text="jarvis do this"):
         self.text = text
+        self.prompts = []
 
     def transcribe(self, _samples, _sample_rate):
         return Transcript(
@@ -39,6 +46,10 @@ class StubTranscriber:
             duration_seconds=1.0,
             segments=[],
         )
+
+    def transcribe_with_prompt(self, samples, sample_rate, initial_prompt):
+        self.prompts.append(initial_prompt)
+        return self.transcribe(samples, sample_rate)
 
 
 class RecordingMemoryRetrieval:
@@ -53,8 +64,7 @@ class RecordingMemoryRetrieval:
 
 
 class RecordingBamlTurnFlow:
-    def __init__(self, agent_thought=None):
-        self.agent_thought = agent_thought
+    def __init__(self):
         self.understanding_request = None
         self.continuation_request = None
 
@@ -63,7 +73,6 @@ class RecordingBamlTurnFlow:
         task_choice = types.TaskChoiceDecision(
             selected_task_id="task:needs_more_information",
             confidence=1.0,
-            agent_thought=self.agent_thought,
             candidate_memory=None,
         )
         return types.VoicePromptUnderstanding(
@@ -191,6 +200,29 @@ class ExistingVoiceMemoryDatabase:
 
     async def close(self):
         self.closed = True
+
+
+class FakeInterruptSpeaker:
+    def __init__(self):
+        self.calls = []
+        self.active = True
+
+    def interrupt(self, reason="human voice"):
+        self.calls.append(reason)
+        self.active = False
+        return True
+
+    def is_speaking(self):
+        return self.active
+
+
+class FakeBargeInDetector:
+    def __init__(self):
+        self.calls = []
+
+    def accept(self, frame, *, tts_active):
+        self.calls.append((len(frame), tts_active))
+        return tts_active
 
 
 class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
@@ -324,34 +356,6 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.relevance_decision.kept_memory_ids, [])
         self.assertIn("Task:\nAsk only for what matters.", result.task_prompt.full_task_prompt)
 
-    async def test_task_choice_agent_thought_is_emitted(self):
-        turn_flow = RecordingBamlTurnFlow(agent_thought="Route this through the info task.")
-        events = []
-        processor = VoiceTurnProcessor(
-            config=_voice_config(),
-            transcriber=StubTranscriber(),
-            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
-            memory_retrieval=RecordingMemoryRetrieval(),
-            turn_flow=turn_flow,
-        )
-
-        result = await processor.process(
-            capture=_capture_result(),
-            conversation_mode=types.ConversationMode.WAKE_COMMAND,
-            model_prepare_seconds=0.0,
-            total_started_at=time.perf_counter(),
-            on_event=lambda stage, message: events.append((stage, message)),
-        )
-
-        self.assertEqual(
-            result.task_choice.agent_thought,
-            "Route this through the info task.",
-        )
-        self.assertIn(
-            ("agent-thought", "Route this through the info task."),
-            events,
-        )
-
     async def test_speculative_turn_emits_human_reply_after_commit(self):
         events = []
         processor = VoiceTurnProcessor(
@@ -412,6 +416,71 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         stages = [stage for stage, _message in events]
         self.assertLess(stages.index("human-reply"), stages.index("turn-understanding"))
 
+    async def test_conversation_on_confirmation_turns_mode_on_without_human_reply(self):
+        transcriber = StubTranscriber("conversation on")
+        mode_controller = ConversationModeController(types.ConversationMode.WAKE_COMMAND)
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(),
+            transcriber=transcriber,
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            memory_retrieval=RecordingMemoryRetrieval(),
+            mode_controller=mode_controller,
+        )
+
+        result = await processor.process(
+            capture=_conversation_on_confirmation_capture(),
+            conversation_mode=types.ConversationMode.WAKE_COMMAND,
+            model_prepare_seconds=0.0,
+            total_started_at=time.perf_counter(),
+            on_event=lambda stage, message: events.append((stage, message)),
+        )
+
+        self.assertTrue(result.mode_switched)
+        self.assertEqual(result.routed_transcript, "")
+        self.assertEqual(
+            mode_controller.get(),
+            types.ConversationMode.CONTINUOUS_CONVERSATION,
+        )
+        self.assertEqual(transcriber.prompts, [CONVERSATION_ON_CONFIRMATION_PROMPT])
+        self.assertNotIn("human-reply", [stage for stage, _message in events])
+        self.assertIn(
+            (
+                "conversation-mode",
+                types.ConversationMode.CONTINUOUS_CONVERSATION.value,
+            ),
+            events,
+        )
+
+    async def test_conversation_on_confirmation_rejects_without_human_reply(self):
+        transcriber = StubTranscriber("open the browser")
+        mode_controller = ConversationModeController(types.ConversationMode.WAKE_COMMAND)
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(),
+            transcriber=transcriber,
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            memory_retrieval=RecordingMemoryRetrieval(),
+            mode_controller=mode_controller,
+        )
+
+        result = await processor.process(
+            capture=_conversation_on_confirmation_capture(),
+            conversation_mode=types.ConversationMode.WAKE_COMMAND,
+            model_prepare_seconds=0.0,
+            total_started_at=time.perf_counter(),
+            on_event=lambda stage, message: events.append((stage, message)),
+        )
+
+        self.assertTrue(result.ignored)
+        self.assertEqual(
+            mode_controller.get(),
+            types.ConversationMode.WAKE_COMMAND,
+        )
+        self.assertEqual(transcriber.prompts, [CONVERSATION_ON_CONFIRMATION_PROMPT])
+        self.assertNotIn("human-reply", [stage for stage, _message in events])
+        self.assertIn("turn-ignored", [stage for stage, _message in events])
+
     def test_cli_prints_input_lifecycle_events_in_normal_mode(self):
         output = io.StringIO()
         printer = _VoiceTurnEventPrinter(
@@ -427,6 +496,32 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             "[Input Started]",
             "[Input Stopped]",
         ])
+
+    def test_barge_in_frame_handler_only_interrupts_active_tts_once(self):
+        pipeline = object.__new__(VoiceTurnPipeline)
+        speaker = FakeInterruptSpeaker()
+        detector = FakeBargeInDetector()
+        pipeline._speaker = speaker
+        pipeline._barge_in_detector = detector
+        events = []
+
+        pipeline._handle_tts_barge_in_frame(
+            np.zeros(512, dtype=np.float32),
+            lambda stage, message: events.append((stage, message)),
+        )
+        pipeline._handle_tts_barge_in_frame(
+            np.zeros(512, dtype=np.float32),
+            lambda stage, message: events.append((stage, message)),
+        )
+
+        self.assertEqual(speaker.calls, ["human voice"])
+        self.assertEqual(detector.calls, [(512, True), (512, False)])
+        self.assertEqual(
+            events,
+            [
+                ("barge-in", "human voice"),
+            ],
+        )
 
     def test_cli_prints_startup_latency_only_once(self):
         output = io.StringIO()
@@ -458,6 +553,56 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(output.getvalue().splitlines(), [
             "selected: Reply to user",
             "[task_choice 5.264s]",
+        ])
+
+    def test_cli_prints_agent_reply_interrupted(self):
+        output = io.StringIO()
+        printer = _VoiceTurnEventPrinter(
+            debug_output=False,
+            turn_started_at=time.perf_counter(),
+        )
+
+        with contextlib.redirect_stdout(output):
+            printer(
+                "agent-reply-interrupted",
+                "Last fully spoken word beta at character 10",
+            )
+
+        self.assertEqual(output.getvalue().splitlines(), [
+            "agent_reply_interrupted: Last fully spoken word beta at character 10",
+        ])
+
+    def test_cli_prints_barge_in_event(self):
+        output = io.StringIO()
+        printer = _VoiceTurnEventPrinter(
+            debug_output=False,
+            turn_started_at=time.perf_counter(),
+        )
+
+        with contextlib.redirect_stdout(output):
+            printer("barge-in", "human voice")
+
+        self.assertEqual(output.getvalue().splitlines(), [
+            "[barge-in] human voice",
+        ])
+
+    def test_cli_prints_conversation_mode_status_lines(self):
+        output = io.StringIO()
+        printer = _VoiceTurnEventPrinter(
+            debug_output=False,
+            turn_started_at=time.perf_counter(),
+        )
+
+        with contextlib.redirect_stdout(output):
+            printer("conversation-mode", "continuous_conversation")
+            printer("conversation-mode", "continuous conversation off")
+            printer("conversation-mode", "wake_command")
+            printer("conversation-mode", "continuous_conversation")
+
+        self.assertEqual(output.getvalue().splitlines(), [
+            "[conversation mode] On",
+            "[conversation mode] Off",
+            "[conversation mode] On",
         ])
 
     def test_cli_prints_prompt_layer_latencies_from_baml_flow_events(self):
@@ -574,6 +719,31 @@ def _capture_result():
         keyphrase_wait_seconds=0.0,
         listen_seconds=0.1,
         wait_for_speech_seconds=0.0,
+        speech_capture_wall_seconds=0.1,
+    )
+
+
+def _conversation_on_confirmation_capture():
+    return CaptureResult(
+        conversation_mode=types.ConversationMode.WAKE_COMMAND,
+        keyphrase_detection=KeyphraseDetection(
+            kind="conversation_on",
+            phrase="conversation on",
+            hypstr="conversation on",
+            confirmed=True,
+            phrase_start_sample=0,
+            phrase_end_sample=1600,
+        ),
+        utterance=DetectedUtterance(
+            samples=np.zeros(1600, dtype=np.float32),
+            sample_rate=16_000,
+            duration_seconds=0.1,
+            forced_end=True,
+        ),
+        mode_switched=False,
+        keyphrase_wait_seconds=0.0,
+        listen_seconds=0.1,
+        wait_for_speech_seconds=None,
         speech_capture_wall_seconds=0.1,
     )
 

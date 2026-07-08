@@ -11,9 +11,11 @@ function PerformTask(full_task_prompt: string) -> TaskExecutionResult {
         - When the task prompt describes named response items, put each item name in
           name and its arguments in payload.
         - You must only return response items for which you have direct evidence of its name and structure.
+        - Guessing return names you do not know is not allowed.
         - Do not add extra commentary outside the structured result.
         - Return an empty returns array when the task prompt does not request any
           response item.
+        - Do not put any extra fields in the payload that is not specified in the return item layout.
 
         {{ _.role("user") }}
 

@@ -1,6 +1,9 @@
+import json
 import unittest
 from datetime import UTC, datetime
 
+import baml_sdk as baml
+from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.agent_flow.task_choice import TaskChoiceContextBuilder
 from reframe_agent_host.commands.parser import build_parser
 from reframe_memory import (
@@ -8,6 +11,7 @@ from reframe_memory import (
     ConversationMessage,
     MemoryNode,
     MemoryTimestamps,
+    UserPreferenceMemory,
 )
 
 
@@ -38,6 +42,16 @@ class TaskChoiceContextTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertIsNone(context.current_conversation)
 
+    async def test_context_includes_user_preferences(self):
+        context = await TaskChoiceContextBuilder(
+            database=FakeDatabase(),
+            session_id="memory_node:session",
+        ).build()
+
+        self.assertEqual(len(context.user_preferences), 1)
+        self.assertEqual(context.user_preferences[0].title, "Interface density")
+        self.assertIn("compact", context.user_preferences[0].tags)
+
     def test_choose_task_accepts_current_conversation_id(self):
         args = build_parser().parse_args(
             [
@@ -52,6 +66,46 @@ class TaskChoiceContextTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(args.session_id, "memory_node:session")
         self.assertEqual(args.conversation_id, "memory_node:current")
+
+    async def test_choose_task_prompt_renders_user_preferences(self):
+        request = await baml.ChooseTask__build_request_async(
+            current_user_request="Open Hacker News compactly.",
+            current_conversation=None,
+            session_memories=[],
+            user_preferences=[
+                baml.UserPreferenceMemoryContext(
+                    title="Interface density",
+                    description="Prefer compact, information-dense interfaces.",
+                    tags=["compact", "ui"],
+                    created_at="2026-01-01T00:00:00Z",
+                    updated_at="2026-01-01T00:00:00Z",
+                    read_at="NONE",
+                )
+            ],
+            available_tasks=[
+                baml.AvailableTask(
+                    id="task:visual_panel",
+                    name="Visual panel",
+                    description="Open a visual panel.",
+                    input="The user's request.",
+                    output="A rendered panel.",
+                    prompt="Use the store and panel.",
+                    provider_id="provider:test",
+                    created_at="2026-01-01T00:00:00Z",
+                    updated_at="2026-01-01T00:00:00Z",
+                    read_at="NONE",
+                )
+            ],
+            task_choice_memories=[],
+            machine_state=local_machine_state_context("test"),
+        )
+
+        body = json.loads(request.body)
+        rendered = json.dumps(body)
+
+        self.assertIn("User preferences:", rendered)
+        self.assertIn("Interface density", rendered)
+        self.assertIn("Prefer compact, information-dense interfaces.", rendered)
 
 
 class FakeDatabase:
@@ -73,8 +127,9 @@ class FakeDatabase:
             }
         )
         self.session_memories = EmptySessionMemories()
-        self.tasks = EmptySearchStore()
-        self.task_choice_memories = EmptySearchStore()
+        self.user_preferences = SearchStore([_user_preference("memory_node:pref1")])
+        self.tasks = SearchStore([])
+        self.task_choice_memories = SearchStore([])
 
 
 class FakeSessions:
@@ -100,9 +155,12 @@ class EmptySessionMemories:
         return []
 
 
-class EmptySearchStore:
+class SearchStore:
+    def __init__(self, items):
+        self._items = items
+
     async def search(self):
-        return []
+        return self._items
 
 
 def _conversation(node_id, name):
@@ -113,11 +171,22 @@ def _message(node_id, content):
     return _node(node_id, ConversationMessage(role="human", content=content))
 
 
-def _node(node_id, content):
+def _user_preference(node_id):
+    return _node(
+        node_id,
+        UserPreferenceMemory(
+            title="Interface density",
+            description="Prefer compact, information-dense interfaces.",
+        ),
+        tags=("compact", "ui"),
+    )
+
+
+def _node(node_id, content, tags=()):
     now = datetime(2026, 1, 1, tzinfo=UTC)
     return MemoryNode(
         id=node_id,
-        tags=(),
+        tags=tags,
         timestamps=MemoryTimestamps(
             created_at=now,
             updated_at=now,

@@ -140,6 +140,20 @@ class PocketSphinxPhraseSpotter:
         start_sample = max(0, boundary_sample - pre_roll_samples)
         return trim_frames_from_sample(self._frames, start_sample)
 
+    def confirmation_frames_for_detection(
+        self,
+        detection: KeyphraseDetection,
+        window_ms: int,
+    ) -> list[np.ndarray]:
+        if detection.phrase_start_sample is None or detection.phrase_end_sample is None:
+            return list(self._frames)
+
+        window_samples = max(1, int(16_000 * window_ms / 1000))
+        phrase_start = max(0, detection.phrase_start_sample)
+        phrase_end = max(phrase_start, detection.phrase_end_sample)
+        start_sample = max(0, phrase_end - window_samples, phrase_start)
+        return trim_frames_between_samples(self._frames, start_sample, phrase_end)
+
     def _phrase_sample_span(self, matched_phrase: str) -> tuple[int | None, int | None]:
         span = phrase_sample_span(tuple(self._decoder.seg()), matched_phrase)
         if span is None:
@@ -154,7 +168,7 @@ class PocketSphinxPhraseSpotter:
         self,
         match,
     ) -> tuple[int | None, int | None] | None:
-        if match.kind != "wake_command":
+        if match.kind == "conversation_on":
             return self._phrase_sample_span(match.matched_phrase) or (None, None)
         return (
             self._keyword_spotted(match.matched_phrase)
@@ -228,5 +242,35 @@ def trim_frames_from_sample(
         if remaining_skip > 0:
             mono_frame = mono_frame[remaining_skip:]
             remaining_skip = 0
+        trimmed.append(mono_frame.copy())
+    return trimmed
+
+
+def trim_frames_between_samples(
+    frames: list[np.ndarray],
+    start_sample: int,
+    end_sample: int,
+) -> list[np.ndarray]:
+    if end_sample <= start_sample:
+        return []
+
+    remaining_skip = max(0, start_sample)
+    remaining_take = end_sample - max(0, start_sample)
+    trimmed: list[np.ndarray] = []
+    for frame in frames:
+        if remaining_take <= 0:
+            break
+
+        mono_frame = np.asarray(frame, dtype=np.float32).reshape(-1)
+        if remaining_skip >= len(mono_frame):
+            remaining_skip -= len(mono_frame)
+            continue
+        if remaining_skip > 0:
+            mono_frame = mono_frame[remaining_skip:]
+            remaining_skip = 0
+
+        if len(mono_frame) > remaining_take:
+            mono_frame = mono_frame[:remaining_take]
+        remaining_take -= len(mono_frame)
         trimmed.append(mono_frame.copy())
     return trimmed

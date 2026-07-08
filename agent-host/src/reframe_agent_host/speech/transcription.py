@@ -44,6 +44,13 @@ DEFAULT_WHISPER_INITIAL_PROMPT = (
     "just, Java, or Travis may be misheard forms of Jarvis. Requests may mention "
     "jokes."
 )
+CONVERSATION_ON_CONFIRMATION_PROMPT = (
+    "This is a short control-phrase confirmation clip. The speaker may use a "
+    "New Zealand English accent. Listen for whether they clearly said "
+    "'conversation on'. It may sound like 'conversation one', 'conservation on', "
+    "or 'conservation one'. If that phrase is not clearly present, transcribe "
+    "the actual words you hear without inventing the control phrase."
+)
 DEFAULT_GPU_COMPUTE_TYPE = DEFAULT_CUDA_COMPUTE_TYPE
 GPU_COMPUTE_TYPES = ("float16", "int8_float16")
 GPU_DEVICE = DEFAULT_CUDA_DEVICE
@@ -136,6 +143,18 @@ def create_transcriber(config: WhisperTranscriberConfig) -> Transcriber:
     )
 
 
+def transcribe_with_initial_prompt(
+    transcriber: Transcriber,
+    samples: np.ndarray,
+    sample_rate: int,
+    initial_prompt: str,
+) -> Transcript:
+    transcribe_with_prompt = getattr(transcriber, "transcribe_with_prompt", None)
+    if transcribe_with_prompt is None:
+        return transcriber.transcribe(samples, sample_rate)
+    return transcribe_with_prompt(samples, sample_rate, initial_prompt)
+
+
 class FasterWhisperTranscriber:
     def __init__(self, config: WhisperTranscriberConfig) -> None:
         self._config = config
@@ -154,6 +173,18 @@ class FasterWhisperTranscriber:
             self._load_model()
 
     def transcribe(self, samples: np.ndarray, sample_rate: int) -> Transcript:
+        return self.transcribe_with_prompt(
+            samples,
+            sample_rate,
+            self._config.initial_prompt,
+        )
+
+    def transcribe_with_prompt(
+        self,
+        samples: np.ndarray,
+        sample_rate: int,
+        initial_prompt: str | None,
+    ) -> Transcript:
         if sample_rate != 16_000:
             raise ValueError("faster-whisper ndarray transcription expects 16000 Hz audio.")
 
@@ -176,7 +207,7 @@ class FasterWhisperTranscriber:
                 language=self._config.language,
                 beam_size=self._config.beam_size,
                 condition_on_previous_text=False,
-                initial_prompt=self._config.initial_prompt,
+                initial_prompt=initial_prompt,
             )
             segments = [
                 TranscriptSegment(
@@ -245,9 +276,30 @@ class WhisperCppTranscriber:
             self.prepare()
             assert self._binary is not None
             assert self._model is not None
-            return self._run_cli(audio, sample_rate)
+            return self._run_cli(audio, sample_rate, initial_prompt=None)
 
-    def _run_cli(self, audio: np.ndarray, sample_rate: int) -> Transcript:
+    def transcribe_with_prompt(
+        self,
+        samples: np.ndarray,
+        sample_rate: int,
+        initial_prompt: str | None,
+    ) -> Transcript:
+        if sample_rate != 16_000:
+            raise ValueError("whisper.cpp transcription expects 16000 Hz audio.")
+
+        audio = _normalized_audio(samples, sample_rate, self._config)
+        with self._lock:
+            self.prepare()
+            assert self._binary is not None
+            assert self._model is not None
+            return self._run_cli(audio, sample_rate, initial_prompt=initial_prompt)
+
+    def _run_cli(
+        self,
+        audio: np.ndarray,
+        sample_rate: int,
+        initial_prompt: str | None,
+    ) -> Transcript:
         assert self._binary is not None
         assert self._model is not None
 
@@ -256,7 +308,7 @@ class WhisperCppTranscriber:
             wav_path = work_dir / "utterance.wav"
             output_stem = work_dir / "transcript"
             _write_wav(wav_path, audio, sample_rate)
-            command = self._command(wav_path, output_stem)
+            command = self._command(wav_path, output_stem, initial_prompt)
             try:
                 completed = subprocess.run(
                     command,
@@ -293,7 +345,12 @@ class WhisperCppTranscriber:
                 language=self._config.language,
             )
 
-    def _command(self, wav_path: Path, output_stem: Path) -> list[str]:
+    def _command(
+        self,
+        wav_path: Path,
+        output_stem: Path,
+        initial_prompt: str | None = None,
+    ) -> list[str]:
         command = [
             str(self._binary),
             "-m",
@@ -306,6 +363,8 @@ class WhisperCppTranscriber:
         ]
         if self._config.language:
             command.extend(["-l", self._config.language])
+        if initial_prompt:
+            command.extend(["--prompt", initial_prompt])
         if self._config.device == "openvino":
             command.extend(["--ov-e-device", "GPU"])
         command.extend(self._config.whisper_cpp_extra_args)
