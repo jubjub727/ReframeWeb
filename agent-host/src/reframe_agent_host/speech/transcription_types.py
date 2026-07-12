@@ -19,17 +19,19 @@ DEFAULT_WHISPER_BEAM_SIZE = 5
 DEFAULT_TRANSCRIPTION_TARGET_RMS = 0.1
 DEFAULT_TRANSCRIPTION_MAX_GAIN = 5.0
 DEFAULT_WHISPER_INITIAL_PROMPT = (
-    "The speaker uses a New Zealand English accent. Wake-command prompts often "
-    "start with the wake word Jarvis. At the start of a prompt, words like "
-    "just, Java, or Travis may be misheard forms of Jarvis. Requests may mention "
-    "jokes."
+    "The speaker may use a New Zealand English accent. This is a spoken prompt in "
+    "a natural conversation with a voice assistant. Transcribe it as ordinary "
+    "conversational English, using the grammar and meaning of the complete prompt "
+    "to resolve ambiguous speech. Wake-command prompts often start with the wake "
+    "word Jarvis. At the start of a prompt, words like just, Java, or Travis may "
+    "be misheard forms of Jarvis."
 )
 CONVERSATION_ON_CONFIRMATION_PROMPT = (
-    "This is a short control-phrase confirmation clip. The speaker may use a "
-    "New Zealand English accent. Listen for whether they clearly said "
-    "'conversation on'. It may sound like 'conversation one', 'conservation on', "
-    "or 'conservation one'. If that phrase is not clearly present, transcribe "
-    "the actual words you hear without inventing the control phrase."
+    "The speaker may use a New Zealand English accent. This is a short spoken "
+    "response in a natural conversation with a voice assistant. 'Conversation "
+    "on' is a possible control phrase. Transcribe it as ordinary conversational "
+    "English, using the grammar and meaning of the complete utterance. Do not add "
+    "words unsupported by the audio."
 )
 DEFAULT_GPU_COMPUTE_TYPE = DEFAULT_CUDA_COMPUTE_TYPE
 GPU_COMPUTE_TYPES = ("float16", "int8_float16")

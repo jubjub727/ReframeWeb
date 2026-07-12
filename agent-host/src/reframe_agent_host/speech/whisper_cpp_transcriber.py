@@ -48,7 +48,9 @@ class WhisperCppTranscriber:
                 )
 
     def transcribe(self, samples: np.ndarray, sample_rate: int) -> Transcript:
-        return self.transcribe_with_prompt(samples, sample_rate, None)
+        return self.transcribe_with_prompt(
+            samples, sample_rate, self._config.initial_prompt
+        )
 
     def transcribe_with_prompt(
         self,

@@ -114,6 +114,19 @@ class TranscriptionRuntimeTests(unittest.TestCase):
         self.assertIn("GPU", command)
         self.assertEqual(command[-2:], ["--threads", "4"])
 
+    def test_whisper_cpp_transcribe_uses_configured_initial_prompt(self):
+        samples = object()
+        transcriber = WhisperCppTranscriber(
+            WhisperTranscriberConfig(initial_prompt="Conversational context.")
+        )
+
+        with patch.object(transcriber, "transcribe_with_prompt") as transcribe:
+            transcriber.transcribe(samples, 16_000)
+
+        transcribe.assert_called_once_with(
+            samples, 16_000, "Conversational context."
+        )
+
     def test_whisper_cpp_json_transcript_uses_segments_and_language(self):
         transcript = transcript_from_whisper_cpp_json(
             {
