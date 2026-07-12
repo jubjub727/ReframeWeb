@@ -1,10 +1,10 @@
 import unittest
 
+from baml_sdk import opencode_go as baml_opencode_go
 from reframe_agent_host.memory_seed.opencode_go import (
     _allowed_provider_keys,
     _direct_provider,
 )
-from reframe_agent_host.memory_seed.opencode_go_models import OpenCodeGoModelReference
 
 
 class OpenCodeGoSeedTests(unittest.TestCase):
@@ -41,11 +41,12 @@ class OpenCodeGoSeedTests(unittest.TestCase):
         )
 
 
-def _kimi_reference() -> OpenCodeGoModelReference:
-    return OpenCodeGoModelReference(
+def _kimi_reference() -> baml_opencode_go.ModelReference:
+    return baml_opencode_go.ModelReference(
         model_id="kimi-k2.6",
         direct_baml_surface="opencode_go.OpenCodeGoModelKimiK26",
         workspace_baml_surface="OpenCodeWorkspaceModelKimiK26",
+        reasoning_efforts=baml_opencode_go.StandardReasoningEfforts(),
     )
 
 

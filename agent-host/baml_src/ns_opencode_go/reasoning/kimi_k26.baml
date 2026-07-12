@@ -7,6 +7,7 @@ client<llm> OpenCodeGoModelKimiK26ReasoningNone {
         reasoning_effort: "none",
     },
 }
+
 client<llm> OpenCodeGoModelKimiK26ReasoningMinimal {
     provider: openai-generic,
     options: {

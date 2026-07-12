@@ -17,13 +17,12 @@ from reframe_agent_host.voice.conversation_mode import ConversationModeControlle
 from reframe_agent_host.voice.turn_capture import VoiceTurnCapture
 from reframe_agent_host.voice.turn_capture import CaptureStreamEventHandler
 from reframe_agent_host.voice.turn_processor import VoiceTurnProcessor
-from reframe_agent_host.voice.types import (
-    CaptureResult,
+from reframe_agent_host.voice.capture_types import CaptureResult, VoiceTurnControl
+from reframe_agent_host.voice.pipeline_config import (
     VoicePipelineConfig,
     VoicePipelineEventHandler,
-    VoiceTurnControl,
-    VoiceTurnResult,
 )
+from reframe_agent_host.voice.turn_data import VoiceTurnResult
 
 
 class VoiceTurnPipeline:

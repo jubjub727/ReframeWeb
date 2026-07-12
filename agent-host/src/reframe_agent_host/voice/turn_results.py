@@ -14,11 +14,9 @@ from reframe_agent_host.voice.pipeline_timings import (
     mode_switch_timings,
     turn_timings,
 )
-from reframe_agent_host.voice.types import (
-    CaptureResult,
-    VoicePipelineConfig,
-    VoiceTurnResult,
-)
+from reframe_agent_host.voice.capture_types import CaptureResult
+from reframe_agent_host.voice.pipeline_config import VoicePipelineConfig
+from reframe_agent_host.voice.turn_data import VoiceTurnResult
 from reframe_memory import RetrievedMemoryContext
 
 
@@ -200,4 +198,60 @@ def transcribed_turn_result(
             ],
             task_completion_seconds=timings["task_completion_seconds"],
         ),
+    )
+
+
+def transcribed_only_turn_result(
+    *,
+    config: VoicePipelineConfig,
+    conversation_mode: baml_context.ConversationMode,
+    capture: CaptureResult,
+    transcript: Transcript,
+    trigger_detection: TriggerPhraseDetection | None,
+    routed_transcript: str,
+    model_prepare_seconds: float,
+    total_started_at: float,
+    post_vad_transcript_seconds: float,
+    transcription_seconds: float,
+) -> VoiceTurnResult:
+    timings = {
+        "model_prepare_seconds": model_prepare_seconds,
+        "total_started_at": total_started_at,
+        "post_vad_transcript_seconds": post_vad_transcript_seconds,
+        "transcription_seconds": transcription_seconds,
+    }
+    for stage in (
+        "task_choice",
+        "memory_search",
+        "search_depth",
+        "memory_retrieval",
+        "memory_relevance",
+        "task_prompt",
+        "task_execution",
+        "primitive_dispatch",
+        "action_history_summary",
+        "task_completion",
+    ):
+        timings[f"post_vad_{stage}_seconds"] = None
+        timings[f"{stage}_seconds"] = None
+    return transcribed_turn_result(
+        config=config,
+        conversation_mode=conversation_mode,
+        capture=capture,
+        transcript=transcript,
+        trigger_detection=trigger_detection,
+        routed_transcript=routed_transcript,
+        task_choice=None,
+        memory_search_hints=None,
+        search_depths=None,
+        retrieved_memories=None,
+        relevance_decision=None,
+        relevant_memories=None,
+        selected_memory_contexts=None,
+        task_prompt=None,
+        task_execution=None,
+        primitive_dispatch=None,
+        action_history_summary=None,
+        task_completion=None,
+        timings=timings,
     )

@@ -11,7 +11,7 @@ from reframe_agent_host.keyphrases import (
     PocketSphinxPhraseSpotter,
 )
 from reframe_agent_host.voice.capture_state import CaptureState
-from reframe_agent_host.voice.types import VoicePipelineConfig
+from reframe_agent_host.voice.pipeline_config import VoicePipelineConfig
 
 
 EventEmitter = Callable[[str, str], None]

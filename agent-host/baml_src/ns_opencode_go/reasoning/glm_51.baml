@@ -7,6 +7,7 @@ client<llm> OpenCodeGoModelGlm51ReasoningNone {
         reasoning_effort: "none",
     },
 }
+
 client<llm> OpenCodeGoModelGlm51ReasoningMinimal {
     provider: openai-generic,
     options: {

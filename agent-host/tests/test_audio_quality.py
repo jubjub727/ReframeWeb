@@ -9,7 +9,7 @@ from reframe_agent_host.commands.parser import build_parser
 from reframe_agent_host.commands.audio_quality_test import (
     _audio_config as _quality_audio_config,
 )
-from reframe_agent_host.commands.voice_turn import _audio_config as _voice_audio_config
+from reframe_agent_host.commands.voice_config import audio_config as _voice_audio_config
 from reframe_agent_host.speech.transcription import (
     DEFAULT_WHISPER_BEAM_SIZE,
     DEFAULT_WHISPER_INITIAL_PROMPT,

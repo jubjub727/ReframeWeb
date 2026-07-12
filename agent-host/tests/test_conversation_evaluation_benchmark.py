@@ -1,11 +1,11 @@
 import unittest
 import json
-from datetime import datetime, timezone
 from tempfile import TemporaryDirectory
 
+from baml_sdk import benchmarks as baml_benchmarks
 from baml_sdk import memory_search as baml_memory_search
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
-from reframe_agent_host.benchmarks.conversation_evaluation_config import (
+from reframe_agent_host.benchmarks.config import (
     CONVERSATION_EVALUATION_DEFAULT_MODEL_ID,
     CONVERSATION_EVALUATION_DEFAULT_REASONING_EFFORT,
     ConversationEvaluationBenchmarkConfig,
@@ -13,31 +13,22 @@ from reframe_agent_host.benchmarks.conversation_evaluation_config import (
 from reframe_agent_host.benchmarks.conversation_evaluation_result_analysis import (
     conversation_evaluation_case_analyses,
 )
-from reframe_agent_host.benchmarks.conversation_evaluation_cases import (
-    conversation_evaluation_cases,
-)
-from reframe_agent_host.benchmarks.conversation_evaluation_context import (
-    conversation_context,
-    conversation_evaluation_memory_context,
-    memory_context,
-    selected_task_context,
-)
-from reframe_agent_host.benchmarks.conversation_evaluation_runner import (
+from reframe_agent_host.benchmarks.runner import (
     _conversation_evaluation_providers,
 )
 from reframe_agent_host.commands.parser import build_parser
-from reframe_memory import MemoryNode, MemoryTimestamps, Provider
+from benchmark_fixtures import provider as _provider
 
 
 class ConversationEvaluationBenchmarkTests(unittest.TestCase):
     def test_cases_convert_to_baml_context_types(self):
-        cases = conversation_evaluation_cases()
+        cases = baml_benchmarks.ConversationEvaluationCases()
 
         self.assertGreaterEqual(len(cases), 3)
         for case in cases:
             self.assertTrue(case.id)
             self.assertTrue(case.current_user_request)
-            selected_task = selected_task_context(case.selected_task)
+            selected_task = baml_benchmarks.SelectedTaskContext(case.selected_task)
             self.assertTrue(selected_task.name)
             self.assertTrue(selected_task.created_at)
             self.assertTrue(selected_task.updated_at)
@@ -57,9 +48,13 @@ class ConversationEvaluationBenchmarkTests(unittest.TestCase):
                     self.assertTrue(message.read_at)
                     if message.role == "human" and index > 0:
                         self.assertEqual(conversation.messages[index - 1].role, "agent")
-            conversations = conversation_context(case.session_conversations)
-            session_memories = memory_context(case.session_memories)
-            evaluation_memories = conversation_evaluation_memory_context(
+            conversations = baml_benchmarks.ConversationContexts(
+                case.session_conversations
+            )
+            session_memories = baml_benchmarks.SessionMemoryContexts(
+                case.session_memories
+            )
+            evaluation_memories = baml_benchmarks.ConversationEvaluationMemoryContexts(
                 case.conversation_evaluation_memories
             )
             self.assertTrue(conversations[0].created_at)
@@ -201,14 +196,18 @@ class ConversationEvaluationBenchmarkTests(unittest.TestCase):
 
 class ConversationEvaluationClientTests(unittest.IsolatedAsyncioTestCase):
     async def test_default_client_request_uses_glm51_none(self):
-        case = conversation_evaluation_cases()[0]
-        conversations = conversation_context(case.session_conversations)
+        case = baml_benchmarks.ConversationEvaluationCases()[0]
+        conversations = baml_benchmarks.ConversationContexts(
+            case.session_conversations
+        )
         request = await baml_memory_search.ChooseMemorySearch__build_request_async(
             current_user_request=case.current_user_request,
             current_conversation=conversations[0] if conversations else None,
-            session_memories=memory_context(case.session_memories),
-            selected_task=selected_task_context(case.selected_task),
-            conversation_evaluation_memories=conversation_evaluation_memory_context(
+            session_memories=baml_benchmarks.SessionMemoryContexts(
+                case.session_memories
+            ),
+            selected_task=baml_benchmarks.SelectedTaskContext(case.selected_task),
+            conversation_evaluation_memories=baml_benchmarks.ConversationEvaluationMemoryContexts(
                 case.conversation_evaluation_memories
             ),
             machine_state=local_machine_state_context("test"),
@@ -217,24 +216,6 @@ class ConversationEvaluationClientTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(body["model"], "glm-5.1")
         self.assertEqual(body["reasoning_effort"], "none")
-
-
-def _provider(provider_id: str, surface: str):
-    now = datetime.now(timezone.utc)
-    return MemoryNode(
-        id=provider_id,
-        tags=(),
-        timestamps=MemoryTimestamps(
-            created_at=now,
-            updated_at=now,
-            read_at=None,
-        ),
-        content=Provider(
-            name=provider_id,
-            description="Test provider",
-            baml_surface=surface,
-        ),
-    )
 
 
 if __name__ == "__main__":

@@ -1,23 +1,6 @@
 from __future__ import annotations
 
 import sys
-import time
-
-
-class TimedEventPrinter:
-    def __init__(self) -> None:
-        self._started_at = time.perf_counter()
-        self._previous_at = self._started_at
-
-    def __call__(self, stage: str, message: str) -> None:
-        now = time.perf_counter()
-        delta_ms = (now - self._previous_at) * 1000
-        total_seconds = now - self._started_at
-        self._previous_at = now
-        print(
-            f"[{stage} +{delta_ms:.0f}ms | {total_seconds:.3f}s] {message}",
-            file=sys.stderr,
-        )
 
 
 def print_timing_summary(results) -> None:

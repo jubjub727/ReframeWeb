@@ -2,10 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from reframe_agent_host.memory_seed.core_task_definitions import (
-    CORE_TASKS,
-    CoreTaskDefinition,
-)
+from baml_sdk import agent_host_catalog
 from reframe_agent_host.magic_providers import (
     MAGIC_DO_NOTHING_MODEL_ID,
     MAGIC_DO_NOTHING_TAGS,
@@ -20,6 +17,7 @@ from reframe_memory import (
     ProviderNode,
     ProviderSearch,
     TagSearch,
+    Task,
     TaskNode,
     TaskSearch,
 )
@@ -40,19 +38,19 @@ async def ensure_core_tasks(database: MemoryDatabase) -> CoreTaskSeedResult:
     created_task_ids: list[str] = []
     existing_task_ids: list[str] = []
     updated_task_ids: list[str] = []
-    for definition in CORE_TASKS:
+    for definition in agent_host_catalog.CoreTasks():
         provider = providers.get((definition.model_id, definition.reasoning_effort))
         if provider is None:
             provider = await _provider_for_definition(database, definition)
             providers[(definition.model_id, definition.reasoning_effort)] = provider
-        expected = definition.to_task(provider.id)
+        expected = _task_for_provider(definition, provider.id)
         existing = await _find_task(database, definition.name)
         if existing is not None:
-            if existing.content != expected or existing.tags != definition.tags:
+            if existing.content != expected or existing.tags != tuple(definition.tags):
                 task = await database.tasks.update(
                     existing.id,
                     expected,
-                    tags=definition.tags,
+                    tags=tuple(definition.tags),
                 )
                 updated_task_ids.append(task.id)
                 continue
@@ -61,7 +59,7 @@ async def ensure_core_tasks(database: MemoryDatabase) -> CoreTaskSeedResult:
 
         task = await database.tasks.create(
             expected,
-            tags=definition.tags,
+            tags=tuple(definition.tags),
         )
         created_task_ids.append(task.id)
 
@@ -76,7 +74,7 @@ async def ensure_core_tasks(database: MemoryDatabase) -> CoreTaskSeedResult:
 
 async def _provider_for_definition(
     database: MemoryDatabase,
-    definition: CoreTaskDefinition,
+    definition: agent_host_catalog.CoreTaskDefinition,
 ) -> ProviderNode:
     if definition.model_id == MAGIC_DO_NOTHING_MODEL_ID:
         return await _magic_do_nothing_provider(database)
@@ -154,6 +152,20 @@ def _reasoning_effort_search(reasoning_effort: str | None) -> tuple[str, ...]:
     if reasoning_effort is None:
         return ()
     return (reasoning_effort,)
+
+
+def _task_for_provider(
+    definition: agent_host_catalog.CoreTaskDefinition,
+    provider_id: str,
+) -> Task:
+    return Task(
+        name=definition.name,
+        description=definition.description,
+        input=definition.input,
+        output=definition.output,
+        prompt=definition.prompt,
+        provider_id=provider_id,
+    )
 
 
 async def _find_task(

@@ -7,10 +7,8 @@ from reframe_agent_host.voice.capture_flow import VoiceCaptureFlow
 from reframe_agent_host.voice.capture_state import CaptureState
 from reframe_agent_host.voice.debug_audio import DebugAudioRecorder
 from reframe_agent_host.voice.microphone import MicrophoneStream
-from reframe_agent_host.voice.types import (
-    CaptureResult,
-    VoicePipelineEventHandler,
-)
+from reframe_agent_host.voice.capture_types import CaptureResult
+from reframe_agent_host.voice.pipeline_config import VoicePipelineEventHandler
 
 
 EventEmitter = Callable[[str, str], None]

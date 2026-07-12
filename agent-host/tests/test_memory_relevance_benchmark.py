@@ -1,38 +1,22 @@
 import unittest
-from datetime import datetime, timezone
 from unittest.mock import patch
 
+from baml_sdk import benchmarks as baml_benchmarks
 from reframe_agent_host import cli
-from reframe_agent_host.benchmarks.control_flow_cases import control_flow_cases
-from reframe_agent_host.benchmarks.control_flow_context import (
-    case_conversation_context,
-    case_session_memory_context,
-)
-from reframe_agent_host.benchmarks.control_flow_execution import ControlFlowSnapshot
-from reframe_agent_host.benchmarks.memory_relevance_config import (
+from reframe_agent_host.benchmarks.config import (
     MemoryRelevanceBenchmarkConfig,
+    OPENCODE_GO_REASONING_EFFORT_CANDIDATES,
 )
 from reframe_agent_host.benchmarks.memory_relevance_execution import (
     MemoryRelevanceSnapshot,
     snapshot_payload,
 )
-from reframe_agent_host.benchmarks.memory_relevance_runner import (
+from reframe_agent_host.benchmarks.runner import (
     _select_cases,
     run_memory_relevance_benchmark,
 )
-from reframe_agent_host.benchmarks.reasoning_efforts import (
-    OPENCODE_GO_REASONING_EFFORT_CANDIDATES,
-)
 from reframe_agent_host.commands.parser import build_parser
-from reframe_memory import MemoryNode, MemoryTimestamps, Provider
-
-
-class FakeModel:
-    def __init__(self, **values):
-        self.__dict__.update(values)
-
-    def model_dump(self, mode="json"):
-        return dict(self.__dict__)
+from benchmark_fixtures import FakeModel, provider as _provider
 
 
 class MemoryRelevanceBenchmarkTests(unittest.TestCase):
@@ -54,7 +38,10 @@ class MemoryRelevanceBenchmarkTests(unittest.TestCase):
         self.assertIn("max", config.reasoning_effort_candidates)
 
     def test_select_cases_uses_real_control_flow_cases(self):
-        cases = _select_cases(control_flow_cases(), ("hacker_news_compact_panel",))
+        cases = _select_cases(
+            tuple(baml_benchmarks.ControlFlowCases()),
+            ("hacker_news_compact_panel",),
+        )
 
         self.assertEqual(len(cases), 1)
         case = cases[0]
@@ -113,24 +100,17 @@ class MemoryRelevanceBenchmarkTests(unittest.TestCase):
         self.assertIsNone(captured["reasoning_efforts"])
 
     def test_snapshot_payload_saves_reusable_relevance_input(self):
-        case = control_flow_cases()[0]
-        control = ControlFlowSnapshot(
-            case=case,
-            task_choice=FakeModel(selected_task_id=case.expected_task_id),
-            selected_task=FakeModel(id=case.expected_task_id),
-            search_hints=FakeModel(search_terms=["compact"]),
-            session_conversations=case_conversation_context(case),
-            session_memories=case_session_memory_context(case),
-            search_domains=[],
-            search_depth_memories=[],
-            latency_seconds=1.5,
-            stage_latency_seconds={"task_choice": 1.0, "search_hints": 0.5},
+        case = baml_benchmarks.ControlFlowCases()[0]
+        conversations = baml_benchmarks.ConversationContexts(
+            case.session.conversations
         )
         snapshot = MemoryRelevanceSnapshot(
             case=case,
-            control_flow=control,
-            search_depths=FakeModel(depths={}),
-            retrieved_memories=None,
+            selected_task=baml_benchmarks.MemoryRelevanceSelectedTask(case),
+            current_conversation=conversations[0],
+            session_memories=baml_benchmarks.SessionMemoryContexts(
+                case.session.memories
+            ),
             candidate_memories=[
                 FakeModel(
                     id="memory_node:benchmark_session_memory",
@@ -140,12 +120,6 @@ class MemoryRelevanceBenchmarkTests(unittest.TestCase):
             expected_kept_memory_ids=("memory_node:benchmark_session_memory",),
             relevance_memories=[],
             latency_seconds=2.0,
-            stage_latency_seconds={
-                "task_choice": 1.0,
-                "search_hints": 0.5,
-                "search_depth": 0.25,
-                "memory_retrieval": 0.25,
-            },
         )
 
         payload = snapshot_payload(snapshot)
@@ -166,7 +140,7 @@ class MemoryRelevanceBenchmarkTests(unittest.TestCase):
 
 class MemoryRelevanceRunnerTests(unittest.IsolatedAsyncioTestCase):
     async def test_runner_reuses_one_snapshot_for_each_provider_effort(self):
-        case = control_flow_cases()[0]
+        case = baml_benchmarks.ControlFlowCases()[0]
         providers = (
             _provider("provider:one", "opencode_go.OpenCodeGoModelGlm51"),
             _provider("provider:two", "opencode_go.OpenCodeGoModelKimiK25"),
@@ -221,27 +195,27 @@ class MemoryRelevanceRunnerTests(unittest.IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "reframe_agent_host.benchmarks.memory_relevance_runner.control_flow_cases",
+            "reframe_agent_host.benchmarks.runner.baml_benchmarks.ControlFlowCases",
             lambda: (case,),
         ):
             with patch(
-                "reframe_agent_host.benchmarks.memory_relevance_runner.direct_model_providers",
+                "reframe_agent_host.benchmarks.runner.direct_model_providers",
                 fake_direct_model_providers,
             ):
                 with patch(
-                    "reframe_agent_host.benchmarks.memory_relevance_runner.build_memory_relevance_snapshot",
+                    "reframe_agent_host.benchmarks.runner.build_memory_relevance_snapshot",
                     fake_build_memory_relevance_snapshot,
                 ):
                     with patch(
-                        "reframe_agent_host.benchmarks.memory_relevance_runner.discover_memory_relevance_reasoning_efforts",
+                        "reframe_agent_host.benchmarks.runner.discover_memory_relevance_reasoning_efforts",
                         fake_discover,
                     ):
                         with patch(
-                            "reframe_agent_host.benchmarks.memory_relevance_runner.benchmark_memory_relevance_provider",
+                            "reframe_agent_host.benchmarks.runner.benchmark_memory_relevance_provider",
                             fake_benchmark,
                         ):
                             with patch(
-                                "reframe_agent_host.benchmarks.memory_relevance_runner.snapshot_payload",
+                                "reframe_agent_host.benchmarks.runner.memory_relevance_snapshot",
                                 fake_snapshot_payload,
                             ):
                                 result = await run_memory_relevance_benchmark(
@@ -262,24 +236,6 @@ class MemoryRelevanceRunnerTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(result["summary"]["base_providers"], 2)
         self.assertEqual(result["summary"]["provider_effort_runs"], 4)
-
-
-def _provider(provider_id: str, surface: str):
-    now = datetime.now(timezone.utc)
-    return MemoryNode(
-        id=provider_id,
-        tags=(),
-        timestamps=MemoryTimestamps(
-            created_at=now,
-            updated_at=now,
-            read_at=None,
-        ),
-        content=Provider(
-            name=provider_id,
-            description="Test provider",
-            baml_surface=surface,
-        ),
-    )
 
 
 if __name__ == "__main__":

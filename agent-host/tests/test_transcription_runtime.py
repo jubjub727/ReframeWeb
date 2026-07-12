@@ -4,11 +4,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 from reframe_agent_host.commands.parser import build_parser
-from reframe_agent_host.commands.voice_turn import _transcription_config
-from reframe_agent_host.speech.transcription import (
+from reframe_agent_host.commands.voice_config import transcription_config
+from reframe_agent_host.speech.transcription import WhisperTranscriberConfig
+from reframe_agent_host.speech.whisper_cpp_transcriber import (
     WhisperCppTranscriber,
-    WhisperTranscriberConfig,
-    _transcript_from_whisper_cpp_json,
+    transcript_from_whisper_cpp_json,
 )
 from reframe_agent_host.speech.whisper_runtime import (
     resolve_whisper_cpp_binary,
@@ -35,7 +35,7 @@ class TranscriptionRuntimeTests(unittest.TestCase):
             ]
         )
 
-        config = _transcription_config(args)
+        config = transcription_config(args)
 
         self.assertEqual(config.backend, "whisper-cpp")
         self.assertEqual(config.device, "metal")
@@ -115,7 +115,7 @@ class TranscriptionRuntimeTests(unittest.TestCase):
         self.assertEqual(command[-2:], ["--threads", "4"])
 
     def test_whisper_cpp_json_transcript_uses_segments_and_language(self):
-        transcript = _transcript_from_whisper_cpp_json(
+        transcript = transcript_from_whisper_cpp_json(
             {
                 "result": {"language": "en"},
                 "transcription": [

@@ -1,13 +1,12 @@
 import unittest
-from datetime import datetime, timezone
 
-from reframe_agent_host.benchmarks.task_choice_config import (
+from reframe_agent_host.benchmarks.config import (
     TASK_CHOICE_DEFAULT_MODEL_ID,
     TASK_CHOICE_DEFAULT_REASONING_EFFORT,
     TaskChoiceBenchmarkConfig,
 )
-from reframe_agent_host.benchmarks.task_choice_runner import _task_choice_providers
-from reframe_memory import MemoryNode, MemoryTimestamps, Provider
+from reframe_agent_host.benchmarks.runner import _task_choice_providers
+from benchmark_fixtures import provider as _provider
 
 
 class TaskChoiceBenchmarkTests(unittest.TestCase):
@@ -42,24 +41,6 @@ class TaskChoiceBenchmarkTests(unittest.TestCase):
 
         self.assertEqual(len(selected), 1)
         self.assertEqual(selected[0].content.baml_surface, "opencode_go.OpenCodeGoModelKimiK25")
-
-
-def _provider(provider_id: str, surface: str):
-    now = datetime.now(timezone.utc)
-    return MemoryNode(
-        id=provider_id,
-        tags=(),
-        timestamps=MemoryTimestamps(
-            created_at=now,
-            updated_at=now,
-            read_at=None,
-        ),
-        content=Provider(
-            name=provider_id,
-            description="Test provider",
-            baml_surface=surface,
-        ),
-    )
 
 
 if __name__ == "__main__":

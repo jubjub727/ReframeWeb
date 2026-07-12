@@ -11,7 +11,8 @@ from baml_sdk import memory_selection as baml_memory_selection
 from baml_sdk import task_execution as baml_task_execution
 from baml_sdk import task_prompt as baml_task_prompt
 from baml_sdk import task_routing as baml_task_routing
-from reframe_agent_host.agent_flow import machine_state
+from reframe_agent_host.agent_flow import geolocation, machine_state, monitor_detection
+from reframe_agent_host.agent_flow import windows_monitors
 from reframe_agent_host.agent_flow.machine_state import (
     MachineGeolocation,
     MachineMonitor,
@@ -113,11 +114,11 @@ class MachineStateProviderTests(unittest.TestCase):
             right = 4114
             bottom = 1234
 
-        geometry = machine_state._monitor_geometry_from_rect(Rect(), (3840, 2160))
+        geometry = windows_monitors.monitor_geometry_from_rect(Rect(), (3840, 2160))
 
         self.assertEqual(
             geometry,
-            machine_state._MonitorGeometry(
+            monitor_detection.MonitorGeometry(
                 x=1920,
                 y=0,
                 width=3840,
@@ -127,12 +128,12 @@ class MachineStateProviderTests(unittest.TestCase):
 
     def test_monitor_detection_collapses_mirrored_duplicate_geometry(self) -> None:
         with mock.patch.object(
-            machine_state,
+            monitor_detection,
             "_detect_monitor_geometries",
             return_value=[
-                machine_state._MonitorGeometry(x=0, y=0, width=1920, height=1080),
-                machine_state._MonitorGeometry(x=0, y=0, width=1920, height=1080),
-                machine_state._MonitorGeometry(x=1920, y=0, width=1920, height=1080),
+                monitor_detection.MonitorGeometry(x=0, y=0, width=1920, height=1080),
+                monitor_detection.MonitorGeometry(x=0, y=0, width=1920, height=1080),
+                monitor_detection.MonitorGeometry(x=1920, y=0, width=1920, height=1080),
             ],
         ):
             monitors = machine_state.machine_monitors()
@@ -157,19 +158,19 @@ class MachineStateProviderTests(unittest.TestCase):
  1: +HDMI-1 1920/527x1080/296+1920+0  HDMI-1
 """
 
-        with mock.patch.object(machine_state.platform, "system", return_value="Linux"):
+        with mock.patch.object(monitor_detection.platform, "system", return_value="Linux"):
             with mock.patch.object(
-                machine_state,
+                monitor_detection,
                 "_run_monitor_command",
                 return_value=output,
             ):
-                geometries = machine_state._xrandr_list_monitor_geometries()
+                geometries = monitor_detection._xrandr_list_monitor_geometries()
 
         self.assertEqual(
             geometries,
             [
-                machine_state._MonitorGeometry(x=0, y=0, width=1920, height=1080),
-                machine_state._MonitorGeometry(
+                monitor_detection.MonitorGeometry(x=0, y=0, width=1920, height=1080),
+                monitor_detection.MonitorGeometry(
                     x=1920,
                     y=0,
                     width=1920,
@@ -192,18 +193,18 @@ class MachineStateProviderTests(unittest.TestCase):
             ]
         )
 
-        with mock.patch.object(machine_state.platform, "system", return_value="Linux"):
+        with mock.patch.object(monitor_detection.platform, "system", return_value="Linux"):
             with mock.patch.object(
-                machine_state,
+                monitor_detection,
                 "_run_monitor_command",
                 return_value=payload,
             ):
-                geometries = machine_state._swaymsg_monitor_geometries()
+                geometries = monitor_detection._swaymsg_monitor_geometries()
 
         self.assertEqual(
             geometries,
             [
-                machine_state._MonitorGeometry(x=0, y=0, width=2560, height=1440),
+                monitor_detection.MonitorGeometry(x=0, y=0, width=2560, height=1440),
             ],
         )
 
@@ -222,17 +223,17 @@ class MachineStateProviderTests(unittest.TestCase):
         )
 
         with mock.patch.object(
-            machine_state,
+            monitor_detection,
             "_run_monitor_command",
             return_value=payload,
         ):
-            geometries = machine_state._macos_system_profiler_monitors()
+            geometries = monitor_detection._macos_system_profiler_monitors()
 
         self.assertEqual(
             geometries,
             [
-                machine_state._MonitorGeometry(x=0, y=0, width=2560, height=1440),
-                machine_state._MonitorGeometry(x=0, y=0, width=1920, height=1080),
+                monitor_detection.MonitorGeometry(x=0, y=0, width=2560, height=1440),
+                monitor_detection.MonitorGeometry(x=0, y=0, width=1920, height=1080),
             ],
         )
 
@@ -253,9 +254,9 @@ class MachineStateProviderTests(unittest.TestCase):
                 country_code="NZ",
             )
 
-        with mock.patch.object(machine_state, "_fetch_ipapi", fail_ipapi):
-            with mock.patch.object(machine_state, "_fetch_ipwho", succeed_second_ipwho):
-                with mock.patch.object(machine_state.time, "sleep") as sleep:
+        with mock.patch.object(geolocation, "_fetch_ipapi", fail_ipapi):
+            with mock.patch.object(geolocation, "_fetch_ipwho", succeed_second_ipwho):
+                with mock.patch.object(geolocation.time, "sleep") as sleep:
                     result = fetch_ip_geolocation(
                         max_attempts=2,
                         retry_delay_seconds=0.25,
@@ -274,9 +275,9 @@ class MachineStateProviderTests(unittest.TestCase):
         def fail_endpoint(_timeout_seconds: float) -> MachineGeolocation:
             raise MachineStateError("offline")
 
-        with mock.patch.object(machine_state, "_fetch_ipapi", fail_endpoint):
-            with mock.patch.object(machine_state, "_fetch_ipwho", fail_endpoint):
-                with mock.patch.object(machine_state.time, "sleep") as sleep:
+        with mock.patch.object(geolocation, "_fetch_ipapi", fail_endpoint):
+            with mock.patch.object(geolocation, "_fetch_ipwho", fail_endpoint):
+                with mock.patch.object(geolocation.time, "sleep") as sleep:
                     with self.assertRaisesRegex(
                         MachineStateError,
                         "IP geolocation failed after 3 attempts",

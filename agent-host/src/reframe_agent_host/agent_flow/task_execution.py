@@ -161,11 +161,3 @@ class TaskExecutionPlanner:
         if self.database is None:
             self.database = await open_memory_database()
         return self.database
-
-
-async def execute_task_with_default_client(
-    full_task_prompt: str,
-) -> baml_task_execution.TaskExecutionResult:
-    return await baml_task_execution.PerformTask_async(
-        full_task_prompt=full_task_prompt,
-    )

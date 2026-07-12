@@ -1,30 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-import os
-from pathlib import Path
 import re
 from threading import Lock
 import time
-from urllib.request import urlretrieve
 
 import numpy as np
 
 from reframe_agent_host.speech.chunking import speech_chunks
+from reframe_agent_host.speech.kokoro_assets import ensure_kokoro_onnx_assets
 from reframe_agent_host.speech.playback import QueuedAudioOutput
 from reframe_agent_host.speech.tts import SpeechEventHandler
 
 
-MODEL_URL = (
-    "https://github.com/thewh1teagle/kokoro-onnx/releases/download/"
-    "model-files-v1.0/kokoro-v1.0.onnx"
-)
-VOICES_URL = (
-    "https://github.com/thewh1teagle/kokoro-onnx/releases/download/"
-    "model-files-v1.0/voices-v1.0.bin"
-)
-MODEL_FILENAME = "kokoro-v1.0.onnx"
-VOICES_FILENAME = "voices-v1.0.bin"
 _WORD_RE = re.compile(r"[A-Za-z0-9]+(?:[’'\-][A-Za-z0-9]+)*")
 
 
@@ -282,33 +270,6 @@ class KokoroOnnxSpeaker:
         if state.output is not None:
             played_samples = min(played_samples, state.output.played_samples)
         return _last_spoken_word_detail(state.text, state.chunks, played_samples)
-
-
-def ensure_kokoro_onnx_assets() -> tuple[Path, Path]:
-    asset_dir = _asset_dir()
-    asset_dir.mkdir(parents=True, exist_ok=True)
-    model_path = asset_dir / MODEL_FILENAME
-    voices_path = asset_dir / VOICES_FILENAME
-    _download_if_missing(MODEL_URL, model_path)
-    _download_if_missing(VOICES_URL, voices_path)
-    return model_path, voices_path
-
-
-def _asset_dir() -> Path:
-    configured = os.environ.get("REFRAME_KOKORO_ONNX_DIR")
-    if configured:
-        return Path(configured).expanduser()
-    return Path.home() / ".cache" / "reframe-agent-host" / "kokoro-onnx"
-
-
-def _download_if_missing(url: str, path: Path) -> None:
-    if path.exists() and path.stat().st_size > 0:
-        return
-    tmp_path = path.with_suffix(path.suffix + ".tmp")
-    if tmp_path.exists():
-        tmp_path.unlink()
-    urlretrieve(url, tmp_path)
-    tmp_path.replace(path)
 
 
 def _sounddevice():

@@ -1,16 +1,12 @@
 import unittest
-from datetime import datetime, timezone
 from unittest.mock import patch
 
+from baml_sdk import benchmarks as baml_benchmarks
 from reframe_agent_host import cli
-from baml_sdk import memory_selection as baml_memory_selection
 from baml_sdk import task_prompt as baml_task_prompt
 from baml_sdk import task_routing as baml_task_routing
-from reframe_agent_host.benchmarks.reasoning_efforts import (
+from reframe_agent_host.benchmarks.config import (
     OPENCODE_GO_REASONING_EFFORT_CANDIDATES,
-)
-from reframe_agent_host.benchmarks.task_prompt_cases import task_prompt_cases
-from reframe_agent_host.benchmarks.task_prompt_config import (
     TaskPromptBenchmarkConfig,
 )
 from reframe_agent_host.benchmarks.task_prompt_execution import (
@@ -18,20 +14,12 @@ from reframe_agent_host.benchmarks.task_prompt_execution import (
     evaluate_task_prompt,
     snapshot_payload,
 )
-from reframe_agent_host.benchmarks.task_prompt_runner import (
+from reframe_agent_host.benchmarks.runner import (
     _select_cases,
     run_task_prompt_benchmark,
 )
 from reframe_agent_host.commands.parser import build_parser
-from reframe_memory import MemoryNode, MemoryTimestamps, Provider
-
-
-class FakeModel:
-    def __init__(self, **values):
-        self.__dict__.update(values)
-
-    def model_dump(self, mode="json"):
-        return dict(self.__dict__)
+from benchmark_fixtures import FakeModel, provider as _provider
 
 
 class TaskPromptBenchmarkTests(unittest.TestCase):
@@ -50,7 +38,10 @@ class TaskPromptBenchmarkTests(unittest.TestCase):
         )
 
     def test_select_cases_uses_task_prompt_cases(self):
-        cases = _select_cases(task_prompt_cases(), ("stripe_followup_cleanup",))
+        cases = _select_cases(
+            tuple(baml_benchmarks.TaskPromptCases()),
+            ("stripe_followup_cleanup",),
+        )
 
         self.assertEqual(len(cases), 1)
         self.assertEqual(cases[0].id, "stripe_followup_cleanup")
@@ -155,10 +146,8 @@ class TaskPromptBenchmarkTests(unittest.TestCase):
             "Ask only for the information needed to continue.",
         )
         self.assertEqual(
-            payload["task_prompt_input_snapshot"]["relevance_decision"][
-                "kept_memory_ids"
-            ],
-            ["memory_node:stripe_memory"],
+            payload["task_prompt_input_snapshot"]["selected_memories"][0]["title"],
+            "Stripe export pair",
         )
         self.assertIn("current_conversation", payload["task_prompt_input_snapshot"])
         self.assertNotIn(
@@ -171,7 +160,7 @@ class TaskPromptBenchmarkTests(unittest.TestCase):
 
 class TaskPromptRunnerTests(unittest.IsolatedAsyncioTestCase):
     async def test_runner_reuses_one_snapshot_for_each_provider_effort(self):
-        case = task_prompt_cases()[0]
+        case = baml_benchmarks.TaskPromptCases()[0]
         providers = (
             _provider("provider:one", "opencode_go.OpenCodeGoModelGlm51"),
             _provider("provider:two", "opencode_go.OpenCodeGoModelKimiK25"),
@@ -227,27 +216,27 @@ class TaskPromptRunnerTests(unittest.IsolatedAsyncioTestCase):
         )
 
         with patch(
-            "reframe_agent_host.benchmarks.task_prompt_runner.task_prompt_cases",
+            "reframe_agent_host.benchmarks.runner.baml_benchmarks.TaskPromptCases",
             lambda: (case,),
         ):
             with patch(
-                "reframe_agent_host.benchmarks.task_prompt_runner.direct_model_providers",
+                "reframe_agent_host.benchmarks.runner.direct_model_providers",
                 fake_direct_model_providers,
             ):
                 with patch(
-                    "reframe_agent_host.benchmarks.task_prompt_runner.build_task_prompt_snapshot",
+                    "reframe_agent_host.benchmarks.runner.build_task_prompt_snapshot",
                     fake_build_task_prompt_snapshot,
                 ):
                     with patch(
-                        "reframe_agent_host.benchmarks.task_prompt_runner.discover_task_prompt_reasoning_efforts",
+                        "reframe_agent_host.benchmarks.runner.discover_task_prompt_reasoning_efforts",
                         fake_discover,
                     ):
                         with patch(
-                            "reframe_agent_host.benchmarks.task_prompt_runner.benchmark_task_prompt_provider",
+                            "reframe_agent_host.benchmarks.runner.benchmark_task_prompt_provider",
                             fake_benchmark,
                         ):
                             with patch(
-                                "reframe_agent_host.benchmarks.task_prompt_runner.snapshot_payload",
+                                "reframe_agent_host.benchmarks.runner.task_prompt_snapshot",
                                 fake_snapshot_payload,
                             ):
                                 result = await run_task_prompt_benchmark(
@@ -284,58 +273,32 @@ def _snapshot():
         updated_at="2026-07-05T00:00:00+00:00",
         read_at="NONE",
     )
-    task_choice = baml_task_routing.TaskChoiceDecision(
-        selected_task_id=selected_task.id,
-        confidence=1.0,
-        candidate_memory=None,
-    )
     return TaskPromptSnapshot(
         case=case,
         current_timestamp="2026-07-05T00:00:00+00:00",
-        session_id="memory_node:session",
-        conversation_id="memory_node:conversation",
-        task_choice=task_choice,
         selected_task=selected_task,
-        current_conversation=None,
-        session_memories=[],
-        memory_search_hints=None,
-        search_depths=None,
-        retrieved_memories=None,
-        relevance_decision=baml_memory_selection.RelevantMemoryDecision(
-            kept_memory_ids=["memory_node:stripe_memory"],
-            candidate_memory=None,
+        current_conversation=baml_benchmarks.TaskPromptConversation(
+            case,
+            "2026-07-05T00:00:00+00:00",
         ),
-        selected_memories=None,
-        selected_memory_contexts=[],
+        session_memories=baml_benchmarks.TaskPromptSessionMemoryContexts(
+            case,
+            "2026-07-05T00:00:00+00:00",
+        ),
+        selected_memory_contexts=baml_benchmarks.TaskPromptSelectedMemoryContexts(
+            case,
+            "2026-07-05T00:00:00+00:00",
+        ),
         task_prompt_memories=[],
         latency_seconds=0.1,
-        stage_latency_seconds={},
     )
 
 
 def _stripe_case():
-    for case in task_prompt_cases():
+    for case in baml_benchmarks.TaskPromptCases():
         if case.id == "stripe_followup_cleanup":
             return case
     raise AssertionError("stripe_followup_cleanup case missing")
-
-
-def _provider(provider_id: str, surface: str):
-    now = datetime.now(timezone.utc)
-    return MemoryNode(
-        id=provider_id,
-        tags=(),
-        timestamps=MemoryTimestamps(
-            created_at=now,
-            updated_at=now,
-            read_at=None,
-        ),
-        content=Provider(
-            name=provider_id,
-            description="Test provider",
-            baml_surface=surface,
-        ),
-    )
 
 
 if __name__ == "__main__":

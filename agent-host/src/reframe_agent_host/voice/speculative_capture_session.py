@@ -21,9 +21,8 @@ from reframe_agent_host.voice.capture_state import CaptureState
 from reframe_agent_host.voice.conversation_mode import ConversationModeController
 from reframe_agent_host.voice.microphone import MicrophoneStream
 from reframe_agent_host.voice.keyphrase_gate import VoiceKeyphraseGate
-from reframe_agent_host.voice.types import (
-    CaptureResult,
-    CaptureStreamEvent,
+from reframe_agent_host.voice.capture_types import CaptureResult, CaptureStreamEvent
+from reframe_agent_host.voice.pipeline_config import (
     VoicePipelineConfig,
     VoicePipelineEventHandler,
 )

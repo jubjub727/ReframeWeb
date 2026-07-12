@@ -6,20 +6,6 @@ from reframe_memory import ConversationNode, MemoryDatabase
 from reframe_memory.ids import memory_node_record_id
 
 
-async def session_conversation_history(
-    database: MemoryDatabase,
-    session_id: str | None,
-) -> list[baml_context.ConversationHistory]:
-    if session_id is None:
-        return []
-
-    conversations = await database.sessions.conversations_for(session_id)
-    history = []
-    for conversation in conversations:
-        history.append(await conversation_history(database, conversation))
-    return history
-
-
 async def current_conversation_history(
     database: MemoryDatabase,
     session_id: str | None,

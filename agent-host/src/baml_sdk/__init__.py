@@ -30,10 +30,13 @@ set_type_map(_TYPE_MAP)
 
 _LAZY_CHILDREN = frozenset({
     "action_history",
+    "agent_host_catalog",
     "baml",
+    "benchmarks",
     "context",
     "memory_search",
     "memory_selection",
+    "opencode_go",
     "retrieved_memory",
     "stream_types",
     "task_completion",

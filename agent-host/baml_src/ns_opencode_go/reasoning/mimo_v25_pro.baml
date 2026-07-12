@@ -7,6 +7,7 @@ client<llm> OpenCodeGoModelMimoV25ProReasoningNone {
         reasoning_effort: "none",
     },
 }
+
 client<llm> OpenCodeGoModelMimoV25ProReasoningMinimal {
     provider: openai-generic,
     options: {

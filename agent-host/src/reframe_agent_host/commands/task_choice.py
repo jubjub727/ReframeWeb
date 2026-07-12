@@ -1,23 +1,25 @@
 from __future__ import annotations
 
-from datetime import datetime
 import json
-from pathlib import Path
+
+from baml_sdk import opencode_go as baml_opencode_go
 
 from reframe_agent_host.agent_flow.task_choice import (
     TaskChoicePlanner,
 )
-from reframe_agent_host.benchmarks import (
-    TaskChoiceBenchmarkConfig,
-    run_task_choice_benchmark,
-)
+from reframe_agent_host.benchmarks.config import TaskChoiceBenchmarkConfig
+from reframe_agent_host.benchmarks.runner import run_task_choice_benchmark
 from reframe_agent_host.benchmarks.task_choice_result_analysis import (
     task_choice_failed_provider_groups,
 )
 from reframe_agent_host.memory_seed import (
     ensure_core_tasks,
     ensure_opencode_go_providers,
-    opencode_go_model_inventory,
+)
+from reframe_agent_host.commands.benchmarking import (
+    benchmark_config_values,
+    execute_benchmark,
+    print_benchmark_summary,
 )
 from reframe_agent_host.memory_readiness import require_memory_ready
 from reframe_memory import open_memory_database
@@ -56,35 +58,24 @@ async def run_benchmark_task_choice(
     reasoning_effort_candidates: list[str] | None,
     output: str | None,
 ) -> int:
-    database = await open_memory_database()
-    try:
-        await require_memory_ready(database, require_task_catalog=True)
-        config_kwargs = {
-            "session_id": session_id,
-            "runs": runs,
-            "warmup_runs": warmup_runs,
-            "delay_seconds": delay_seconds,
-            "provider_cooldown_seconds": provider_cooldown_seconds,
-            "provider_ids": tuple(provider_ids or ()),
-            "case_ids": tuple(case_ids or ()),
-        }
-        if reasoning_efforts is not None:
-            config_kwargs["reasoning_efforts"] = tuple(reasoning_efforts)
-        elif reasoning_effort_candidates is not None:
-            config_kwargs["reasoning_efforts"] = ()
-        if reasoning_effort_candidates is not None:
-            config_kwargs["reasoning_effort_candidates"] = tuple(
-                reasoning_effort_candidates
-            )
-        result = await run_task_choice_benchmark(
-            database=database,
-            config=TaskChoiceBenchmarkConfig(**config_kwargs),
-        )
-        output_path = _write_benchmark_result(result, output)
-        _print_benchmark_saved(output_path, result)
-        return 0
-    finally:
-        await database.close()
+    values = benchmark_config_values(
+        runs=runs,
+        warmup_runs=warmup_runs,
+        delay_seconds=delay_seconds,
+        provider_cooldown_seconds=provider_cooldown_seconds,
+        provider_ids=provider_ids,
+        case_ids=case_ids,
+        reasoning_efforts=reasoning_efforts,
+        reasoning_effort_candidates=reasoning_effort_candidates,
+        session_id=session_id,
+    )
+    return await execute_benchmark(
+        config=TaskChoiceBenchmarkConfig(**values),
+        runner=run_task_choice_benchmark,
+        output=output,
+        output_name="task-choice",
+        reporter=_print_benchmark_saved,
+    )
 
 
 async def run_memory_setup() -> int:
@@ -151,7 +142,7 @@ def run_list_opencode_go_models() -> int:
                     "workspace_baml_surface": reference.workspace_baml_surface,
                     "reasoning_efforts": list(reference.reasoning_efforts),
                 }
-                for reference in opencode_go_model_inventory()
+                for reference in baml_opencode_go.ModelInventory()
             ],
             indent=2,
         )
@@ -175,30 +166,17 @@ def run_analyze_task_choice_benchmark(path: str) -> int:
     return 0
 
 
-def _write_benchmark_result(result: dict[str, object], output: str | None) -> Path:
-    path = Path(output) if output else _default_benchmark_output_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
-    return path.resolve()
+def _print_benchmark_saved(path, result: dict[str, object]) -> None:
+    print_benchmark_summary(path, result, _SUMMARY_FIELDS)
 
 
-def _default_benchmark_output_path() -> Path:
-    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    return Path("benchmark-results") / f"task-choice-{stamp}.json"
-
-
-def _print_benchmark_saved(path: Path, result: dict[str, object]) -> None:
-    summary = result.get("summary")
-    print(f"benchmark JSON saved to {path}")
-    if isinstance(summary, dict):
-        print(
-            "summary: "
-            f"base_providers={summary.get('base_providers')} "
-            f"provider_effort_runs={summary.get('provider_effort_runs')} "
-            f"model={summary.get('task_choice_model_id')} "
-            f"cases={summary.get('cases')} "
-            f"total={summary.get('total')} "
-            f"correct={summary.get('correct')} "
-            f"errors={summary.get('errors')} "
-            f"accuracy={summary.get('accuracy')}"
-        )
+_SUMMARY_FIELDS = (
+    ("base_providers", "base_providers"),
+    ("provider_effort_runs", "provider_effort_runs"),
+    ("model", "task_choice_model_id"),
+    ("cases", "cases"),
+    ("total", "total"),
+    ("correct", "correct"),
+    ("errors", "errors"),
+    ("accuracy", "accuracy"),
+)

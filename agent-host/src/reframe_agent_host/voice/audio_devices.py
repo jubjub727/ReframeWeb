@@ -53,10 +53,6 @@ def list_input_devices() -> list[AudioDeviceInfo]:
     return results
 
 
-def resolve_input_device(device: int | str | None) -> int | str | None:
-    return resolve_input_devices(device)[0]
-
-
 def resolve_input_devices(device: int | str | None) -> tuple[int | str | None, ...]:
     devices = list_input_devices()
     if device is None:
@@ -106,13 +102,6 @@ def device_summary(device: int | str | None) -> str:
     )
 
 
-def _preferred_duplicate(
-    selected: AudioDeviceInfo | None,
-    devices: list[AudioDeviceInfo],
-) -> AudioDeviceInfo:
-    return _preferred_duplicates(selected, devices)[0]
-
-
 def _preferred_duplicates(
     selected: AudioDeviceInfo | None,
     devices: list[AudioDeviceInfo],
@@ -121,10 +110,6 @@ def _preferred_duplicates(
         raise ValueError("Input device was not found.")
     same_name = [item for item in devices if item.name == selected.name]
     return _preferred_devices(same_name)
-
-
-def _preferred_device(devices: list[AudioDeviceInfo]) -> AudioDeviceInfo:
-    return _preferred_devices(devices)[0]
 
 
 def _preferred_devices(devices: list[AudioDeviceInfo]) -> tuple[AudioDeviceInfo, ...]:

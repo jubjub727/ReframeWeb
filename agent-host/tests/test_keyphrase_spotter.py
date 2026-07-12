@@ -22,7 +22,7 @@ from reframe_agent_host.voice.capture_state import CaptureState
 from reframe_agent_host.voice.keyphrase_gate import KeyphraseGateResult
 from reframe_agent_host.voice.keyphrase_gate import VoiceKeyphraseGate
 from reframe_agent_host.voice.microphone import AudioInputConfig
-from reframe_agent_host.voice.types import VoicePipelineConfig
+from reframe_agent_host.voice.pipeline_config import VoicePipelineConfig
 
 
 class FakeSegment:

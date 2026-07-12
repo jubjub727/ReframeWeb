@@ -1,12 +1,11 @@
 import unittest
 from contextlib import redirect_stdout
-from datetime import datetime, timezone
 from io import StringIO
 from unittest.mock import patch
 
+from baml_sdk import benchmarks as baml_benchmarks
 from reframe_agent_host import cli
-from reframe_agent_host.benchmarks.control_flow_cases import control_flow_cases
-from reframe_agent_host.benchmarks.control_flow_config import (
+from reframe_agent_host.benchmarks.config import (
     ControlFlowBenchmarkConfig,
     SEARCH_DEPTH_DEFAULT_MODEL_ID,
 )
@@ -14,19 +13,11 @@ from reframe_agent_host.benchmarks.control_flow_execution import (
     ControlFlowSnapshot,
     snapshot_payload,
 )
-from reframe_agent_host.benchmarks.control_flow_runner import _search_depth_providers
+from reframe_agent_host.benchmarks.runner import _search_depth_providers
 from reframe_agent_host.benchmarks.control_flow_time import cutoff_age, format_duration
 from reframe_agent_host.commands.control_flow_report import print_control_flow_report
 from reframe_agent_host.commands.parser import build_parser
-from reframe_memory import MemoryNode, MemoryTimestamps, Provider
-
-
-class FakeModel:
-    def __init__(self, **values):
-        self.__dict__.update(values)
-
-    def model_dump(self, mode="json"):
-        return dict(self.__dict__)
+from benchmark_fixtures import FakeModel, provider as _provider
 
 
 class ControlFlowBenchmarkTests(unittest.TestCase):
@@ -48,7 +39,7 @@ class ControlFlowBenchmarkTests(unittest.TestCase):
         self.assertEqual(age["display"], "1 hour and 30 minutes")
 
     def test_cases_use_session_shaped_memory_graph(self):
-        case = control_flow_cases()[0]
+        case = baml_benchmarks.ControlFlowCases()[0]
 
         self.assertTrue(case.session.id.startswith("benchmark_session:"))
         self.assertGreaterEqual(len(case.session.conversations), 1)
@@ -150,7 +141,7 @@ class ControlFlowBenchmarkTests(unittest.TestCase):
         self.assertEqual(captured["reasoning_effort_candidates"], ["low"])
 
     def test_snapshot_payload_saves_search_depth_input(self):
-        case = control_flow_cases()[0]
+        case = baml_benchmarks.ControlFlowCases()[0]
         snapshot = ControlFlowSnapshot(
             case=case,
             task_choice=FakeModel(selected_task_id=case.expected_task_id),
@@ -236,24 +227,6 @@ class ControlFlowBenchmarkTests(unittest.TestCase):
         self.assertIn("1 hour and 30 minutes", output.getvalue())
         self.assertIn("snapshots:", output.getvalue())
         self.assertIn("depth=1.200 s", output.getvalue())
-
-
-def _provider(provider_id: str, surface: str):
-    now = datetime.now(timezone.utc)
-    return MemoryNode(
-        id=provider_id,
-        tags=(),
-        timestamps=MemoryTimestamps(
-            created_at=now,
-            updated_at=now,
-            read_at=None,
-        ),
-        content=Provider(
-            name=provider_id,
-            description="Test provider",
-            baml_surface=surface,
-        ),
-    )
 
 
 if __name__ == "__main__":

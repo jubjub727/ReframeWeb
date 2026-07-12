@@ -8,28 +8,14 @@ from typing import Any
 from baml_core import Collector
 
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
+from baml_sdk import benchmarks as baml_benchmarks
 from baml_sdk import memory_search as baml_memory_search
 from baml_sdk import task_routing as baml_task_routing
 from reframe_agent_host.agent_flow.provider_clients import client_kwargs
-from reframe_agent_host.benchmarks.control_flow_case_types import (
-    ControlFlowBenchmarkCase,
-)
-from reframe_agent_host.benchmarks.control_flow_config import (
+from reframe_agent_host.benchmarks.config import (
     ControlFlowBenchmarkConfig,
 )
-from reframe_agent_host.benchmarks.control_flow_context import (
-    available_task_context,
-    case_conversation_context,
-    case_session_memory_context,
-    search_depth_memory_context,
-    selected_task_from_case,
-    task_choice_memory_context,
-    user_preference_context,
-)
 from reframe_agent_host.benchmarks.control_flow_time import cutoff_age
-from reframe_agent_host.benchmarks.conversation_evaluation_context import (
-    conversation_evaluation_memory_context,
-)
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     collector_stop_reason,
     collector_usage,
@@ -39,7 +25,7 @@ from reframe_memory import ProviderNode
 
 @dataclass(frozen=True)
 class ControlFlowSnapshot:
-    case: ControlFlowBenchmarkCase
+    case: baml_benchmarks.ControlFlowBenchmarkCase
     task_choice: Any | None
     selected_task: Any | None
     search_hints: Any | None
@@ -63,7 +49,7 @@ class ControlFlowSnapshot:
 
 
 async def build_control_flow_snapshot(
-    case: ControlFlowBenchmarkCase,
+    case: baml_benchmarks.ControlFlowBenchmarkCase,
     client=None,
 ) -> ControlFlowSnapshot:
     total_started_at = time.perf_counter()
@@ -71,15 +57,22 @@ async def build_control_flow_snapshot(
     task_choice = None
     selected_task = None
     hints = None
-    session_conversations = case_conversation_context(case)
-    session_memories = case_session_memory_context(case)
+    session_conversations = baml_benchmarks.ConversationContexts(
+        case.session.conversations
+    )
+    session_memories = baml_benchmarks.SessionMemoryContexts(case.session.memories)
     search_domains = await baml_memory_search.SearchDomains_async()
-    search_depth_memories = search_depth_memory_context(case.search_depth_memories)
+    search_depth_memories = baml_benchmarks.SearchDepthMemoryContexts(
+        case.search_depth_memories
+    )
 
     try:
         task_choice, task_choice_latency = await choose_task(client, case)
         stage_latencies["task_choice"] = task_choice_latency
-        selected_task = selected_task_from_case(case, task_choice.selected_task_id)
+        selected_task = baml_benchmarks.SelectedTaskForCase(
+            case,
+            task_choice.selected_task_id,
+        )
         hints, hints_latency = await search_hints(
             client,
             case,
@@ -197,15 +190,21 @@ async def warmup_search_depth(
     return errors
 
 
-async def choose_task(client, case: ControlFlowBenchmarkCase):
+async def choose_task(client, case: baml_benchmarks.ControlFlowBenchmarkCase):
     started_at = time.perf_counter()
     result = await baml_task_routing.ChooseTask_async(
         current_user_request=case.current_user_request,
-        current_conversation=_current_conversation(case_conversation_context(case)),
-        session_memories=case_session_memory_context(case),
-        user_preferences=user_preference_context(case.user_preferences),
-        available_tasks=available_task_context(case.available_tasks),
-        task_choice_memories=task_choice_memory_context(case.task_choice_memories),
+        current_conversation=_current_conversation(
+            baml_benchmarks.ConversationContexts(case.session.conversations)
+        ),
+        session_memories=baml_benchmarks.SessionMemoryContexts(case.session.memories),
+        user_preferences=baml_benchmarks.UserPreferenceContexts(
+            case.user_preferences
+        ),
+        available_tasks=baml_benchmarks.AvailableTaskContexts(case.available_tasks),
+        task_choice_memories=baml_benchmarks.TaskChoiceMemoryContexts(
+            case.task_choice_memories
+        ),
         machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
@@ -216,14 +215,20 @@ def _current_conversation(conversations):
     return conversations[0] if conversations else None
 
 
-async def search_hints(client, case: ControlFlowBenchmarkCase, selected_task):
+async def search_hints(
+    client,
+    case: baml_benchmarks.ControlFlowBenchmarkCase,
+    selected_task,
+):
     started_at = time.perf_counter()
     result = await baml_memory_search.ChooseMemorySearch_async(
         current_user_request=case.current_user_request,
-        current_conversation=_current_conversation(case_conversation_context(case)),
-        session_memories=case_session_memory_context(case),
+        current_conversation=_current_conversation(
+            baml_benchmarks.ConversationContexts(case.session.conversations)
+        ),
+        session_memories=baml_benchmarks.SessionMemoryContexts(case.session.memories),
         selected_task=selected_task,
-        conversation_evaluation_memories=conversation_evaluation_memory_context(
+        conversation_evaluation_memories=baml_benchmarks.ConversationEvaluationMemoryContexts(
             case.conversation_evaluation_memories
         ),
         machine_state=local_machine_state_context("Benchmark machine state"),
@@ -291,7 +296,9 @@ def snapshot_payload(snapshot: ControlFlowSnapshot) -> dict[str, Any]:
     return payload
 
 
-def _session_payload(case: ControlFlowBenchmarkCase) -> dict[str, str]:
+def _session_payload(
+    case: baml_benchmarks.ControlFlowBenchmarkCase,
+) -> dict[str, str]:
     return {
         "id": case.session.id,
         "name": case.session.name,

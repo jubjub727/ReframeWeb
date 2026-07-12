@@ -20,11 +20,8 @@ from baml_sdk import task_prompt as baml_task_prompt
 from baml_sdk import task_routing as baml_task_routing
 from baml_sdk import voice_turn as baml_voice_turn
 from reframe_agent_host.agent_flow.live_conversation import LiveConversationContext
-from reframe_agent_host.commands.voice_turn import (
-    _VoiceTurnEventPrinter,
-    _ensure_voice_memory_context,
-    run_voice_turn,
-)
+from reframe_agent_host.commands.voice_output import VoiceTurnEventPrinter
+from reframe_agent_host.commands.voice_turn import _ensure_voice_memory_context, run_voice_turn
 from reframe_agent_host.memory_readiness import MemoryReadinessError
 from reframe_agent_host.keyphrases import KeyphraseDetection, KeyphraseSpotterConfig
 from reframe_agent_host.speech.transcription import (
@@ -38,11 +35,8 @@ from reframe_agent_host.voice.conversation_mode import ConversationModeControlle
 from reframe_agent_host.voice.microphone import AudioInputConfig
 from reframe_agent_host.voice.pipeline import VoiceTurnPipeline
 from reframe_agent_host.voice.turn_processor import VoiceTurnProcessor
-from reframe_agent_host.voice.types import (
-    CaptureResult,
-    VoicePipelineConfig,
-    VoiceTurnControl,
-)
+from reframe_agent_host.voice.capture_types import CaptureResult, VoiceTurnControl
+from reframe_agent_host.voice.pipeline_config import VoicePipelineConfig
 from reframe_agent_host.task_execution import (
     PrimitiveDispatchRecord,
     PrimitiveDispatchResult,
@@ -559,7 +553,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             return database
 
         with patch(
-            "reframe_agent_host.voice.turn_processor.open_memory_database",
+            "reframe_agent_host.voice.turn_side_effects.open_memory_database",
             fake_open_memory_database,
         ):
             await processor.process(
@@ -603,7 +597,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             return database
 
         with patch(
-            "reframe_agent_host.voice.turn_processor.open_memory_database",
+            "reframe_agent_host.voice.turn_side_effects.open_memory_database",
             fake_open_memory_database,
         ):
             await processor.process(
@@ -635,10 +629,10 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             raise AssertionError("empty task result should not dispatch primitives")
 
         with patch(
-            "reframe_agent_host.voice.turn_processor.open_memory_database",
+            "reframe_agent_host.voice.turn_side_effects.open_memory_database",
             fail_open_memory_database,
         ):
-            result = await processor._maybe_dispatch_primitives(
+            result = await processor._side_effects.dispatch_primitives(
                 baml_task_execution.TaskExecutionResult(returns=[]),
                 time.perf_counter(),
                 lambda stage, message: events.append((stage, message)),
@@ -706,19 +700,19 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             return ClosingOnlyDatabase()
 
         with patch(
-            "reframe_agent_host.voice.turn_processor.PrimitiveDispatcher",
+            "reframe_agent_host.voice.turn_side_effects.PrimitiveDispatcher",
             OrderedPrimitiveDispatcher,
         ):
             with patch(
-                "reframe_agent_host.voice.turn_processor.ActionHistorySummarizer",
+                "reframe_agent_host.voice.turn_side_effects.ActionHistorySummarizer",
                 OrderedActionHistorySummarizer,
             ):
                 with patch(
-                    "reframe_agent_host.voice.turn_processor.TaskCompletionChecker",
+                    "reframe_agent_host.voice.turn_side_effects.TaskCompletionChecker",
                     OrderedTaskCompletionChecker,
                 ):
                     with patch(
-                        "reframe_agent_host.voice.turn_processor.open_memory_database",
+                        "reframe_agent_host.voice.turn_side_effects.open_memory_database",
                         fake_open_memory_database,
                     ):
                         result = await processor.process(
@@ -811,7 +805,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     def test_cli_prints_input_lifecycle_events_in_normal_mode(self):
         output = io.StringIO()
-        printer = _VoiceTurnEventPrinter(
+        printer = VoiceTurnEventPrinter(
             debug_output=False,
             turn_started_at=time.perf_counter(),
         )
@@ -853,7 +847,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     def test_cli_prints_startup_latency_only_once(self):
         output = io.StringIO()
-        printer = _VoiceTurnEventPrinter(
+        printer = VoiceTurnEventPrinter(
             debug_output=False,
             turn_started_at=10.0,
         )
@@ -870,7 +864,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     def test_cli_prints_selected_task_name(self):
         output = io.StringIO()
-        printer = _VoiceTurnEventPrinter(
+        printer = VoiceTurnEventPrinter(
             debug_output=False,
             turn_started_at=time.perf_counter(),
         )
@@ -885,7 +879,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     def test_cli_prints_agent_reply_interrupted(self):
         output = io.StringIO()
-        printer = _VoiceTurnEventPrinter(
+        printer = VoiceTurnEventPrinter(
             debug_output=False,
             turn_started_at=time.perf_counter(),
         )
@@ -902,7 +896,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     def test_cli_prints_barge_in_event(self):
         output = io.StringIO()
-        printer = _VoiceTurnEventPrinter(
+        printer = VoiceTurnEventPrinter(
             debug_output=False,
             turn_started_at=time.perf_counter(),
         )
@@ -916,7 +910,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     def test_cli_prints_conversation_mode_status_lines(self):
         output = io.StringIO()
-        printer = _VoiceTurnEventPrinter(
+        printer = VoiceTurnEventPrinter(
             debug_output=False,
             turn_started_at=time.perf_counter(),
         )
@@ -935,7 +929,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     def test_cli_prints_prompt_layer_latencies_from_baml_flow_events(self):
         output = io.StringIO()
-        printer = _VoiceTurnEventPrinter(
+        printer = VoiceTurnEventPrinter(
             debug_output=False,
             turn_started_at=time.perf_counter(),
         )

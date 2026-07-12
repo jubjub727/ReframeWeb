@@ -1,13 +1,21 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field, is_dataclass
+from dataclasses import dataclass, field
 from collections.abc import Mapping
-from datetime import date, datetime, timezone
-import enum
+from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
 from typing import Any
+
+from reframe_agent_host.agent_flow.debug_artifacts import (
+    dump_directory,
+    jsonable,
+    request_body_payload,
+    timestamp_id,
+    try_unlink,
+    try_write_text,
+)
 
 
 @dataclass
@@ -46,7 +54,7 @@ class PromptLayerDebugSession:
         try:
             latest_dir.mkdir(parents=True, exist_ok=True)
             for path in latest_dir.glob("*.json"):
-                _try_unlink(path)
+                try_unlink(path)
         except Exception:
             pass
 
@@ -105,12 +113,14 @@ class PromptLayerDebugSession:
             "status": status,
             "current_user_request": self.current_user_request,
             "elapsed_seconds": elapsed_seconds,
-            "inputs": _jsonable(inputs),
+            "inputs": jsonable(inputs),
         }
         if request is not None:
-            payload["request"] = _request_payload(request)
+            payload["request"] = request_body_payload(
+                str(getattr(request, "body", ""))
+            )
         if result is not None:
-            payload["result"] = _jsonable(result)
+            payload["result"] = jsonable(result)
         if error is not None:
             payload["error"] = {
                 "type": type(error).__name__,
@@ -118,9 +128,9 @@ class PromptLayerDebugSession:
             }
 
         text = json.dumps(payload, indent=2, sort_keys=True) + "\n"
-        if not _try_write_text(run_path, text):
+        if not try_write_text(run_path, text):
             return
-        _try_write_text(latest_path, text)
+        try_write_text(latest_path, text)
         self._upsert_layer_index(
             {
                 "order": order,
@@ -155,8 +165,8 @@ class PromptLayerDebugSession:
             "layers": self.layers,
         }
         text = json.dumps(payload, indent=2, sort_keys=True) + "\n"
-        _try_write_text(self.run_dir / "index.json", text)
-        _try_write_text(self.latest_dir / "index.json", text)
+        try_write_text(self.run_dir / "index.json", text)
+        try_write_text(self.latest_dir / "index.json", text)
 
     def _started_at(self) -> str:
         parsed = datetime.strptime(self.run_id, "%Y%m%dT%H%M%S%fZ")
@@ -164,111 +174,8 @@ class PromptLayerDebugSession:
 
 
 def _dump_dir() -> Path:
-    return Path(__file__).resolve().parents[3] / "debug-dumps" / "prompt-layers"
+    return dump_directory("prompt-layers")
 
 
 def _timestamp() -> str:
-    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-
-
-def _jsonable(value: Any) -> Any:
-    if value is None or isinstance(value, str | int | float | bool):
-        return value
-    if isinstance(value, enum.Enum):
-        return value.value
-    if isinstance(value, datetime | date):
-        return value.isoformat()
-    if isinstance(value, Path):
-        return str(value)
-    if hasattr(value, "model_dump"):
-        return _jsonable(value.model_dump(mode="json"))
-    if is_dataclass(value):
-        return _jsonable(asdict(value))
-    if isinstance(value, Mapping):
-        return {str(key): _jsonable(item) for key, item in value.items()}
-    if isinstance(value, list | tuple | set):
-        return [_jsonable(item) for item in value]
-    return str(value)
-
-
-def _request_payload(request: Any) -> dict[str, Any]:
-    body = str(getattr(request, "body", ""))
-    payload: dict[str, Any] = {
-        "body_chars": len(body),
-        "body": body,
-    }
-    try:
-        parsed = json.loads(body)
-    except json.JSONDecodeError:
-        payload["body_json"] = "invalid"
-    else:
-        payload["body_json"] = "valid"
-        payload["body"] = parsed
-        payload["summary"] = _request_body_summary(parsed)
-    return payload
-
-
-def _request_body_summary(body: dict[str, Any]) -> dict[str, Any]:
-    messages = body.get("messages")
-    message_summaries = []
-    if isinstance(messages, list):
-        for message in messages:
-            if not isinstance(message, dict):
-                continue
-            message_summaries.append(
-                {
-                    "role": message.get("role"),
-                    "content_chars": _content_chars(message.get("content")),
-                },
-            )
-
-    summary = {
-        "model": body.get("model"),
-        "reasoning_effort": body.get("reasoning_effort"),
-        "message_count": len(message_summaries),
-        "messages": message_summaries,
-    }
-    if "max_tokens" in body:
-        summary["max_tokens"] = body["max_tokens"]
-    if "temperature" in body:
-        summary["temperature"] = body["temperature"]
-    return summary
-
-
-def _content_chars(value: Any) -> int | None:
-    if isinstance(value, str):
-        return len(value)
-    if isinstance(value, list):
-        total = 0
-        found = False
-        for item in value:
-            size = _content_chars(item)
-            if size is not None:
-                total += size
-                found = True
-        return total if found else None
-    if isinstance(value, dict):
-        total = 0
-        found = False
-        for key in ("text", "content"):
-            size = _content_chars(value.get(key))
-            if size is not None:
-                total += size
-                found = True
-        return total if found else None
-    return None
-
-
-def _try_write_text(path: Path, text: str) -> bool:
-    try:
-        path.write_text(text, encoding="utf-8")
-    except Exception:
-        return False
-    return True
-
-
-def _try_unlink(path: Path) -> None:
-    try:
-        path.unlink()
-    except Exception:
-        return
+    return timestamp_id()

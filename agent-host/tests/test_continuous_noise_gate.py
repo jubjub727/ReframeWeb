@@ -11,11 +11,8 @@ from reframe_agent_host.speech.triggers import TriggerPhraseConfig, TriggerPhras
 from reframe_agent_host.voice.activity import DetectedUtterance, VoiceActivityConfig
 from reframe_agent_host.voice.microphone import AudioInputConfig
 from reframe_agent_host.voice.turn_processor import VoiceTurnProcessor
-from reframe_agent_host.voice.types import (
-    CaptureResult,
-    VoicePipelineConfig,
-    VoiceTurnControl,
-)
+from reframe_agent_host.voice.capture_types import CaptureResult, VoiceTurnControl
+from reframe_agent_host.voice.pipeline_config import VoicePipelineConfig
 from reframe_memory import RetrievedMemoryContext
 
 

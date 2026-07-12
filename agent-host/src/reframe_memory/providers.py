@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Any
 from reframe_memory.ids import memory_node_record_id
 from reframe_memory.models import Provider, ProviderNode
 from reframe_memory.records import memory_node_from_record
+from reframe_memory.query_results import first_record as _first_record
+from reframe_memory.query_results import records as _records
 from reframe_memory.search import (
     MemoryNodeSearch,
     StringSearch,
@@ -240,16 +242,3 @@ def _optional_string(value: Any) -> str | None:
         return None
     text = str(value)
     return text if text else None
-
-
-def _records(result: Any) -> list[Mapping[str, Any]]:
-    if not isinstance(result, list):
-        return []
-    return [item for item in result if isinstance(item, Mapping)]
-
-
-def _first_record(result: Any) -> Mapping[str, Any]:
-    records = _records(result)
-    if not records:
-        raise ValueError("query did not return a memory node")
-    return records[0]

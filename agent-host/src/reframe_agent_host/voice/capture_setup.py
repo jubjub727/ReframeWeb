@@ -12,7 +12,7 @@ from reframe_agent_host.voice.activity import (
 )
 from reframe_agent_host.voice.capture_state import CaptureState
 from reframe_agent_host.voice.debug_audio import DebugAudioRecorder
-from reframe_agent_host.voice.types import VoicePipelineConfig
+from reframe_agent_host.voice.pipeline_config import VoicePipelineConfig
 
 
 def create_segmenter(config: VoicePipelineConfig) -> UtteranceSegmenter:

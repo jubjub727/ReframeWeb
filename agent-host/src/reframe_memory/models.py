@@ -74,37 +74,7 @@ class SessionMemory:
 
 
 @dataclass(frozen=True)
-class UserPreferenceMemory:
-    title: str
-    description: str
-
-
-@dataclass(frozen=True)
-class TaskChoiceMemory:
-    title: str
-    description: str
-
-
-@dataclass(frozen=True)
-class ConversationEvaluationMemory:
-    title: str
-    description: str
-
-
-@dataclass(frozen=True)
-class SearchDepthMemory:
-    title: str
-    description: str
-
-
-@dataclass(frozen=True)
-class RelevanceMemory:
-    title: str
-    description: str
-
-
-@dataclass(frozen=True)
-class TaskPromptMemory:
+class ContextMemory:
     title: str
     description: str
 
@@ -138,12 +108,18 @@ SessionNode: TypeAlias = MemoryNode[Session]
 ConversationNode: TypeAlias = MemoryNode[Conversation]
 ConversationMessageNode: TypeAlias = MemoryNode[ConversationMessage]
 SessionMemoryNode: TypeAlias = MemoryNode[SessionMemory]
-UserPreferenceMemoryNode: TypeAlias = MemoryNode[UserPreferenceMemory]
-TaskChoiceMemoryNode: TypeAlias = MemoryNode[TaskChoiceMemory]
-ConversationEvaluationMemoryNode: TypeAlias = MemoryNode[ConversationEvaluationMemory]
-SearchDepthMemoryNode: TypeAlias = MemoryNode[SearchDepthMemory]
-RelevanceMemoryNode: TypeAlias = MemoryNode[RelevanceMemory]
-TaskPromptMemoryNode: TypeAlias = MemoryNode[TaskPromptMemory]
+UserPreferenceMemory: TypeAlias = ContextMemory
+TaskChoiceMemory: TypeAlias = ContextMemory
+ConversationEvaluationMemory: TypeAlias = ContextMemory
+SearchDepthMemory: TypeAlias = ContextMemory
+RelevanceMemory: TypeAlias = ContextMemory
+TaskPromptMemory: TypeAlias = ContextMemory
+UserPreferenceMemoryNode: TypeAlias = MemoryNode[ContextMemory]
+TaskChoiceMemoryNode: TypeAlias = MemoryNode[ContextMemory]
+ConversationEvaluationMemoryNode: TypeAlias = MemoryNode[ContextMemory]
+SearchDepthMemoryNode: TypeAlias = MemoryNode[ContextMemory]
+RelevanceMemoryNode: TypeAlias = MemoryNode[ContextMemory]
+TaskPromptMemoryNode: TypeAlias = MemoryNode[ContextMemory]
 TaskHistoryMemoryNode: TypeAlias = MemoryNode[TaskHistory]
 TaskHistoryNodeMemoryNode: TypeAlias = MemoryNode[TaskHistoryNode]
 SessionActionNode: TypeAlias = MemoryNode[SessionAction]

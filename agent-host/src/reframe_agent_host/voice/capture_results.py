@@ -6,7 +6,7 @@ from collections.abc import Callable
 from reframe_agent_host.voice.activity import DetectedUtterance
 from reframe_agent_host.voice.capture_state import CaptureState
 from reframe_agent_host.voice.microphone import MicrophoneStream
-from reframe_agent_host.voice.types import CaptureResult
+from reframe_agent_host.voice.capture_types import CaptureResult
 
 
 EventEmitter = Callable[[str, str], None]

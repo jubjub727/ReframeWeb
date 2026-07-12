@@ -6,11 +6,15 @@ from baml_sdk import context as baml_context
 from baml_sdk import task_routing as baml_task_routing
 from reframe_agent_host.agent_flow.provider_clients import client_kwargs
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
+from reframe_agent_host.agent_flow.memory_contexts import (
+    available_tasks,
+    task_choice_memories,
+    user_preferences,
+)
 from reframe_agent_host.agent_flow.session_context import (
     current_conversation_history,
     session_memory_contexts,
 )
-from reframe_agent_host.agent_flow.timestamps import timestamp_fields
 from reframe_memory import MemoryDatabase, open_memory_database
 
 
@@ -33,9 +37,9 @@ class TaskChoiceContextBuilder:
         return TaskChoiceContext(
             current_conversation=await self._current_conversation(),
             session_memories=await self._session_memories(),
-            user_preferences=await self._user_preferences(),
-            available_tasks=await self._available_tasks(),
-            task_choice_memories=await self._task_choice_memories(),
+            user_preferences=await user_preferences(self.database),
+            available_tasks=await available_tasks(self.database),
+            task_choice_memories=await task_choice_memories(self.database),
         )
 
     async def _current_conversation(
@@ -49,48 +53,6 @@ class TaskChoiceContextBuilder:
 
     async def _session_memories(self) -> list[baml_context.SessionMemoryContext]:
         return await session_memory_contexts(self.database, self.session_id)
-
-    async def _user_preferences(self) -> list[baml_context.UserPreferenceMemoryContext]:
-        memories = await self.database.user_preferences.search()
-        return [
-            baml_context.UserPreferenceMemoryContext(
-                id=memory.id,
-                title=memory.content.title,
-                description=memory.content.description,
-                tags=list(memory.tags),
-                **timestamp_fields(memory),
-            )
-            for memory in memories
-        ]
-
-    async def _available_tasks(self) -> list[baml_task_routing.AvailableTask]:
-        tasks = await self.database.tasks.search()
-        return [
-            baml_task_routing.AvailableTask(
-                id=task.id,
-                name=task.content.name,
-                description=task.content.description,
-                input=task.content.input,
-                output=task.content.output,
-                prompt=task.content.prompt,
-                provider_id=task.content.provider_id,
-                **timestamp_fields(task),
-            )
-            for task in tasks
-        ]
-
-    async def _task_choice_memories(self) -> list[baml_task_routing.TaskChoiceMemoryContext]:
-        memories = await self.database.task_choice_memories.search()
-        return [
-            baml_task_routing.TaskChoiceMemoryContext(
-                title=memory.content.title,
-                description=memory.content.description,
-                tags=list(memory.tags),
-                **timestamp_fields(memory),
-            )
-            for memory in memories
-        ]
-
 
 class TaskChoicePlanner:
     def __init__(

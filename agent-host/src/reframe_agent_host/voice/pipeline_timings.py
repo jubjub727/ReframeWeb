@@ -2,11 +2,9 @@ from __future__ import annotations
 
 import time
 
-from reframe_agent_host.voice.types import (
-    CaptureResult,
-    VoicePipelineConfig,
-    VoiceTurnTimings,
-)
+from reframe_agent_host.voice.capture_types import CaptureResult
+from reframe_agent_host.voice.pipeline_config import VoicePipelineConfig
+from reframe_agent_host.voice.turn_data import VoiceTurnTimings
 
 
 def mode_switch_timings(

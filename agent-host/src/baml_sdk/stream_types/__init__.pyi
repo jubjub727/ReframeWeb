@@ -20,10 +20,13 @@
 
 from __future__ import annotations
 
+from . import agent_host_catalog
 from . import baml
+from . import benchmarks
 from . import context
 from . import memory_search
 from . import memory_selection
+from . import opencode_go
 from . import retrieved_memory
 from . import task_execution
 from . import task_prompt

@@ -111,7 +111,7 @@ def _mock_baml_calls():
     for name, module in build_requests.items():
         patches.append(
             mock.patch(
-                "reframe_agent_host.agent_flow.voice_turn_flow."
+                "reframe_agent_host.agent_flow.voice_prompt_debug."
                 f"{module}.{name}__build_request_async",
                 side_effect=lambda *args, _name=name, **kwargs: _Request(_name),
             ),

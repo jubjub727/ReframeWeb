@@ -7,6 +7,7 @@ client<llm> OpenCodeGoModelDeepseekV4ProReasoningNone {
         reasoning_effort: "none",
     },
 }
+
 client<llm> OpenCodeGoModelDeepseekV4ProReasoningMinimal {
     provider: openai-generic,
     options: {

@@ -25,9 +25,8 @@ from reframe_agent_host.voice.keyphrase_gate import VoiceKeyphraseGate
 from reframe_agent_host.voice.speculative_capture_session import (
     SpeculativeCaptureSession,
 )
-from reframe_agent_host.voice.types import (
-    CaptureStreamEvent,
-    CaptureResult,
+from reframe_agent_host.voice.capture_types import CaptureResult, CaptureStreamEvent
+from reframe_agent_host.voice.pipeline_config import (
     VoicePipelineConfig,
     VoicePipelineEventHandler,
 )

@@ -3,19 +3,19 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from reframe_memory.conversation_evaluation_memories import (
+from reframe_memory.context_memories import (
     CONVERSATION_EVALUATION_MEMORIES_ROOT_ID,
+    RELEVANCE_MEMORIES_ROOT_ID,
+    SEARCH_DEPTH_MEMORIES_ROOT_ID,
+    TASK_CHOICE_MEMORIES_ROOT_ID,
+    TASK_PROMPT_MEMORIES_ROOT_ID,
+    USER_PREFERENCES_ROOT_ID,
 )
 from reframe_memory.conversations import CONVERSATIONS_ROOT_ID
 from reframe_memory.providers import PROVIDERS_ROOT_ID
-from reframe_memory.relevance_memories import RELEVANCE_MEMORIES_ROOT_ID
-from reframe_memory.search_depth_memories import SEARCH_DEPTH_MEMORIES_ROOT_ID
 from reframe_memory.session_memories import SESSION_MEMORIES_ROOT_ID
 from reframe_memory.sessions import SESSIONS_ROOT_ID
-from reframe_memory.task_choice_memories import TASK_CHOICE_MEMORIES_ROOT_ID
-from reframe_memory.task_prompt_memories import TASK_PROMPT_MEMORIES_ROOT_ID
 from reframe_memory.tasks import TASKS_ROOT_ID
-from reframe_memory.user_preferences import USER_PREFERENCES_ROOT_ID
 
 
 class MemoryReadinessError(RuntimeError):

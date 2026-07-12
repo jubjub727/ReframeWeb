@@ -2,11 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from reframe_agent_host.memory_seed.opencode_go_models import (
-    OPENCODE_GO_BASE_URL,
-    OpenCodeGoModelReference,
-    opencode_go_model_inventory,
-)
+from baml_sdk import opencode_go as baml_opencode_go
 from reframe_memory.ids import memory_node_record_id
 from reframe_memory import (
     MemoryDatabase,
@@ -33,7 +29,7 @@ async def ensure_opencode_go_providers(
 ) -> OpenCodeGoProviderSeedResult:
     created_provider_ids: list[str] = []
     existing_provider_ids: list[str] = []
-    for reference in opencode_go_model_inventory():
+    for reference in baml_opencode_go.ModelInventory():
         direct_default = await _ensure_provider(
             database,
             _direct_provider(reference, None),
@@ -103,7 +99,10 @@ def _record_seed_result(
         existing_provider_ids.append(node.id)
 
 
-def _direct_provider(reference: OpenCodeGoModelReference, effort: str | None) -> Provider:
+def _direct_provider(
+    reference: baml_opencode_go.ModelReference,
+    effort: str | None,
+) -> Provider:
     if effort is None:
         return Provider(
             name=f"OpenCode Go direct model: {reference.model_id}",
@@ -127,7 +126,7 @@ def _direct_provider(reference: OpenCodeGoModelReference, effort: str | None) ->
     )
 
 
-def _workspace_provider(reference: OpenCodeGoModelReference) -> Provider:
+def _workspace_provider(reference: baml_opencode_go.ModelReference) -> Provider:
     return Provider(
         name=f"OpenCode workspace model: {reference.model_id}",
         description=(
@@ -161,7 +160,7 @@ async def _prune_removed_providers(database: MemoryDatabase) -> list[str]:
 
 def _allowed_provider_keys() -> set[tuple[str, str | None, str | None]]:
     keys: set[tuple[str, str | None, str | None]] = set()
-    for reference in opencode_go_model_inventory():
+    for reference in baml_opencode_go.ModelInventory():
         keys.add((reference.direct_baml_surface, reference.model_id, None))
         for effort in reference.reasoning_efforts:
             keys.add((reference.direct_baml_surface, reference.model_id, effort))

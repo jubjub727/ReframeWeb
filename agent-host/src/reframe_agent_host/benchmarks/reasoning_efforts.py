@@ -3,15 +3,16 @@ from __future__ import annotations
 import re
 
 from baml_core import Collector
+from baml_sdk import benchmarks as baml_benchmarks
+from baml_sdk import opencode_go as baml_opencode_go
 
 from reframe_agent_host.agent_flow.provider_clients import (
     BamlClient,
     compiled_client,
 )
-from reframe_agent_host.benchmarks.task_choice_provider_index import (
+from reframe_agent_host.benchmarks.provider_catalog import (
     model_id_for_surface,
 )
-from reframe_agent_host.memory_seed import opencode_go_model_inventory
 from reframe_memory import ProviderNode
 
 
@@ -77,6 +78,10 @@ def collector_stop_reason(collector: Collector) -> str | None:
     return str(value)
 
 
+def latency_summary(latencies: list[float]) -> dict[str, float | None]:
+    return baml_benchmarks.SummariseLatencies(latencies).model_dump(mode="json")
+
+
 def _client_name(surface: str, effort: str) -> str:
     parts = re.split(r"[^A-Za-z0-9]+", effort)
     suffix = "".join(part.capitalize() for part in parts if part) or "Default"
@@ -84,7 +89,7 @@ def _client_name(surface: str, effort: str) -> str:
 
 
 def _reasoning_efforts_for_surface(surface: str) -> tuple[str, ...] | None:
-    for reference in opencode_go_model_inventory():
+    for reference in baml_opencode_go.ModelInventory():
         if reference.direct_baml_surface == surface:
             return reference.reasoning_efforts
     return None

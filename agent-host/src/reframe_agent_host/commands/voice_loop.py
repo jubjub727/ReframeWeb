@@ -9,12 +9,9 @@ from threading import Event
 
 from reframe_agent_host.voice.daemon_threads import run_in_daemon_thread
 from reframe_agent_host.voice.pipeline import VoiceTurnPipeline
-from reframe_agent_host.voice.types import (
-    CaptureStreamEvent,
-    VoicePipelineEventHandler,
-    VoiceTurnControl,
-    VoiceTurnResult,
-)
+from reframe_agent_host.voice.capture_types import CaptureStreamEvent, VoiceTurnControl
+from reframe_agent_host.voice.pipeline_config import VoicePipelineEventHandler
+from reframe_agent_host.voice.turn_data import VoiceTurnResult
 
 
 EventHandlerFactory = Callable[[float], VoicePipelineEventHandler]

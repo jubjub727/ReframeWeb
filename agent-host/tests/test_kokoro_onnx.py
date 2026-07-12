@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from reframe_agent_host.speech import kokoro_onnx
+from reframe_agent_host.speech import kokoro_assets, kokoro_onnx
 from reframe_agent_host.speech.kokoro_onnx import KokoroOnnxSpeaker
 
 
@@ -20,13 +20,13 @@ class KokoroOnnxAssetTests(unittest.TestCase):
 
             with (
                 patch.dict("os.environ", {"REFRAME_KOKORO_ONNX_DIR": temp_dir}),
-                patch.object(kokoro_onnx, "urlretrieve", fake_download),
+                patch.object(kokoro_assets, "urlretrieve", fake_download),
             ):
-                model_path, voices_path = kokoro_onnx.ensure_kokoro_onnx_assets()
+                model_path, voices_path = kokoro_assets.ensure_kokoro_onnx_assets()
 
             self.assertTrue(model_path.exists())
             self.assertTrue(voices_path.exists())
-            self.assertEqual(downloads, [kokoro_onnx.MODEL_URL, kokoro_onnx.VOICES_URL])
+            self.assertEqual(downloads, [kokoro_assets.MODEL_URL, kokoro_assets.VOICES_URL])
 
 
 class KokoroOnnxSpeakerTests(unittest.TestCase):

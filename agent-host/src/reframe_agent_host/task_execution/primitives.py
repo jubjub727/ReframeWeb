@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from inspect import Parameter, signature
@@ -10,6 +9,12 @@ from typing import Any
 
 from baml_sdk import task_execution as baml_task_execution
 from reframe_agent_host.speech.tts import NoopSpeaker, TextSpeaker
+from reframe_agent_host.task_execution.primitive_payloads import (
+    action_not_supported_detail,
+    malformed_detail,
+    memory_payload,
+    payload_text,
+)
 from reframe_memory import (
     ConversationMessage,
     MemoryDatabase,
@@ -18,9 +23,6 @@ from reframe_memory import (
     open_memory_database,
 )
 
-
-ACTION_NOT_SUPPORTED_REPLY = "Action not supported."
-MAX_ACTION_DETAIL_CHARS = 1200
 
 SUPPORTED_PRIMITIVES = {
     "agent_thought",
@@ -100,7 +102,7 @@ class PrimitiveDispatcher:
     ) -> PrimitiveDispatchRecord:
         name = call.name.strip()
         if name in UNSUPPORTED_PRIMITIVES or name not in SUPPORTED_PRIMITIVES:
-            detail = _action_not_supported_detail(name, call.payload)
+            detail = action_not_supported_detail(name, call.payload)
             message_id = await self._agent_reply(detail)
             return PrimitiveDispatchRecord(
                 name=name or "<empty>",
@@ -114,9 +116,9 @@ class PrimitiveDispatcher:
             )
 
         if name == "agent_reply":
-            text = _payload_text(call.payload, "text", "message", "reply")
+            text = payload_text(call.payload, "text", "message", "reply")
             if not text:
-                detail = _malformed_detail(name, call.payload)
+                detail = malformed_detail(name, call.payload)
                 message_id = await self._agent_reply(detail)
                 return _malformed(name, detail, message_id=message_id)
             message_id = await self._agent_reply(text)
@@ -132,9 +134,9 @@ class PrimitiveDispatcher:
             )
 
         if name == "agent_thought":
-            text = _payload_text(call.payload, "text", "thought", "message")
+            text = payload_text(call.payload, "text", "thought", "message")
             if not text:
-                detail = _malformed_detail(name, call.payload)
+                detail = malformed_detail(name, call.payload)
                 message_id = await self._agent_reply(detail)
                 return _malformed(name, detail, message_id=message_id)
             message_id = await self._agent_thought(text)
@@ -165,7 +167,7 @@ class PrimitiveDispatcher:
 
         if name == "session_memory":
             if self.session_id is None:
-                detail = _action_not_supported_detail(
+                detail = action_not_supported_detail(
                     name,
                     call.payload,
                     reason="missing session_id",
@@ -181,7 +183,7 @@ class PrimitiveDispatcher:
                         "message": message_id,
                     },
                 )
-            title, description = _memory_payload(call.payload, "Session memory")
+            title, description = memory_payload(call.payload, "Session memory")
             memory = await self.database.session_memories.create(
                 self.session_id,
                 SessionMemory(title=title, description=description),
@@ -200,7 +202,7 @@ class PrimitiveDispatcher:
             )
 
         if name == "user_preference":
-            title, description = _memory_payload(call.payload, "User preference")
+            title, description = memory_payload(call.payload, "User preference")
             memory = await self.database.user_preferences.create(
                 UserPreferenceMemory(title=title, description=description),
                 tags=("task-execution", "user-preference"),
@@ -217,7 +219,7 @@ class PrimitiveDispatcher:
                 },
             )
 
-        detail = _action_not_supported_detail(name, call.payload)
+        detail = action_not_supported_detail(name, call.payload)
         message_id = await self._agent_reply(detail)
         return PrimitiveDispatchRecord(
             name=name,
@@ -351,75 +353,8 @@ class PrimitiveDispatcher:
             await database.close()
 
 
-def _payload_text(payload: Any, *keys: str) -> str:
-    if isinstance(payload, str):
-        return payload.strip()
-    if isinstance(payload, Mapping):
-        for key in keys:
-            value = payload.get(key)
-            if value is not None:
-                text = str(value).strip()
-                if text:
-                    return text
-    return ""
-
-
 def _single_line(value: str) -> str:
     return " ".join(value.split())
-
-
-def _memory_payload(payload: Any, default_title: str) -> tuple[str, str]:
-    if isinstance(payload, Mapping):
-        title = _first_text(payload, ("title", "name", "summary")) or default_title
-        description = (
-            _first_text(payload, ("description", "text", "memory", "value"))
-            or title
-        )
-        return title, description
-
-    text = str(payload).strip() if payload is not None else ""
-    if not text:
-        return default_title, default_title
-    title = text[:80].strip()
-    return title, text
-
-
-def _first_text(payload: Mapping[str, Any], keys: tuple[str, ...]) -> str:
-    for key in keys:
-        value = payload.get(key)
-        if value is not None:
-            text = str(value).strip()
-            if text:
-                return text
-    return ""
-
-
-def _action_not_supported_detail(
-    name: str,
-    payload: Any,
-    *,
-    reason: str | None = None,
-) -> str:
-    action = name or "<empty>"
-    pieces = [f"Action not supported: {action}"]
-    if reason:
-        pieces.append(f"reason={reason}")
-    pieces.append(f"payload={_payload_preview(payload)}")
-    return " ".join(pieces)
-
-
-def _malformed_detail(name: str, payload: Any) -> str:
-    return f"Malformed action payload: {name} payload={_payload_preview(payload)}"
-
-
-def _payload_preview(payload: Any) -> str:
-    try:
-        text = json.dumps(payload, sort_keys=True, default=str)
-    except TypeError:
-        text = repr(payload)
-    if len(text) <= MAX_ACTION_DETAIL_CHARS:
-        return text
-    return text[: MAX_ACTION_DETAIL_CHARS - 3].rstrip() + "..."
 
 
 def _malformed(

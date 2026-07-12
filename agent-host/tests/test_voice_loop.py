@@ -2,7 +2,7 @@ import unittest
 
 from baml_sdk import context as baml_context
 from reframe_agent_host.commands.voice_loop import run_voice_turn_loop
-from reframe_agent_host.voice.types import CaptureResult, CaptureStreamEvent
+from reframe_agent_host.voice.capture_types import CaptureResult, CaptureStreamEvent
 
 
 class FakePipeline:

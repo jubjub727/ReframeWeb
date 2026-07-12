@@ -10,6 +10,7 @@ from surrealdb import AsyncSurreal
 
 from reframe_memory.config import MemoryConfig
 from reframe_memory.ids import memory_node_record_id
+from reframe_memory.query_results import records as _records
 
 
 @dataclass
@@ -110,13 +111,13 @@ class MemoryDatabase:
 
     @property
     def task_choice_memories(self) -> "TaskChoiceMemoryStore":
-        from reframe_memory.task_choice_memories import TaskChoiceMemoryStore
+        from reframe_memory.context_memories import TaskChoiceMemoryStore
 
         return TaskChoiceMemoryStore(self)
 
     @property
     def conversation_evaluation_memories(self) -> "ConversationEvaluationMemoryStore":
-        from reframe_memory.conversation_evaluation_memories import (
+        from reframe_memory.context_memories import (
             ConversationEvaluationMemoryStore,
         )
 
@@ -124,25 +125,25 @@ class MemoryDatabase:
 
     @property
     def search_depth_memories(self) -> "SearchDepthMemoryStore":
-        from reframe_memory.search_depth_memories import SearchDepthMemoryStore
+        from reframe_memory.context_memories import SearchDepthMemoryStore
 
         return SearchDepthMemoryStore(self)
 
     @property
     def relevance_memories(self) -> "RelevanceMemoryStore":
-        from reframe_memory.relevance_memories import RelevanceMemoryStore
+        from reframe_memory.context_memories import RelevanceMemoryStore
 
         return RelevanceMemoryStore(self)
 
     @property
     def task_prompt_memories(self) -> "TaskPromptMemoryStore":
-        from reframe_memory.task_prompt_memories import TaskPromptMemoryStore
+        from reframe_memory.context_memories import TaskPromptMemoryStore
 
         return TaskPromptMemoryStore(self)
 
     @property
     def user_preferences(self) -> "UserPreferenceMemoryStore":
-        from reframe_memory.user_preferences import UserPreferenceMemoryStore
+        from reframe_memory.context_memories import UserPreferenceMemoryStore
 
         return UserPreferenceMemoryStore(self)
 
@@ -245,9 +246,3 @@ class _SurrealKvWorker:
         await client.use(self._config.namespace, self._config.database)
         self._client = client
         return client
-
-
-def _records(result: Any) -> list[Mapping[str, Any]]:
-    if not isinstance(result, list):
-        return []
-    return [item for item in result if isinstance(item, Mapping)]

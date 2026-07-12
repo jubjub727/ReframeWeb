@@ -56,32 +56,22 @@ from reframe_memory.search import MemoryNodeSearch, StringSearch, TagSearch
 from reframe_memory.session_memories import SessionMemorySearch, SessionMemoryStore
 from reframe_memory.sessions import SessionSearch, SessionStore
 from reframe_memory.conversations import ConversationMemory, ConversationSearch
-from reframe_memory.conversation_evaluation_memories import (
+from reframe_memory.context_memories import (
     ConversationEvaluationMemorySearch,
     ConversationEvaluationMemoryStore,
-)
-from reframe_memory.search_depth_memories import (
-    SearchDepthMemorySearch,
-    SearchDepthMemoryStore,
-)
-from reframe_memory.relevance_memories import (
     RelevanceMemorySearch,
     RelevanceMemoryStore,
-)
-from reframe_memory.tasks import TaskMemory, TaskSearch
-from reframe_memory.task_choice_memories import (
+    SearchDepthMemorySearch,
+    SearchDepthMemoryStore,
     TaskChoiceMemorySearch,
     TaskChoiceMemoryStore,
-)
-from reframe_memory.task_prompt_memories import (
     TaskPromptMemorySearch,
     TaskPromptMemoryStore,
-)
-from reframe_memory.task_history import TaskHistoryStore
-from reframe_memory.user_preferences import (
     UserPreferenceMemorySearch,
     UserPreferenceMemoryStore,
 )
+from reframe_memory.tasks import TaskMemory, TaskSearch
+from reframe_memory.task_history import TaskHistoryStore
 
 __all__ = [
     "Action",
