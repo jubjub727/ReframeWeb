@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-import baml_sdk as types
+from baml_sdk import context as baml_context
+from baml_sdk import memory_search as baml_memory_search
+from baml_sdk import task_routing as baml_task_routing
 from reframe_agent_host.benchmarks.conversation_evaluation_case_types import (
     BenchmarkMemory,
     BenchmarkSelectedTask,
@@ -17,9 +19,9 @@ from reframe_agent_host.benchmarks.control_flow_case_types import (
 
 def available_task_context(
     tasks: tuple[BenchmarkSelectedTask, ...],
-) -> list[types.AvailableTask]:
+) -> list[baml_task_routing.AvailableTask]:
     return [
-        types.AvailableTask(
+        baml_task_routing.AvailableTask(
             id=task.id,
             name=task.name,
             description=task.description,
@@ -37,9 +39,9 @@ def available_task_context(
 
 def task_choice_memory_context(
     memories: tuple[BenchmarkMemory, ...],
-) -> list[types.TaskChoiceMemoryContext]:
+) -> list[baml_task_routing.TaskChoiceMemoryContext]:
     return [
-        types.TaskChoiceMemoryContext(
+        baml_task_routing.TaskChoiceMemoryContext(
             title=memory.title,
             description=memory.description,
             tags=list(memory.tags),
@@ -53,9 +55,9 @@ def task_choice_memory_context(
 
 def user_preference_context(
     memories: tuple[BenchmarkMemory, ...],
-) -> list[types.UserPreferenceMemoryContext]:
+) -> list[baml_context.UserPreferenceMemoryContext]:
     return [
-        types.UserPreferenceMemoryContext(
+        baml_context.UserPreferenceMemoryContext(
             id=f"memory_node:user_preference_{index}",
             title=memory.title,
             description=memory.description,
@@ -70,9 +72,9 @@ def user_preference_context(
 
 def search_depth_memory_context(
     memories: tuple[BenchmarkMemory, ...],
-) -> list[types.SearchDepthMemoryContext]:
+) -> list[baml_memory_search.SearchDepthMemoryContext]:
     return [
-        types.SearchDepthMemoryContext(
+        baml_memory_search.SearchDepthMemoryContext(
             title=memory.title,
             description=memory.description,
             tags=list(memory.tags),
@@ -87,7 +89,7 @@ def search_depth_memory_context(
 def selected_task_from_case(
     case: ControlFlowBenchmarkCase,
     selected_task_id: str,
-) -> types.SelectedTaskContext:
+) -> baml_task_routing.SelectedTaskContext:
     for task in case.available_tasks:
         if task.id == selected_task_id:
             return selected_task_context(task)
@@ -98,13 +100,13 @@ def selected_task_from_case(
 
 def case_conversation_context(
     case: ControlFlowBenchmarkCase,
-) -> list[types.ConversationHistory]:
+) -> list[baml_context.ConversationHistory]:
     return conversation_context(case.session.conversations)
 
 
 def case_session_memory_context(
     case: ControlFlowBenchmarkCase,
-) -> list[types.SessionMemoryContext]:
+) -> list[baml_context.SessionMemoryContext]:
     return memory_context(case.session.memories)
 
 

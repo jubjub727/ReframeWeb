@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-import baml_sdk as types
+from baml_sdk import task_completion as baml_task_completion
 from reframe_agent_host.agent_flow.prompt_layer_debug import (
     PromptLayerDebugSession,
 )
@@ -22,7 +22,7 @@ class TaskCompletionCheckerTests(unittest.IsolatedAsyncioTestCase):
                 return_value=root / "prompt-layers",
             ):
                 with mock.patch(
-                    "reframe_agent_host.agent_flow.task_completion.baml."
+                    "reframe_agent_host.agent_flow.task_completion.baml_task_completion."
                     "CheckTaskCompletion__build_request_async",
                     return_value=_Request(
                         body=json.dumps(
@@ -41,9 +41,9 @@ class TaskCompletionCheckerTests(unittest.IsolatedAsyncioTestCase):
                     ),
                 ):
                     with mock.patch(
-                        "reframe_agent_host.agent_flow.task_completion.baml."
+                        "reframe_agent_host.agent_flow.task_completion.baml_task_completion."
                         "CheckTaskCompletion_async",
-                        return_value=types.CompletionResult.PASS,
+                        return_value=baml_task_completion.CompletionResult.PASS,
                     ):
                         prompt_debug = PromptLayerDebugSession.begin(
                             current_user_request="Done?",
@@ -64,7 +64,7 @@ class TaskCompletionCheckerTests(unittest.IsolatedAsyncioTestCase):
                 ).read_text(encoding="utf-8"),
             )
 
-        self.assertEqual(result, types.CompletionResult.PASS)
+        self.assertEqual(result, baml_task_completion.CompletionResult.PASS)
         self.assertEqual(layer["layer"], "check_task_completion")
         self.assertEqual(layer["result"], "PASS")
         self.assertEqual(layer["request"]["summary"]["model"], "glm-5.1")

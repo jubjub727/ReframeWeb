@@ -8,7 +8,7 @@ from inspect import Parameter, signature
 from threading import Thread
 from typing import Any
 
-import baml_sdk as types
+from baml_sdk import task_execution as baml_task_execution
 from reframe_agent_host.speech.tts import NoopSpeaker, TextSpeaker
 from reframe_memory import (
     ConversationMessage,
@@ -70,7 +70,7 @@ class PrimitiveDispatcher:
 
     async def dispatch(
         self,
-        result: types.TaskExecutionResult | None,
+        result: baml_task_execution.TaskExecutionResult | None,
     ) -> PrimitiveDispatchResult:
         if result is None:
             return PrimitiveDispatchResult()
@@ -96,7 +96,7 @@ class PrimitiveDispatcher:
 
     async def _dispatch_call(
         self,
-        call: types.TaskReturnItem,
+        call: baml_task_execution.TaskReturnItem,
     ) -> PrimitiveDispatchRecord:
         name = call.name.strip()
         if name in UNSUPPORTED_PRIMITIVES or name not in SUPPORTED_PRIMITIVES:
@@ -265,7 +265,7 @@ class PrimitiveDispatcher:
 
     async def _record_action(
         self,
-        call: types.TaskReturnItem,
+        call: baml_task_execution.TaskReturnItem,
         record: PrimitiveDispatchRecord,
     ) -> str | None:
         if self.task_history_id is None:

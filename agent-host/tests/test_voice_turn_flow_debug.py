@@ -7,7 +7,12 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-import baml_sdk as types
+from baml_sdk import memory_search as baml_memory_search
+from baml_sdk import memory_selection as baml_memory_selection
+from baml_sdk import retrieved_memory as baml_retrieved_memory
+from baml_sdk import task_prompt as baml_task_prompt
+from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import voice_turn as baml_voice_turn
 from reframe_agent_host.agent_flow.voice_turn_flow import BamlVoiceTurnFlow
 from reframe_memory import MemoryNode, MemoryTimestamps, RetrievedMemoryContext, Task
 
@@ -88,25 +93,26 @@ class _Request:
 def _mock_baml_calls():
     patches = [
         mock.patch(
-            "reframe_agent_host.agent_flow.voice_turn_flow.baml.UnderstandVoicePrompt_async",
+            "reframe_agent_host.agent_flow.voice_turn_flow.baml_voice_turn.UnderstandVoicePrompt_async",
             side_effect=_understand,
         ),
         mock.patch(
-            "reframe_agent_host.agent_flow.voice_turn_flow.baml.ContinueVoicePrompt_async",
+            "reframe_agent_host.agent_flow.voice_turn_flow.baml_voice_turn.ContinueVoicePrompt_async",
             side_effect=_continue,
         ),
     ]
-    for name in (
-        "ChooseTask",
-        "ChooseMemorySearch",
-        "ChooseMemorySearchDepths",
-        "SelectRelevantMemories",
-        "ComposeTaskInput",
-    ):
+    build_requests = {
+        "ChooseTask": "baml_task_routing",
+        "ChooseMemorySearch": "baml_memory_search",
+        "ChooseMemorySearchDepths": "baml_memory_search",
+        "SelectRelevantMemories": "baml_memory_selection",
+        "ComposeTaskInput": "baml_task_prompt",
+    }
+    for name, module in build_requests.items():
         patches.append(
             mock.patch(
-                "reframe_agent_host.agent_flow.voice_turn_flow.baml."
-                f"{name}__build_request_async",
+                "reframe_agent_host.agent_flow.voice_turn_flow."
+                f"{module}.{name}__build_request_async",
                 side_effect=lambda *args, _name=name, **kwargs: _Request(_name),
             ),
         )
@@ -128,21 +134,21 @@ class _PatchStack:
 
 
 async def _understand(**_kwargs):
-    return types.VoicePromptUnderstanding(
-        task_choice=types.TaskChoiceDecision(
+    return baml_voice_turn.VoicePromptUnderstanding(
+        task_choice=baml_task_routing.TaskChoiceDecision(
             selected_task_id="memory_node:reply",
             confidence=1.0,
             candidate_memory=None,
         ),
         selected_task=_selected_task(),
-        memory_search_hints=types.ConversationMemorySearchHints(
-            tags=types.MemoryTagSearch(any_of=[], all_of=[], none_of=[]),
-            strings=types.MemoryStringSearch(contains=[], equals=[]),
+        memory_search_hints=baml_memory_search.ConversationMemorySearchHints(
+            tags=baml_memory_search.MemoryTagSearch(any_of=[], all_of=[], none_of=[]),
+            strings=baml_memory_search.MemoryStringSearch(contains=[], equals=[]),
             candidate_memory=None,
         ),
-        search_depths=types.SearchDepthDecision(
+        search_depths=baml_memory_search.SearchDepthDecision(
             depths={
-                "task_catalog": types.SearchDepthTimestamps(
+                "task_catalog": baml_memory_search.SearchDepthTimestamps(
                     created_after="2026-01-01T00:00:00Z",
                     read_after="2026-01-01T00:00:00Z",
                     updated_after="2026-01-01T00:00:00Z",
@@ -150,7 +156,7 @@ async def _understand(**_kwargs):
             },
             candidate_memory=None,
         ),
-        timings=types.VoicePromptUnderstandingTimings(
+        timings=baml_voice_turn.VoicePromptUnderstandingTimings(
             task_choice_ms=10,
             memory_search_ms=20,
             search_depth_ms=30,
@@ -159,30 +165,30 @@ async def _understand(**_kwargs):
 
 
 async def _continue(**_kwargs):
-    return types.VoicePromptContinuation(
-        relevance_decision=types.RelevantMemoryDecision(
+    return baml_voice_turn.VoicePromptContinuation(
+        relevance_decision=baml_memory_selection.RelevantMemoryDecision(
             kept_memory_ids=[],
             candidate_memory=None,
         ),
-        selected_memories=types.RetrievedMemoryGraph(
+        selected_memories=baml_retrieved_memory.RetrievedMemoryGraph(
             task_catalog=[],
             past_sessions=[],
             current_session_memories=[],
         ),
         selected_memory_contexts=[],
-        task_prompt=types.TaskPromptDecision(
+        task_prompt=baml_task_prompt.TaskPromptDecision(
             full_task_prompt="Task:\nReply.\n\nInput:\nTell me a joke.",
             candidate_memory=None,
         ),
-        timings=types.VoicePromptContinuationTimings(
+        timings=baml_voice_turn.VoicePromptContinuationTimings(
             memory_relevance_ms=40,
             task_prompt_ms=50,
         ),
     )
 
 
-def _selected_task() -> types.SelectedTaskContext:
-    return types.SelectedTaskContext(
+def _selected_task() -> baml_task_routing.SelectedTaskContext:
+    return baml_task_routing.SelectedTaskContext(
         id="memory_node:reply",
         name="Reply to user",
         description="Reply directly.",

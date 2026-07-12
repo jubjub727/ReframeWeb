@@ -11,7 +11,12 @@ from reframe_agent_host.agent_flow.retrieved_memory_graph import (
 )
 from reframe_agent_host.agent_flow.task_completion import TaskCompletionChecker
 from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
-import baml_sdk as types
+from baml_sdk import context as baml_context
+from baml_sdk import memory_search as baml_memory_search
+from baml_sdk import task_completion as baml_task_completion
+from baml_sdk import task_execution as baml_task_execution
+from baml_sdk import task_prompt as baml_task_prompt
+from baml_sdk import task_routing as baml_task_routing
 from reframe_agent_host.speech.transcription import (
     CONVERSATION_ON_CONFIRMATION_PROMPT,
     Transcriber,
@@ -70,7 +75,7 @@ class VoiceTurnProcessor:
     async def process(
         self,
         capture: CaptureResult,
-        conversation_mode: types.ConversationMode,
+        conversation_mode: baml_context.ConversationMode,
         model_prepare_seconds: float,
         total_started_at: float,
         on_event: VoicePipelineEventHandler | None,
@@ -229,7 +234,7 @@ class VoiceTurnProcessor:
         self,
         *,
         capture: CaptureResult,
-        conversation_mode: types.ConversationMode,
+        conversation_mode: baml_context.ConversationMode,
         model_prepare_seconds: float,
         total_started_at: float,
         on_event: VoicePipelineEventHandler | None,
@@ -542,7 +547,7 @@ class VoiceTurnProcessor:
         self,
         *,
         capture: CaptureResult,
-        conversation_mode: types.ConversationMode,
+        conversation_mode: baml_context.ConversationMode,
         model_prepare_seconds: float,
         total_started_at: float,
         on_event: VoicePipelineEventHandler | None,
@@ -611,8 +616,8 @@ class VoiceTurnProcessor:
     def _turn_on_conversation_mode(
         self,
         on_event: VoicePipelineEventHandler | None,
-    ) -> types.ConversationMode:
-        mode = types.ConversationMode.CONTINUOUS_CONVERSATION
+    ) -> baml_context.ConversationMode:
+        mode = baml_context.ConversationMode.CONTINUOUS_CONVERSATION
         changed = True
         if self._mode_controller is not None:
             changed = self._mode_controller.set(mode)
@@ -677,8 +682,8 @@ class VoiceTurnProcessor:
 
     async def _maybe_retrieve_memories(
         self,
-        memory_search_hints: types.ConversationMemorySearchHints | None,
-        search_depths: types.SearchDepthDecision | None,
+        memory_search_hints: baml_memory_search.ConversationMemorySearchHints | None,
+        search_depths: baml_memory_search.SearchDepthDecision | None,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
     ) -> tuple[RetrievedMemoryContext | None, float | None, float | None]:
@@ -711,11 +716,11 @@ class VoiceTurnProcessor:
 
     async def _maybe_execute_task(
         self,
-        task_choice: types.TaskChoiceDecision | None,
-        task_prompt: types.TaskPromptDecision | None,
+        task_choice: baml_task_routing.TaskChoiceDecision | None,
+        task_prompt: baml_task_prompt.TaskPromptDecision | None,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
-    ) -> tuple[types.TaskExecutionResult | None, float | None, float | None]:
+    ) -> tuple[baml_task_execution.TaskExecutionResult | None, float | None, float | None]:
         if not self._config.task_choice_enabled:
             return None, None, None
         if self._task_execution is None or task_choice is None or task_prompt is None:
@@ -739,7 +744,7 @@ class VoiceTurnProcessor:
     async def _maybe_summarize_action_history(
         self,
         primitive_dispatch,
-        task_choice: types.TaskChoiceDecision | None,
+        task_choice: baml_task_routing.TaskChoiceDecision | None,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
     ):
@@ -776,11 +781,11 @@ class VoiceTurnProcessor:
 
     async def _maybe_check_task_completion(
         self,
-        selected_task: types.SelectedTaskContext | None,
+        selected_task: baml_task_routing.SelectedTaskContext | None,
         action_history_summary: str | None,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
-    ) -> tuple[types.CompletionResult | None, float | None, float | None]:
+    ) -> tuple[baml_task_completion.CompletionResult | None, float | None, float | None]:
         if selected_task is None or action_history_summary is None:
             return None, None, None
 
@@ -805,7 +810,7 @@ class VoiceTurnProcessor:
 
     async def _maybe_dispatch_primitives(
         self,
-        task_execution: types.TaskExecutionResult | None,
+        task_execution: baml_task_execution.TaskExecutionResult | None,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
     ):
@@ -849,11 +854,11 @@ class VoiceTurnProcessor:
 
 
 def _is_continuous_unprompted(
-    conversation_mode: types.ConversationMode,
+    conversation_mode: baml_context.ConversationMode,
     capture: CaptureResult,
 ) -> bool:
     return (
-        conversation_mode == types.ConversationMode.CONTINUOUS_CONVERSATION
+        conversation_mode == baml_context.ConversationMode.CONTINUOUS_CONVERSATION
         and capture.keyphrase_detection is None
     )
 
@@ -876,7 +881,7 @@ def _is_conversation_on_trigger_only(trigger_detection) -> bool:
 
 def _mode_switch_capture(
     capture: CaptureResult,
-    mode: types.ConversationMode,
+    mode: baml_context.ConversationMode,
 ) -> CaptureResult:
     return CaptureResult(
         conversation_mode=mode,

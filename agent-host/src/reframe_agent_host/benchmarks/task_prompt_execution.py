@@ -16,20 +16,18 @@ from reframe_agent_host.agent_flow.memory_retrieval import (
     _timestamp_breadths,
 )
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
-from reframe_agent_host.agent_flow.relevance_candidates import (
-    candidate_contexts,
-    filter_retrieved_memories,
+from reframe_agent_host.agent_flow.retrieved_memory_graph import (
+    retrieved_memory_graph,
 )
-from reframe_agent_host.agent_flow.search_depth import default_search_domains
 from reframe_agent_host.agent_flow.session_context import current_conversation_history
-from reframe_agent_host.agent_flow.task_prompt import (
-    build_task_prompt_decision,
-    selected_memory_contexts,
-)
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
-import baml_sdk as baml
-import baml_sdk as types
-from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from baml_sdk import context as baml_context
+from baml_sdk import memory_search as baml_memory_search
+from baml_sdk import memory_selection as baml_memory_selection
+from baml_sdk import retrieved_memory as baml_retrieved_memory
+from baml_sdk import task_prompt as baml_task_prompt
+from baml_sdk import task_routing as baml_task_routing
+from reframe_agent_host.agent_flow.provider_clients import client_kwargs
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     collector_stop_reason,
     collector_usage,
@@ -61,17 +59,17 @@ class TaskPromptSnapshot:
     current_timestamp: str
     session_id: str | None
     conversation_id: str | None
-    task_choice: types.TaskChoiceDecision | None
-    selected_task: types.SelectedTaskContext | None
-    current_conversation: types.ConversationHistory | None
-    session_memories: list[types.SessionMemoryContext]
-    memory_search_hints: types.ConversationMemorySearchHints | None
-    search_depths: types.SearchDepthDecision | None
+    task_choice: baml_task_routing.TaskChoiceDecision | None
+    selected_task: baml_task_routing.SelectedTaskContext | None
+    current_conversation: baml_context.ConversationHistory | None
+    session_memories: list[baml_context.SessionMemoryContext]
+    memory_search_hints: baml_memory_search.ConversationMemorySearchHints | None
+    search_depths: baml_memory_search.SearchDepthDecision | None
     retrieved_memories: RetrievedMemoryContext | None
-    relevance_decision: types.RelevantMemoryDecision | None
-    selected_memories: RetrievedMemoryContext | None
-    selected_memory_contexts: list[types.TaskPromptSelectedMemoryContext]
-    task_prompt_memories: list[types.TaskPromptMemoryContext]
+    relevance_decision: baml_memory_selection.RelevantMemoryDecision | None
+    selected_memories: baml_retrieved_memory.RetrievedMemoryGraph | None
+    selected_memory_contexts: list[baml_task_prompt.TaskPromptSelectedMemoryContext]
+    task_prompt_memories: list[baml_task_prompt.TaskPromptMemoryContext]
     latency_seconds: float
     stage_latency_seconds: dict[str, float]
     error: str | None = None
@@ -124,8 +122,8 @@ async def _build_live_task_prompt_snapshot(
     retrieved_memories = None
     relevance_decision = None
     selected_memories = None
-    selected_contexts: list[types.TaskPromptSelectedMemoryContext] = []
-    task_prompt_memories: list[types.TaskPromptMemoryContext] = []
+    selected_contexts: list[baml_task_prompt.TaskPromptSelectedMemoryContext] = []
+    task_prompt_memories: list[baml_task_prompt.TaskPromptMemoryContext] = []
     session_id = None
     conversation_id = None
     current_conversation = None
@@ -212,14 +210,16 @@ async def _build_live_task_prompt_snapshot(
         )
         stage_latencies["memory_relevance"] = latency
 
-        selected_memories = filter_retrieved_memories(
-            retrieved_memories,
+        retrieved_graph = retrieved_memory_graph(retrieved_memories)
+        selected_memories = await baml_memory_selection.SelectedGraph_async(
+            retrieved_graph,
             relevance_decision,
         )
-        selected_contexts = selected_memory_contexts(
+        selected_contexts = await baml_task_prompt.PromptContexts_async(
             selected_memories,
             relevance_decision.kept_memory_ids,
-            user_preferences=user_preferences,
+            None,
+            user_preferences,
         )
         task_prompt_memories = await _task_prompt_memories(database)
     except Exception as exc:
@@ -355,7 +355,7 @@ async def task_prompt(
     snapshot: TaskPromptSnapshot,
 ):
     started_at = time.perf_counter()
-    composition = await baml.ComposeTaskInput_async(
+    composition = await baml_task_prompt.ComposeTaskInput_async(
         current_user_request=snapshot.case.current_user_request,
         current_conversation=snapshot.current_conversation,
         session_memories=snapshot.session_memories,
@@ -365,12 +365,15 @@ async def task_prompt(
         machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
-    result = build_task_prompt_decision(snapshot.selected_task.prompt, composition)
+    result = await baml_task_prompt.PromptDecision_async(
+        snapshot.selected_task.prompt,
+        composition,
+    )
     return result, time.perf_counter() - started_at
 
 
 def evaluate_task_prompt(
-    decision: types.TaskPromptDecision,
+    decision: baml_task_prompt.TaskPromptDecision,
     snapshot: TaskPromptSnapshot,
 ) -> dict[str, Any]:
     parsed = parse_task_prompt(decision.full_task_prompt)
@@ -459,41 +462,41 @@ def _load_snapshot(
         session_id=prompt_input.get("session_id"),
         conversation_id=prompt_input.get("conversation_id"),
         task_choice=_model_or_none(
-            types.TaskChoiceDecision,
+            baml_task_routing.TaskChoiceDecision,
             prompt_input.get("task_choice"),
         ),
         selected_task=_model_or_none(
-            types.SelectedTaskContext,
+            baml_task_routing.SelectedTaskContext,
             prompt_input.get("selected_task"),
         ),
         current_conversation=_model_or_none(
-            types.ConversationHistory,
+            baml_context.ConversationHistory,
             prompt_input["current_conversation"],
         ),
         session_memories=[
-            types.SessionMemoryContext(**memory)
+            baml_context.SessionMemoryContext(**memory)
             for memory in prompt_input.get("session_memories", [])
         ],
         memory_search_hints=_model_or_none(
-            types.ConversationMemorySearchHints,
+            baml_memory_search.ConversationMemorySearchHints,
             prompt_input.get("memory_search_hints"),
         ),
         search_depths=_model_or_none(
-            types.SearchDepthDecision,
+            baml_memory_search.SearchDepthDecision,
             prompt_input.get("search_depths"),
         ),
         retrieved_memories=None,
         relevance_decision=_model_or_none(
-            types.RelevantMemoryDecision,
+            baml_memory_selection.RelevantMemoryDecision,
             prompt_input.get("relevance_decision"),
         ),
         selected_memories=None,
         selected_memory_contexts=[
-            types.TaskPromptSelectedMemoryContext(**memory)
+            baml_task_prompt.TaskPromptSelectedMemoryContext(**memory)
             for memory in prompt_input.get("selected_memories", [])
         ],
         task_prompt_memories=[
-            types.TaskPromptMemoryContext(**memory)
+            baml_task_prompt.TaskPromptMemoryContext(**memory)
             for memory in prompt_input.get("task_prompt_memories", [])
         ],
         latency_seconds=float(payload.get("latency_seconds") or 0.0),
@@ -542,7 +545,7 @@ async def _record_current_turn(
     database: MemoryDatabase,
     conversation_id: str,
     case: TaskPromptBenchmarkCase,
-    task_choice: types.TaskChoiceDecision | None,
+    task_choice: baml_task_routing.TaskChoiceDecision | None,
 ) -> None:
     await database.conversations.add_message(
         conversation_id,
@@ -561,7 +564,7 @@ async def _choose_task(
     task_choice_memories,
 ):
     started_at = time.perf_counter()
-    result = await baml.ChooseTask_async(
+    result = await baml_task_routing.ChooseTask_async(
         current_user_request=case.current_user_request,
         current_conversation=current_conversation,
         session_memories=session_memories,
@@ -583,7 +586,7 @@ async def _memory_search_hints(
     selected_task,
 ):
     started_at = time.perf_counter()
-    result = await baml.ChooseMemorySearch_async(
+    result = await baml_memory_search.ChooseMemorySearch_async(
         current_user_request=case.current_user_request,
         current_conversation=current_conversation,
         session_memories=session_memories,
@@ -608,14 +611,14 @@ async def _search_depths(
     memory_search_hints,
 ):
     started_at = time.perf_counter()
-    result = await baml.ChooseMemorySearchDepths_async(
+    result = await baml_memory_search.ChooseMemorySearchDepths_async(
         current_timestamp=current_timestamp,
         current_user_request=case.current_user_request,
         current_conversation=current_conversation,
         session_memories=session_memories,
         selected_task=selected_task,
         memory_search_hints=memory_search_hints,
-        search_domains=default_search_domains(),
+        search_domains=await baml_memory_search.SearchDomains_async(),
         search_depth_memories=await _search_depth_memories(database),
         machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
@@ -652,15 +655,15 @@ async def _relevance_decision(
     retrieved_memories,
 ):
     started_at = time.perf_counter()
-    result = await baml.SelectRelevantMemories_async(
+    result = await baml_memory_selection.SelectRelevantMemories_async(
         current_user_request=case.current_user_request,
         current_conversation=current_conversation,
         session_memories=session_memories,
         selected_task=selected_task,
-        candidate_memories=candidate_contexts(
-            retrieved_memories,
-            current_session_id=session_id,
-            user_preferences=user_preferences,
+        candidate_memories=await baml_memory_selection.Candidates_async(
+            retrieved_memory_graph(retrieved_memories),
+            session_id,
+            user_preferences,
         ),
         relevance_memories=await _relevance_memories(database),
         machine_state=local_machine_state_context("Benchmark machine state"),
@@ -669,7 +672,7 @@ async def _relevance_decision(
     return result, time.perf_counter() - started_at
 
 
-async def _core_available_tasks(database) -> list[types.AvailableTask]:
+async def _core_available_tasks(database) -> list[baml_task_routing.AvailableTask]:
     seed = await ensure_core_tasks(database)
     tasks = []
     seen_task_ids = set()
@@ -680,7 +683,7 @@ async def _core_available_tasks(database) -> list[types.AvailableTask]:
             seen_task_ids.add(task.id)
             tasks.append(task)
     return [
-        types.AvailableTask(
+        baml_task_routing.AvailableTask(
             id=task.id,
             name=task.content.name,
             description=task.content.description,
@@ -694,8 +697,8 @@ async def _core_available_tasks(database) -> list[types.AvailableTask]:
     ]
 
 
-def _selected_task_context(task: TaskNode) -> types.SelectedTaskContext:
-    return types.SelectedTaskContext(
+def _selected_task_context(task: TaskNode) -> baml_task_routing.SelectedTaskContext:
+    return baml_task_routing.SelectedTaskContext(
         id=task.id,
         name=task.content.name,
         description=task.content.description,
@@ -707,10 +710,10 @@ def _selected_task_context(task: TaskNode) -> types.SelectedTaskContext:
     )
 
 
-async def _session_memories(database, session_id) -> list[types.SessionMemoryContext]:
+async def _session_memories(database, session_id) -> list[baml_context.SessionMemoryContext]:
     memories = await database.session_memories.for_session(session_id)
     return [
-        types.SessionMemoryContext(
+        baml_context.SessionMemoryContext(
             title=memory.content.title,
             description=memory.content.description,
             tags=list(memory.tags),
@@ -720,10 +723,10 @@ async def _session_memories(database, session_id) -> list[types.SessionMemoryCon
     ]
 
 
-async def _task_choice_memories(database) -> list[types.TaskChoiceMemoryContext]:
+async def _task_choice_memories(database) -> list[baml_task_routing.TaskChoiceMemoryContext]:
     memories = await database.task_choice_memories.search()
     return [
-        types.TaskChoiceMemoryContext(
+        baml_task_routing.TaskChoiceMemoryContext(
             title=memory.content.title,
             description=memory.content.description,
             tags=list(memory.tags),
@@ -733,10 +736,10 @@ async def _task_choice_memories(database) -> list[types.TaskChoiceMemoryContext]
     ]
 
 
-async def _user_preferences(database) -> list[types.UserPreferenceMemoryContext]:
+async def _user_preferences(database) -> list[baml_context.UserPreferenceMemoryContext]:
     memories = await database.user_preferences.search()
     return [
-        types.UserPreferenceMemoryContext(
+        baml_context.UserPreferenceMemoryContext(
             id=memory.id,
             title=memory.content.title,
             description=memory.content.description,
@@ -749,10 +752,10 @@ async def _user_preferences(database) -> list[types.UserPreferenceMemoryContext]
 
 async def _conversation_evaluation_memories(
     database,
-) -> list[types.ConversationEvaluationMemoryContext]:
+) -> list[baml_memory_search.ConversationEvaluationMemoryContext]:
     memories = await database.conversation_evaluation_memories.search()
     return [
-        types.ConversationEvaluationMemoryContext(
+        baml_memory_search.ConversationEvaluationMemoryContext(
             title=memory.content.title,
             description=memory.content.description,
             tags=list(memory.tags),
@@ -762,10 +765,10 @@ async def _conversation_evaluation_memories(
     ]
 
 
-async def _search_depth_memories(database) -> list[types.SearchDepthMemoryContext]:
+async def _search_depth_memories(database) -> list[baml_memory_search.SearchDepthMemoryContext]:
     memories = await database.search_depth_memories.search()
     return [
-        types.SearchDepthMemoryContext(
+        baml_memory_search.SearchDepthMemoryContext(
             title=memory.content.title,
             description=memory.content.description,
             tags=list(memory.tags),
@@ -775,10 +778,10 @@ async def _search_depth_memories(database) -> list[types.SearchDepthMemoryContex
     ]
 
 
-async def _relevance_memories(database) -> list[types.RelevanceMemoryContext]:
+async def _relevance_memories(database) -> list[baml_memory_selection.RelevanceMemoryContext]:
     memories = await database.relevance_memories.search()
     return [
-        types.RelevanceMemoryContext(
+        baml_memory_selection.RelevanceMemoryContext(
             title=memory.content.title,
             description=memory.content.description,
             tags=list(memory.tags),
@@ -788,10 +791,10 @@ async def _relevance_memories(database) -> list[types.RelevanceMemoryContext]:
     ]
 
 
-async def _task_prompt_memories(database) -> list[types.TaskPromptMemoryContext]:
+async def _task_prompt_memories(database) -> list[baml_task_prompt.TaskPromptMemoryContext]:
     memories = await database.task_prompt_memories.search()
     return [
-        types.TaskPromptMemoryContext(
+        baml_task_prompt.TaskPromptMemoryContext(
             title=memory.content.title,
             description=memory.content.description,
             tags=list(memory.tags),

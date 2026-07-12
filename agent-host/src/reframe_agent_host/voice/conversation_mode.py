@@ -2,24 +2,24 @@ from __future__ import annotations
 
 from threading import Lock
 
-import baml_sdk as types
+from baml_sdk import context as baml_context
 
 
 class ConversationModeController:
-    def __init__(self, mode: types.ConversationMode) -> None:
+    def __init__(self, mode: baml_context.ConversationMode) -> None:
         self._mode = mode
         self._version = 0
         self._lock = Lock()
 
-    def get(self) -> types.ConversationMode:
+    def get(self) -> baml_context.ConversationMode:
         with self._lock:
             return self._mode
 
-    def snapshot(self) -> tuple[types.ConversationMode, int]:
+    def snapshot(self) -> tuple[baml_context.ConversationMode, int]:
         with self._lock:
             return self._mode, self._version
 
-    def set(self, mode: types.ConversationMode) -> bool:
+    def set(self, mode: baml_context.ConversationMode) -> bool:
         with self._lock:
             if self._mode == mode:
                 return False
@@ -28,4 +28,4 @@ class ConversationModeController:
             return True
 
     def turn_off_conversation(self) -> bool:
-        return self.set(types.ConversationMode.WAKE_COMMAND)
+        return self.set(baml_context.ConversationMode.WAKE_COMMAND)

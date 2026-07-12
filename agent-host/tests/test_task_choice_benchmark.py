@@ -27,8 +27,8 @@ class TaskChoiceBenchmarkTests(unittest.TestCase):
 
     def test_task_choice_default_provider_filter(self):
         providers = (
-            _provider("provider:deepseek", "OpenCodeGoModelDeepseekV4Flash"),
-            _provider("provider:kimi25", "OpenCodeGoModelKimiK25"),
+            _provider("provider:deepseek", "opencode_go.OpenCodeGoModelDeepseekV4Flash"),
+            _provider("provider:kimi25", "opencode_go.OpenCodeGoModelKimiK25"),
         )
         config = TaskChoiceBenchmarkConfig(
             session_id=None,
@@ -41,7 +41,7 @@ class TaskChoiceBenchmarkTests(unittest.TestCase):
         selected = _task_choice_providers(providers, config)
 
         self.assertEqual(len(selected), 1)
-        self.assertEqual(selected[0].content.baml_surface, "OpenCodeGoModelKimiK25")
+        self.assertEqual(selected[0].content.baml_surface, "opencode_go.OpenCodeGoModelKimiK25")
 
 
 def _provider(provider_id: str, surface: str):

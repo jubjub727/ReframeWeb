@@ -6,7 +6,13 @@ from dataclasses import dataclass
 from typing import Literal
 
 from reframe_agent_host.voice.microphone import AudioInputConfig
-import baml_sdk as types
+from baml_sdk import context as baml_context
+from baml_sdk import memory_search as baml_memory_search
+from baml_sdk import memory_selection as baml_memory_selection
+from baml_sdk import task_completion as baml_task_completion
+from baml_sdk import task_execution as baml_task_execution
+from baml_sdk import task_prompt as baml_task_prompt
+from baml_sdk import task_routing as baml_task_routing
 from reframe_agent_host.keyphrases import (
     KeyphraseDetection,
     KeyphraseSpotterConfig,
@@ -29,7 +35,7 @@ class VoicePipelineConfig:
     keyphrases: KeyphraseSpotterConfig
     triggers: TriggerPhraseConfig
     transcription: WhisperTranscriberConfig
-    conversation_mode: types.ConversationMode
+    conversation_mode: baml_context.ConversationMode
     task_choice_enabled: bool = True
     session_id: str | None = None
     conversation_id: str | None = None
@@ -166,7 +172,7 @@ class VoiceTurnTimings:
 
 @dataclass(frozen=True)
 class VoiceTurnResult:
-    mode: types.ConversationMode
+    mode: baml_context.ConversationMode
     mode_switched: bool
     keyphrase_detection: KeyphraseDetection | None
     trigger_detection: TriggerPhraseDetection | None
@@ -174,18 +180,18 @@ class VoiceTurnResult:
     ignored: bool
     utterance: DetectedUtterance | None
     transcript: Transcript | None
-    task_choice: types.TaskChoiceDecision | None
-    memory_search_hints: types.ConversationMemorySearchHints | None
-    search_depths: types.SearchDepthDecision | None
+    task_choice: baml_task_routing.TaskChoiceDecision | None
+    memory_search_hints: baml_memory_search.ConversationMemorySearchHints | None
+    search_depths: baml_memory_search.SearchDepthDecision | None
     retrieved_memories: RetrievedMemoryContext | None
-    relevance_decision: types.RelevantMemoryDecision | None
+    relevance_decision: baml_memory_selection.RelevantMemoryDecision | None
     relevant_memories: RetrievedMemoryContext | None
-    selected_memory_contexts: list[types.TaskPromptSelectedMemoryContext] | None
-    task_prompt: types.TaskPromptDecision | None
-    task_execution: types.TaskExecutionResult | None
+    selected_memory_contexts: list[baml_task_prompt.TaskPromptSelectedMemoryContext] | None
+    task_prompt: baml_task_prompt.TaskPromptDecision | None
+    task_execution: baml_task_execution.TaskExecutionResult | None
     primitive_dispatch: PrimitiveDispatchResult | None
     action_history_summary: str | None
-    task_completion: types.CompletionResult | None
+    task_completion: baml_task_completion.CompletionResult | None
     timings: VoiceTurnTimings
 
     def to_dict(self) -> dict[str, object]:
@@ -316,7 +322,7 @@ class VoiceTurnResult:
 
 @dataclass(frozen=True)
 class CaptureResult:
-    conversation_mode: types.ConversationMode
+    conversation_mode: baml_context.ConversationMode
     keyphrase_detection: KeyphraseDetection | None
     utterance: DetectedUtterance | None
     mode_switched: bool

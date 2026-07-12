@@ -17,7 +17,7 @@ class ActionHistorySummaryTests(unittest.IsolatedAsyncioTestCase):
             return "The recorded actions replied to the user."
 
         with mock.patch(
-            "reframe_agent_host.agent_flow.action_history.baml."
+            "reframe_agent_host.agent_flow.action_history.baml_action_history."
             "SummariseActionHistory_async",
             side_effect=summarize,
         ):
@@ -77,7 +77,7 @@ class _FakeProviders:
             content=Provider(
                 name="GLM 5.1",
                 description="Test provider.",
-                baml_surface="OpenCodeGoModelGlm51",
+                baml_surface="opencode_go.OpenCodeGoModelGlm51",
                 model_id="glm-5.1",
                 reasoning_effort="none",
             ),

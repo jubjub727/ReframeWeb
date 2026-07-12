@@ -8,9 +8,9 @@ from typing import Any
 from baml_core import Collector
 
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
-from reframe_agent_host.agent_flow.search_depth import default_search_domains
-import baml_sdk as baml
-from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from baml_sdk import memory_search as baml_memory_search
+from baml_sdk import task_routing as baml_task_routing
+from reframe_agent_host.agent_flow.provider_clients import client_kwargs
 from reframe_agent_host.benchmarks.control_flow_case_types import (
     ControlFlowBenchmarkCase,
 )
@@ -73,7 +73,7 @@ async def build_control_flow_snapshot(
     hints = None
     session_conversations = case_conversation_context(case)
     session_memories = case_session_memory_context(case)
-    search_domains = default_search_domains()
+    search_domains = await baml_memory_search.SearchDomains_async()
     search_depth_memories = search_depth_memory_context(case.search_depth_memories)
 
     try:
@@ -199,7 +199,7 @@ async def warmup_search_depth(
 
 async def choose_task(client, case: ControlFlowBenchmarkCase):
     started_at = time.perf_counter()
-    result = await baml.ChooseTask_async(
+    result = await baml_task_routing.ChooseTask_async(
         current_user_request=case.current_user_request,
         current_conversation=_current_conversation(case_conversation_context(case)),
         session_memories=case_session_memory_context(case),
@@ -218,7 +218,7 @@ def _current_conversation(conversations):
 
 async def search_hints(client, case: ControlFlowBenchmarkCase, selected_task):
     started_at = time.perf_counter()
-    result = await baml.ChooseMemorySearch_async(
+    result = await baml_memory_search.ChooseMemorySearch_async(
         current_user_request=case.current_user_request,
         current_conversation=_current_conversation(case_conversation_context(case)),
         session_memories=case_session_memory_context(case),
@@ -237,7 +237,7 @@ async def search_depths(
     snapshot: ControlFlowSnapshot,
 ):
     started_at = time.perf_counter()
-    result = await baml.ChooseMemorySearchDepths_async(
+    result = await baml_memory_search.ChooseMemorySearchDepths_async(
         current_timestamp=snapshot.case.current_timestamp,
         current_user_request=snapshot.case.current_user_request,
         current_conversation=_current_conversation(snapshot.session_conversations),

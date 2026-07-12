@@ -85,8 +85,8 @@ class ControlFlowBenchmarkTests(unittest.TestCase):
 
     def test_control_flow_defaults_to_chosen_search_depth_model(self):
         providers = (
-            _provider("provider:deepseek", "OpenCodeGoModelDeepseekV4Flash"),
-            _provider("provider:glm51", "OpenCodeGoModelGlm51"),
+            _provider("provider:deepseek", "opencode_go.OpenCodeGoModelDeepseekV4Flash"),
+            _provider("provider:glm51", "opencode_go.OpenCodeGoModelGlm51"),
         )
         config = ControlFlowBenchmarkConfig(
             runs=1,
@@ -99,12 +99,12 @@ class ControlFlowBenchmarkTests(unittest.TestCase):
 
         self.assertEqual(SEARCH_DEPTH_DEFAULT_MODEL_ID, "glm-5.1")
         self.assertEqual(len(selected), 1)
-        self.assertEqual(selected[0].content.baml_surface, "OpenCodeGoModelGlm51")
+        self.assertEqual(selected[0].content.baml_surface, "opencode_go.OpenCodeGoModelGlm51")
 
     def test_control_flow_can_select_a_different_search_depth_model(self):
         providers = (
-            _provider("provider:deepseek", "OpenCodeGoModelDeepseekV4Flash"),
-            _provider("provider:glm51", "OpenCodeGoModelGlm51"),
+            _provider("provider:deepseek", "opencode_go.OpenCodeGoModelDeepseekV4Flash"),
+            _provider("provider:glm51", "opencode_go.OpenCodeGoModelGlm51"),
         )
         config = ControlFlowBenchmarkConfig(
             runs=1,
@@ -119,7 +119,7 @@ class ControlFlowBenchmarkTests(unittest.TestCase):
         self.assertEqual(len(selected), 1)
         self.assertEqual(
             selected[0].content.baml_surface,
-            "OpenCodeGoModelDeepseekV4Flash",
+            "opencode_go.OpenCodeGoModelDeepseekV4Flash",
         )
 
     def test_cli_passes_search_depth_model_to_control_flow_command(self):

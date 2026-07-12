@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from reframe_memory.ids import memory_node_record_id
+from reframe_memory.schema import MEMORY_RELATIONS
 
 from reframe_agent_host.memory_browser.catalog import TABLES, view_for
 from reframe_agent_host.memory_browser.json_tools import json_ready
@@ -135,13 +136,7 @@ async def delete_node(node_id: str) -> dict[str, object]:
         existing = result_records(await database.query(f"SELECT id FROM {record_id};"))
         if not existing:
             raise LookupError(f"memory node not found: {node_id}")
-        for table in (
-            "contains",
-            "provides_task",
-            "has_conversation",
-            "has_message",
-            "has_session_memory",
-        ):
+        for table in MEMORY_RELATIONS:
             await database.query(
                 f"DELETE {table} WHERE in = {record_id} OR out = {record_id};"
             )

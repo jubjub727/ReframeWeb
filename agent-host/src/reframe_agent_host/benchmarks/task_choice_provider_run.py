@@ -6,8 +6,8 @@ from typing import Any
 
 from baml_core import Collector
 
-import baml_sdk as baml
-from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from baml_sdk import task_routing as baml_task_routing
+from reframe_agent_host.agent_flow.provider_clients import client_kwargs
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     collector_stop_reason,
@@ -129,7 +129,7 @@ async def _probe_task_choice_reasoning_effort(
     collector = Collector(name=f"task-choice-discovery-{provider.id}-{effort}")
     started_at = time.perf_counter()
     try:
-        await baml.ChooseTask_async(
+        await baml_task_routing.ChooseTask_async(
             current_user_request=cases[0].transcript,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,
@@ -178,7 +178,7 @@ async def _run_case(
         name=f"task-choice-{provider.id}-{reasoning_effort}-{case.id}-{run_index}"
     )
     try:
-        decision = await baml.ChooseTask_async(
+        decision = await baml_task_routing.ChooseTask_async(
             current_user_request=case.transcript,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,
@@ -225,7 +225,7 @@ async def _warmup(client, cases, context, config: TaskChoiceBenchmarkConfig) -> 
 
     for _ in range(config.warmup_runs):
         try:
-            await baml.ChooseTask_async(
+            await baml_task_routing.ChooseTask_async(
                 current_user_request=cases[0].transcript,
                 current_conversation=context.current_conversation,
                 session_memories=context.session_memories,

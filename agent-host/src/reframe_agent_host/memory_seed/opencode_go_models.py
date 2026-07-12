@@ -34,48 +34,48 @@ def opencode_go_model_inventory() -> tuple[OpenCodeGoModelReference, ...]:
     return (
         OpenCodeGoModelReference(
             "kimi-k2.7-code",
-            "OpenCodeGoModelKimiK27Code",
+            "opencode_go.OpenCodeGoModelKimiK27Code",
             "OpenCodeWorkspaceModelKimiK27Code",
         ),
         OpenCodeGoModelReference(
             "kimi-k2.6",
-            "OpenCodeGoModelKimiK26",
+            "opencode_go.OpenCodeGoModelKimiK26",
             "OpenCodeWorkspaceModelKimiK26",
         ),
         OpenCodeGoModelReference(
             "kimi-k2.5",
-            "OpenCodeGoModelKimiK25",
+            "opencode_go.OpenCodeGoModelKimiK25",
             "OpenCodeWorkspaceModelKimiK25",
         ),
         OpenCodeGoModelReference(
             "glm-5.1",
-            "OpenCodeGoModelGlm51",
+            "opencode_go.OpenCodeGoModelGlm51",
             "OpenCodeWorkspaceModelGlm51",
         ),
         OpenCodeGoModelReference(
             "glm-5",
-            "OpenCodeGoModelGlm5",
+            "opencode_go.OpenCodeGoModelGlm5",
             "OpenCodeWorkspaceModelGlm5",
         ),
         OpenCodeGoModelReference(
             "deepseek-v4-pro",
-            "OpenCodeGoModelDeepseekV4Pro",
+            "opencode_go.OpenCodeGoModelDeepseekV4Pro",
             "OpenCodeWorkspaceModelDeepseekV4Pro",
         ),
         OpenCodeGoModelReference(
             "deepseek-v4-flash",
-            "OpenCodeGoModelDeepseekV4Flash",
+            "opencode_go.OpenCodeGoModelDeepseekV4Flash",
             "OpenCodeWorkspaceModelDeepseekV4Flash",
             OPENCODE_GO_DEEPSEEK_V4_FLASH_REASONING_EFFORTS,
         ),
         OpenCodeGoModelReference(
             "mimo-v2.5-pro",
-            "OpenCodeGoModelMimoV25Pro",
+            "opencode_go.OpenCodeGoModelMimoV25Pro",
             "OpenCodeWorkspaceModelMimoV25Pro",
         ),
         OpenCodeGoModelReference(
             "mimo-v2.5",
-            "OpenCodeGoModelMimoV25",
+            "opencode_go.OpenCodeGoModelMimoV25",
             "OpenCodeWorkspaceModelMimoV25",
         ),
     )

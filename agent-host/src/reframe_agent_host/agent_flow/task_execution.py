@@ -3,9 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import time
 
-import baml_sdk as baml
-import baml_sdk as types
-from reframe_agent_host.agent_flow.baml_clients import client_kwargs, provider_client
+from baml_sdk import task_execution as baml_task_execution
+from reframe_agent_host.agent_flow.provider_clients import client_kwargs, provider_client
 from reframe_agent_host.magic_providers import (
     MAGIC_DO_NOTHING_CLIENT_NAME,
     is_magic_do_nothing_provider,
@@ -28,7 +27,7 @@ class TaskExecutionPlanner:
         selected_task_id: str,
         full_task_prompt: str,
         prompt_layer_debug: PromptLayerDebugSession | None = None,
-    ) -> types.TaskExecutionResult:
+    ) -> baml_task_execution.TaskExecutionResult:
         database = await self._get_database()
         task = await database.tasks.get(selected_task_id)
         if task is None:
@@ -58,7 +57,7 @@ class TaskExecutionPlanner:
         )
         request = None
         if debug_dump is not None or prompt_layer_debug is not None:
-            request = await baml.PerformTask__build_request_async(
+            request = await baml_task_execution.PerformTask__build_request_async(
                 full_task_prompt=full_task_prompt,
                 **kwargs,
             )
@@ -67,7 +66,7 @@ class TaskExecutionPlanner:
 
         started_at = time.perf_counter()
         try:
-            result = await baml.PerformTask_async(
+            result = await baml_task_execution.PerformTask_async(
                 full_task_prompt=full_task_prompt,
                 **kwargs,
             )
@@ -121,7 +120,7 @@ class TaskExecutionPlanner:
         provider,
         full_task_prompt: str,
         prompt_layer_debug: PromptLayerDebugSession | None,
-    ) -> types.TaskExecutionResult:
+    ) -> baml_task_execution.TaskExecutionResult:
         client_name = MAGIC_DO_NOTHING_CLIENT_NAME
         debug_dump = TaskExecutionDebugDump.begin(
             selected_task=task,
@@ -130,7 +129,7 @@ class TaskExecutionPlanner:
             full_task_prompt=full_task_prompt,
         )
         started_at = time.perf_counter()
-        result = types.TaskExecutionResult(returns=[])
+        result = baml_task_execution.TaskExecutionResult(returns=[])
         elapsed_seconds = time.perf_counter() - started_at
         if debug_dump is not None:
             debug_dump.record_result(
@@ -166,7 +165,7 @@ class TaskExecutionPlanner:
 
 async def execute_task_with_default_client(
     full_task_prompt: str,
-) -> types.TaskExecutionResult:
-    return await baml.PerformTask_async(
+) -> baml_task_execution.TaskExecutionResult:
+    return await baml_task_execution.PerformTask_async(
         full_task_prompt=full_task_prompt,
     )

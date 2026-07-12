@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import baml_sdk as types
+from baml_sdk import context as baml_context
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
 from reframe_memory import ConversationNode, MemoryDatabase
 from reframe_memory.ids import memory_node_record_id
@@ -9,7 +9,7 @@ from reframe_memory.ids import memory_node_record_id
 async def session_conversation_history(
     database: MemoryDatabase,
     session_id: str | None,
-) -> list[types.ConversationHistory]:
+) -> list[baml_context.ConversationHistory]:
     if session_id is None:
         return []
 
@@ -24,7 +24,7 @@ async def current_conversation_history(
     database: MemoryDatabase,
     session_id: str | None,
     conversation_id: str | None,
-) -> types.ConversationHistory | None:
+) -> baml_context.ConversationHistory | None:
     if session_id is None or conversation_id is None:
         return None
 
@@ -39,14 +39,14 @@ async def current_conversation_history(
 async def conversation_history(
     database: MemoryDatabase,
     conversation: ConversationNode,
-) -> types.ConversationHistory:
+) -> baml_context.ConversationHistory:
     messages = await database.conversations.messages_for(conversation.id)
-    return types.ConversationHistory(
+    return baml_context.ConversationHistory(
         id=conversation.id,
         name=conversation.content.name,
         **timestamp_fields(conversation),
         messages=[
-            types.ConversationHistoryMessage(
+            baml_context.ConversationHistoryMessage(
                 **timestamp_fields(message),
                 role=message.content.role,
                 content=message.content.content,
@@ -59,13 +59,13 @@ async def conversation_history(
 async def session_memory_contexts(
     database: MemoryDatabase,
     session_id: str | None,
-) -> list[types.SessionMemoryContext]:
+) -> list[baml_context.SessionMemoryContext]:
     if session_id is None:
         return []
 
     memories = await database.session_memories.for_session(session_id)
     return [
-        types.SessionMemoryContext(
+        baml_context.SessionMemoryContext(
             title=memory.content.title,
             description=memory.content.description,
             tags=list(memory.tags),

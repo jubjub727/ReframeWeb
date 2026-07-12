@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-import baml_sdk as types
+from baml_sdk import context as baml_context
+from baml_sdk import memory_search as baml_memory_search
+from baml_sdk import task_routing as baml_task_routing
 from reframe_agent_host.benchmarks.conversation_evaluation_case_types import (
     BenchmarkConversation,
     BenchmarkMemory,
@@ -10,16 +12,16 @@ from reframe_agent_host.benchmarks.conversation_evaluation_case_types import (
 
 def conversation_context(
     conversations: tuple[BenchmarkConversation, ...],
-) -> list[types.ConversationHistory]:
+) -> list[baml_context.ConversationHistory]:
     return [
-        types.ConversationHistory(
+        baml_context.ConversationHistory(
             id=conversation.id,
             name=conversation.name,
             created_at=conversation.created_at,
             updated_at=conversation.updated_at,
             read_at=conversation.read_at,
             messages=[
-                types.ConversationHistoryMessage(
+                baml_context.ConversationHistoryMessage(
                     created_at=message.created_at,
                     updated_at=message.updated_at,
                     read_at=message.read_at,
@@ -33,9 +35,9 @@ def conversation_context(
     ]
 
 
-def memory_context(memories: tuple[BenchmarkMemory, ...]) -> list[types.SessionMemoryContext]:
+def memory_context(memories: tuple[BenchmarkMemory, ...]) -> list[baml_context.SessionMemoryContext]:
     return [
-        types.SessionMemoryContext(
+        baml_context.SessionMemoryContext(
             title=memory.title,
             description=memory.description,
             tags=list(memory.tags),
@@ -49,9 +51,9 @@ def memory_context(memories: tuple[BenchmarkMemory, ...]) -> list[types.SessionM
 
 def conversation_evaluation_memory_context(
     memories: tuple[BenchmarkMemory, ...],
-) -> list[types.ConversationEvaluationMemoryContext]:
+) -> list[baml_memory_search.ConversationEvaluationMemoryContext]:
     return [
-        types.ConversationEvaluationMemoryContext(
+        baml_memory_search.ConversationEvaluationMemoryContext(
             title=memory.title,
             description=memory.description,
             tags=list(memory.tags),
@@ -63,8 +65,8 @@ def conversation_evaluation_memory_context(
     ]
 
 
-def selected_task_context(task: BenchmarkSelectedTask) -> types.SelectedTaskContext:
-    return types.SelectedTaskContext(
+def selected_task_context(task: BenchmarkSelectedTask) -> baml_task_routing.SelectedTaskContext:
+    return baml_task_routing.SelectedTaskContext(
         id=task.id,
         name=task.name,
         description=task.description,

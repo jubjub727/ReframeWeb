@@ -1,0 +1,4 @@
+enum CompletionResult {
+    PASS,
+    FAIL,
+}

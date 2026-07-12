@@ -4,15 +4,15 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any
 
-import baml_sdk as types
+from baml_sdk import retrieved_memory as baml_retrieved_memory
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
 from reframe_memory.retrieved_context import RetrievedMemoryContext
 
 
-def retrieved_memory_graph(memories: RetrievedMemoryContext) -> types.RetrievedMemoryGraph:
-    return types.RetrievedMemoryGraph(
+def retrieved_memory_graph(memories: RetrievedMemoryContext) -> baml_retrieved_memory.RetrievedMemoryGraph:
+    return baml_retrieved_memory.RetrievedMemoryGraph(
         task_catalog=[
-            types.RetrievedTaskNode(
+            baml_retrieved_memory.RetrievedTaskNode(
                 id=task.id,
                 name=task.content.name,
                 description=task.content.description,
@@ -26,8 +26,8 @@ def retrieved_memory_graph(memories: RetrievedMemoryContext) -> types.RetrievedM
             for task in memories.task_catalog.tasks
         ],
         past_sessions=[
-            types.RetrievedSessionGraph(
-                session=types.RetrievedSessionNode(
+            baml_retrieved_memory.RetrievedSessionGraph(
+                session=baml_retrieved_memory.RetrievedSessionNode(
                     id=session.session.id,
                     name=session.session.content.name,
                     tags=list(session.session.tags),
@@ -35,8 +35,8 @@ def retrieved_memory_graph(memories: RetrievedMemoryContext) -> types.RetrievedM
                 ),
                 matched=session.matched,
                 conversations=[
-                    types.RetrievedConversationGraph(
-                        conversation=types.RetrievedConversationNode(
+                    baml_retrieved_memory.RetrievedConversationGraph(
+                        conversation=baml_retrieved_memory.RetrievedConversationNode(
                             id=conversation.conversation.id,
                             name=conversation.conversation.content.name,
                             tags=list(conversation.conversation.tags),
@@ -44,7 +44,7 @@ def retrieved_memory_graph(memories: RetrievedMemoryContext) -> types.RetrievedM
                         ),
                         matched=conversation.matched,
                         messages=[
-                            types.RetrievedConversationMessageNode(
+                            baml_retrieved_memory.RetrievedConversationMessageNode(
                                 id=message.id,
                                 role=message.content.role,
                                 content=message.content.content,
@@ -60,7 +60,7 @@ def retrieved_memory_graph(memories: RetrievedMemoryContext) -> types.RetrievedM
                     for conversation in session.conversations
                 ],
                 session_memories=[
-                    types.RetrievedSessionMemoryNode(
+                    baml_retrieved_memory.RetrievedSessionMemoryNode(
                         id=memory.id,
                         title=memory.content.title,
                         description=memory.content.description,
@@ -73,7 +73,7 @@ def retrieved_memory_graph(memories: RetrievedMemoryContext) -> types.RetrievedM
             for session in memories.past_conversation_context.sessions
         ],
         current_session_memories=[
-            types.RetrievedSessionMemoryNode(
+            baml_retrieved_memory.RetrievedSessionMemoryNode(
                 id=memory.id,
                 title=memory.content.title,
                 description=memory.content.description,
@@ -92,7 +92,7 @@ class BamlRetrievedMemoryContext:
     current_session_memories: tuple[Any, ...]
 
     @classmethod
-    def from_graph(cls, graph: types.RetrievedMemoryGraph) -> "BamlRetrievedMemoryContext":
+    def from_graph(cls, graph: baml_retrieved_memory.RetrievedMemoryGraph) -> "BamlRetrievedMemoryContext":
         return cls(
             task_catalog=SimpleNamespace(tasks=tuple(graph.task_catalog)),
             past_conversation_context=SimpleNamespace(

@@ -3,7 +3,9 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 
 from reframe_agent_host import cli
-import baml_sdk as types
+from baml_sdk import memory_selection as baml_memory_selection
+from baml_sdk import task_prompt as baml_task_prompt
+from baml_sdk import task_routing as baml_task_routing
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     OPENCODE_GO_REASONING_EFFORT_CANDIDATES,
 )
@@ -108,7 +110,7 @@ class TaskPromptBenchmarkTests(unittest.TestCase):
 
     def test_evaluation_scores_shape_and_non_empty_sections(self):
         snapshot = _snapshot()
-        decision = types.TaskPromptDecision(
+        decision = baml_task_prompt.TaskPromptDecision(
             full_task_prompt=(
                 "Task:\n"
                 "Ask for the information needed to continue.\n\n"
@@ -129,7 +131,7 @@ class TaskPromptBenchmarkTests(unittest.TestCase):
 
     def test_evaluation_requires_non_empty_input(self):
         snapshot = _snapshot()
-        decision = types.TaskPromptDecision(
+        decision = baml_task_prompt.TaskPromptDecision(
             full_task_prompt=(
                 "Task:\n"
                 "Ask only for the information needed to continue.\n\n"
@@ -171,8 +173,8 @@ class TaskPromptRunnerTests(unittest.IsolatedAsyncioTestCase):
     async def test_runner_reuses_one_snapshot_for_each_provider_effort(self):
         case = task_prompt_cases()[0]
         providers = (
-            _provider("provider:one", "OpenCodeGoModelGlm51"),
-            _provider("provider:two", "OpenCodeGoModelKimiK25"),
+            _provider("provider:one", "opencode_go.OpenCodeGoModelGlm51"),
+            _provider("provider:two", "opencode_go.OpenCodeGoModelKimiK25"),
         )
         built_snapshots = []
         benchmark_calls = []
@@ -270,7 +272,7 @@ class TaskPromptRunnerTests(unittest.IsolatedAsyncioTestCase):
 
 def _snapshot():
     case = _stripe_case()
-    selected_task = types.SelectedTaskContext(
+    selected_task = baml_task_routing.SelectedTaskContext(
         id="memory_node:core_task_request_info",
         name="Request more information from the user",
         description="Use when the request needs input before it can be handled.",
@@ -282,7 +284,7 @@ def _snapshot():
         updated_at="2026-07-05T00:00:00+00:00",
         read_at="NONE",
     )
-    task_choice = types.TaskChoiceDecision(
+    task_choice = baml_task_routing.TaskChoiceDecision(
         selected_task_id=selected_task.id,
         confidence=1.0,
         candidate_memory=None,
@@ -299,7 +301,7 @@ def _snapshot():
         memory_search_hints=None,
         search_depths=None,
         retrieved_memories=None,
-        relevance_decision=types.RelevantMemoryDecision(
+        relevance_decision=baml_memory_selection.RelevantMemoryDecision(
             kept_memory_ids=["memory_node:stripe_memory"],
             candidate_memory=None,
         ),

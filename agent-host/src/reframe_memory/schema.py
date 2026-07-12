@@ -1,6 +1,18 @@
 from __future__ import annotations
 
 
+MEMORY_RELATIONS: tuple[str, ...] = (
+    "contains",
+    "provides_task",
+    "has_conversation",
+    "has_message",
+    "has_session_memory",
+    "history",
+    "actions",
+    "action",
+)
+
+
 SCHEMA_STATEMENTS: tuple[str, ...] = (
     "DEFINE TABLE IF NOT EXISTS memory_root SCHEMAFULL;",
     "DEFINE FIELD IF NOT EXISTS name ON TABLE memory_root TYPE string;",

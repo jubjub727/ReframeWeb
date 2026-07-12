@@ -8,7 +8,7 @@ import sys
 import time
 
 from reframe_agent_host.voice.microphone import AudioInputConfig
-import baml_sdk as types
+from baml_sdk import context as baml_context
 from reframe_agent_host.commands.timing import print_timing_summary
 from reframe_agent_host.commands.memory_output import (
     memory_search_summary,
@@ -676,7 +676,7 @@ def _voice_pipeline_config(args: argparse.Namespace) -> VoicePipelineConfig:
             conversation_on_phrases=tuple(args.conversation_on_phrase),
         ),
         transcription=_transcription_config(args),
-        conversation_mode=types.ConversationMode(args.mode),
+        conversation_mode=baml_context.ConversationMode(args.mode),
         task_choice_enabled=not args.no_task_choice,
         session_id=args.session_id,
         conversation_id=args.conversation_id,

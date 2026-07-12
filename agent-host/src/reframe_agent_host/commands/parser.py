@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 
 from reframe_agent_host import __version__
-import baml_sdk as types
+from baml_sdk import context as baml_context
 from reframe_agent_host.commands.voice_args import add_voice_turn_args
 from reframe_agent_host.speech.transcription import (
     DEFAULT_CPU_COMPUTE_TYPE,
@@ -388,8 +388,8 @@ def _add_voice_turn_parser(subparsers) -> None:
     )
     voice_turn.add_argument(
         "--mode",
-        choices=[mode.value for mode in types.ConversationMode],
-        default=types.ConversationMode.WAKE_COMMAND.value,
+        choices=[mode.value for mode in baml_context.ConversationMode],
+        default=baml_context.ConversationMode.WAKE_COMMAND.value,
     )
     add_voice_turn_args(voice_turn)
 

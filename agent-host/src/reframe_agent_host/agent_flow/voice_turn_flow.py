@@ -4,9 +4,13 @@ from dataclasses import dataclass, field
 import time
 from typing import Any, Awaitable, Callable, Mapping
 
-import baml_sdk as baml
-import baml_sdk as types
-from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from baml_sdk import context as baml_context
+from baml_sdk import memory_search as baml_memory_search
+from baml_sdk import memory_selection as baml_memory_selection
+from baml_sdk import task_prompt as baml_task_prompt
+from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import voice_turn as baml_voice_turn
+from reframe_agent_host.agent_flow.provider_clients import client_kwargs
 from reframe_agent_host.agent_flow.machine_state import (
     MachineStateProvider,
     local_machine_state_context,
@@ -18,12 +22,11 @@ from reframe_agent_host.agent_flow.prompt_layer_debug import (
 from reframe_agent_host.agent_flow.retrieved_memory_graph import (
     retrieved_memory_graph,
 )
-from reframe_agent_host.agent_flow.search_depth import current_timestamp
 from reframe_agent_host.agent_flow.session_context import (
     current_conversation_history,
     session_memory_contexts,
 )
-from reframe_agent_host.agent_flow.timestamps import timestamp_fields
+from reframe_agent_host.agent_flow.timestamps import current_timestamp, timestamp_fields
 from reframe_memory import MemoryDatabase, open_memory_database
 from reframe_memory.retrieved_context import RetrievedMemoryContext
 
@@ -52,7 +55,7 @@ class BamlVoiceTurnFlow:
     async def understand_prompt(
         self,
         current_user_request: str,
-    ) -> types.VoicePromptUnderstanding:
+    ) -> baml_voice_turn.VoicePromptUnderstanding:
         database = await self._get_database()
         timestamp = current_timestamp()
         conversation = await current_conversation_history(
@@ -91,7 +94,7 @@ class BamlVoiceTurnFlow:
         kwargs = client_kwargs(self.client_name)
         started_at = time.perf_counter()
         try:
-            result = await baml.UnderstandVoicePrompt_async(
+            result = await baml_voice_turn.UnderstandVoicePrompt_async(
                 **inputs,
                 **kwargs,
             )
@@ -121,9 +124,9 @@ class BamlVoiceTurnFlow:
     async def continue_prompt(
         self,
         current_user_request: str,
-        selected_task: types.SelectedTaskContext,
+        selected_task: baml_task_routing.SelectedTaskContext,
         retrieved_memories: RetrievedMemoryContext,
-    ) -> types.VoicePromptContinuation:
+    ) -> baml_voice_turn.VoicePromptContinuation:
         database = await self._get_database()
         conversation = await current_conversation_history(
             database,
@@ -159,7 +162,7 @@ class BamlVoiceTurnFlow:
         kwargs = client_kwargs(self.client_name)
         started_at = time.perf_counter()
         try:
-            result = await baml.ContinueVoicePrompt_async(
+            result = await baml_voice_turn.ContinueVoicePrompt_async(
                 **inputs,
                 **kwargs,
             )
@@ -189,7 +192,7 @@ class BamlVoiceTurnFlow:
     async def _dump_understanding_prompt_layers(
         self,
         inputs: Mapping[str, Any],
-        result: types.VoicePromptUnderstanding,
+        result: baml_voice_turn.VoicePromptUnderstanding,
         kwargs: dict[str, Any],
     ) -> None:
         choose_task_inputs = {
@@ -207,7 +210,7 @@ class BamlVoiceTurnFlow:
             inputs=choose_task_inputs,
             result=result.task_choice,
             elapsed_seconds=_seconds_from_ms(result.timings.task_choice_ms),
-            build_request=lambda: baml.ChooseTask__build_request_async(
+            build_request=lambda: baml_task_routing.ChooseTask__build_request_async(
                 **choose_task_inputs,
                 **kwargs,
             ),
@@ -229,7 +232,7 @@ class BamlVoiceTurnFlow:
             inputs=memory_search_inputs,
             result=result.memory_search_hints,
             elapsed_seconds=_seconds_from_ms(result.timings.memory_search_ms),
-            build_request=lambda: baml.ChooseMemorySearch__build_request_async(
+            build_request=lambda: baml_memory_search.ChooseMemorySearch__build_request_async(
                 **memory_search_inputs,
                 **kwargs,
             ),
@@ -242,7 +245,7 @@ class BamlVoiceTurnFlow:
             "session_memories": inputs["session_memories"],
             "selected_task": result.selected_task,
             "memory_search_hints": result.memory_search_hints,
-            "search_domains": await baml.MemorySearchDomains_async(),
+            "search_domains": await baml_memory_search.SearchDomains_async(),
             "search_depth_memories": inputs["search_depth_memories"],
             "machine_state": inputs["machine_state"],
         }
@@ -252,7 +255,7 @@ class BamlVoiceTurnFlow:
             inputs=search_depth_inputs,
             result=result.search_depths,
             elapsed_seconds=_seconds_from_ms(result.timings.search_depth_ms),
-            build_request=lambda: baml.ChooseMemorySearchDepths__build_request_async(
+            build_request=lambda: baml_memory_search.ChooseMemorySearchDepths__build_request_async(
                 **search_depth_inputs,
                 **kwargs,
             ),
@@ -261,10 +264,10 @@ class BamlVoiceTurnFlow:
     async def _dump_continuation_prompt_layers(
         self,
         inputs: Mapping[str, Any],
-        result: types.VoicePromptContinuation,
+        result: baml_voice_turn.VoicePromptContinuation,
         kwargs: dict[str, Any],
     ) -> None:
-        candidate_memories = await baml.MemoryCandidates_async(
+        candidate_memories = await baml_memory_selection.Candidates_async(
             inputs["retrieved_memories"],
             inputs["current_session_id"],
             inputs["user_preferences"],
@@ -284,7 +287,7 @@ class BamlVoiceTurnFlow:
             inputs=relevance_inputs,
             result=result.relevance_decision,
             elapsed_seconds=_seconds_from_ms(result.timings.memory_relevance_ms),
-            build_request=lambda: baml.SelectRelevantMemories__build_request_async(
+            build_request=lambda: baml_memory_selection.SelectRelevantMemories__build_request_async(
                 **relevance_inputs,
                 **kwargs,
             ),
@@ -306,7 +309,7 @@ class BamlVoiceTurnFlow:
             inputs=composition_inputs,
             result=composition,
             elapsed_seconds=_seconds_from_ms(result.timings.task_prompt_ms),
-            build_request=lambda: baml.ComposeTaskInput__build_request_async(
+            build_request=lambda: baml_task_prompt.ComposeTaskInput__build_request_async(
                 **composition_inputs,
                 **kwargs,
             ),
@@ -383,15 +386,15 @@ class BamlVoiceTurnFlow:
             self.database = await open_memory_database()
         return self.database
 
-    def _machine_state_context(self) -> types.MachineStateContext:
+    def _machine_state_context(self) -> baml_context.MachineStateContext:
         if self.machine_state_provider is None:
             return local_machine_state_context("No voice startup machine state provider")
         return self.machine_state_provider.context()
 
     def _live_conversation(
         self,
-        conversation: types.ConversationHistory | None,
-    ) -> types.ConversationHistory | None:
+        conversation: baml_context.ConversationHistory | None,
+    ) -> baml_context.ConversationHistory | None:
         if self.live_conversation is None:
             return conversation
         return self.live_conversation.merge(conversation, self.conversation_id)
@@ -399,10 +402,10 @@ class BamlVoiceTurnFlow:
     async def _available_tasks(
         self,
         database: MemoryDatabase,
-    ) -> list[types.AvailableTask]:
+    ) -> list[baml_task_routing.AvailableTask]:
         tasks = await database.tasks.search()
         return [
-            types.AvailableTask(
+            baml_task_routing.AvailableTask(
                 id=task.id,
                 name=task.content.name,
                 description=task.content.description,
@@ -418,10 +421,10 @@ class BamlVoiceTurnFlow:
     async def _task_choice_memories(
         self,
         database: MemoryDatabase,
-    ) -> list[types.TaskChoiceMemoryContext]:
+    ) -> list[baml_task_routing.TaskChoiceMemoryContext]:
         memories = await database.task_choice_memories.search()
         return [
-            types.TaskChoiceMemoryContext(
+            baml_task_routing.TaskChoiceMemoryContext(
                 title=memory.content.title,
                 description=memory.content.description,
                 tags=list(memory.tags),
@@ -433,10 +436,10 @@ class BamlVoiceTurnFlow:
     async def _user_preferences(
         self,
         database: MemoryDatabase,
-    ) -> list[types.UserPreferenceMemoryContext]:
+    ) -> list[baml_context.UserPreferenceMemoryContext]:
         memories = await database.user_preferences.search()
         return [
-            types.UserPreferenceMemoryContext(
+            baml_context.UserPreferenceMemoryContext(
                 id=memory.id,
                 title=memory.content.title,
                 description=memory.content.description,
@@ -449,10 +452,10 @@ class BamlVoiceTurnFlow:
     async def _conversation_evaluation_memories(
         self,
         database: MemoryDatabase,
-    ) -> list[types.ConversationEvaluationMemoryContext]:
+    ) -> list[baml_memory_search.ConversationEvaluationMemoryContext]:
         memories = await database.conversation_evaluation_memories.search()
         return [
-            types.ConversationEvaluationMemoryContext(
+            baml_memory_search.ConversationEvaluationMemoryContext(
                 title=memory.content.title,
                 description=memory.content.description,
                 tags=list(memory.tags),
@@ -464,10 +467,10 @@ class BamlVoiceTurnFlow:
     async def _search_depth_memories(
         self,
         database: MemoryDatabase,
-    ) -> list[types.SearchDepthMemoryContext]:
+    ) -> list[baml_memory_search.SearchDepthMemoryContext]:
         memories = await database.search_depth_memories.search()
         return [
-            types.SearchDepthMemoryContext(
+            baml_memory_search.SearchDepthMemoryContext(
                 title=memory.content.title,
                 description=memory.content.description,
                 tags=list(memory.tags),
@@ -479,10 +482,10 @@ class BamlVoiceTurnFlow:
     async def _relevance_memories(
         self,
         database: MemoryDatabase,
-    ) -> list[types.RelevanceMemoryContext]:
+    ) -> list[baml_memory_selection.RelevanceMemoryContext]:
         memories = await database.relevance_memories.search()
         return [
-            types.RelevanceMemoryContext(
+            baml_memory_selection.RelevanceMemoryContext(
                 title=memory.content.title,
                 description=memory.content.description,
                 tags=list(memory.tags),
@@ -494,10 +497,10 @@ class BamlVoiceTurnFlow:
     async def _task_prompt_memories(
         self,
         database: MemoryDatabase,
-    ) -> list[types.TaskPromptMemoryContext]:
+    ) -> list[baml_task_prompt.TaskPromptMemoryContext]:
         memories = await database.task_prompt_memories.search()
         return [
-            types.TaskPromptMemoryContext(
+            baml_task_prompt.TaskPromptMemoryContext(
                 title=memory.content.title,
                 description=memory.content.description,
                 tags=list(memory.tags),
@@ -512,11 +515,11 @@ def _seconds_from_ms(milliseconds) -> float:
 
 
 def _task_prompt_composition_from_decision(
-    decision: types.TaskPromptDecision,
-) -> types.TaskPromptComposition:
+    decision: baml_task_prompt.TaskPromptDecision,
+) -> baml_task_prompt.TaskPromptComposition:
     marker = "\n\nInput:\n"
     _task_prompt, separator, task_input = decision.full_task_prompt.partition(marker)
-    return types.TaskPromptComposition(
+    return baml_task_prompt.TaskPromptComposition(
         task_input=task_input if separator else decision.full_task_prompt,
         candidate_memory=decision.candidate_memory,
     )

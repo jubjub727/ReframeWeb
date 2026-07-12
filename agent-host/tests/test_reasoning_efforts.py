@@ -2,9 +2,10 @@ import json
 import unittest
 from datetime import datetime, timezone
 
-import baml_sdk as baml
-import baml_sdk as types
-from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from baml_sdk import memory_search as baml_memory_search
+from baml_sdk import memory_selection as baml_memory_selection
+from baml_sdk import task_routing as baml_task_routing
+from reframe_agent_host.agent_flow.provider_clients import client_kwargs
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.benchmarks.reasoning_efforts import (
     opencode_reasoning_effort_candidates,
@@ -17,13 +18,13 @@ from reframe_memory import MemoryNode, MemoryTimestamps, Provider
 
 class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
     async def test_default_task_choice_client_uses_kimi_k25_high(self):
-        request = await baml.ChooseTask__build_request_async(
+        request = await baml_task_routing.ChooseTask__build_request_async(
             current_user_request="Install the missing GPU driver for me.",
             current_conversation=None,
             session_memories=[],
             user_preferences=[],
             available_tasks=[
-                types.AvailableTask(
+                baml_task_routing.AvailableTask(
                     id="task:cannot_handle",
                     name="Explain request cannot be handled",
                     description="Use when the request is unsupported.",
@@ -46,17 +47,17 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_compiled_client_adds_reasoning_effort_to_request(self):
         client, client_name = opencode_reasoning_effort_client(
-            _provider("OpenCodeGoModelDeepseekV4Pro"),
+            _provider("opencode_go.OpenCodeGoModelDeepseekV4Pro"),
             "low",
         )
 
-        request = await baml.ChooseTask__build_request_async(
+        request = await baml_task_routing.ChooseTask__build_request_async(
             current_user_request="Test routing.",
             current_conversation=None,
             session_memories=[],
             user_preferences=[],
             available_tasks=[
-                types.AvailableTask(
+                baml_task_routing.AvailableTask(
                     id="task:test",
                     name="Test task",
                     description="Used by the benchmark request test.",
@@ -75,7 +76,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
         )
         body = json.loads(request.body)
 
-        self.assertEqual(client_name, "OpenCodeGoModelDeepseekV4ProReasoningLow")
+        self.assertEqual(client_name, "opencode_go.OpenCodeGoModelDeepseekV4ProReasoningLow")
         self.assertEqual(body["model"], "deepseek-v4-pro")
         self.assertEqual(body["reasoning_effort"], "low")
 
@@ -84,14 +85,14 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(
             opencode_reasoning_effort_candidates(
-                _provider("OpenCodeGoModelKimiK26"),
+                _provider("opencode_go.OpenCodeGoModelKimiK26"),
                 candidates,
             ),
             ("high", "xhigh"),
         )
         self.assertEqual(
             opencode_reasoning_effort_candidates(
-                _provider("OpenCodeGoModelDeepseekV4Flash"),
+                _provider("opencode_go.OpenCodeGoModelDeepseekV4Flash"),
                 candidates,
             ),
             ("high", "max"),
@@ -99,16 +100,16 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_compiled_client_adds_reasoning_effort_to_search_depth_request(self):
         client, client_name = opencode_reasoning_effort_client(
-            _provider("OpenCodeGoModelGlm51"),
+            _provider("opencode_go.OpenCodeGoModelGlm51"),
             "high",
         )
 
-        request = await baml.ChooseMemorySearchDepths__build_request_async(
+        request = await baml_memory_search.ChooseMemorySearchDepths__build_request_async(
             current_timestamp="2026-07-03T15:00:00Z",
             current_user_request="Open Hacker News compactly.",
             current_conversation=None,
             session_memories=[],
-            selected_task=types.SelectedTaskContext(
+            selected_task=baml_task_routing.SelectedTaskContext(
                 id="task:visual_panel",
                 name="Visual panel",
                 description="Open a visual panel.",
@@ -120,13 +121,13 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 updated_at="2026-07-03T00:00:00Z",
                 read_at="NONE",
             ),
-            memory_search_hints=types.ConversationMemorySearchHints(
-                tags=types.MemoryTagSearch(any_of=[], all_of=[], none_of=[]),
-                strings=types.MemoryStringSearch(contains=[], equals=[]),
+            memory_search_hints=baml_memory_search.ConversationMemorySearchHints(
+                tags=baml_memory_search.MemoryTagSearch(any_of=[], all_of=[], none_of=[]),
+                strings=baml_memory_search.MemoryStringSearch(contains=[], equals=[]),
                 candidate_memory=None,
             ),
             search_domains=[
-                types.SearchDepthDomain(
+                baml_memory_search.SearchDepthDomain(
                     id="task_catalog",
                     description="Task records.",
                     searches="Task nodes.",
@@ -139,16 +140,16 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
         )
         body = json.loads(request.body)
 
-        self.assertEqual(client_name, "OpenCodeGoModelGlm51ReasoningHigh")
+        self.assertEqual(client_name, "opencode_go.OpenCodeGoModelGlm51ReasoningHigh")
         self.assertEqual(body["model"], "glm-5.1")
         self.assertEqual(body["reasoning_effort"], "high")
 
     async def test_default_relevance_client_uses_glm51_none(self):
-        request = await baml.SelectRelevantMemories__build_request_async(
+        request = await baml_memory_selection.SelectRelevantMemories__build_request_async(
             current_user_request="Open Hacker News compactly.",
             current_conversation=None,
             session_memories=[],
-            selected_task=types.SelectedTaskContext(
+            selected_task=baml_task_routing.SelectedTaskContext(
                 id="task:visual_panel",
                 name="Visual panel",
                 description="Open a visual panel.",
@@ -161,7 +162,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 read_at="NONE",
             ),
             candidate_memories=[
-                types.RetrievedMemoryCandidate(
+                baml_memory_selection.RetrievedMemoryCandidate(
                     id="memory_node:message1",
                     kind="past_conversation_message",
                     title="human message",

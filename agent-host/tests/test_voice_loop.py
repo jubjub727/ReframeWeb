@@ -1,6 +1,6 @@
 import unittest
 
-import baml_sdk as types
+from baml_sdk import context as baml_context
 from reframe_agent_host.commands.voice_loop import run_voice_turn_loop
 from reframe_agent_host.voice.types import CaptureResult, CaptureStreamEvent
 
@@ -109,7 +109,7 @@ class VoiceLoopTests(unittest.IsolatedAsyncioTestCase):
 
 def _capture_result():
     return CaptureResult(
-        conversation_mode=types.ConversationMode.WAKE_COMMAND,
+        conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
         keyphrase_detection=None,
         utterance=None,
         mode_switched=False,

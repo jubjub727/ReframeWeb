@@ -14,10 +14,11 @@ from reframe_agent_host.agent_flow.memory_retrieval import (
     _timestamp_breadths,
 )
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
-from reframe_agent_host.agent_flow.relevance_candidates import candidate_contexts
-import baml_sdk as baml
-import baml_sdk as types
-from reframe_agent_host.agent_flow.baml_clients import client_kwargs
+from reframe_agent_host.agent_flow.retrieved_memory_graph import (
+    retrieved_memory_graph,
+)
+from baml_sdk import memory_selection as baml_memory_selection
+from reframe_agent_host.agent_flow.provider_clients import client_kwargs
 from reframe_agent_host.benchmarks.control_flow_case_types import (
     ControlFlowBenchmarkCase,
 )
@@ -53,9 +54,9 @@ class MemoryRelevanceSnapshot:
     control_flow: ControlFlowSnapshot
     search_depths: Any | None
     retrieved_memories: RetrievedMemoryContext | None
-    candidate_memories: list[types.RetrievedMemoryCandidate]
+    candidate_memories: list[baml_memory_selection.RetrievedMemoryCandidate]
     expected_kept_memory_ids: tuple[str, ...]
-    relevance_memories: list[types.RelevanceMemoryContext]
+    relevance_memories: list[baml_memory_selection.RelevanceMemoryContext]
     latency_seconds: float
     stage_latency_seconds: dict[str, float]
     error: str | None = None
@@ -77,10 +78,10 @@ async def build_memory_relevance_snapshot(
     control = await build_control_flow_snapshot(case, client=client)
     stage_latencies = dict(control.stage_latency_seconds)
     expected_ids = _expected_kept_ids(case)
-    relevance_memories: list[types.RelevanceMemoryContext] = []
+    relevance_memories: list[baml_memory_selection.RelevanceMemoryContext] = []
     depths = None
     retrieved = None
-    candidates: list[types.RetrievedMemoryCandidate] = []
+    candidates: list[baml_memory_selection.RetrievedMemoryCandidate] = []
 
     if control.error is not None:
         return MemoryRelevanceSnapshot(
@@ -101,10 +102,10 @@ async def build_memory_relevance_snapshot(
         stage_latencies["search_depth"] = depth_latency
         retrieved, retrieval_latency = await _retrieve_memory_context(control, depths)
         stage_latencies["memory_retrieval"] = retrieval_latency
-        candidates = candidate_contexts(
-            retrieved,
-            current_session_id=_session_node_id(case),
-            user_preferences=user_preference_context(case.user_preferences),
+        candidates = await baml_memory_selection.Candidates_async(
+            retrieved_memory_graph(retrieved),
+            _session_node_id(case),
+            user_preference_context(case.user_preferences),
         )
     except Exception as exc:
         return MemoryRelevanceSnapshot(
@@ -220,7 +221,7 @@ async def relevant_memories(
     snapshot: MemoryRelevanceSnapshot,
 ):
     started_at = time.perf_counter()
-    result = await baml.SelectRelevantMemories_async(
+    result = await baml_memory_selection.SelectRelevantMemories_async(
         current_user_request=snapshot.case.current_user_request,
         current_conversation=_current_conversation(
             snapshot.control_flow.session_conversations

@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timezone
 from tempfile import TemporaryDirectory
 
-import baml_sdk as baml
+from baml_sdk import memory_search as baml_memory_search
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.benchmarks.conversation_evaluation_config import (
     CONVERSATION_EVALUATION_DEFAULT_MODEL_ID,
@@ -100,8 +100,8 @@ class ConversationEvaluationBenchmarkTests(unittest.TestCase):
 
     def test_conversation_evaluation_default_provider_filter(self):
         providers = (
-            _provider("provider:deepseek", "OpenCodeGoModelDeepseekV4Flash"),
-            _provider("provider:glm51", "OpenCodeGoModelGlm51"),
+            _provider("provider:deepseek", "opencode_go.OpenCodeGoModelDeepseekV4Flash"),
+            _provider("provider:glm51", "opencode_go.OpenCodeGoModelGlm51"),
         )
         config = ConversationEvaluationBenchmarkConfig(
             runs=1,
@@ -113,7 +113,7 @@ class ConversationEvaluationBenchmarkTests(unittest.TestCase):
         selected = _conversation_evaluation_providers(providers, config)
 
         self.assertEqual(len(selected), 1)
-        self.assertEqual(selected[0].content.baml_surface, "OpenCodeGoModelGlm51")
+        self.assertEqual(selected[0].content.baml_surface, "opencode_go.OpenCodeGoModelGlm51")
 
     def test_parser_accepts_conversation_evaluation_analysis(self):
         parser = build_parser()
@@ -203,7 +203,7 @@ class ConversationEvaluationClientTests(unittest.IsolatedAsyncioTestCase):
     async def test_default_client_request_uses_glm51_none(self):
         case = conversation_evaluation_cases()[0]
         conversations = conversation_context(case.session_conversations)
-        request = await baml.ChooseMemorySearch__build_request_async(
+        request = await baml_memory_search.ChooseMemorySearch__build_request_async(
             current_user_request=case.current_user_request,
             current_conversation=conversations[0] if conversations else None,
             session_memories=memory_context(case.session_memories),

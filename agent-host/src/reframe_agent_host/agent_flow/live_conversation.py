@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from threading import Lock
 
-import baml_sdk as types
+from baml_sdk import context as baml_context
 from reframe_memory.ids import memory_node_record_id
 
 
@@ -45,9 +45,9 @@ class LiveConversationContext:
 
     def merge(
         self,
-        conversation: types.ConversationHistory | None,
+        conversation: baml_context.ConversationHistory | None,
         conversation_id: str | None,
-    ) -> types.ConversationHistory | None:
+    ) -> baml_context.ConversationHistory | None:
         if conversation_id is None:
             return conversation
 
@@ -58,7 +58,7 @@ class LiveConversationContext:
 
         if conversation is None:
             now = _timestamp()
-            return types.ConversationHistory(
+            return baml_context.ConversationHistory(
                 id=expected_conversation_id,
                 name="Current conversation",
                 created_at=now,
@@ -82,7 +82,7 @@ class LiveConversationContext:
                 continue
             merged.append(_history_message(message))
 
-        return types.ConversationHistory(
+        return baml_context.ConversationHistory(
             id=conversation.id,
             name=conversation.name,
             created_at=conversation.created_at,
@@ -102,8 +102,8 @@ class LiveConversationContext:
 
 def _history_message(
     message: LiveConversationMessage,
-) -> types.ConversationHistoryMessage:
-    return types.ConversationHistoryMessage(
+) -> baml_context.ConversationHistoryMessage:
+    return baml_context.ConversationHistoryMessage(
         created_at=message.captured_at,
         updated_at=message.captured_at,
         read_at="NONE",

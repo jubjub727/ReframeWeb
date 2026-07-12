@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from baml_sdk import TaskExecutionResult, TaskReturnItem
+from baml_sdk.task_execution import TaskExecutionResult, TaskReturnItem
 from reframe_agent_host.agent_flow.prompt_layer_debug import (
     PromptLayerDebugSession,
 )
@@ -32,7 +32,7 @@ class TaskExecutionDebugDumpTests(unittest.IsolatedAsyncioTestCase):
                 dump = TaskExecutionDebugDump.begin(
                     selected_task=_task_node(),
                     provider=_provider_node(),
-                    client_name="OpenCodeGoModelDeepseekV4FlashReasoningMax",
+                    client_name="opencode_go.OpenCodeGoModelDeepseekV4FlashReasoningMax",
                     full_task_prompt="Reply to the user.",
                 )
                 self.assertIsNotNone(dump)
@@ -90,7 +90,7 @@ class TaskExecutionDebugDumpTests(unittest.IsolatedAsyncioTestCase):
             dump = TaskExecutionDebugDump.begin(
                 selected_task=_task_node(),
                 provider=_provider_node(),
-                client_name="OpenCodeGoModelDeepseekV4FlashReasoningMax",
+                client_name="opencode_go.OpenCodeGoModelDeepseekV4FlashReasoningMax",
                 full_task_prompt="Reply to the user.",
             )
 
@@ -114,7 +114,7 @@ class TaskExecutionDebugDumpTests(unittest.IsolatedAsyncioTestCase):
                     dump = TaskExecutionDebugDump.begin(
                         selected_task=_task_node(),
                         provider=_provider_node(),
-                        client_name="OpenCodeGoModelGlm51ReasoningNone",
+                        client_name="opencode_go.OpenCodeGoModelGlm51ReasoningNone",
                         full_task_prompt="Reply to the user.",
                     )
 
@@ -134,7 +134,7 @@ class TaskExecutionDebugDumpTests(unittest.IsolatedAsyncioTestCase):
                     return_value=root / "task-execution",
                 ):
                     with mock.patch(
-                        "reframe_agent_host.agent_flow.task_execution.baml."
+                        "reframe_agent_host.agent_flow.task_execution.baml_task_execution."
                         "PerformTask__build_request_async",
                         return_value=_Request(
                             body=json.dumps(
@@ -153,7 +153,7 @@ class TaskExecutionDebugDumpTests(unittest.IsolatedAsyncioTestCase):
                         ),
                     ):
                         with mock.patch(
-                            "reframe_agent_host.agent_flow.task_execution.baml."
+                            "reframe_agent_host.agent_flow.task_execution.baml_task_execution."
                             "PerformTask_async",
                             return_value=TaskExecutionResult(
                                 returns=[
@@ -199,11 +199,11 @@ class TaskExecutionDebugDumpTests(unittest.IsolatedAsyncioTestCase):
         )
 
         with mock.patch(
-            "reframe_agent_host.agent_flow.task_execution.baml."
+            "reframe_agent_host.agent_flow.task_execution.baml_task_execution."
             "PerformTask__build_request_async",
         ) as build_request:
             with mock.patch(
-                "reframe_agent_host.agent_flow.task_execution.baml.PerformTask_async",
+                "reframe_agent_host.agent_flow.task_execution.baml_task_execution.PerformTask_async",
             ) as perform_task:
                 result = await planner.execute_task(
                     "memory_node:do_nothing_task",
@@ -267,7 +267,7 @@ def _provider_node() -> MemoryNode[Provider]:
         content=Provider(
             name="OpenCode Go direct model: deepseek-v4-flash / max",
             description="Provider.",
-            baml_surface="OpenCodeGoModelDeepseekV4Flash",
+            baml_surface="opencode_go.OpenCodeGoModelDeepseekV4Flash",
             model_id="deepseek-v4-flash",
             reasoning_effort="max",
         ),

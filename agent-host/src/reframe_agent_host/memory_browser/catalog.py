@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from reframe_memory.schema import MEMORY_RELATIONS
+
 
 @dataclass(frozen=True)
 class BrowserView:
@@ -32,15 +34,7 @@ VIEWS: tuple[BrowserView, ...] = (
     BrowserView("raw", "Raw Records"),
 )
 
-RELATION_TABLES: tuple[str, ...] = (
-    "contains",
-    "provides_task",
-    "has_conversation",
-    "has_message",
-    "has_session_memory",
-)
-
-TABLES: tuple[str, ...] = ("memory_root", "memory_node", *RELATION_TABLES)
+TABLES: tuple[str, ...] = ("memory_root", "memory_node", *MEMORY_RELATIONS)
 
 
 def view_for(key: str) -> BrowserView:

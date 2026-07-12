@@ -4,8 +4,7 @@ from dataclasses import dataclass
 import time
 from typing import Any, Mapping
 
-import baml_sdk as baml
-import baml_sdk as types
+from baml_sdk import task_completion as baml_task_completion
 from reframe_agent_host.agent_flow.prompt_layer_debug import (
     PromptLayerDebugSession,
 )
@@ -19,18 +18,18 @@ class TaskCompletionChecker:
         completion_string: str,
         output_summary: str,
         prompt_layer_debug: PromptLayerDebugSession | None = None,
-    ) -> types.CompletionResult:
+    ) -> baml_task_completion.CompletionResult:
         inputs = {
             "completion_string": completion_string,
             "output_summary": output_summary,
         }
         request = None
         if prompt_layer_debug is not None:
-            request = await baml.CheckTaskCompletion__build_request_async(**inputs)
+            request = await baml_task_completion.CheckTaskCompletion__build_request_async(**inputs)
 
         started_at = time.perf_counter()
         try:
-            result = await baml.CheckTaskCompletion_async(**inputs)
+            result = await baml_task_completion.CheckTaskCompletion_async(**inputs)
         except Exception as error:
             if prompt_layer_debug is not None:
                 _write_debug_layer(

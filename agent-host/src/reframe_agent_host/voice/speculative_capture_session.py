@@ -4,7 +4,7 @@ import time
 from collections.abc import Callable
 from threading import Event
 
-import baml_sdk as types
+from baml_sdk import context as baml_context
 import numpy as np
 from reframe_agent_host.voice.activity import UtteranceSegmenter
 from reframe_agent_host.voice.capture_finish import finish_with_debug_audio
@@ -37,7 +37,7 @@ class SpeculativeCaptureSession:
     def __init__(
         self,
         config: VoicePipelineConfig,
-        conversation_mode: types.ConversationMode,
+        conversation_mode: baml_context.ConversationMode,
         mode_controller: ConversationModeController | None = None,
         audio_frame_handler: AudioFrameHandler | None = None,
     ) -> None:

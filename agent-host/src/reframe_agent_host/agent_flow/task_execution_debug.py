@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-import baml_sdk as types
+from baml_sdk import task_execution as baml_task_execution
 from reframe_memory import ProviderNode, TaskNode
 
 
@@ -139,7 +139,7 @@ class TaskExecutionDebugDump:
         self,
         *,
         elapsed_seconds: float,
-        result: types.TaskExecutionResult,
+        result: baml_task_execution.TaskExecutionResult,
     ) -> None:
         try:
             returns = result.returns

@@ -6,7 +6,7 @@ from typing import Any
 from reframe_memory import open_memory_database
 from reframe_memory.ids import memory_node_record_id
 
-from reframe_agent_host.memory_browser.catalog import RELATION_TABLES
+from reframe_memory.schema import MEMORY_RELATIONS
 from reframe_agent_host.memory_browser.json_tools import json_ready
 from reframe_agent_host.memory_readiness import require_memory_ready
 
@@ -33,7 +33,7 @@ async def contains_relations(database) -> list[dict[str, object]]:
 
 async def relations_for(database, record_id: str) -> dict[str, list[dict[str, object]]]:
     relations: dict[str, list[dict[str, object]]] = {}
-    for table in RELATION_TABLES:
+    for table in MEMORY_RELATIONS:
         result = await database.query(
             f"SELECT * FROM {table} WHERE in = {record_id} OR out = {record_id};"
         )

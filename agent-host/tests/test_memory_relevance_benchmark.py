@@ -168,8 +168,8 @@ class MemoryRelevanceRunnerTests(unittest.IsolatedAsyncioTestCase):
     async def test_runner_reuses_one_snapshot_for_each_provider_effort(self):
         case = control_flow_cases()[0]
         providers = (
-            _provider("provider:one", "OpenCodeGoModelGlm51"),
-            _provider("provider:two", "OpenCodeGoModelKimiK25"),
+            _provider("provider:one", "opencode_go.OpenCodeGoModelGlm51"),
+            _provider("provider:two", "opencode_go.OpenCodeGoModelKimiK25"),
         )
         built_snapshots = []
         benchmark_calls = []

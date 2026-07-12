@@ -2,7 +2,8 @@ import json
 import unittest
 from datetime import UTC, datetime
 
-import baml_sdk as baml
+from baml_sdk import context as baml_context
+from baml_sdk import task_routing as baml_task_routing
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.agent_flow.task_choice import TaskChoiceContextBuilder
 from reframe_agent_host.commands.parser import build_parser
@@ -68,12 +69,12 @@ class TaskChoiceContextTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(args.conversation_id, "memory_node:current")
 
     async def test_choose_task_prompt_renders_user_preferences(self):
-        request = await baml.ChooseTask__build_request_async(
+        request = await baml_task_routing.ChooseTask__build_request_async(
             current_user_request="Open Hacker News compactly.",
             current_conversation=None,
             session_memories=[],
             user_preferences=[
-                baml.UserPreferenceMemoryContext(
+                baml_context.UserPreferenceMemoryContext(
                     id="memory_node:pref1",
                     title="Interface density",
                     description="Prefer compact, information-dense interfaces.",
@@ -84,7 +85,7 @@ class TaskChoiceContextTests(unittest.IsolatedAsyncioTestCase):
                 )
             ],
             available_tasks=[
-                baml.AvailableTask(
+                baml_task_routing.AvailableTask(
                     id="task:visual_panel",
                     name="Visual panel",
                     description="Open a visual panel.",

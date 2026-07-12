@@ -4,7 +4,7 @@ import re
 
 from baml_core import Collector
 
-from reframe_agent_host.agent_flow.baml_clients import (
+from reframe_agent_host.agent_flow.provider_clients import (
     BamlClient,
     compiled_client,
 )
@@ -80,7 +80,7 @@ def collector_stop_reason(collector: Collector) -> str | None:
 def _client_name(surface: str, effort: str) -> str:
     parts = re.split(r"[^A-Za-z0-9]+", effort)
     suffix = "".join(part.capitalize() for part in parts if part) or "Default"
-    return _identifier(surface) + "Reasoning" + suffix
+    return surface + "Reasoning" + suffix
 
 
 def _reasoning_efforts_for_surface(surface: str) -> tuple[str, ...] | None:
@@ -88,14 +88,6 @@ def _reasoning_efforts_for_surface(surface: str) -> tuple[str, ...] | None:
         if reference.direct_baml_surface == surface:
             return reference.reasoning_efforts
     return None
-
-
-def _identifier(value: str) -> str:
-    text = re.sub(r"[^A-Za-z0-9_]", "_", value)
-    if not text or text[0].isdigit():
-        text = "_" + text
-    return text
-
 
 def _get_nested(value: Any, names: tuple[str, ...]) -> Any:
     for name in names:

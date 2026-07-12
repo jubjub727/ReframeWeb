@@ -1,6 +1,9 @@
 [package]
 name = "agent-host"
 
+[toolchain]
+version = "0.13.0"
+
 # [scripts]
 # dev = "-f main"
 

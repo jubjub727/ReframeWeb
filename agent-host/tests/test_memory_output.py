@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 import unittest
 
-import baml_sdk as types
+from baml_sdk import memory_search as baml_memory_search
 from reframe_agent_host.commands.memory_output import (
     memory_search_summary,
     memory_type_counts_summary,
@@ -12,13 +12,13 @@ from reframe_agent_host.commands.memory_output import (
 
 class MemoryOutputTests(unittest.TestCase):
     def test_memory_search_summary_lists_tags_and_string_terms(self):
-        hints = types.ConversationMemorySearchHints(
-            tags=types.MemoryTagSearch(
+        hints = baml_memory_search.ConversationMemorySearchHints(
+            tags=baml_memory_search.MemoryTagSearch(
                 any_of=["voice", "latency"],
                 all_of=["agent-host"],
                 none_of=["scratch"],
             ),
-            strings=types.MemoryStringSearch(
+            strings=baml_memory_search.MemoryStringSearch(
                 contains=["sub second"],
                 equals=["exact title"],
             ),
@@ -37,14 +37,14 @@ class MemoryOutputTests(unittest.TestCase):
         )
 
     def test_search_depth_summary_lists_domains_and_cutoffs(self):
-        depths = types.SearchDepthDecision(
+        depths = baml_memory_search.SearchDepthDecision(
             depths={
-                "task_catalog": types.SearchDepthTimestamps(
+                "task_catalog": baml_memory_search.SearchDepthTimestamps(
                     created_after="2026-01-01T00:00:00Z",
                     updated_after="2026-01-02T00:00:00Z",
                     read_after="2026-01-03T00:00:00Z",
                 ),
-                "past_conversation_context": types.SearchDepthTimestamps(
+                "past_conversation_context": baml_memory_search.SearchDepthTimestamps(
                     created_after="2026-02-01T00:00:00Z",
                     updated_after="2026-02-02T00:00:00Z",
                     read_after="2026-02-03T00:00:00Z",

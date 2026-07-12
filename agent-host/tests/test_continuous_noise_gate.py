@@ -4,7 +4,7 @@ import unittest
 
 import numpy as np
 
-import baml_sdk as types
+from baml_sdk import context as baml_context
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
 from reframe_agent_host.speech.transcription import Transcript, WhisperTranscriberConfig
 from reframe_agent_host.speech.triggers import TriggerPhraseConfig, TriggerPhraseMatcher
@@ -45,7 +45,7 @@ class ContinuousNoiseGateTests(unittest.IsolatedAsyncioTestCase):
 
         result = await _processor(transcriber).process(
             capture=_continuous_noise_capture(),
-            conversation_mode=types.ConversationMode.CONTINUOUS_CONVERSATION,
+            conversation_mode=baml_context.ConversationMode.CONTINUOUS_CONVERSATION,
             model_prepare_seconds=0.0,
             total_started_at=time.perf_counter(),
             on_event=lambda stage, message: events.append((stage, message)),
@@ -62,7 +62,7 @@ class ContinuousNoiseGateTests(unittest.IsolatedAsyncioTestCase):
         task = asyncio.create_task(
             _processor(transcriber).process(
                 capture=_continuous_noise_capture(),
-                conversation_mode=types.ConversationMode.CONTINUOUS_CONVERSATION,
+                conversation_mode=baml_context.ConversationMode.CONTINUOUS_CONVERSATION,
                 model_prepare_seconds=0.0,
                 total_started_at=time.perf_counter(),
                 on_event=lambda stage, message: events.append((stage, message)),
@@ -97,14 +97,14 @@ def _voice_config():
         keyphrases=KeyphraseSpotterConfig(),
         triggers=TriggerPhraseConfig(),
         transcription=WhisperTranscriberConfig(),
-        conversation_mode=types.ConversationMode.CONTINUOUS_CONVERSATION,
+        conversation_mode=baml_context.ConversationMode.CONTINUOUS_CONVERSATION,
         task_choice_enabled=False,
     )
 
 
 def _continuous_noise_capture():
     return CaptureResult(
-        conversation_mode=types.ConversationMode.CONTINUOUS_CONVERSATION,
+        conversation_mode=baml_context.ConversationMode.CONTINUOUS_CONVERSATION,
         keyphrase_detection=None,
         utterance=DetectedUtterance(
             samples=np.full(1600, 0.003, dtype=np.float32),

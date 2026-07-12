@@ -27,37 +27,7 @@ trunc       = _define_function("baml.math.trunc", "sync",  ["value"])
 trunc_async = _define_function("baml.math.trunc", "async", ["value"])
 
 
-sum       = _define_function("baml.math.sum", "sync",  ["values"])
-sum_async = _define_function("baml.math.sum", "async", ["values"])
-
-
-_sum_int       = _define_function("baml.math._sum_int", "sync",  ["values"])
-_sum_int_async = _define_function("baml.math._sum_int", "async", ["values"])
-
-
-mean       = _define_function("baml.math.mean", "sync",  ["values"])
-mean.__doc__ = """Raises:
-    InvalidArgument"""
-mean_async = _define_function("baml.math.mean", "async", ["values"])
-mean_async.__doc__ = """Raises:
-    InvalidArgument"""
-
-
-median       = _define_function("baml.math.median", "sync",  ["values"])
-median.__doc__ = """Raises:
-    InvalidArgument"""
-median_async = _define_function("baml.math.median", "async", ["values"])
-median_async.__doc__ = """Raises:
-    InvalidArgument"""
-
-
 __all__ = [
     "trunc",
     "trunc_async",
-    "sum",
-    "sum_async",
-    "mean",
-    "mean_async",
-    "median",
-    "median_async",
 ]

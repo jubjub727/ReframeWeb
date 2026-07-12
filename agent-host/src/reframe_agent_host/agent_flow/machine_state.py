@@ -13,7 +13,7 @@ from typing import Any
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
-import baml_sdk as types
+from baml_sdk import context as baml_context
 
 
 DEFAULT_GEOLOCATION_ATTEMPTS = 5
@@ -97,7 +97,7 @@ class MachineStateProvider:
                 self._executor.shutdown(wait=False, cancel_futures=False)
                 self._executor = None
 
-    def context(self) -> types.MachineStateContext:
+    def context(self) -> baml_context.MachineStateContext:
         if self._state is None:
             msg = "machine state geolocation has not loaded"
             raise MachineStateError(msg)
@@ -125,11 +125,11 @@ def machine_state_context(
     *,
     monitors: list[MachineMonitor] | None = None,
     os_architecture: str | None = None,
-) -> types.MachineStateContext:
+) -> baml_context.MachineStateContext:
     now = datetime.now().astimezone()
     utc_now = datetime.now(timezone.utc).replace(microsecond=0)
     resolved_monitors = machine_monitors() if monitors is None else monitors
-    return types.MachineStateContext(
+    return baml_context.MachineStateContext(
         captured_at_utc=_iso_utc(utc_now),
         current_local_time=now.replace(microsecond=0).isoformat(),
         current_utc_time=_iso_utc(utc_now),
@@ -155,11 +155,11 @@ def machine_state_context(
     )
 
 
-def local_machine_state_context(reason: str = "IP geolocation unavailable") -> types.MachineStateContext:
+def local_machine_state_context(reason: str = "IP geolocation unavailable") -> baml_context.MachineStateContext:
     now = datetime.now().astimezone()
     utc_now = datetime.now(timezone.utc).replace(microsecond=0)
     monitors = machine_monitors()
-    return types.MachineStateContext(
+    return baml_context.MachineStateContext(
         captured_at_utc=_iso_utc(utc_now),
         current_local_time=now.replace(microsecond=0).isoformat(),
         current_utc_time=_iso_utc(utc_now),
@@ -242,9 +242,9 @@ def fetch_ip_geolocation(
     raise MachineStateError(msg)
 
 
-def _monitor_contexts(monitors: list[MachineMonitor]) -> list[types.MachineMonitorContext]:
+def _monitor_contexts(monitors: list[MachineMonitor]) -> list[baml_context.MachineMonitorContext]:
     return [
-        types.MachineMonitorContext(
+        baml_context.MachineMonitorContext(
             horizontal_resolution=monitor.horizontal_resolution,
             vertical_resolution=monitor.vertical_resolution,
         )
