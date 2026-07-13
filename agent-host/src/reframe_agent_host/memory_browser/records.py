@@ -48,7 +48,7 @@ async def overview() -> dict[str, object]:
     }
 
 
-async def list_nodes(view_key: str, search: str, limit: int) -> dict[str, object]:
+async def list_nodes(view_key: str, search: str) -> dict[str, object]:
     view = view_for(view_key)
     async with BrowserDatabase() as database:
         roots = await root_records(database)
@@ -56,8 +56,7 @@ async def list_nodes(view_key: str, search: str, limit: int) -> dict[str, object
         result = await database.query(
             """
             SELECT * FROM memory_node
-            ORDER BY updated_at DESC, created_at DESC
-            LIMIT 1000;
+            ORDER BY updated_at DESC, created_at DESC;
             """,
         )
     grouped_roots = roots_by_node(relations)
@@ -68,7 +67,7 @@ async def list_nodes(view_key: str, search: str, limit: int) -> dict[str, object
         rows = [row for row in rows if needle in row["search_text"]]
     return {
         "view": view.key,
-        "items": [_public_row(row) for row in rows[: _clamped_limit(limit)]],
+        "items": [_public_row(row) for row in rows],
     }
 
 
@@ -146,20 +145,16 @@ async def delete_node(node_id: str) -> dict[str, object]:
     return {"deleted_id": node_id}
 
 
-async def table_rows(table: str, limit: int) -> dict[str, object]:
+async def table_rows(table: str) -> dict[str, object]:
     if table not in TABLES:
         raise ValueError(f"unknown table: {table}")
     order = "ORDER BY updated_at DESC, created_at DESC" if table == "memory_node" else ""
     async with BrowserDatabase() as database:
         result = await database.query(
-            f"SELECT * FROM {table} {order} LIMIT {_clamped_limit(limit)};"
+            f"SELECT * FROM {table} {order};"
         )
     return {"table": table, "rows": json_ready(result_records(result))}
 
 
 def _public_row(row: Mapping[str, object]) -> dict[str, object]:
     return {key: value for key, value in row.items() if key != "search_text"}
-
-
-def _clamped_limit(limit: int) -> int:
-    return max(1, min(limit, 500))

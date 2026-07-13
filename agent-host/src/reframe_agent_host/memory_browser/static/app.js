@@ -7,7 +7,6 @@ const state = {
   view: "sessions",
   table: "memory_node",
   query: "",
-  limit: 100,
   selectedId: "",
   selectedRawIndex: -1,
   rawRows: [],
@@ -17,7 +16,6 @@ const tabs = document.querySelector("#viewTabs");
 const overview = document.querySelector("#overview");
 const tableSelect = document.querySelector("#tableSelect");
 const searchInput = document.querySelector("#searchInput");
-const limitSelect = document.querySelector("#limitSelect");
 const recordList = document.querySelector("#recordList");
 const detailPane = document.querySelector("#detailPane");
 const status = document.querySelector("#status");
@@ -26,10 +24,6 @@ const toast = document.querySelector("#toast");
 document.querySelector("#refreshButton").onclick = () => refresh();
 searchInput.oninput = () => {
   state.query = searchInput.value;
-  refreshList();
-};
-limitSelect.onchange = () => {
-  state.limit = Number(limitSelect.value);
   refreshList();
 };
 tableSelect.onchange = () => {
@@ -80,7 +74,6 @@ async function refreshNodeList() {
   const params = new URLSearchParams({
     view: state.view,
     q: state.query,
-    limit: String(state.limit),
   });
   const data = await getJson(`/api/nodes?${params}`);
   renderNodeList(recordList, data.items, state.selectedId, selectNode);
@@ -92,7 +85,6 @@ async function refreshNodeList() {
 async function refreshRawList() {
   const params = new URLSearchParams({
     name: state.table,
-    limit: String(state.limit),
   });
   const data = await getJson(`/api/table?${params}`);
   const needle = state.query.trim().toLowerCase();

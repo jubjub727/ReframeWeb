@@ -78,7 +78,6 @@ class MemoryBrowserHandler(SimpleHTTPRequestHandler):
                         records.list_nodes(
                             _query_value(query, "view", "sessions"),
                             _query_value(query, "q", ""),
-                            _query_int(query, "limit", 100),
                         )
                     )
                 )
@@ -93,7 +92,6 @@ class MemoryBrowserHandler(SimpleHTTPRequestHandler):
                     asyncio.run(
                         records.table_rows(
                             _query_value(query, "name", "memory_node"),
-                            _query_int(query, "limit", 100),
                         )
                     )
                 )
@@ -143,13 +141,6 @@ class MemoryBrowserHandler(SimpleHTTPRequestHandler):
 def _query_value(query: dict[str, list[str]], key: str, default: str) -> str:
     values = query.get(key)
     return values[0] if values else default
-
-
-def _query_int(query: dict[str, list[str]], key: str, default: int) -> int:
-    try:
-        return int(_query_value(query, key, str(default)))
-    except ValueError:
-        return default
 
 
 def _content_type(path: Path) -> str:
