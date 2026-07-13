@@ -1,3 +1,5 @@
+//# Build context
+
 function PromptContexts(
     memories: root.memory.RetrievedMemoryGraph,
     selected_memory_ids: string[],
@@ -17,6 +19,7 @@ function PromptContexts(
             let _ = contexts.push(ContextFromUserPreference(preference));
         }
     }
+
     for (let session in memories.past_sessions) {
         let is_current_session = root.memory.IsCurrentSession(session, current_session_id);
         if (KeepSessionContext(session, selected_memory_ids)) {
@@ -38,6 +41,8 @@ function PromptContexts(
     contexts
 }
 
+//# Map task context
+
 function ContextFromTask(
     task: root.memory.RetrievedTaskNode,
 ) -> root.task.TaskPromptSelectedMemoryContext {
@@ -50,6 +55,8 @@ function ContextFromTask(
         read_at: task.read_at,
     }
 }
+
+//# Map session
 
 function ContextFromSession(
     session: root.memory.RetrievedSessionGraph,
@@ -64,6 +71,8 @@ function ContextFromSession(
         read_at: session.session.read_at,
     }
 }
+
+//# Map conversation
 
 function ContextFromConversation(
     session: root.memory.RetrievedSessionGraph,
@@ -80,6 +89,8 @@ function ContextFromConversation(
     }
 }
 
+//# Map session memory
+
 function ContextFromSessionMemory(
     memory: root.memory.RetrievedSessionMemoryNode,
 ) -> root.task.TaskPromptSelectedMemoryContext {
@@ -92,6 +103,8 @@ function ContextFromSessionMemory(
         read_at: memory.read_at,
     }
 }
+
+//# Map preference
 
 function ContextFromUserPreference(
     preference: root.turn_context.UserPreferenceMemoryContext,
@@ -106,6 +119,8 @@ function ContextFromUserPreference(
     }
 }
 
+//# Map message
+
 function ContextFromMessage(
     message: root.memory.RetrievedConversationMessageNode,
 ) -> root.task.TaskPromptSelectedMemoryContext {
@@ -119,6 +134,8 @@ function ContextFromMessage(
     }
 }
 
+//# Keep session
+
 function KeepSessionContext(
     session: root.memory.RetrievedSessionGraph,
     selected_ids: string[],
@@ -128,6 +145,8 @@ function KeepSessionContext(
         || session.session_memories.length() > 0
         || session.conversations.length() > 0
 }
+
+//# Keep conversation
 
 function KeepConversationContext(
     conversation: root.memory.RetrievedConversationGraph,

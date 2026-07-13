@@ -1,3 +1,5 @@
+//# Plan voice turn
+
 function UnderstandVoicePrompt(
     current_timestamp: string,
     current_user_request: string,
@@ -10,6 +12,7 @@ function UnderstandVoicePrompt(
     search_depth_memories: root.memory.SearchDepthMemoryContext[],
     machine_state: root.turn_context.MachineStateContext,
 ) -> VoicePromptUnderstanding {
+    //# Choose task
     let task_choice_started_at = baml.time.Instant.now();
     let task_choice = root
         .task
@@ -24,6 +27,7 @@ function UnderstandVoicePrompt(
         );
     let task_choice_ms = task_choice_started_at.elapsed().to_milliseconds();
     let selected_task = root.task_catalog.SelectedTask(available_tasks, task_choice.selected_task_id);
+    //# Plan memory search
     let memory_search_started_at = baml.time.Instant.now();
     let memory_search_hints = root
         .memory
@@ -36,6 +40,7 @@ function UnderstandVoicePrompt(
             machine_state,
         );
     let memory_search_ms = memory_search_started_at.elapsed().to_milliseconds();
+    //# Set search depth
     let search_depth_started_at = baml.time.Instant.now();
     let search_depths = root
         .memory
@@ -51,7 +56,6 @@ function UnderstandVoicePrompt(
             machine_state,
         );
     let search_depth_ms = search_depth_started_at.elapsed().to_milliseconds();
-
     VoicePromptUnderstanding {
         task_choice: task_choice,
         selected_task: selected_task,
@@ -65,6 +69,8 @@ function UnderstandVoicePrompt(
     }
 }
 
+//# Build voice prompt
+
 function ContinueVoicePrompt(
     current_user_request: string,
     current_conversation: root.turn_context.ConversationHistory?,
@@ -77,6 +83,7 @@ function ContinueVoicePrompt(
     task_prompt_memories: root.task.TaskPromptMemoryContext[],
     machine_state: root.turn_context.MachineStateContext,
 ) -> VoicePromptContinuation {
+    //# Select memory
     let memory_relevance_started_at = baml.time.Instant.now();
     let relevance_decision = root
         .memory
@@ -99,6 +106,7 @@ function ContinueVoicePrompt(
             current_session_id,
             user_preferences,
         );
+    //# Compose handoff
     let task_prompt_started_at = baml.time.Instant.now();
     let composition = root
         .task
@@ -112,7 +120,6 @@ function ContinueVoicePrompt(
             machine_state,
         );
     let task_prompt_ms = task_prompt_started_at.elapsed().to_milliseconds();
-
     VoicePromptContinuation {
         relevance_decision: relevance_decision,
         selected_memories: selected_memories,

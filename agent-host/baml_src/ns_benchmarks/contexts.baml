@@ -1,3 +1,5 @@
+//# Map conversation
+
 function ConversationContext(
     conversation: BenchmarkConversation,
 ) -> root.turn_context.ConversationHistory {
@@ -23,6 +25,8 @@ function ConversationContext(
     }
 }
 
+//# Map conversations
+
 function ConversationContexts(
     conversations: BenchmarkConversation[],
 ) -> root.turn_context.ConversationHistory[] {
@@ -33,6 +37,8 @@ function ConversationContexts(
             },
         )
 }
+
+//# Map session memory
 
 function SessionMemoryContexts(
     memories: BenchmarkMemory[],
@@ -52,6 +58,8 @@ function SessionMemoryContexts(
         )
 }
 
+//# Map preferences
+
 function UserPreferenceContexts(
     memories: BenchmarkMemory[],
 ) -> root.turn_context.UserPreferenceMemoryContext[] {
@@ -70,6 +78,8 @@ function UserPreferenceContexts(
             },
         )
 }
+
+//# Map task catalog
 
 function AvailableTaskContexts(tasks: BenchmarkTask[]) -> root.task_catalog.AvailableTask[] {
     tasks
@@ -91,6 +101,8 @@ function AvailableTaskContexts(tasks: BenchmarkTask[]) -> root.task_catalog.Avai
         )
 }
 
+//# Map selected task
+
 function SelectedTaskContext(task: BenchmarkTask) -> root.task_catalog.SelectedTaskContext {
     root.task_catalog.SelectedTaskContext {
         id: task.id,
@@ -106,12 +118,16 @@ function SelectedTaskContext(task: BenchmarkTask) -> root.task_catalog.SelectedT
     }
 }
 
+//# Resolve case task
+
 function SelectedTaskForCase(
     case: ControlFlowBenchmarkCase,
     selected_task_id: string,
 ) -> root.task_catalog.SelectedTaskContext {
     root.task_catalog.SelectedTask(AvailableTaskContexts(case.available_tasks), selected_task_id)
 }
+
+//# Map routing memory
 
 function TaskChoiceMemoryContexts(
     memories: BenchmarkMemory[],
@@ -131,6 +147,8 @@ function TaskChoiceMemoryContexts(
         )
 }
 
+//# Map search memory
+
 function ConversationEvaluationMemoryContexts(
     memories: BenchmarkMemory[],
 ) -> root.memory.ConversationEvaluationMemoryContext[] {
@@ -148,6 +166,8 @@ function ConversationEvaluationMemoryContexts(
             },
         )
 }
+
+//# Map recency memory
 
 function SearchDepthMemoryContexts(
     memories: BenchmarkMemory[],
@@ -167,6 +187,8 @@ function SearchDepthMemoryContexts(
         )
 }
 
+//# Build task history
+
 function TaskPromptConversation(
     case: TaskPromptBenchmarkCase,
     timestamp: string,
@@ -184,6 +206,7 @@ function TaskPromptConversation(
                 }
             },
         );
+
     messages
         .push(
             root.turn_context.ConversationHistoryMessage {
@@ -194,6 +217,7 @@ function TaskPromptConversation(
                 content: case.current_user_request,
             },
         );
+
     root.turn_context.ConversationHistory {
         id: `benchmark_conversation:${case.id}`,
         name: case.conversation_name,
@@ -203,6 +227,8 @@ function TaskPromptConversation(
         messages: messages,
     }
 }
+
+//# Map prompt memory
 
 function TaskPromptSessionMemoryContexts(
     case: TaskPromptBenchmarkCase,
@@ -223,6 +249,8 @@ function TaskPromptSessionMemoryContexts(
         )
 }
 
+//# Map chosen memory
+
 function TaskPromptSelectedMemoryContexts(
     case: TaskPromptBenchmarkCase,
     timestamp: string,
@@ -242,11 +270,15 @@ function TaskPromptSelectedMemoryContexts(
         )
 }
 
+//# Fix relevance task
+
 function MemoryRelevanceSelectedTask(
     case: ControlFlowBenchmarkCase,
 ) -> root.task_catalog.SelectedTaskContext {
     SelectedTaskForCase(case, case.expected_task_id)
 }
+
+//# Build candidates
 
 function MemoryRelevanceCandidates(
     case: ControlFlowBenchmarkCase,
@@ -271,6 +303,7 @@ function MemoryRelevanceCandidates(
                 }
             },
         );
+
     let preference_candidates = case
         .user_preferences
         .map(
@@ -290,8 +323,11 @@ function MemoryRelevanceCandidates(
                 }
             },
         );
+
     session_candidates.concat(preference_candidates)
 }
+
+//# List expected ids
 
 function MemoryRelevanceExpectedIds(case: ControlFlowBenchmarkCase) -> string[] {
     case.session

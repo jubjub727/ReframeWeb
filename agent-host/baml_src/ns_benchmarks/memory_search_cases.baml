@@ -1,3 +1,5 @@
+//# Layout-memory case
+
 function RememberedViewPreference() -> ConversationEvaluationBenchmarkCase {
     ConversationEvaluationBenchmarkCase {
         id: "remembered_view_preference",
@@ -49,6 +51,8 @@ function RememberedViewPreference() -> ConversationEvaluationBenchmarkCase {
     }
 }
 
+//# Ambiguous request
+
 function AmbiguousFollowup() -> ConversationEvaluationBenchmarkCase {
     ConversationEvaluationBenchmarkCase {
         id: "ambiguous_followup",
@@ -95,6 +99,8 @@ function AmbiguousFollowup() -> ConversationEvaluationBenchmarkCase {
         review_focus: "Review whether hints preserve the CSV/Stripe context without guessing a file path.",
     }
 }
+
+//# Capability case
 
 function CapabilityLimitWithSensitiveAction() -> ConversationEvaluationBenchmarkCase {
     ConversationEvaluationBenchmarkCase {
@@ -154,6 +160,8 @@ function CapabilityLimitWithSensitiveAction() -> ConversationEvaluationBenchmark
     }
 }
 
+//# Voice-memory case
+
 function VoicePreferenceRecall() -> ConversationEvaluationBenchmarkCase {
     ConversationEvaluationBenchmarkCase {
         id: "voice_preference_recall",
@@ -212,6 +220,8 @@ function VoicePreferenceRecall() -> ConversationEvaluationBenchmarkCase {
     }
 }
 
+//# Scroll-memory case
+
 function ScrollBehaviorPreference() -> ConversationEvaluationBenchmarkCase {
     ConversationEvaluationBenchmarkCase {
         id: "scroll_behavior_preference",
@@ -262,6 +272,8 @@ function ScrollBehaviorPreference() -> ConversationEvaluationBenchmarkCase {
         review_focus: "Review whether hints keep Reddit and scrolling as concrete references.",
     }
 }
+
+//# Build search cases
 
 function ConversationEvaluationCases() -> ConversationEvaluationBenchmarkCase[] {
     [

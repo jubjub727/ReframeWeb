@@ -1,3 +1,5 @@
+//# Build search scope
+
 function SearchDomains() -> root.memory.SearchDepthDomain[] {
     [
         root.memory.SearchDepthDomain {

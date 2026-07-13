@@ -1,3 +1,5 @@
+//# Map session
+
 function SessionCandidate(
     session: root.memory.RetrievedSessionGraph,
     is_current_session: bool,
@@ -25,6 +27,8 @@ function SessionCandidate(
     }
 }
 
+//# Map session memory
+
 function SessionMemoryCandidate(
     session: root.memory.RetrievedSessionGraph,
     memory: root.memory.RetrievedSessionMemoryNode,
@@ -48,6 +52,8 @@ function SessionMemoryCandidate(
         parent_conversation_id: null,
     }
 }
+
+//# Map conversation
 
 function ConversationCandidate(
     session: root.memory.RetrievedSessionGraph,
@@ -77,6 +83,8 @@ function ConversationCandidate(
     }
 }
 
+//# Map message
+
 function ConversationMessageCandidate(
     session: root.memory.RetrievedSessionGraph,
     conversation: root.memory.RetrievedConversationGraph,
@@ -102,16 +110,21 @@ function ConversationMessageCandidate(
     }
 }
 
+//# Match memory ids
+
 function MessageMatchedMemorySearch(
     conversation: root.memory.RetrievedConversationGraph,
     message: root.memory.RetrievedConversationMessageNode,
 ) -> bool {
-    if (conversation.matched_message_ids.length() > 0) {
+    let has_explicit_matches = conversation.matched_message_ids.length() > 0;
+    if (has_explicit_matches) {
         conversation.matched_message_ids.includes(message.id)
     } else {
         true
     }
 }
+
+//# Match session id
 
 function IsCurrentSession(
     session: root.memory.RetrievedSessionGraph,

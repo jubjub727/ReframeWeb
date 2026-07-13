@@ -1,3 +1,5 @@
+//# Set search depth
+
 function ChooseMemorySearchDepths(
     current_timestamp: string,
     current_user_request: string,

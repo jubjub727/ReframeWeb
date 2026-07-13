@@ -1,3 +1,5 @@
+//# Build core catalog
+
 function CoreTasks() -> CoreTaskDefinition[] {
     [
         CoreTaskDefinition {

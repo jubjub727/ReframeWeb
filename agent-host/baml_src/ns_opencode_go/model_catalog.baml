@@ -5,9 +5,13 @@ class ModelReference {
     reasoning_efforts: string[],
 }
 
+//# List reasoning
+
 function StandardReasoningEfforts() -> string[] {
     ["none", "minimal", "low", "medium", "high", "xhigh"]
 }
+
+//# Build model list
 
 function ModelInventory() -> ModelReference[] {
     let standard = StandardReasoningEfforts();

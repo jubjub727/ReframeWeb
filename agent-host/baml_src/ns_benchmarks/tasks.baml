@@ -1,3 +1,5 @@
+//# Visual-panel task
+
 function VisualPanelTask() -> BenchmarkTask {
     BenchmarkTask {
         id: "benchmark_task:visual_panel",
@@ -12,6 +14,8 @@ function VisualPanelTask() -> BenchmarkTask {
         read_at: "NONE",
     }
 }
+
+//# Input-needed task
 
 function NeedsInformationTask() -> BenchmarkTask {
     BenchmarkTask {
@@ -28,6 +32,8 @@ function NeedsInformationTask() -> BenchmarkTask {
     }
 }
 
+//# Unsupported task
+
 function CannotHandleTask() -> BenchmarkTask {
     BenchmarkTask {
         id: "benchmark_task:cannot_handle",
@@ -43,6 +49,8 @@ function CannotHandleTask() -> BenchmarkTask {
     }
 }
 
+//# Model-choice task
+
 function ModelSelectionTask() -> BenchmarkTask {
     BenchmarkTask {
         id: "benchmark_task:model_selection",
@@ -57,6 +65,8 @@ function ModelSelectionTask() -> BenchmarkTask {
         read_at: "NONE",
     }
 }
+
+//# Build task catalog
 
 function AvailableTasks() -> BenchmarkTask[] {
     [VisualPanelTask(), NeedsInformationTask(), CannotHandleTask()]

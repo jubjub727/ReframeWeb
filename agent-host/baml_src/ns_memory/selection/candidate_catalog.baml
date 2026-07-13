@@ -1,3 +1,5 @@
+//# Build candidates
+
 function Candidates(
     memories: root.memory.RetrievedMemoryGraph,
     current_session_id: string?,
@@ -14,6 +16,7 @@ function Candidates(
     for (let preference in user_preferences) {
         let _ = candidates.push(UserPreferenceCandidate(preference));
     }
+
     for (let session in memories.past_sessions) {
         let is_current_session = IsCurrentSession(session, current_session_id);
         let _ = candidates.push(SessionCandidate(session, is_current_session));
@@ -34,6 +37,8 @@ function Candidates(
     candidates
 }
 
+//# Describe task
+
 function TaskCandidate(
     task: root.memory.RetrievedTaskNode,
 ) -> root.memory.RetrievedMemoryCandidate {
@@ -51,6 +56,8 @@ function TaskCandidate(
         parent_conversation_id: null,
     }
 }
+
+//# Map active memory
 
 function CurrentSessionMemoryCandidate(
     memory: root.memory.RetrievedSessionMemoryNode,
@@ -71,6 +78,8 @@ function CurrentSessionMemoryCandidate(
     }
 }
 
+//# Map preference
+
 function UserPreferenceCandidate(
     preference: root.turn_context.UserPreferenceMemoryContext,
 ) -> root.memory.RetrievedMemoryCandidate {
@@ -89,6 +98,8 @@ function UserPreferenceCandidate(
     }
 }
 
+//# Index task intent
+
 function TaskCandidateDescription(task: root.memory.RetrievedTaskNode) -> string {
     let pieces: string[] = [];
     if (task.description != "") {
@@ -100,11 +111,13 @@ function TaskCandidateDescription(task: root.memory.RetrievedTaskNode) -> string
     if (task.output != "") {
         let _ = pieces.push(`output: ${task.output}`);
     }
+
     if (task.prompt != "") {
         let _ = pieces.push(`prompt: ${task.prompt}`);
     }
     if (task.provider_id != "") {
         let _ = pieces.push(`provider_id: ${task.provider_id}`);
     }
+
     pieces.join("\n")
 }

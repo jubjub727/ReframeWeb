@@ -1,3 +1,5 @@
+//# Build chosen graph
+
 function SelectedGraph(
     memories: root.memory.RetrievedMemoryGraph,
     decision: root.memory.RelevantMemoryDecision,
@@ -30,6 +32,8 @@ function SelectedGraph(
     }
 }
 
+//# Filter session
+
 function RelevantSessionGraph(
     session: root.memory.RetrievedSessionGraph,
     kept_ids: string[],
@@ -48,11 +52,11 @@ function RelevantSessionGraph(
                 kept_ids.includes(memory.id)
             },
         );
-    if (
-        !kept_ids.includes(session.session.id)
-            && conversations.length() == 0
-            && session_memories.length() == 0
-    ) {
+    let has_relevant_context = kept_ids.includes(session.session.id)
+        || conversations.length() > 0
+        || session_memories.length() > 0;
+
+    if (!has_relevant_context) {
         null
     } else {
         root.memory.RetrievedSessionGraph {
@@ -63,6 +67,8 @@ function RelevantSessionGraph(
         }
     }
 }
+
+//# Prune conversation
 
 function RelevantConversationGraph(
     conversation: root.memory.RetrievedConversationGraph,
@@ -75,7 +81,9 @@ function RelevantConversationGraph(
                 kept_ids.includes(message.id)
             },
         );
-    if (!kept_ids.includes(conversation.conversation.id) && messages.length() == 0) {
+    let has_relevant_context = kept_ids.includes(conversation.conversation.id) || messages.length() > 0;
+
+    if (!has_relevant_context) {
         null
     } else {
         root.memory.RetrievedConversationGraph {

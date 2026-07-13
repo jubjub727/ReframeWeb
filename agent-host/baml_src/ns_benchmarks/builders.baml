@@ -1,3 +1,5 @@
+//# Build message
+
 function Message(
     role: string,
     content: string,
@@ -11,6 +13,8 @@ function Message(
         content: content,
     }
 }
+
+//# Build conversation
 
 function Conversation(
     id_suffix: string,
@@ -27,6 +31,8 @@ function Conversation(
     }
 }
 
+//# Build memory
+
 function Memory(
     title: string,
     description: string,
@@ -42,6 +48,8 @@ function Memory(
         read_at: "NONE",
     }
 }
+
+//# Build session
 
 function Session(
     id_suffix: string,

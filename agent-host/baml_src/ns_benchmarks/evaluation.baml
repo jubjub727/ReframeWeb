@@ -13,12 +13,16 @@ class LatencySummary {
     p50: float?,
 }
 
+//# Check task choice
+
 function TaskChoiceCorrect(
     decision: root.task.TaskChoiceDecision,
     expected_task_id: string,
 ) -> bool {
     decision.selected_task_id == expected_task_id
 }
+
+//# Check memory set
 
 function MemorySelectionCorrect(
     decision: root.memory.RelevantMemoryDecision,
@@ -37,11 +41,15 @@ function MemorySelectionCorrect(
                 id
             },
         );
+
     baml.deep_equals(actual, expected_ids)
 }
 
+//# Check task prompt
+
 function EvaluateTaskPrompt(full_task_prompt: string) -> TaskPromptEvaluation {
     let parts = full_task_prompt.trim().split("\nInput:");
+
     let task_present = parts.length() == 2
         && parts[0].starts_with("Task:")
         && parts[0].substring(5, parts[0].length()).trim().length() > 0;
@@ -52,6 +60,7 @@ function EvaluateTaskPrompt(full_task_prompt: string) -> TaskPromptEvaluation {
         []
     };
     let shape_ok = task_present && input_present && baml.deep_equals(labels, ["Task", "Input"]);
+
     TaskPromptEvaluation {
         correct: shape_ok,
         shape_ok: shape_ok,
@@ -61,16 +70,20 @@ function EvaluateTaskPrompt(full_task_prompt: string) -> TaskPromptEvaluation {
     }
 }
 
+//# Summarise latency
+
 function SummariseLatencies(latencies: float[]) -> LatencySummary {
     if (latencies.length() == 0) {
         return LatencySummary { average: null, best: null, worst: null, p50: null };
     }
+
     latencies
         .sort_by_key(
             (latency) -> {
                 latency
             },
         );
+
     let total: float = 0.0;
     for (let latency in latencies) {
         total += latency;
@@ -81,6 +94,7 @@ function SummariseLatencies(latencies: float[]) -> LatencySummary {
     } else {
         latencies[middle]
     };
+
     LatencySummary {
         average: total / (latencies.length() * 1.0),
         best: latencies[0],

@@ -1,3 +1,5 @@
+//# Check completion
+
 function CheckTaskCompletion(
     completion_string: string,
     output_summary: string,

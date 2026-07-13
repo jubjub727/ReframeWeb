@@ -1,3 +1,5 @@
+//# Seed routing
+
 function TaskChoiceMemories() -> BenchmarkMemory[] {
     [
         Memory(
@@ -15,6 +17,8 @@ function TaskChoiceMemories() -> BenchmarkMemory[] {
     ]
 }
 
+//# Seed recency
+
 function SearchDepthMemories() -> BenchmarkMemory[] {
     [
         Memory(
@@ -31,6 +35,8 @@ function SearchDepthMemories() -> BenchmarkMemory[] {
         ),
     ]
 }
+
+//# Compact HN case
 
 function HackerNewsCompactPanel() -> ControlFlowBenchmarkCase {
     let visual_task = VisualPanelTask();
@@ -90,6 +96,8 @@ function HackerNewsCompactPanel() -> ControlFlowBenchmarkCase {
     }
 }
 
+//# Slow-scroll case
+
 function RedditSlowScroll() -> ControlFlowBenchmarkCase {
     let visual_task = VisualPanelTask();
     ControlFlowBenchmarkCase {
@@ -148,6 +156,8 @@ function RedditSlowScroll() -> ControlFlowBenchmarkCase {
     }
 }
 
+//# Stripe follow-up
+
 function StripeFollowupCleanup() -> ControlFlowBenchmarkCase {
     let information_task = NeedsInformationTask();
     ControlFlowBenchmarkCase {
@@ -205,6 +215,8 @@ function StripeFollowupCleanup() -> ControlFlowBenchmarkCase {
         task_prompt_memories: [],
     }
 }
+
+//# Build flow cases
 
 function ControlFlowCases() -> ControlFlowBenchmarkCase[] {
     [HackerNewsCompactPanel(), RedditSlowScroll(), StripeFollowupCleanup()]
