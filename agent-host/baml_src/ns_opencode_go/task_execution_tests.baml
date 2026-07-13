@@ -11,13 +11,13 @@ test "opencode glm 5.1 no reasoning smoke" {
             Output:
             A TaskExecutionResult with an empty returns array.
         `;
-        let request = root.task_execution.PerformTask$build_request(prompt);
+        let request = root.task.PerformTask$build_request(prompt);
         let body = baml.json.parse(request.body);
 
         assert.equal(baml.json.to<string>(baml.json.field(body, "model")), "glm-5.1");
         assert.equal(baml.json.to<string>(baml.json.field(body, "reasoning_effort")), "none");
 
-        let result = root.task_execution.PerformTask(prompt);
+        let result = root.task.PerformTask(prompt);
         assert.equal(result.returns.length(), 0)
     }
 }
@@ -41,15 +41,13 @@ test "opencode reply task uses glm 5.1 no reasoning smoke" {
             Input:
             Say hello in one short sentence.
         `;
-        let request = root
-            .task_execution
-            .PerformTask$build_request(prompt, client = OpenCodeGoModelGlm51ReasoningNone);
+        let request = root.task.PerformTask$build_request(prompt, client = OpenCodeGoModelGlm51ReasoningNone);
         let body = baml.json.parse(request.body);
 
         assert.equal(baml.json.to<string>(baml.json.field(body, "model")), "glm-5.1");
         assert.equal(baml.json.to<string>(baml.json.field(body, "reasoning_effort")), "none");
 
-        let result = root.task_execution.PerformTask(prompt, client = OpenCodeGoModelGlm51ReasoningNone);
+        let result = root.task.PerformTask(prompt, client = OpenCodeGoModelGlm51ReasoningNone);
         assert
             .is_true(
                 result

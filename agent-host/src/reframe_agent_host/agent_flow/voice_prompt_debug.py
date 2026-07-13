@@ -2,10 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Awaitable, Callable, Mapping
 
-from baml_sdk import memory_search as baml_memory_search
-from baml_sdk import memory_selection as baml_memory_selection
-from baml_sdk import task_prompt as baml_task_prompt
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import memory as baml_memory
+from baml_sdk import task as baml_task
 from baml_sdk import voice_turn as baml_voice_turn
 from reframe_agent_host.agent_flow.prompt_layer_debug import PromptLayerDebugSession
 
@@ -35,7 +33,7 @@ async def dump_understanding_layers(
         inputs=choose_task_inputs,
         result=result.task_choice,
         elapsed_seconds=_seconds_from_ms(result.timings.task_choice_ms),
-        build_request=lambda: baml_task_routing.ChooseTask__build_request_async(
+        build_request=lambda: baml_task.ChooseTask__build_request_async(
             **choose_task_inputs, **kwargs
         ),
     )
@@ -57,7 +55,7 @@ async def dump_understanding_layers(
         inputs=memory_search_inputs,
         result=result.memory_search_hints,
         elapsed_seconds=_seconds_from_ms(result.timings.memory_search_ms),
-        build_request=lambda: baml_memory_search.ChooseMemorySearch__build_request_async(
+        build_request=lambda: baml_memory.ChooseMemorySearch__build_request_async(
             **memory_search_inputs, **kwargs
         ),
     )
@@ -69,7 +67,7 @@ async def dump_understanding_layers(
         "session_memories": inputs["session_memories"],
         "selected_task": result.selected_task,
         "memory_search_hints": result.memory_search_hints,
-        "search_domains": await baml_memory_search.SearchDomains_async(),
+        "search_domains": await baml_memory.SearchDomains_async(),
         "search_depth_memories": inputs["search_depth_memories"],
         "machine_state": inputs["machine_state"],
     }
@@ -80,7 +78,7 @@ async def dump_understanding_layers(
         inputs=search_depth_inputs,
         result=result.search_depths,
         elapsed_seconds=_seconds_from_ms(result.timings.search_depth_ms),
-        build_request=lambda: baml_memory_search.ChooseMemorySearchDepths__build_request_async(
+        build_request=lambda: baml_memory.ChooseMemorySearchDepths__build_request_async(
             **search_depth_inputs, **kwargs
         ),
     )
@@ -92,7 +90,7 @@ async def dump_continuation_layers(
     result: baml_voice_turn.VoicePromptContinuation,
     kwargs: dict[str, Any],
 ) -> None:
-    candidate_memories = await baml_memory_selection.Candidates_async(
+    candidate_memories = await baml_memory.Candidates_async(
         inputs["retrieved_memories"],
         inputs["current_session_id"],
         inputs["user_preferences"],
@@ -113,7 +111,7 @@ async def dump_continuation_layers(
         inputs=relevance_inputs,
         result=result.relevance_decision,
         elapsed_seconds=_seconds_from_ms(result.timings.memory_relevance_ms),
-        build_request=lambda: baml_memory_selection.SelectRelevantMemories__build_request_async(
+        build_request=lambda: baml_memory.SelectRelevantMemories__build_request_async(
             **relevance_inputs, **kwargs
         ),
     )
@@ -135,7 +133,7 @@ async def dump_continuation_layers(
         inputs=composition_inputs,
         result=composition,
         elapsed_seconds=_seconds_from_ms(result.timings.task_prompt_ms),
-        build_request=lambda: baml_task_prompt.ComposeTaskInput__build_request_async(
+        build_request=lambda: baml_task.ComposeTaskInput__build_request_async(
             **composition_inputs, **kwargs
         ),
     )
@@ -174,11 +172,11 @@ async def _write_prompt_layer(
 
 
 def task_prompt_composition(
-    decision: baml_task_prompt.TaskPromptDecision,
-) -> baml_task_prompt.TaskPromptComposition:
+    decision: baml_task.TaskPromptDecision,
+) -> baml_task.TaskPromptComposition:
     marker = "\n\nInput:\n"
     _task_prompt, separator, task_input = decision.full_task_prompt.partition(marker)
-    return baml_task_prompt.TaskPromptComposition(
+    return baml_task.TaskPromptComposition(
         task_input=task_input if separator else decision.full_task_prompt,
         candidate_memory=decision.candidate_memory,
     )

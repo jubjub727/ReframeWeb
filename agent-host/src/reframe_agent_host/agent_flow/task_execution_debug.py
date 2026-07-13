@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-from baml_sdk import task_execution as baml_task_execution
+from baml_sdk import task as baml_task
 from reframe_agent_host.agent_flow.debug_artifacts import (
     dump_directory,
     formatted_request_body,
@@ -135,7 +135,7 @@ class TaskExecutionDebugDump:
         self,
         *,
         elapsed_seconds: float,
-        result: baml_task_execution.TaskExecutionResult,
+        result: baml_task.TaskExecutionResult,
     ) -> None:
         try:
             returns = result.returns

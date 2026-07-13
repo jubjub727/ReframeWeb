@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 
-from baml_sdk import context as baml_context
+from baml_sdk import turn_context as baml_turn_context
 from reframe_agent_host.agent_flow.retrieved_memory_graph import (
     BamlRetrievedMemoryContext,
 )
@@ -26,7 +26,7 @@ async def process_agent_turn(
     turn_flow,
     side_effects: TurnSideEffects,
     capture: CaptureResult,
-    conversation_mode: baml_context.ConversationMode,
+    conversation_mode: baml_turn_context.ConversationMode,
     model_prepare_seconds: float,
     total_started_at: float,
     on_event: VoicePipelineEventHandler | None,

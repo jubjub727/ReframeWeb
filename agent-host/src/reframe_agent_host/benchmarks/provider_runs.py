@@ -3,10 +3,10 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from baml_core import Collector
+from baml_bridge import Collector
 from baml_sdk import benchmarks as baml_benchmarks
-from baml_sdk import memory_search as baml_memory_search
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import memory as baml_memory
+from baml_sdk import task as baml_task
 
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.agent_flow.provider_clients import client_kwargs
@@ -277,7 +277,7 @@ async def benchmark_conversation_evaluation_provider(
 
 
 async def _choose_task(client: Any, transcript: str, context: Any):
-    return await baml_task_routing.ChooseTask_async(
+    return await baml_task.ChooseTask_async(
         current_user_request=transcript,
         current_conversation=context.current_conversation,
         session_memories=context.session_memories,
@@ -291,7 +291,7 @@ async def _choose_task(client: Any, transcript: str, context: Any):
 
 async def _choose_memory_search(client: Any, case: Any):
     conversations = baml_benchmarks.ConversationContexts(case.session_conversations)
-    return await baml_memory_search.ChooseMemorySearch_async(
+    return await baml_memory.ChooseMemorySearch_async(
         current_user_request=case.current_user_request,
         current_conversation=conversations[0] if conversations else None,
         session_memories=baml_benchmarks.SessionMemoryContexts(

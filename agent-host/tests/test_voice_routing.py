@@ -10,14 +10,10 @@ from unittest.mock import patch
 
 import numpy as np
 
-from baml_sdk import context as baml_context
-from baml_sdk import memory_search as baml_memory_search
-from baml_sdk import memory_selection as baml_memory_selection
-from baml_sdk import retrieved_memory as baml_retrieved_memory
-from baml_sdk import task_completion as baml_task_completion
-from baml_sdk import task_execution as baml_task_execution
-from baml_sdk import task_prompt as baml_task_prompt
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import turn_context as baml_turn_context
+from baml_sdk import memory as baml_memory
+from baml_sdk import task_catalog as baml_task_catalog
+from baml_sdk import task as baml_task
 from baml_sdk import voice_turn as baml_voice_turn
 from reframe_agent_host.agent_flow.live_conversation import LiveConversationContext
 from reframe_agent_host.commands.voice_output import VoiceTurnEventPrinter
@@ -90,14 +86,14 @@ class RecordingBamlTurnFlow:
 
     async def understand_prompt(self, current_user_request):
         self.understanding_request = current_user_request
-        task_choice = baml_task_routing.TaskChoiceDecision(
+        task_choice = baml_task.TaskChoiceDecision(
             selected_task_id="task:needs_more_information",
             confidence=1.0,
             candidate_memory=None,
         )
         return baml_voice_turn.VoicePromptUnderstanding(
             task_choice=task_choice,
-            selected_task=baml_task_routing.SelectedTaskContext(
+            selected_task=baml_task_catalog.SelectedTaskContext(
                 id="task:needs_more_information",
                 name="Needs more information",
                 description="Ask for the missing detail.",
@@ -109,14 +105,14 @@ class RecordingBamlTurnFlow:
                 updated_at="2026-01-01T00:00:00Z",
                 read_at="2026-01-01T00:00:00Z",
             ),
-            memory_search_hints=baml_memory_search.ConversationMemorySearchHints(
-                tags=baml_memory_search.MemoryTagSearch(any_of=["test"], all_of=[], none_of=[]),
-                strings=baml_memory_search.MemoryStringSearch(contains=["do this"], equals=[]),
+            memory_search_hints=baml_memory.ConversationMemorySearchHints(
+                tags=baml_memory.MemoryTagSearch(any_of=["test"], all_of=[], none_of=[]),
+                strings=baml_memory.MemoryStringSearch(contains=["do this"], equals=[]),
                 candidate_memory=None,
             ),
-            search_depths=baml_memory_search.SearchDepthDecision(
+            search_depths=baml_memory.SearchDepthDecision(
                 depths={
-                    "task_catalog": baml_memory_search.SearchDepthTimestamps(
+                    "task_catalog": baml_memory.SearchDepthTimestamps(
                         created_after="2026-01-01T00:00:00Z",
                         read_after="2026-01-01T00:00:00Z",
                         updated_after="2026-01-01T00:00:00Z",
@@ -143,17 +139,17 @@ class RecordingBamlTurnFlow:
             retrieved_memories,
         )
         return baml_voice_turn.VoicePromptContinuation(
-            relevance_decision=baml_memory_selection.RelevantMemoryDecision(
+            relevance_decision=baml_memory.RelevantMemoryDecision(
                 kept_memory_ids=[],
                 candidate_memory=None,
             ),
-            selected_memories=baml_retrieved_memory.RetrievedMemoryGraph(
+            selected_memories=baml_memory.RetrievedMemoryGraph(
                 task_catalog=[],
                 past_sessions=[],
                 current_session_memories=[],
             ),
             selected_memory_contexts=[],
-            task_prompt=baml_task_prompt.TaskPromptDecision(
+            task_prompt=baml_task.TaskPromptDecision(
                 full_task_prompt="Task:\nAsk only for what matters.\n\nInput:\nDo this.",
                 candidate_memory=None,
             ),
@@ -274,9 +270,9 @@ class ClosingOnlyDatabase:
 
 class RecordingTaskExecution:
     async def execute_task(self, **_kwargs):
-        return baml_task_execution.TaskExecutionResult(
+        return baml_task.TaskExecutionResult(
             returns=[
-                baml_task_execution.TaskReturnItem(
+                baml_task.TaskReturnItem(
                     name="agent_reply",
                     payload={"text": "What detail should I use?"},
                 ),
@@ -380,7 +376,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         result = await processor.process(
             capture=_capture_result(),
-            conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+            conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
             model_prepare_seconds=0.0,
             total_started_at=time.perf_counter(),
             on_event=None,
@@ -422,7 +418,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         result = await processor.process(
             capture=_capture_result(),
-            conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+            conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
             model_prepare_seconds=0.0,
             total_started_at=time.perf_counter(),
             on_event=None,
@@ -450,7 +446,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         task = asyncio.create_task(
             processor.process(
                 capture=_capture_result(),
-                conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+                conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
                 model_prepare_seconds=0.0,
                 total_started_at=time.perf_counter(),
                 on_event=lambda stage, message: events.append((stage, message)),
@@ -480,7 +476,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         task = asyncio.create_task(
             processor.process(
                 capture=_capture_result(),
-                conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+                conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
                 model_prepare_seconds=0.0,
                 total_started_at=time.perf_counter(),
                 on_event=lambda stage, message: events.append((stage, message)),
@@ -517,7 +513,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             task = asyncio.create_task(
                 processor.process(
                     capture=_capture_result(),
-                    conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+                    conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
                     model_prepare_seconds=0.0,
                     total_started_at=time.perf_counter(),
                     on_event=lambda stage, message: events.append((stage, message)),
@@ -558,7 +554,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         ):
             await processor.process(
                 capture=_capture_result(),
-                conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+                conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
                 model_prepare_seconds=0.0,
                 total_started_at=time.perf_counter(),
                 on_event=lambda stage, message: events.append((stage, message)),
@@ -602,7 +598,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         ):
             await processor.process(
                 capture=_capture_result(),
-                conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+                conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
                 model_prepare_seconds=0.0,
                 total_started_at=time.perf_counter(),
                 on_event=lambda stage, message: events.append((stage, message)),
@@ -633,7 +629,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             fail_open_memory_database,
         ):
             result = await processor._side_effects.dispatch_primitives(
-                baml_task_execution.TaskExecutionResult(returns=[]),
+                baml_task.TaskExecutionResult(returns=[]),
                 time.perf_counter(),
                 lambda stage, message: events.append((stage, message)),
             )
@@ -694,7 +690,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
                 completion_inputs.update(kwargs)
                 await asyncio.sleep(0)
                 order.append("review-end")
-                return baml_task_completion.CompletionResult.PASS
+                return baml_task.CompletionResult.PASS
 
         async def fake_open_memory_database():
             return ClosingOnlyDatabase()
@@ -717,7 +713,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
                     ):
                         result = await processor.process(
                             capture=_capture_result(),
-                            conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+                            conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
                             model_prepare_seconds=0.0,
                             total_started_at=time.perf_counter(),
                             on_event=lambda stage, message: events.append(
@@ -732,7 +728,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             completion_inputs["output_summary"],
             "The recorded actions asked the user a question.",
         )
-        self.assertEqual(result.task_completion, baml_task_completion.CompletionResult.PASS)
+        self.assertEqual(result.task_completion, baml_task.CompletionResult.PASS)
         self.assertEqual(
             [stage for stage, _message in events if stage.endswith("reviewed")],
             ["task-completion-reviewed"],
@@ -740,7 +736,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_conversation_on_confirmation_turns_mode_on_without_human_reply(self):
         transcriber = StubTranscriber("conversation on")
-        mode_controller = ConversationModeController(baml_context.ConversationMode.WAKE_COMMAND)
+        mode_controller = ConversationModeController(baml_turn_context.ConversationMode.WAKE_COMMAND)
         events = []
         processor = VoiceTurnProcessor(
             config=_voice_config(),
@@ -752,7 +748,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         result = await processor.process(
             capture=_conversation_on_confirmation_capture(),
-            conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+            conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
             model_prepare_seconds=0.0,
             total_started_at=time.perf_counter(),
             on_event=lambda stage, message: events.append((stage, message)),
@@ -762,21 +758,21 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.routed_transcript, "")
         self.assertEqual(
             mode_controller.get(),
-            baml_context.ConversationMode.CONTINUOUS_CONVERSATION,
+            baml_turn_context.ConversationMode.CONTINUOUS_CONVERSATION,
         )
         self.assertEqual(transcriber.prompts, [CONVERSATION_ON_CONFIRMATION_PROMPT])
         self.assertNotIn("human-reply", [stage for stage, _message in events])
         self.assertIn(
             (
                 "conversation-mode",
-                baml_context.ConversationMode.CONTINUOUS_CONVERSATION.value,
+                baml_turn_context.ConversationMode.CONTINUOUS_CONVERSATION.value,
             ),
             events,
         )
 
     async def test_conversation_on_confirmation_rejects_without_human_reply(self):
         transcriber = StubTranscriber("open the browser")
-        mode_controller = ConversationModeController(baml_context.ConversationMode.WAKE_COMMAND)
+        mode_controller = ConversationModeController(baml_turn_context.ConversationMode.WAKE_COMMAND)
         events = []
         processor = VoiceTurnProcessor(
             config=_voice_config(),
@@ -788,7 +784,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         result = await processor.process(
             capture=_conversation_on_confirmation_capture(),
-            conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+            conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
             model_prepare_seconds=0.0,
             total_started_at=time.perf_counter(),
             on_event=lambda stage, message: events.append((stage, message)),
@@ -797,7 +793,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(result.ignored)
         self.assertEqual(
             mode_controller.get(),
-            baml_context.ConversationMode.WAKE_COMMAND,
+            baml_turn_context.ConversationMode.WAKE_COMMAND,
         )
         self.assertEqual(transcriber.prompts, [CONVERSATION_ON_CONFIRMATION_PROMPT])
         self.assertNotIn("human-reply", [stage for stage, _message in events])
@@ -1066,7 +1062,7 @@ def _voice_config(
         keyphrases=KeyphraseSpotterConfig(),
         triggers=TriggerPhraseConfig(),
         transcription=WhisperTranscriberConfig(),
-        conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+        conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
         task_choice_enabled=task_choice_enabled,
         session_id=session_id,
         conversation_id=conversation_id,
@@ -1075,7 +1071,7 @@ def _voice_config(
 
 def _capture_result():
     return CaptureResult(
-        conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+        conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
         keyphrase_detection=KeyphraseDetection(
             kind="wake_command",
             phrase="jarvis",
@@ -1099,7 +1095,7 @@ def _capture_result():
 
 def _conversation_on_confirmation_capture():
     return CaptureResult(
-        conversation_mode=baml_context.ConversationMode.WAKE_COMMAND,
+        conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
         keyphrase_detection=KeyphraseDetection(
             kind="conversation_on",
             phrase="conversation on",

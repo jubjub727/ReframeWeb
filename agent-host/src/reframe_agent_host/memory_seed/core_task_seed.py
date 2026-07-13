@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from baml_sdk import agent_host_catalog
+from baml_sdk import task_catalog
 from reframe_agent_host.magic_providers import (
     MAGIC_DO_NOTHING_MODEL_ID,
     MAGIC_DO_NOTHING_TAGS,
@@ -38,7 +38,7 @@ async def ensure_core_tasks(database: MemoryDatabase) -> CoreTaskSeedResult:
     created_task_ids: list[str] = []
     existing_task_ids: list[str] = []
     updated_task_ids: list[str] = []
-    for definition in agent_host_catalog.CoreTasks():
+    for definition in task_catalog.CoreTasks():
         provider = providers.get((definition.model_id, definition.reasoning_effort))
         if provider is None:
             provider = await _provider_for_definition(database, definition)
@@ -74,7 +74,7 @@ async def ensure_core_tasks(database: MemoryDatabase) -> CoreTaskSeedResult:
 
 async def _provider_for_definition(
     database: MemoryDatabase,
-    definition: agent_host_catalog.CoreTaskDefinition,
+    definition: task_catalog.CoreTaskDefinition,
 ) -> ProviderNode:
     if definition.model_id == MAGIC_DO_NOTHING_MODEL_ID:
         return await _magic_do_nothing_provider(database)
@@ -155,7 +155,7 @@ def _reasoning_effort_search(reasoning_effort: str | None) -> tuple[str, ...]:
 
 
 def _task_for_provider(
-    definition: agent_host_catalog.CoreTaskDefinition,
+    definition: task_catalog.CoreTaskDefinition,
     provider_id: str,
 ) -> Task:
     return Task(

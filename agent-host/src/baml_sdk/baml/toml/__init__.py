@@ -26,7 +26,7 @@ import pydantic
 
 from ... import baml
 
-from baml_core import define_function as _define_function
+from baml_bridge import define_function as _define_function
 
 
 Item = typing_extensions.TypeAliasType("Item", typing.Union["Table", typing.List["Item"], bool, int, float, str, "baml.time.ZonedDateTime", "baml.time.PlainDateTime", "baml.time.PlainDate", "baml.time.PlainTime"])

@@ -1,16 +1,16 @@
 class VoicePromptUnderstanding {
-    task_choice: root.task_routing.TaskChoiceDecision,
-    selected_task: root.task_routing.SelectedTaskContext,
-    memory_search_hints: root.memory_search.ConversationMemorySearchHints,
-    search_depths: root.memory_search.SearchDepthDecision,
+    task_choice: root.task.TaskChoiceDecision,
+    selected_task: root.task_catalog.SelectedTaskContext,
+    memory_search_hints: root.memory.ConversationMemorySearchHints,
+    search_depths: root.memory.SearchDepthDecision,
     timings: VoicePromptUnderstandingTimings,
 }
 
 class VoicePromptContinuation {
-    relevance_decision: root.memory_selection.RelevantMemoryDecision,
-    selected_memories: root.retrieved_memory.RetrievedMemoryGraph,
-    selected_memory_contexts: root.task_prompt.TaskPromptSelectedMemoryContext[],
-    task_prompt: root.task_prompt.TaskPromptDecision,
+    relevance_decision: root.memory.RelevantMemoryDecision,
+    selected_memories: root.memory.RetrievedMemoryGraph,
+    selected_memory_contexts: root.task.TaskPromptSelectedMemoryContext[],
+    task_prompt: root.task.TaskPromptDecision,
     timings: VoicePromptContinuationTimings,
 }
 

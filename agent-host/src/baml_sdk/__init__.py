@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-from baml_core import BamlRuntime, set_type_map
+from baml_bridge import BamlRuntime, set_type_map
 from . import _inlinedbaml
 from ._typemap import _TYPE_MAP
 
@@ -29,20 +29,14 @@ BamlRuntime.initialize_runtime_from_bytecode(_inlinedbaml.BYTECODE)
 set_type_map(_TYPE_MAP)
 
 _LAZY_CHILDREN = frozenset({
-    "action_history",
-    "agent_host_catalog",
     "baml",
     "benchmarks",
-    "context",
-    "memory_search",
-    "memory_selection",
+    "memory",
     "opencode_go",
-    "retrieved_memory",
     "stream_types",
-    "task_completion",
-    "task_execution",
-    "task_prompt",
-    "task_routing",
+    "task",
+    "task_catalog",
+    "turn_context",
     "vendor",
     "voice_turn",
 })

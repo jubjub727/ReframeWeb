@@ -5,7 +5,7 @@ import time
 from collections.abc import Awaitable, Callable, Sequence
 from typing import Any
 
-from baml_core import Collector
+from baml_bridge import Collector
 
 from reframe_agent_host.benchmarks.config import BenchmarkConfig
 from reframe_agent_host.benchmarks.reasoning_efforts import (

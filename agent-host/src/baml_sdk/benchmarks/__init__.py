@@ -24,13 +24,12 @@ import typing
 import pydantic
 
 if typing.TYPE_CHECKING:
-    from .. import context
-    from .. import memory_search
-    from .. import memory_selection
-    from .. import task_prompt
-    from .. import task_routing
+    from .. import memory
+    from .. import task
+    from .. import task_catalog
+    from .. import turn_context
 
-from baml_core import define_function as _define_function
+from baml_bridge import define_function as _define_function
 
 
 Message       = _define_function("user.benchmarks.Message", "sync",  ["role", "content", "created_at"])

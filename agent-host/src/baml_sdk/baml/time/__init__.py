@@ -26,7 +26,7 @@ import pydantic
 if typing.TYPE_CHECKING:
     from ... import baml
 
-from baml_core import define_function as _define_function
+from baml_bridge import define_function as _define_function
 
 
 class Duration(pydantic.BaseModel):

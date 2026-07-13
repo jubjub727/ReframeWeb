@@ -4,7 +4,7 @@ from collections import deque
 
 import numpy as np
 
-from baml_sdk import context as baml_context
+from baml_sdk import turn_context as baml_turn_context
 from reframe_agent_host.keyphrases import (
     KeyphraseDetection,
     PocketSphinxPhraseSpotter,
@@ -14,7 +14,7 @@ from reframe_agent_host.keyphrases import (
 class CaptureState:
     def __init__(
         self,
-        conversation_mode: baml_context.ConversationMode,
+        conversation_mode: baml_turn_context.ConversationMode,
         keyphrase_required: bool,
         keyphrase_carry_frames: deque[np.ndarray],
     ) -> None:

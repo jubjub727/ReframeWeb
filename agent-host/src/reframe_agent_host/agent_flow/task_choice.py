@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from baml_sdk import context as baml_context
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import turn_context as baml_turn_context
+from baml_sdk import task_catalog as baml_task_catalog
+from baml_sdk import task as baml_task
 from reframe_agent_host.agent_flow.provider_clients import client_kwargs
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.agent_flow.memory_contexts import (
@@ -20,11 +21,11 @@ from reframe_memory import MemoryDatabase, open_memory_database
 
 @dataclass(frozen=True)
 class TaskChoiceContext:
-    current_conversation: baml_context.ConversationHistory | None
-    session_memories: list[baml_context.SessionMemoryContext]
-    user_preferences: list[baml_context.UserPreferenceMemoryContext]
-    available_tasks: list[baml_task_routing.AvailableTask]
-    task_choice_memories: list[baml_task_routing.TaskChoiceMemoryContext]
+    current_conversation: baml_turn_context.ConversationHistory | None
+    session_memories: list[baml_turn_context.SessionMemoryContext]
+    user_preferences: list[baml_turn_context.UserPreferenceMemoryContext]
+    available_tasks: list[baml_task_catalog.AvailableTask]
+    task_choice_memories: list[baml_task.TaskChoiceMemoryContext]
 
 
 @dataclass
@@ -44,14 +45,14 @@ class TaskChoiceContextBuilder:
 
     async def _current_conversation(
         self,
-    ) -> baml_context.ConversationHistory | None:
+    ) -> baml_turn_context.ConversationHistory | None:
         return await current_conversation_history(
             self.database,
             self.session_id,
             self.conversation_id,
         )
 
-    async def _session_memories(self) -> list[baml_context.SessionMemoryContext]:
+    async def _session_memories(self) -> list[baml_turn_context.SessionMemoryContext]:
         return await session_memory_contexts(self.database, self.session_id)
 
 class TaskChoicePlanner:
@@ -71,7 +72,7 @@ class TaskChoicePlanner:
     async def choose_initial_task(
         self,
         current_user_request: str,
-    ) -> baml_task_routing.TaskChoiceDecision:
+    ) -> baml_task.TaskChoiceDecision:
         database = await self._get_database()
         context = await TaskChoiceContextBuilder(
             database=database,
@@ -79,7 +80,7 @@ class TaskChoicePlanner:
             conversation_id=self._conversation_id,
         ).build()
 
-        return await baml_task_routing.ChooseTask_async(
+        return await baml_task.ChooseTask_async(
             current_user_request=current_user_request,
             current_conversation=context.current_conversation,
             session_memories=context.session_memories,

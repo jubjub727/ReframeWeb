@@ -3,8 +3,8 @@ from unittest.mock import patch
 
 from baml_sdk import benchmarks as baml_benchmarks
 from reframe_agent_host import cli
-from baml_sdk import task_prompt as baml_task_prompt
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import task_catalog as baml_task_catalog
+from baml_sdk import task as baml_task
 from reframe_agent_host.benchmarks.config import (
     OPENCODE_GO_REASONING_EFFORT_CANDIDATES,
     TaskPromptBenchmarkConfig,
@@ -101,7 +101,7 @@ class TaskPromptBenchmarkTests(unittest.TestCase):
 
     def test_evaluation_scores_shape_and_non_empty_sections(self):
         snapshot = _snapshot()
-        decision = baml_task_prompt.TaskPromptDecision(
+        decision = baml_task.TaskPromptDecision(
             full_task_prompt=(
                 "Task:\n"
                 "Ask for the information needed to continue.\n\n"
@@ -122,7 +122,7 @@ class TaskPromptBenchmarkTests(unittest.TestCase):
 
     def test_evaluation_requires_non_empty_input(self):
         snapshot = _snapshot()
-        decision = baml_task_prompt.TaskPromptDecision(
+        decision = baml_task.TaskPromptDecision(
             full_task_prompt=(
                 "Task:\n"
                 "Ask only for the information needed to continue.\n\n"
@@ -261,7 +261,7 @@ class TaskPromptRunnerTests(unittest.IsolatedAsyncioTestCase):
 
 def _snapshot():
     case = _stripe_case()
-    selected_task = baml_task_routing.SelectedTaskContext(
+    selected_task = baml_task_catalog.SelectedTaskContext(
         id="memory_node:core_task_request_info",
         name="Request more information from the user",
         description="Use when the request needs input before it can be handled.",

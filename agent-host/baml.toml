@@ -2,7 +2,7 @@
 name = "agent-host"
 
 [toolchain]
-version = "0.13.0"
+version = "local-dev"
 
 # [scripts]
 # dev = "-f main"

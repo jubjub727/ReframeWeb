@@ -1,10 +1,8 @@
 import json
 import unittest
 
-from baml_sdk import action_history as baml_action_history
-from baml_sdk import context as baml_context
-from baml_sdk import task_completion as baml_task_completion
-from baml_sdk import task_execution as baml_task_execution
+from baml_sdk import task as baml_task
+from baml_sdk import turn_context as baml_turn_context
 from baml_sdk import baml as baml_std
 from reframe_agent_host.agent_flow.provider_clients import (
     client_kwargs,
@@ -19,7 +17,7 @@ class ProviderClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(client, baml_std.llm.Client)
         self.assertEqual(client.client_type, baml_std.llm.ClientType.Primitive)
 
-        request = await baml_task_execution.PerformTask__build_request_async(
+        request = await baml_task.PerformTask__build_request_async(
             full_task_prompt="Task:\nReturn no response items.",
             **client_kwargs(client),
         )
@@ -29,15 +27,15 @@ class ProviderClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(body["reasoning_effort"], "high")
 
     async def test_action_history_summary_prompt_uses_history_and_conversation(self):
-        request = await baml_action_history.SummariseActionHistory__build_request_async(
-            current_conversation=baml_context.ConversationHistory(
+        request = await baml_task.SummariseActionHistory__build_request_async(
+            current_conversation=baml_turn_context.ConversationHistory(
                 id="memory_node:conversation",
                 name="Current conversation",
                 created_at="2026-07-13T00:00:00Z",
                 updated_at="2026-07-13T00:01:00Z",
                 read_at="NONE",
                 messages=[
-                    baml_context.ConversationHistoryMessage(
+                    baml_turn_context.ConversationHistoryMessage(
                         created_at="2026-07-13T00:00:00Z",
                         updated_at="2026-07-13T00:00:00Z",
                         read_at="NONE",
@@ -73,7 +71,7 @@ class ProviderClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("Current task", prompt_text)
 
     async def test_task_completion_prompt_uses_glm51_pass_fail_gate(self):
-        request = await baml_task_completion.CheckTaskCompletion__build_request_async(
+        request = await baml_task.CheckTaskCompletion__build_request_async(
             completion_string=(
                 "The user received a useful spoken reply that answered or "
                 "responded to their message."

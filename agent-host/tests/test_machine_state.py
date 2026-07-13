@@ -4,13 +4,10 @@ import json
 import unittest
 from unittest import mock
 
-from baml_sdk import action_history as baml_action_history
-from baml_sdk import context as baml_context
-from baml_sdk import memory_search as baml_memory_search
-from baml_sdk import memory_selection as baml_memory_selection
-from baml_sdk import task_execution as baml_task_execution
-from baml_sdk import task_prompt as baml_task_prompt
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import task_catalog as baml_task_catalog
+from baml_sdk import task as baml_task
+from baml_sdk import turn_context as baml_turn_context
+from baml_sdk import memory as baml_memory
 from reframe_agent_host.agent_flow import geolocation, machine_state, monitor_detection
 from reframe_agent_host.agent_flow import windows_monitors
 from reframe_agent_host.agent_flow.machine_state import (
@@ -298,7 +295,7 @@ class MachineStatePromptLayerTests(unittest.IsolatedAsyncioTestCase):
         search_hints = _search_hints()
 
         included_requests = [
-            await baml_task_routing.ChooseTask__build_request_async(
+            await baml_task.ChooseTask__build_request_async(
                 current_user_request="What time is it here?",
                 current_conversation=None,
                 session_memories=[],
@@ -307,7 +304,7 @@ class MachineStatePromptLayerTests(unittest.IsolatedAsyncioTestCase):
                 task_choice_memories=[],
                 machine_state=machine_context,
             ),
-            await baml_memory_search.ChooseMemorySearch__build_request_async(
+            await baml_memory.ChooseMemorySearch__build_request_async(
                 current_user_request="What time is it here?",
                 current_conversation=None,
                 session_memories=[],
@@ -315,7 +312,7 @@ class MachineStatePromptLayerTests(unittest.IsolatedAsyncioTestCase):
                 conversation_evaluation_memories=[],
                 machine_state=machine_context,
             ),
-            await baml_memory_search.ChooseMemorySearchDepths__build_request_async(
+            await baml_memory.ChooseMemorySearchDepths__build_request_async(
                 current_timestamp="2026-07-08T00:00:00Z",
                 current_user_request="What time is it here?",
                 current_conversation=None,
@@ -323,7 +320,7 @@ class MachineStatePromptLayerTests(unittest.IsolatedAsyncioTestCase):
                 selected_task=selected_task,
                 memory_search_hints=search_hints,
                 search_domains=[
-                    baml_memory_search.SearchDepthDomain(
+                    baml_memory.SearchDepthDomain(
                         id="task_catalog",
                         description="Task records.",
                         searches="Task nodes.",
@@ -333,7 +330,7 @@ class MachineStatePromptLayerTests(unittest.IsolatedAsyncioTestCase):
                 search_depth_memories=[],
                 machine_state=machine_context,
             ),
-            await baml_memory_selection.SelectRelevantMemories__build_request_async(
+            await baml_memory.SelectRelevantMemories__build_request_async(
                 current_user_request="What time is it here?",
                 current_conversation=None,
                 session_memories=[],
@@ -342,7 +339,7 @@ class MachineStatePromptLayerTests(unittest.IsolatedAsyncioTestCase):
                 relevance_memories=[],
                 machine_state=machine_context,
             ),
-            await baml_task_prompt.ComposeTaskInput__build_request_async(
+            await baml_task.ComposeTaskInput__build_request_async(
                 current_user_request="What time is it here?",
                 current_conversation=None,
                 session_memories=[],
@@ -363,10 +360,10 @@ class MachineStatePromptLayerTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn("vertical_resolution: 1440", rendered)
             self.assertIn("country_code: NZ", rendered)
 
-        execution = await baml_task_execution.PerformTask__build_request_async(
+        execution = await baml_task.PerformTask__build_request_async(
             full_task_prompt="Reply directly.",
         )
-        review = await baml_action_history.SummariseActionHistory__build_request_async(
+        review = await baml_task.SummariseActionHistory__build_request_async(
             current_conversation=None,
             recorded_action_history="No actions.",
         )
@@ -375,8 +372,8 @@ class MachineStatePromptLayerTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("Machine state:", _rendered_request(review))
 
 
-def _machine_context() -> baml_context.MachineStateContext:
-    return baml_context.MachineStateContext(
+def _machine_context() -> baml_turn_context.MachineStateContext:
+    return baml_turn_context.MachineStateContext(
         captured_at_utc="2026-07-08T00:34:56Z",
         current_local_time="2026-07-08T12:34:56+12:00",
         current_utc_time="2026-07-08T00:34:56Z",
@@ -385,11 +382,11 @@ def _machine_context() -> baml_context.MachineStateContext:
         os_architecture="Windows x86_64",
         monitor_count=2,
         monitors=[
-            baml_context.MachineMonitorContext(
+            baml_turn_context.MachineMonitorContext(
                 horizontal_resolution=1920,
                 vertical_resolution=1080,
             ),
-            baml_context.MachineMonitorContext(
+            baml_turn_context.MachineMonitorContext(
                 horizontal_resolution=2560,
                 vertical_resolution=1440,
             ),
@@ -411,8 +408,8 @@ def _machine_context() -> baml_context.MachineStateContext:
     )
 
 
-def _available_task() -> baml_task_routing.AvailableTask:
-    return baml_task_routing.AvailableTask(
+def _available_task() -> baml_task_catalog.AvailableTask:
+    return baml_task_catalog.AvailableTask(
         id="task:reply",
         name="Reply to user",
         description="Reply directly.",
@@ -426,15 +423,15 @@ def _available_task() -> baml_task_routing.AvailableTask:
     )
 
 
-def _selected_task() -> baml_task_routing.SelectedTaskContext:
+def _selected_task() -> baml_task_catalog.SelectedTaskContext:
     task = _available_task()
-    return baml_task_routing.SelectedTaskContext(**task.model_dump())
+    return baml_task_catalog.SelectedTaskContext(**task.model_dump())
 
 
-def _search_hints() -> baml_memory_search.ConversationMemorySearchHints:
-    return baml_memory_search.ConversationMemorySearchHints(
-        tags=baml_memory_search.MemoryTagSearch(any_of=[], all_of=[], none_of=[]),
-        strings=baml_memory_search.MemoryStringSearch(contains=[], equals=[]),
+def _search_hints() -> baml_memory.ConversationMemorySearchHints:
+    return baml_memory.ConversationMemorySearchHints(
+        tags=baml_memory.MemoryTagSearch(any_of=[], all_of=[], none_of=[]),
+        strings=baml_memory.MemoryStringSearch(contains=[], equals=[]),
         candidate_memory=None,
     )
 

@@ -24,43 +24,41 @@ import typing
 import pydantic
 
 if typing.TYPE_CHECKING:
-    from .. import context
-    from .. import memory_search
-    from .. import memory_selection
-    from .. import retrieved_memory
-    from .. import task_prompt
-    from .. import task_routing
+    from .. import memory
+    from .. import task
+    from .. import task_catalog
+    from .. import turn_context
 
 
-def UnderstandVoicePrompt(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[context.ConversationHistory], session_memories: typing.List[context.SessionMemoryContext], user_preferences: typing.List[context.UserPreferenceMemoryContext], available_tasks: typing.List[task_routing.AvailableTask], task_choice_memories: typing.List[task_routing.TaskChoiceMemoryContext], conversation_evaluation_memories: typing.List[memory_search.ConversationEvaluationMemoryContext], search_depth_memories: typing.List[memory_search.SearchDepthMemoryContext], machine_state: context.MachineStateContext) -> VoicePromptUnderstanding:
+def UnderstandVoicePrompt(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], session_memories: typing.List[turn_context.SessionMemoryContext], user_preferences: typing.List[turn_context.UserPreferenceMemoryContext], available_tasks: typing.List[task_catalog.AvailableTask], task_choice_memories: typing.List[task.TaskChoiceMemoryContext], conversation_evaluation_memories: typing.List[memory.ConversationEvaluationMemoryContext], search_depth_memories: typing.List[memory.SearchDepthMemoryContext], machine_state: turn_context.MachineStateContext) -> VoicePromptUnderstanding:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def UnderstandVoicePrompt_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[context.ConversationHistory], session_memories: typing.List[context.SessionMemoryContext], user_preferences: typing.List[context.UserPreferenceMemoryContext], available_tasks: typing.List[task_routing.AvailableTask], task_choice_memories: typing.List[task_routing.TaskChoiceMemoryContext], conversation_evaluation_memories: typing.List[memory_search.ConversationEvaluationMemoryContext], search_depth_memories: typing.List[memory_search.SearchDepthMemoryContext], machine_state: context.MachineStateContext) -> VoicePromptUnderstanding:
+async def UnderstandVoicePrompt_async(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], session_memories: typing.List[turn_context.SessionMemoryContext], user_preferences: typing.List[turn_context.UserPreferenceMemoryContext], available_tasks: typing.List[task_catalog.AvailableTask], task_choice_memories: typing.List[task.TaskChoiceMemoryContext], conversation_evaluation_memories: typing.List[memory.ConversationEvaluationMemoryContext], search_depth_memories: typing.List[memory.SearchDepthMemoryContext], machine_state: turn_context.MachineStateContext) -> VoicePromptUnderstanding:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-def ContinueVoicePrompt(current_user_request: str, current_conversation: typing.Optional[context.ConversationHistory], session_memories: typing.List[context.SessionMemoryContext], user_preferences: typing.List[context.UserPreferenceMemoryContext], selected_task: task_routing.SelectedTaskContext, retrieved_memories: retrieved_memory.RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[memory_selection.RelevanceMemoryContext], task_prompt_memories: typing.List[task_prompt.TaskPromptMemoryContext], machine_state: context.MachineStateContext) -> VoicePromptContinuation:
+def ContinueVoicePrompt(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], session_memories: typing.List[turn_context.SessionMemoryContext], user_preferences: typing.List[turn_context.UserPreferenceMemoryContext], selected_task: task_catalog.SelectedTaskContext, retrieved_memories: memory.RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[memory.RelevanceMemoryContext], task_prompt_memories: typing.List[task.TaskPromptMemoryContext], machine_state: turn_context.MachineStateContext) -> VoicePromptContinuation:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def ContinueVoicePrompt_async(current_user_request: str, current_conversation: typing.Optional[context.ConversationHistory], session_memories: typing.List[context.SessionMemoryContext], user_preferences: typing.List[context.UserPreferenceMemoryContext], selected_task: task_routing.SelectedTaskContext, retrieved_memories: retrieved_memory.RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[memory_selection.RelevanceMemoryContext], task_prompt_memories: typing.List[task_prompt.TaskPromptMemoryContext], machine_state: context.MachineStateContext) -> VoicePromptContinuation:
+async def ContinueVoicePrompt_async(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], session_memories: typing.List[turn_context.SessionMemoryContext], user_preferences: typing.List[turn_context.UserPreferenceMemoryContext], selected_task: task_catalog.SelectedTaskContext, retrieved_memories: memory.RetrievedMemoryGraph, current_session_id: typing.Optional[str], relevance_memories: typing.List[memory.RelevanceMemoryContext], task_prompt_memories: typing.List[task.TaskPromptMemoryContext], machine_state: turn_context.MachineStateContext) -> VoicePromptContinuation:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
 class VoicePromptUnderstanding(pydantic.BaseModel):
-    task_choice: task_routing.TaskChoiceDecision
-    selected_task: task_routing.SelectedTaskContext
-    memory_search_hints: memory_search.ConversationMemorySearchHints
-    search_depths: memory_search.SearchDepthDecision
+    task_choice: task.TaskChoiceDecision
+    selected_task: task_catalog.SelectedTaskContext
+    memory_search_hints: memory.ConversationMemorySearchHints
+    search_depths: memory.SearchDepthDecision
     timings: VoicePromptUnderstandingTimings
 
 
 class VoicePromptContinuation(pydantic.BaseModel):
-    relevance_decision: memory_selection.RelevantMemoryDecision
-    selected_memories: retrieved_memory.RetrievedMemoryGraph
-    selected_memory_contexts: typing.List[task_prompt.TaskPromptSelectedMemoryContext]
-    task_prompt: task_prompt.TaskPromptDecision
+    relevance_decision: memory.RelevantMemoryDecision
+    selected_memories: memory.RetrievedMemoryGraph
+    selected_memory_contexts: typing.List[task.TaskPromptSelectedMemoryContext]
+    task_prompt: task.TaskPromptDecision
     timings: VoicePromptContinuationTimings
 
 

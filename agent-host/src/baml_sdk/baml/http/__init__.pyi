@@ -27,7 +27,7 @@ if typing.TYPE_CHECKING:
     from ... import baml
     from ...baml import UNSET as UNSET
 
-from baml_core import BamlPyHandle as _BamlPyHandle
+from baml_bridge import BamlPyHandle as _BamlPyHandle
 
 
 class Request(pydantic.BaseModel):

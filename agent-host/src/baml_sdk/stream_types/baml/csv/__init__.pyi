@@ -27,7 +27,7 @@ if typing.TYPE_CHECKING:
     from .... import baml
     from .... import stream_types
 
-from baml_core import BamlPyHandle as _BamlPyHandle
+from baml_bridge import BamlPyHandle as _BamlPyHandle
 
 
 T = typing.TypeVar("T")
@@ -63,14 +63,6 @@ class CsvReader(pydantic.BaseModel):
     _file: typing.Optional[stream_types.baml.fs.File]
     _on_skip: typing.Optional[typing.Any]
     _owns_file: typing.Optional[bool]
-    def iter(self) -> typing.Any: ...
-    async def iter_async(self) -> typing.Any: ...
-    def next(self) -> typing.Union[baml.csv.CsvRecord, baml.iter.Done]:
-        """Raises:
-            CsvError, Io"""
-    async def next_async(self) -> typing.Union[baml.csv.CsvRecord, baml.iter.Done]:
-        """Raises:
-            CsvError, Io"""
 
 
 class CsvRecord(pydantic.BaseModel):
@@ -79,14 +71,6 @@ class CsvRecord(pydantic.BaseModel):
 
 class CsvRows(pydantic.BaseModel, typing.Generic[T]):
     reader: typing.Optional[CsvReader]
-    def iter(self) -> typing.Any: ...
-    async def iter_async(self) -> typing.Any: ...
-    def next(self) -> typing.Union[T, baml.iter.Done]:
-        """Raises:
-            CsvError, Io"""
-    async def next_async(self) -> typing.Union[T, baml.iter.Done]:
-        """Raises:
-            CsvError, Io"""
 
 
 class CsvSkip(pydantic.BaseModel):

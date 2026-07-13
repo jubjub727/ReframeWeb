@@ -5,11 +5,9 @@ from dataclasses import dataclass
 import time
 from threading import Thread
 
-from baml_sdk import memory_search as baml_memory_search
-from baml_sdk import task_completion as baml_task_completion
-from baml_sdk import task_execution as baml_task_execution
-from baml_sdk import task_prompt as baml_task_prompt
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import memory as baml_memory
+from baml_sdk import task_catalog as baml_task_catalog
+from baml_sdk import task as baml_task
 
 from reframe_agent_host.agent_flow.action_history import ActionHistorySummarizer
 from reframe_agent_host.agent_flow.live_conversation import LiveConversationContext
@@ -71,8 +69,8 @@ class TurnSideEffects:
 
     async def retrieve_memories(
         self,
-        hints: baml_memory_search.ConversationMemorySearchHints | None,
-        depths: baml_memory_search.SearchDepthDecision | None,
+        hints: baml_memory.ConversationMemorySearchHints | None,
+        depths: baml_memory.SearchDepthDecision | None,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
     ) -> tuple[RetrievedMemoryContext | None, float | None, float | None]:
@@ -90,11 +88,11 @@ class TurnSideEffects:
 
     async def execute_task(
         self,
-        task_choice: baml_task_routing.TaskChoiceDecision | None,
-        task_prompt: baml_task_prompt.TaskPromptDecision | None,
+        task_choice: baml_task.TaskChoiceDecision | None,
+        task_prompt: baml_task.TaskPromptDecision | None,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
-    ) -> tuple[baml_task_execution.TaskExecutionResult | None, float | None, float | None]:
+    ) -> tuple[baml_task.TaskExecutionResult | None, float | None, float | None]:
         if self.task_execution is None or task_choice is None or task_prompt is None:
             return None, None, None
         _emit(on_event, "task-execution", "executing selected task")
@@ -114,7 +112,7 @@ class TurnSideEffects:
 
     async def dispatch_primitives(
         self,
-        execution: baml_task_execution.TaskExecutionResult | None,
+        execution: baml_task.TaskExecutionResult | None,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
     ):
@@ -149,7 +147,7 @@ class TurnSideEffects:
     async def summarize_action_history(
         self,
         dispatch,
-        task_choice: baml_task_routing.TaskChoiceDecision | None,
+        task_choice: baml_task.TaskChoiceDecision | None,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
     ):
@@ -177,11 +175,11 @@ class TurnSideEffects:
 
     async def check_task_completion(
         self,
-        selected_task: baml_task_routing.SelectedTaskContext | None,
+        selected_task: baml_task_catalog.SelectedTaskContext | None,
         action_history_summary: str | None,
         post_vad_started_at: float,
         on_event: VoicePipelineEventHandler | None,
-    ) -> tuple[baml_task_completion.CompletionResult | None, float | None, float | None]:
+    ) -> tuple[baml_task.CompletionResult | None, float | None, float | None]:
         if selected_task is None or action_history_summary is None:
             return None, None, None
         _emit(on_event, "task-completion-review", "checking task completion")

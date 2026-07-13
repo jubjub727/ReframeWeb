@@ -26,10 +26,7 @@ import pydantic
 from .... import baml
 from .... import stream_types
 
-from baml_core import (
-    BamlPyHandle as _BamlPyHandle,
-    define_function as _define_function,
-)
+from baml_bridge import BamlPyHandle as _BamlPyHandle
 
 
 T = typing.TypeVar("T")
@@ -115,10 +112,6 @@ class CsvReader(pydantic.BaseModel):
     _file: typing.Optional[stream_types.baml.fs.File]
     _on_skip: typing.Optional[typing.Any]
     _owns_file: typing.Optional[bool]
-    iter       = _define_function("baml.csv.CsvReader$stream.iter", "sync",  ["self"])
-    iter_async = _define_function("baml.csv.CsvReader$stream.iter", "async", ["self"])
-    next       = _define_function("baml.csv.CsvReader$stream.next", "sync",  ["self"])
-    next_async = _define_function("baml.csv.CsvReader$stream.next", "async", ["self"])
 
 
 class CsvRecord(pydantic.BaseModel):
@@ -140,10 +133,6 @@ class CsvRows(pydantic.BaseModel, typing.Generic[T]):
     """
     model_config = pydantic.ConfigDict(extra="forbid")
     reader: typing.Optional[CsvReader]
-    iter       = _define_function("baml.csv.CsvRows$stream.iter", "sync",  ["self"], class_type_params=["T"])
-    iter_async = _define_function("baml.csv.CsvRows$stream.iter", "async", ["self"], class_type_params=["T"])
-    next       = _define_function("baml.csv.CsvRows$stream.next", "sync",  ["self"], class_type_params=["T"])
-    next_async = _define_function("baml.csv.CsvRows$stream.next", "async", ["self"], class_type_params=["T"])
 
 
 class CsvSkip(pydantic.BaseModel):

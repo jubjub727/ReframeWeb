@@ -23,9 +23,6 @@ from __future__ import annotations
 import typing
 import pydantic
 
-if typing.TYPE_CHECKING:
-    from .... import baml
-
 
 class Duration(pydantic.BaseModel):
     _nanoseconds: typing.Optional[int]
@@ -33,82 +30,18 @@ class Duration(pydantic.BaseModel):
 
 class Instant(pydantic.BaseModel):
     _nanoseconds: typing.Optional[int]
-    @staticmethod
-    def from_json(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    @staticmethod
-    async def from_json_async(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    def to_string(self) -> str: ...
-    async def to_string_async(self) -> str: ...
-    def to_json(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
-    async def to_json_async(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
 
 
 class PlainDate(pydantic.BaseModel):
     _days: typing.Optional[int]
-    @staticmethod
-    def from_json(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    @staticmethod
-    async def from_json_async(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    def to_string(self) -> str: ...
-    async def to_string_async(self) -> str: ...
-    def to_json(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
-    async def to_json_async(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
 
 
 class PlainDateTime(pydantic.BaseModel):
     _nanoseconds: typing.Optional[int]
-    @staticmethod
-    def from_json(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    @staticmethod
-    async def from_json_async(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    def to_string(self) -> str: ...
-    async def to_string_async(self) -> str: ...
-    def to_json(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
-    async def to_json_async(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
 
 
 class PlainTime(pydantic.BaseModel):
     _nanoseconds: typing.Optional[int]
-    @staticmethod
-    def from_json(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    @staticmethod
-    async def from_json_async(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    def to_string(self) -> str: ...
-    async def to_string_async(self) -> str: ...
-    def to_json(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
-    async def to_json_async(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
 
 
 class AmbiguousTimeError(pydantic.BaseModel):
@@ -130,22 +63,6 @@ class ZonedDateTime(pydantic.BaseModel):
     _nanoseconds: typing.Optional[int]
     _offset_ns: typing.Optional[int]
     _iana: typing.Optional[str]
-    @staticmethod
-    def from_json(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    @staticmethod
-    async def from_json_async(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    def to_string(self) -> str: ...
-    async def to_string_async(self) -> str: ...
-    def to_json(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
-    async def to_json_async(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
 
 
 __all__ = [

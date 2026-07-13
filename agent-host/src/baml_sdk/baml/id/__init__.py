@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-from baml_core import define_function as _define_function
+from baml_bridge import define_function as _define_function
 
 
 current       = _define_function("baml.id.current", "sync",  [])

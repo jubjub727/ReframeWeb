@@ -23,16 +23,16 @@ from __future__ import annotations
 import typing
 import pydantic
 
-from baml_core import (
+from baml_bridge import (
     BamlPyHandle as _BamlPyHandle,
     define_function as _define_function,
 )
 
 
-from baml_core.baml_py import BamlPdf as Pdf
-from baml_core.baml_py import BamlAudio as Audio
-from baml_core.baml_py import BamlVideo as Video
-from baml_core.baml_py import BamlImage as Image
+from baml_bridge.baml_py import BamlPdf as Pdf
+from baml_bridge.baml_py import BamlAudio as Audio
+from baml_bridge.baml_py import BamlVideo as Video
+from baml_bridge.baml_py import BamlImage as Image
 
 
 __all__ = [

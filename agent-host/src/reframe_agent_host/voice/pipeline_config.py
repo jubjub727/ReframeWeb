@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from baml_sdk import context as baml_context
+from baml_sdk import turn_context as baml_turn_context
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
 from reframe_agent_host.speech.transcription import WhisperTranscriberConfig
 from reframe_agent_host.speech.triggers import TriggerPhraseConfig
@@ -21,7 +21,7 @@ class VoicePipelineConfig:
     keyphrases: KeyphraseSpotterConfig
     triggers: TriggerPhraseConfig
     transcription: WhisperTranscriberConfig
-    conversation_mode: baml_context.ConversationMode
+    conversation_mode: baml_turn_context.ConversationMode
     task_choice_enabled: bool = True
     session_id: str | None = None
     conversation_id: str | None = None

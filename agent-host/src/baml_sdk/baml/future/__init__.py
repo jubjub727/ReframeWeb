@@ -24,7 +24,7 @@ import enum
 import typing
 import pydantic
 
-from baml_core import define_function as _define_function
+from baml_bridge import define_function as _define_function
 
 
 E = typing.TypeVar("E")

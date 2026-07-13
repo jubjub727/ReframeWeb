@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from baml_sdk import context as baml_context
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import turn_context as baml_turn_context
+from baml_sdk import task_catalog as baml_task_catalog
 from reframe_agent_host.agent_flow.live_conversation import LiveConversationContext
 from reframe_agent_host.agent_flow.memory_contexts import (
     available_tasks,
@@ -69,7 +69,7 @@ class VoiceTurnContext:
     async def continuation_inputs(
         self,
         current_user_request: str,
-        selected_task: baml_task_routing.SelectedTaskContext,
+        selected_task: baml_task_catalog.SelectedTaskContext,
         retrieved_memories: RetrievedMemoryContext,
     ) -> dict:
         database = await self._get_database()
@@ -109,15 +109,15 @@ class VoiceTurnContext:
             self.database = await open_memory_database()
         return self.database
 
-    def _machine_state_context(self) -> baml_context.MachineStateContext:
+    def _machine_state_context(self) -> baml_turn_context.MachineStateContext:
         if self.machine_state_provider is None:
             return local_machine_state_context("No voice startup machine state provider")
         return self.machine_state_provider.context()
 
     def _merge_live_conversation(
         self,
-        conversation: baml_context.ConversationHistory | None,
-    ) -> baml_context.ConversationHistory | None:
+        conversation: baml_turn_context.ConversationHistory | None,
+    ) -> baml_turn_context.ConversationHistory | None:
         if self.live_conversation is None:
             return conversation
         return self.live_conversation.merge(conversation, self.conversation_id)

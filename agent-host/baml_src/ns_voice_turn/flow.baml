@@ -1,18 +1,18 @@
 function UnderstandVoicePrompt(
     current_timestamp: string,
     current_user_request: string,
-    current_conversation: root.context.ConversationHistory?,
-    session_memories: root.context.SessionMemoryContext[],
-    user_preferences: root.context.UserPreferenceMemoryContext[],
-    available_tasks: root.task_routing.AvailableTask[],
-    task_choice_memories: root.task_routing.TaskChoiceMemoryContext[],
-    conversation_evaluation_memories: root.memory_search.ConversationEvaluationMemoryContext[],
-    search_depth_memories: root.memory_search.SearchDepthMemoryContext[],
-    machine_state: root.context.MachineStateContext,
+    current_conversation: root.turn_context.ConversationHistory?,
+    session_memories: root.turn_context.SessionMemoryContext[],
+    user_preferences: root.turn_context.UserPreferenceMemoryContext[],
+    available_tasks: root.task_catalog.AvailableTask[],
+    task_choice_memories: root.task.TaskChoiceMemoryContext[],
+    conversation_evaluation_memories: root.memory.ConversationEvaluationMemoryContext[],
+    search_depth_memories: root.memory.SearchDepthMemoryContext[],
+    machine_state: root.turn_context.MachineStateContext,
 ) -> VoicePromptUnderstanding {
     let task_choice_started_at = baml.time.Instant.now();
     let task_choice = root
-        .task_routing
+        .task
         .ChooseTask(
             current_user_request,
             current_conversation,
@@ -23,10 +23,10 @@ function UnderstandVoicePrompt(
             machine_state,
         );
     let task_choice_ms = task_choice_started_at.elapsed().to_milliseconds();
-    let selected_task = root.task_routing.SelectedTask(available_tasks, task_choice.selected_task_id);
+    let selected_task = root.task_catalog.SelectedTask(available_tasks, task_choice.selected_task_id);
     let memory_search_started_at = baml.time.Instant.now();
     let memory_search_hints = root
-        .memory_search
+        .memory
         .ChooseMemorySearch(
             current_user_request,
             current_conversation,
@@ -38,7 +38,7 @@ function UnderstandVoicePrompt(
     let memory_search_ms = memory_search_started_at.elapsed().to_milliseconds();
     let search_depth_started_at = baml.time.Instant.now();
     let search_depths = root
-        .memory_search
+        .memory
         .ChooseMemorySearchDepths(
             current_timestamp,
             current_user_request,
@@ -46,7 +46,7 @@ function UnderstandVoicePrompt(
             session_memories,
             selected_task,
             memory_search_hints,
-            root.memory_search.SearchDomains(),
+            root.memory.SearchDomains(),
             search_depth_memories,
             machine_state,
         );
@@ -67,33 +67,32 @@ function UnderstandVoicePrompt(
 
 function ContinueVoicePrompt(
     current_user_request: string,
-    current_conversation: root.context.ConversationHistory?,
-    session_memories: root.context.SessionMemoryContext[],
-    user_preferences: root.context.UserPreferenceMemoryContext[],
-    selected_task: root.task_routing.SelectedTaskContext,
-    retrieved_memories: root.retrieved_memory.RetrievedMemoryGraph,
+    current_conversation: root.turn_context.ConversationHistory?,
+    session_memories: root.turn_context.SessionMemoryContext[],
+    user_preferences: root.turn_context.UserPreferenceMemoryContext[],
+    selected_task: root.task_catalog.SelectedTaskContext,
+    retrieved_memories: root.memory.RetrievedMemoryGraph,
     current_session_id: string?,
-    relevance_memories: root.memory_selection.RelevanceMemoryContext[],
-    task_prompt_memories: root.task_prompt.TaskPromptMemoryContext[],
-    machine_state: root.context.MachineStateContext,
+    relevance_memories: root.memory.RelevanceMemoryContext[],
+    task_prompt_memories: root.task.TaskPromptMemoryContext[],
+    machine_state: root.turn_context.MachineStateContext,
 ) -> VoicePromptContinuation {
     let memory_relevance_started_at = baml.time.Instant.now();
     let relevance_decision = root
-        .memory_selection
+        .memory
         .SelectRelevantMemories(
             current_user_request,
             current_conversation,
             session_memories,
             selected_task,
-            root.memory_selection
-                .Candidates(retrieved_memories, current_session_id, user_preferences),
+            root.memory.Candidates(retrieved_memories, current_session_id, user_preferences),
             relevance_memories,
             machine_state,
         );
     let memory_relevance_ms = memory_relevance_started_at.elapsed().to_milliseconds();
-    let selected_memories = root.memory_selection.SelectedGraph(retrieved_memories, relevance_decision);
+    let selected_memories = root.memory.SelectedGraph(retrieved_memories, relevance_decision);
     let selected_memory_contexts = root
-        .task_prompt
+        .task
         .PromptContexts(
             selected_memories,
             relevance_decision.kept_memory_ids,
@@ -102,7 +101,7 @@ function ContinueVoicePrompt(
         );
     let task_prompt_started_at = baml.time.Instant.now();
     let composition = root
-        .task_prompt
+        .task
         .ComposeTaskInput(
             current_user_request,
             current_conversation,
@@ -118,7 +117,7 @@ function ContinueVoicePrompt(
         relevance_decision: relevance_decision,
         selected_memories: selected_memories,
         selected_memory_contexts: selected_memory_contexts,
-        task_prompt: root.task_prompt.PromptDecision(selected_task.prompt, composition),
+        task_prompt: root.task.PromptDecision(selected_task.prompt, composition),
         timings: VoicePromptContinuationTimings {
             memory_relevance_ms: memory_relevance_ms,
             task_prompt_ms: task_prompt_ms,

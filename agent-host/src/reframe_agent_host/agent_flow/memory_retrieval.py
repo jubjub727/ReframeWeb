@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from baml_sdk import memory_search as baml_memory_search
+from baml_sdk import memory as baml_memory
 from reframe_memory import (
     MemoryDatabase,
     StringSearch,
@@ -28,8 +28,8 @@ class MemoryRetrievalPlanner:
 
     async def retrieve(
         self,
-        memory_search_hints: baml_memory_search.ConversationMemorySearchHints,
-        search_depths: baml_memory_search.SearchDepthDecision,
+        memory_search_hints: baml_memory.ConversationMemorySearchHints,
+        search_depths: baml_memory.SearchDepthDecision,
     ) -> RetrievedMemoryContext:
         database = await self._get_database()
         retriever = GraphMemoryRetriever(
@@ -55,7 +55,7 @@ class MemoryRetrievalPlanner:
 
 
 def _search_hints(
-    hints: baml_memory_search.ConversationMemorySearchHints,
+    hints: baml_memory.ConversationMemorySearchHints,
 ) -> GraphSearchHints:
     return GraphSearchHints(
         tags=TagSearch.build(
@@ -71,7 +71,7 @@ def _search_hints(
 
 
 def _timestamp_breadths(
-    decision: baml_memory_search.SearchDepthDecision,
+    decision: baml_memory.SearchDepthDecision,
 ) -> dict[str, TimestampBreadth]:
     return {
         domain: TimestampBreadth.build(

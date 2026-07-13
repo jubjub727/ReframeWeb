@@ -23,10 +23,24 @@ from __future__ import annotations
 import typing
 import pydantic
 
-from baml_core import (
-    BamlPyHandle as _BamlPyHandle,
-    define_function as _define_function,
-)
+from baml_bridge import BamlPyHandle as _BamlPyHandle
+
+
+class ErrorContext(pydantic.BaseModel):
+    """
+    The temporal context of a thrown error: the error value itself, where it
+    was thrown, and the error it superseded while the scope was unwinding (its
+    `cause`), if any. Bound by the second parameter of a `catch (e, ctx)`
+    handler.
+    
+    The chain runs newest → oldest through `cause`; `root_cause` walks to the
+    original failure at the tail, and `to_string` renders the whole chain
+    Python-style ("During handling of the above error, another error occurred").
+    """
+    model_config = pydantic.ConfigDict(extra="forbid")
+    error: typing.Any
+    stack_trace: typing.Optional[StackTrace]
+    cause: typing.Optional[ErrorContext]
 
 
 class AccessError(pydantic.BaseModel):
@@ -146,11 +160,10 @@ class StackTrace(pydantic.BaseModel):
     """A captured call stack, consisting of one or more `StackFrame` entries."""
     model_config = pydantic.ConfigDict(extra="forbid")
     frames: typing.List[StackFrame]
-    to_string       = _define_function("baml.errors.StackTrace$stream.to_string", "sync",  ["self"])
-    to_string_async = _define_function("baml.errors.StackTrace$stream.to_string", "async", ["self"])
 
 
 __all__ = [
+    "ErrorContext",
     "AccessError",
     "CompilationError",
     "DevOther",

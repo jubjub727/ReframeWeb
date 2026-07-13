@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from baml_sdk import context as baml_context
+from baml_sdk import turn_context as baml_turn_context
 
 from reframe_agent_host.keyphrases import KeyphraseSpotterConfig
 from reframe_agent_host.speech.transcription import WhisperTranscriberConfig
@@ -23,7 +23,7 @@ def voice_pipeline_config(args: argparse.Namespace) -> VoicePipelineConfig:
             conversation_on_phrases=tuple(args.conversation_on_phrase),
         ),
         transcription=transcription_config(args),
-        conversation_mode=baml_context.ConversationMode(args.mode),
+        conversation_mode=baml_turn_context.ConversationMode(args.mode),
         task_choice_enabled=not args.no_task_choice,
         session_id=args.session_id,
         conversation_id=args.conversation_id,

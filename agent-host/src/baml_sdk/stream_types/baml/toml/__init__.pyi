@@ -25,7 +25,6 @@ import typing_extensions
 import pydantic
 
 if typing.TYPE_CHECKING:
-    from .... import baml
     from .... import stream_types
 
 
@@ -34,20 +33,6 @@ Item = typing_extensions.TypeAliasType("Item", typing.Union["Table", typing.List
 
 class Table(pydantic.BaseModel):
     items: typing.Dict[str, Item]
-    @staticmethod
-    def from_json(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    @staticmethod
-    async def from_json_async(j: baml.json.json) -> None:
-        """Raises:
-            JsonDecodeError"""
-    def to_json(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
-    async def to_json_async(self) -> baml.json.json:
-        """Raises:
-            JsonSerializationError"""
 
 
 class TomlParseError(pydantic.BaseModel):

@@ -55,9 +55,37 @@ async def get_or_panic_async(key: str) -> str:
         Io, ParseError"""
 
 
+def get_or_panic_lenient(key: str, lenient: bool) -> str:
+    """Like `get_or_panic`, but tolerant of a missing variable when `lenient` is
+    true: a missing variable yields the empty string instead of panicking.
+    
+    Used by generated client constructors so that offline prompt rendering
+    (`<Fn>$render_prompt`) can build a client for its provider/role metadata
+    without requiring credentials. The network paths (`<Fn>$call`,
+    `<Fn>$build_request`) construct with `lenient = false`, so a missing
+    `api_key` env var still panics for them, exactly as before.
+    
+    Raises:
+        Io, ParseError"""
+async def get_or_panic_lenient_async(key: str, lenient: bool) -> str:
+    """Like `get_or_panic`, but tolerant of a missing variable when `lenient` is
+    true: a missing variable yields the empty string instead of panicking.
+    
+    Used by generated client constructors so that offline prompt rendering
+    (`<Fn>$render_prompt`) can build a client for its provider/role metadata
+    without requiring credentials. The network paths (`<Fn>$call`,
+    `<Fn>$build_request`) construct with `lenient = false`, so a missing
+    `api_key` env var still panics for them, exactly as before.
+    
+    Raises:
+        Io, ParseError"""
+
+
 __all__ = [
     "get",
     "get_async",
     "get_or_panic",
     "get_or_panic_async",
+    "get_or_panic_lenient",
+    "get_or_panic_lenient_async",
 ]

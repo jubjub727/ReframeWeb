@@ -28,10 +28,10 @@ if typing.TYPE_CHECKING:
 
 
 class VoicePromptContinuation(pydantic.BaseModel):
-    relevance_decision: typing.Optional[stream_types.memory_selection.RelevantMemoryDecision]
-    selected_memories: typing.Optional[stream_types.retrieved_memory.RetrievedMemoryGraph]
-    selected_memory_contexts: typing.List[stream_types.task_prompt.TaskPromptSelectedMemoryContext]
-    task_prompt: typing.Optional[stream_types.task_prompt.TaskPromptDecision]
+    relevance_decision: typing.Optional[stream_types.memory.RelevantMemoryDecision]
+    selected_memories: typing.Optional[stream_types.memory.RetrievedMemoryGraph]
+    selected_memory_contexts: typing.List[stream_types.task.TaskPromptSelectedMemoryContext]
+    task_prompt: typing.Optional[stream_types.task.TaskPromptDecision]
     timings: typing.Optional[VoicePromptContinuationTimings]
 
 
@@ -41,10 +41,10 @@ class VoicePromptContinuationTimings(pydantic.BaseModel):
 
 
 class VoicePromptUnderstanding(pydantic.BaseModel):
-    task_choice: typing.Optional[stream_types.task_routing.TaskChoiceDecision]
-    selected_task: typing.Optional[stream_types.task_routing.SelectedTaskContext]
-    memory_search_hints: typing.Optional[stream_types.memory_search.ConversationMemorySearchHints]
-    search_depths: typing.Optional[stream_types.memory_search.SearchDepthDecision]
+    task_choice: typing.Optional[stream_types.task.TaskChoiceDecision]
+    selected_task: typing.Optional[stream_types.task_catalog.SelectedTaskContext]
+    memory_search_hints: typing.Optional[stream_types.memory.ConversationMemorySearchHints]
+    search_depths: typing.Optional[stream_types.memory.SearchDepthDecision]
     timings: typing.Optional[VoicePromptUnderstandingTimings]
 
 

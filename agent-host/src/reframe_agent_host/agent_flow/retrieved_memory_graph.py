@@ -4,15 +4,15 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any
 
-from baml_sdk import retrieved_memory as baml_retrieved_memory
+from baml_sdk import memory as baml_memory
 from reframe_agent_host.agent_flow.timestamps import timestamp_fields
 from reframe_memory.retrieved_context import RetrievedMemoryContext
 
 
-def retrieved_memory_graph(memories: RetrievedMemoryContext) -> baml_retrieved_memory.RetrievedMemoryGraph:
-    return baml_retrieved_memory.RetrievedMemoryGraph(
+def retrieved_memory_graph(memories: RetrievedMemoryContext) -> baml_memory.RetrievedMemoryGraph:
+    return baml_memory.RetrievedMemoryGraph(
         task_catalog=[
-            baml_retrieved_memory.RetrievedTaskNode(
+            baml_memory.RetrievedTaskNode(
                 id=task.id,
                 name=task.content.name,
                 description=task.content.description,
@@ -26,8 +26,8 @@ def retrieved_memory_graph(memories: RetrievedMemoryContext) -> baml_retrieved_m
             for task in memories.task_catalog.tasks
         ],
         past_sessions=[
-            baml_retrieved_memory.RetrievedSessionGraph(
-                session=baml_retrieved_memory.RetrievedSessionNode(
+            baml_memory.RetrievedSessionGraph(
+                session=baml_memory.RetrievedSessionNode(
                     id=session.session.id,
                     name=session.session.content.name,
                     tags=list(session.session.tags),
@@ -35,8 +35,8 @@ def retrieved_memory_graph(memories: RetrievedMemoryContext) -> baml_retrieved_m
                 ),
                 matched=session.matched,
                 conversations=[
-                    baml_retrieved_memory.RetrievedConversationGraph(
-                        conversation=baml_retrieved_memory.RetrievedConversationNode(
+                    baml_memory.RetrievedConversationGraph(
+                        conversation=baml_memory.RetrievedConversationNode(
                             id=conversation.conversation.id,
                             name=conversation.conversation.content.name,
                             tags=list(conversation.conversation.tags),
@@ -44,7 +44,7 @@ def retrieved_memory_graph(memories: RetrievedMemoryContext) -> baml_retrieved_m
                         ),
                         matched=conversation.matched,
                         messages=[
-                            baml_retrieved_memory.RetrievedConversationMessageNode(
+                            baml_memory.RetrievedConversationMessageNode(
                                 id=message.id,
                                 role=message.content.role,
                                 content=message.content.content,
@@ -60,7 +60,7 @@ def retrieved_memory_graph(memories: RetrievedMemoryContext) -> baml_retrieved_m
                     for conversation in session.conversations
                 ],
                 session_memories=[
-                    baml_retrieved_memory.RetrievedSessionMemoryNode(
+                    baml_memory.RetrievedSessionMemoryNode(
                         id=memory.id,
                         title=memory.content.title,
                         description=memory.content.description,
@@ -73,7 +73,7 @@ def retrieved_memory_graph(memories: RetrievedMemoryContext) -> baml_retrieved_m
             for session in memories.past_conversation_context.sessions
         ],
         current_session_memories=[
-            baml_retrieved_memory.RetrievedSessionMemoryNode(
+            baml_memory.RetrievedSessionMemoryNode(
                 id=memory.id,
                 title=memory.content.title,
                 description=memory.content.description,
@@ -92,7 +92,7 @@ class BamlRetrievedMemoryContext:
     current_session_memories: tuple[Any, ...]
 
     @classmethod
-    def from_graph(cls, graph: baml_retrieved_memory.RetrievedMemoryGraph) -> "BamlRetrievedMemoryContext":
+    def from_graph(cls, graph: baml_memory.RetrievedMemoryGraph) -> "BamlRetrievedMemoryContext":
         return cls(
             task_catalog=SimpleNamespace(tasks=tuple(graph.task_catalog)),
             past_conversation_context=SimpleNamespace(

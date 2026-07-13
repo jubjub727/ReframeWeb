@@ -3,7 +3,7 @@ from threading import Event
 import unittest
 from unittest.mock import patch
 
-from baml_sdk import task_execution as baml_task_execution
+from baml_sdk import task as baml_task
 from reframe_agent_host.task_execution import PrimitiveDispatcher
 
 
@@ -125,13 +125,13 @@ class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
             speaker=speaker,
             on_event=lambda stage, message: events.append((stage, message)),
         )
-        result = baml_task_execution.TaskExecutionResult(
+        result = baml_task.TaskExecutionResult(
             returns=[
-                baml_task_execution.TaskReturnItem(
+                baml_task.TaskReturnItem(
                     name="agent_reply",
                     payload={"text": "spoken reply"},
                 ),
-                baml_task_execution.TaskReturnItem(
+                baml_task.TaskReturnItem(
                     name="agent_thought",
                     payload={"text": "next thought"},
                 ),
@@ -165,9 +165,9 @@ class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
         )
 
         await dispatcher.dispatch(
-            baml_task_execution.TaskExecutionResult(
+            baml_task.TaskExecutionResult(
                 returns=[
-                    baml_task_execution.TaskReturnItem(
+                    baml_task.TaskReturnItem(
                         name="agent_reply",
                         payload={"text": "spoken reply"},
                     )
@@ -198,9 +198,9 @@ class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
             fake_open_memory_database,
         ):
             await dispatcher.dispatch(
-                baml_task_execution.TaskExecutionResult(
+                baml_task.TaskExecutionResult(
                     returns=[
-                        baml_task_execution.TaskReturnItem(
+                        baml_task.TaskReturnItem(
                             name="agent_reply",
                             payload={"text": "spoken reply"},
                         )
@@ -238,9 +238,9 @@ class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
             on_event=lambda stage, message: events.append((stage, message)),
             on_conversation_mode_off=lambda: mode_changes.append("off"),
         )
-        result = baml_task_execution.TaskExecutionResult(
+        result = baml_task.TaskExecutionResult(
             returns=[
-                baml_task_execution.TaskReturnItem(
+                baml_task.TaskReturnItem(
                     name="conversation_mode_off",
                     payload={},
                 )
@@ -265,9 +265,9 @@ class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
             conversation_id="conversation:test",
             on_event=lambda stage, message: events.append((stage, message)),
         )
-        result = baml_task_execution.TaskExecutionResult(
+        result = baml_task.TaskExecutionResult(
             returns=[
-                baml_task_execution.TaskReturnItem(
+                baml_task.TaskReturnItem(
                     name="website_open",
                     payload={"url": "https://example.com", "reason": "test"},
                 )
@@ -290,13 +290,13 @@ class PrimitiveDispatcherTests(unittest.IsolatedAsyncioTestCase):
         )
 
         dispatch_result = await dispatcher.dispatch(
-            baml_task_execution.TaskExecutionResult(
+            baml_task.TaskExecutionResult(
                 returns=[
-                    baml_task_execution.TaskReturnItem(
+                    baml_task.TaskReturnItem(
                         name="agent_reply",
                         payload={"text": "done"},
                     ),
-                    baml_task_execution.TaskReturnItem(
+                    baml_task.TaskReturnItem(
                         name="conversation_mode_off",
                         payload={},
                     ),

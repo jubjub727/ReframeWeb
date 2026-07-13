@@ -26,11 +26,6 @@ import pydantic
 
 from .... import stream_types
 
-if typing.TYPE_CHECKING:
-    from .... import baml
-
-from baml_core import define_function as _define_function
-
 
 Item = typing_extensions.TypeAliasType("Item", typing.Union["Table", typing.List["Item"], bool, int, float, str, "stream_types.baml.time.ZonedDateTime", "stream_types.baml.time.PlainDateTime", "stream_types.baml.time.PlainDate", "stream_types.baml.time.PlainTime"])
 
@@ -38,10 +33,6 @@ Item = typing_extensions.TypeAliasType("Item", typing.Union["Table", typing.List
 class Table(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     items: typing.Dict[str, Item]
-    from_json       = staticmethod(_define_function("baml.toml.Table$stream.from_json", "sync",  ["j"]))
-    from_json_async = staticmethod(_define_function("baml.toml.Table$stream.from_json", "async", ["j"]))
-    to_json       = _define_function("baml.toml.Table$stream.to_json", "sync",  ["self"])
-    to_json_async = _define_function("baml.toml.Table$stream.to_json", "async", ["self"])
 
 
 class TomlParseError(pydantic.BaseModel):

@@ -23,16 +23,14 @@ from __future__ import annotations
 import typing
 import pydantic
 
-from .. import memory_search
-from .. import memory_selection
-from .. import retrieved_memory
-from .. import task_prompt
-from .. import task_routing
+from .. import memory
+from .. import task
+from .. import task_catalog
 
 if typing.TYPE_CHECKING:
-    from .. import context
+    from .. import turn_context
 
-from baml_core import define_function as _define_function
+from baml_bridge import define_function as _define_function
 
 
 UnderstandVoicePrompt       = _define_function("user.voice_turn.UnderstandVoicePrompt", "sync",  ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "user_preferences", "available_tasks", "task_choice_memories", "conversation_evaluation_memories", "search_depth_memories", "machine_state"])
@@ -53,19 +51,19 @@ ContinueVoicePrompt_async.__doc__ = """Raises:
 
 class VoicePromptUnderstanding(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
-    task_choice: task_routing.TaskChoiceDecision
-    selected_task: task_routing.SelectedTaskContext
-    memory_search_hints: memory_search.ConversationMemorySearchHints
-    search_depths: memory_search.SearchDepthDecision
+    task_choice: task.TaskChoiceDecision
+    selected_task: task_catalog.SelectedTaskContext
+    memory_search_hints: memory.ConversationMemorySearchHints
+    search_depths: memory.SearchDepthDecision
     timings: VoicePromptUnderstandingTimings
 
 
 class VoicePromptContinuation(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
-    relevance_decision: memory_selection.RelevantMemoryDecision
-    selected_memories: retrieved_memory.RetrievedMemoryGraph
-    selected_memory_contexts: typing.List[task_prompt.TaskPromptSelectedMemoryContext]
-    task_prompt: task_prompt.TaskPromptDecision
+    relevance_decision: memory.RelevantMemoryDecision
+    selected_memories: memory.RetrievedMemoryGraph
+    selected_memory_contexts: typing.List[task.TaskPromptSelectedMemoryContext]
+    task_prompt: task.TaskPromptDecision
     timings: VoicePromptContinuationTimings
 
 

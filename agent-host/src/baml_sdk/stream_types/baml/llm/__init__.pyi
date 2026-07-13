@@ -27,7 +27,7 @@ if typing.TYPE_CHECKING:
     from .... import baml
     from .... import stream_types
 
-from baml_core import BamlPyHandle as _BamlPyHandle
+from baml_bridge import BamlPyHandle as _BamlPyHandle
 
 
 TFinal = typing.TypeVar("TFinal")
@@ -135,6 +135,11 @@ class PromptAst(pydantic.BaseModel):
     _data: _BamlPyHandle
 
 
+class PromptMessage(pydantic.BaseModel):
+    role: typing.Optional[str]
+    content: typing.Optional[str]
+
+
 class RetryPolicy(pydantic.BaseModel):
     max_retries: typing.Optional[int]
     initial_delay_ms: typing.Optional[int]
@@ -184,6 +189,7 @@ __all__ = [
     "PrimitiveClient",
     "PrimitiveClientOptions",
     "PromptAst",
+    "PromptMessage",
     "RetryPolicy",
     "Role",
     "Stream",

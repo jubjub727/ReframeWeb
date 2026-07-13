@@ -33,7 +33,6 @@ from . import io
 from . import iter
 from . import json
 from . import llm
-from . import math
 from . import media
 from . import net
 from . import ops
@@ -51,7 +50,7 @@ import pydantic
 if typing.TYPE_CHECKING:
     from .. import baml
 
-from baml_core import BamlError as BamlError, BamlPanic as BamlPanic, UNSET as UNSET
+from baml_bridge import BamlError as BamlError, BamlPanic as BamlPanic, UNSET as UNSET
 
 
 A = typing.TypeVar("A")
@@ -348,9 +347,18 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
         # Parameters
         - `length`: the number of elements to create. A negative or zero `length`
           produces an empty array.
-        - `value`: the value stored in every slot. The same value is shared by
-          every slot, so for reference types each slot refers to the *same*
-          object and mutating it is visible through all of them.
+        - `value`: the value stored in every slot.
+        
+        # Warning
+        `Array.filled` reuses the exact same `value` for every slot. For reference
+        types (arrays, maps, class instances), every slot aliases the same object.
+        Mutating one slot mutates all slots.
+        
+        To get independent per-slot values, use `Array.generate`, which calls a
+        factory once per index:
+        ```
+        Array.generate(3, (i: int) -> int[] { [] })   // three independent []s
+        ```
         
         # Returns
         A fresh `T[]` of length `max(length, 0)` with every element equal to
@@ -364,6 +372,7 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
         Array.filled(0, 0)     // []
         Array.filled(-1, 0)    // []
         Array.filled(2, "x")   // ["x", "x"]
+        Array.filled(3, [])    // aliases the same inner array in all 3 slots
         ```"""
     @staticmethod
     async def filled_async(length: int, value: T) -> typing.List[T]:
@@ -377,9 +386,18 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
         # Parameters
         - `length`: the number of elements to create. A negative or zero `length`
           produces an empty array.
-        - `value`: the value stored in every slot. The same value is shared by
-          every slot, so for reference types each slot refers to the *same*
-          object and mutating it is visible through all of them.
+        - `value`: the value stored in every slot.
+        
+        # Warning
+        `Array.filled` reuses the exact same `value` for every slot. For reference
+        types (arrays, maps, class instances), every slot aliases the same object.
+        Mutating one slot mutates all slots.
+        
+        To get independent per-slot values, use `Array.generate`, which calls a
+        factory once per index:
+        ```
+        Array.generate(3, (i: int) -> int[] { [] })   // three independent []s
+        ```
         
         # Returns
         A fresh `T[]` of length `max(length, 0)` with every element equal to
@@ -393,6 +411,61 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
         Array.filled(0, 0)     // []
         Array.filled(-1, 0)    // []
         Array.filled(2, "x")   // ["x", "x"]
+        Array.filled(3, [])    // aliases the same inner array in all 3 slots
+        ```"""
+    @staticmethod
+    def generate(length: int, f: typing.Callable[[int], T], *, _types: dict[str, type]) -> typing.List[T]:
+        """Builds a new array of `length` elements by calling `f` once per index.
+        
+        `f` is invoked with each index `0, 1, ..., length - 1` in order, and its
+        result is stored in that slot. Unlike `Array.filled`, which reuses one
+        shared value, `generate` produces an **independent value per slot** — the
+        alias-free way to build runtime-sized buffers of reference types (rows of a
+        grid, per-slot maps or class instances). It mirrors JavaScript's
+        `Array.from({ length }, f)` and a Python list comprehension.
+        
+        # Parameters
+        - `length`: the number of elements to create. A negative or zero `length`
+          produces an empty array and never calls `f`.
+        - `f`: called once per index to produce that slot's value. Any error it
+          throws propagates to the caller, halting generation.
+        
+        # Returns
+        A fresh `T[]` of length `max(length, 0)` whose element `i` is `f(i)`.
+        
+        # Examples
+        ```
+        Array.generate(3, (i: int) -> int { i * i })      // [0, 1, 4]
+        Array.generate(0, (i: int) -> int { i })          // []
+        // A 2D grid with independent rows (mutating one row leaves the rest):
+        Array.generate(rows, (r: int) -> int[] { Array.filled(cols, 0) })
+        ```"""
+    @staticmethod
+    async def generate_async(length: int, f: typing.Callable[[int], T], *, _types: dict[str, type]) -> typing.List[T]:
+        """Builds a new array of `length` elements by calling `f` once per index.
+        
+        `f` is invoked with each index `0, 1, ..., length - 1` in order, and its
+        result is stored in that slot. Unlike `Array.filled`, which reuses one
+        shared value, `generate` produces an **independent value per slot** — the
+        alias-free way to build runtime-sized buffers of reference types (rows of a
+        grid, per-slot maps or class instances). It mirrors JavaScript's
+        `Array.from({ length }, f)` and a Python list comprehension.
+        
+        # Parameters
+        - `length`: the number of elements to create. A negative or zero `length`
+          produces an empty array and never calls `f`.
+        - `f`: called once per index to produce that slot's value. Any error it
+          throws propagates to the caller, halting generation.
+        
+        # Returns
+        A fresh `T[]` of length `max(length, 0)` whose element `i` is `f(i)`.
+        
+        # Examples
+        ```
+        Array.generate(3, (i: int) -> int { i * i })      // [0, 1, 4]
+        Array.generate(0, (i: int) -> int { i })          // []
+        // A 2D grid with independent rows (mutating one row leaves the rest):
+        Array.generate(rows, (r: int) -> int[] { Array.filled(cols, 0) })
         ```"""
     def length(self) -> int:
         """Returns the number of elements in the array."""
@@ -547,6 +620,30 @@ class Map(pydantic.BaseModel, typing.Generic[K, V]):
     async def get_or_insert_async(self, key: K, default: V) -> V: ...
     def clear(self) -> None: ...
     async def clear_async(self) -> None: ...
+
+
+def _sum_int(values: typing.List[int]) -> int: ...
+async def _sum_int_async(values: typing.List[int]) -> int: ...
+
+
+def _sum_float(values: typing.List[float]) -> float: ...
+async def _sum_float_async(values: typing.List[float]) -> float: ...
+
+
+def _mean_float(values: typing.List[float]) -> float:
+    """Raises:
+        InvalidArgument"""
+async def _mean_float_async(values: typing.List[float]) -> float:
+    """Raises:
+        InvalidArgument"""
+
+
+def _median_float(values: typing.List[float]) -> float:
+    """Raises:
+        InvalidArgument"""
+async def _median_float_async(values: typing.List[float]) -> float:
+    """Raises:
+        InvalidArgument"""
 
 
 def _to_string_default(value: T, *, _types: dict[str, type]) -> str: ...
@@ -1183,6 +1280,24 @@ class Float(pydantic.BaseModel):
         """Converts `self` from radians to degrees."""
     async def to_degrees_async(self) -> float:
         """Converts `self` from radians to degrees."""
+
+
+def _trunc_to_int(value: float) -> int:
+    """Truncates `value` toward zero and returns the integer part, **saturating**
+    to the `int` range and mapping NaN to `0` — it never throws.
+    
+    Private helper (leading `_`; formerly the public `baml.math.trunc`) backing
+    internal retry-delay math in `baml.llm`. User code should prefer the
+    range-checked, throwing `float.itrunc()` (or the float-returning
+    `float.trunc()`); this saturating form is intentionally not public surface."""
+async def _trunc_to_int_async(value: float) -> int:
+    """Truncates `value` toward zero and returns the integer part, **saturating**
+    to the `int` range and mapping NaN to `0` — it never throws.
+    
+    Private helper (leading `_`; formerly the public `baml.math.trunc`) backing
+    internal retry-delay math in `baml.llm`. User code should prefer the
+    range-checked, throwing `float.itrunc()` (or the float-returning
+    `float.trunc()`); this saturating form is intentionally not public surface."""
 
 
 class Int(pydantic.BaseModel):
@@ -2029,6 +2144,8 @@ class String(pydantic.BaseModel):
         ```"""
     def char_at(self, index: int) -> str: ...
     async def char_at_async(self, index: int) -> str: ...
+    def code_point_at(self, index: int) -> int: ...
+    async def code_point_at_async(self, index: int) -> int: ...
     def repeat(self, count: int) -> str:
         """Returns a new string that repeats `self` the given number of times.
         Negative counts are treated as 0.
@@ -2362,6 +2479,44 @@ class String(pydantic.BaseModel):
         "hi".to_utf8()     // [0x68, 0x69]
         "é".to_utf8()      // [0xC3, 0xA9]
         "".to_utf8()       // []
+        ```"""
+    def to_code_points(self) -> typing.List[int]:
+        """Returns the string's Unicode code points as an array of `int`s.
+        
+        This is the exact inverse of `string.from_code_points`: for any string
+        `s`, `string.from_code_points(s.to_code_points())` equals `s`. The result
+        has one element per character (`self.length()` elements), each in
+        `[0, 0x10FFFF]`. Never throws.
+        
+        Use this for char → integer mappings (checksums, base-N encoding, hashing,
+        character classification) instead of indexing into a literal alphabet
+        string.
+        
+        # Examples
+        ```
+        "hi".to_code_points()    // [104, 105]
+        "é".to_code_points()     // [233]
+        "🐑".to_code_points()    // [128017]
+        "".to_code_points()      // []
+        ```"""
+    async def to_code_points_async(self) -> typing.List[int]:
+        """Returns the string's Unicode code points as an array of `int`s.
+        
+        This is the exact inverse of `string.from_code_points`: for any string
+        `s`, `string.from_code_points(s.to_code_points())` equals `s`. The result
+        has one element per character (`self.length()` elements), each in
+        `[0, 0x10FFFF]`. Never throws.
+        
+        Use this for char → integer mappings (checksums, base-N encoding, hashing,
+        character classification) instead of indexing into a literal alphabet
+        string.
+        
+        # Examples
+        ```
+        "hi".to_code_points()    // [104, 105]
+        "é".to_code_points()     // [233]
+        "🐑".to_code_points()    // [128017]
+        "".to_code_points()      // []
         ```"""
 
 

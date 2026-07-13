@@ -1,7 +1,7 @@
 function ConversationContext(
     conversation: BenchmarkConversation,
-) -> root.context.ConversationHistory {
-    root.context.ConversationHistory {
+) -> root.turn_context.ConversationHistory {
+    root.turn_context.ConversationHistory {
         id: conversation.id,
         name: conversation.name,
         created_at: conversation.created_at,
@@ -11,7 +11,7 @@ function ConversationContext(
             .messages
             .map(
                 (message) -> {
-                    root.context.ConversationHistoryMessage {
+                    root.turn_context.ConversationHistoryMessage {
                         created_at: message.created_at,
                         updated_at: message.updated_at,
                         read_at: message.read_at,
@@ -25,7 +25,7 @@ function ConversationContext(
 
 function ConversationContexts(
     conversations: BenchmarkConversation[],
-) -> root.context.ConversationHistory[] {
+) -> root.turn_context.ConversationHistory[] {
     conversations
         .map(
             (conversation) -> {
@@ -34,11 +34,13 @@ function ConversationContexts(
         )
 }
 
-function SessionMemoryContexts(memories: BenchmarkMemory[]) -> root.context.SessionMemoryContext[] {
+function SessionMemoryContexts(
+    memories: BenchmarkMemory[],
+) -> root.turn_context.SessionMemoryContext[] {
     memories
         .map(
             (memory) -> {
-                root.context.SessionMemoryContext {
+                root.turn_context.SessionMemoryContext {
                     title: memory.title,
                     description: memory.description,
                     tags: memory.tags,
@@ -52,11 +54,11 @@ function SessionMemoryContexts(memories: BenchmarkMemory[]) -> root.context.Sess
 
 function UserPreferenceContexts(
     memories: BenchmarkMemory[],
-) -> root.context.UserPreferenceMemoryContext[] {
+) -> root.turn_context.UserPreferenceMemoryContext[] {
     memories
         .map(
             (memory) -> {
-                root.context.UserPreferenceMemoryContext {
+                root.turn_context.UserPreferenceMemoryContext {
                     id: `benchmark_preference:${memory.title}`,
                     title: memory.title,
                     description: memory.description,
@@ -69,11 +71,11 @@ function UserPreferenceContexts(
         )
 }
 
-function AvailableTaskContexts(tasks: BenchmarkTask[]) -> root.task_routing.AvailableTask[] {
+function AvailableTaskContexts(tasks: BenchmarkTask[]) -> root.task_catalog.AvailableTask[] {
     tasks
         .map(
             (task) -> {
-                root.task_routing.AvailableTask {
+                root.task_catalog.AvailableTask {
                     id: task.id,
                     name: task.name,
                     description: task.description,
@@ -89,8 +91,8 @@ function AvailableTaskContexts(tasks: BenchmarkTask[]) -> root.task_routing.Avai
         )
 }
 
-function SelectedTaskContext(task: BenchmarkTask) -> root.task_routing.SelectedTaskContext {
-    root.task_routing.SelectedTaskContext {
+function SelectedTaskContext(task: BenchmarkTask) -> root.task_catalog.SelectedTaskContext {
+    root.task_catalog.SelectedTaskContext {
         id: task.id,
         name: task.name,
         description: task.description,
@@ -107,17 +109,17 @@ function SelectedTaskContext(task: BenchmarkTask) -> root.task_routing.SelectedT
 function SelectedTaskForCase(
     case: ControlFlowBenchmarkCase,
     selected_task_id: string,
-) -> root.task_routing.SelectedTaskContext {
-    root.task_routing.SelectedTask(AvailableTaskContexts(case.available_tasks), selected_task_id)
+) -> root.task_catalog.SelectedTaskContext {
+    root.task_catalog.SelectedTask(AvailableTaskContexts(case.available_tasks), selected_task_id)
 }
 
 function TaskChoiceMemoryContexts(
     memories: BenchmarkMemory[],
-) -> root.task_routing.TaskChoiceMemoryContext[] {
+) -> root.task.TaskChoiceMemoryContext[] {
     memories
         .map(
             (memory) -> {
-                root.task_routing.TaskChoiceMemoryContext {
+                root.task.TaskChoiceMemoryContext {
                     title: memory.title,
                     description: memory.description,
                     tags: memory.tags,
@@ -131,11 +133,11 @@ function TaskChoiceMemoryContexts(
 
 function ConversationEvaluationMemoryContexts(
     memories: BenchmarkMemory[],
-) -> root.memory_search.ConversationEvaluationMemoryContext[] {
+) -> root.memory.ConversationEvaluationMemoryContext[] {
     memories
         .map(
             (memory) -> {
-                root.memory_search.ConversationEvaluationMemoryContext {
+                root.memory.ConversationEvaluationMemoryContext {
                     title: memory.title,
                     description: memory.description,
                     tags: memory.tags,
@@ -149,11 +151,11 @@ function ConversationEvaluationMemoryContexts(
 
 function SearchDepthMemoryContexts(
     memories: BenchmarkMemory[],
-) -> root.memory_search.SearchDepthMemoryContext[] {
+) -> root.memory.SearchDepthMemoryContext[] {
     memories
         .map(
             (memory) -> {
-                root.memory_search.SearchDepthMemoryContext {
+                root.memory.SearchDepthMemoryContext {
                     title: memory.title,
                     description: memory.description,
                     tags: memory.tags,
@@ -168,12 +170,12 @@ function SearchDepthMemoryContexts(
 function TaskPromptConversation(
     case: TaskPromptBenchmarkCase,
     timestamp: string,
-) -> root.context.ConversationHistory {
+) -> root.turn_context.ConversationHistory {
     let messages = case
         .messages
         .map(
             (message) -> {
-                root.context.ConversationHistoryMessage {
+                root.turn_context.ConversationHistoryMessage {
                     created_at: timestamp,
                     updated_at: timestamp,
                     read_at: "NONE",
@@ -184,7 +186,7 @@ function TaskPromptConversation(
         );
     messages
         .push(
-            root.context.ConversationHistoryMessage {
+            root.turn_context.ConversationHistoryMessage {
                 created_at: timestamp,
                 updated_at: timestamp,
                 read_at: "NONE",
@@ -192,7 +194,7 @@ function TaskPromptConversation(
                 content: case.current_user_request,
             },
         );
-    root.context.ConversationHistory {
+    root.turn_context.ConversationHistory {
         id: `benchmark_conversation:${case.id}`,
         name: case.conversation_name,
         created_at: timestamp,
@@ -205,11 +207,11 @@ function TaskPromptConversation(
 function TaskPromptSessionMemoryContexts(
     case: TaskPromptBenchmarkCase,
     timestamp: string,
-) -> root.context.SessionMemoryContext[] {
+) -> root.turn_context.SessionMemoryContext[] {
     case.session_memories
         .map(
             (memory) -> {
-                root.context.SessionMemoryContext {
+                root.turn_context.SessionMemoryContext {
                     title: memory.title,
                     description: memory.description,
                     tags: memory.tags,
@@ -224,11 +226,11 @@ function TaskPromptSessionMemoryContexts(
 function TaskPromptSelectedMemoryContexts(
     case: TaskPromptBenchmarkCase,
     timestamp: string,
-) -> root.task_prompt.TaskPromptSelectedMemoryContext[] {
+) -> root.task.TaskPromptSelectedMemoryContext[] {
     case.session_memories
         .map(
             (memory) -> {
-                root.task_prompt.TaskPromptSelectedMemoryContext {
+                root.task.TaskPromptSelectedMemoryContext {
                     title: memory.title,
                     description: memory.description,
                     tags: memory.tags,
@@ -242,19 +244,19 @@ function TaskPromptSelectedMemoryContexts(
 
 function MemoryRelevanceSelectedTask(
     case: ControlFlowBenchmarkCase,
-) -> root.task_routing.SelectedTaskContext {
+) -> root.task_catalog.SelectedTaskContext {
     SelectedTaskForCase(case, case.expected_task_id)
 }
 
 function MemoryRelevanceCandidates(
     case: ControlFlowBenchmarkCase,
-) -> root.memory_selection.RetrievedMemoryCandidate[] {
+) -> root.memory.RetrievedMemoryCandidate[] {
     let session_candidates = case
         .session
         .memories
         .map(
             (memory) -> {
-                root.memory_selection.RetrievedMemoryCandidate {
+                root.memory.RetrievedMemoryCandidate {
                     id: `benchmark_memory:${case.id}:${memory.title}`,
                     kind: "current_session_memory",
                     title: memory.title,
@@ -273,7 +275,7 @@ function MemoryRelevanceCandidates(
         .user_preferences
         .map(
             (memory) -> {
-                root.memory_selection.RetrievedMemoryCandidate {
+                root.memory.RetrievedMemoryCandidate {
                     id: `benchmark_preference:${case.id}:${memory.title}`,
                     kind: "user_preference",
                     title: memory.title,

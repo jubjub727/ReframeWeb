@@ -26,7 +26,7 @@ import pydantic
 if typing.TYPE_CHECKING:
     from ...baml import UNSET as UNSET
 
-from baml_core import BamlPyHandle as _BamlPyHandle
+from baml_bridge import BamlPyHandle as _BamlPyHandle
 
 
 E = typing.TypeVar("E")

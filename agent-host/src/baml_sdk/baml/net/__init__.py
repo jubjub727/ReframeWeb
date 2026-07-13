@@ -26,7 +26,7 @@ import pydantic
 if typing.TYPE_CHECKING:
     from ... import baml
 
-from baml_core import (
+from baml_bridge import (
     BamlPyHandle as _BamlPyHandle,
     define_function as _define_function,
 )

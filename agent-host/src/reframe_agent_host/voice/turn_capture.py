@@ -6,7 +6,7 @@ from threading import Event
 
 import numpy as np
 from reframe_agent_host.voice.microphone import MicrophoneStream
-from baml_sdk import context as baml_context
+from baml_sdk import turn_context as baml_turn_context
 from reframe_agent_host.voice.activity import (
     UtteranceSegmenter,
 )
@@ -40,7 +40,7 @@ class VoiceTurnCapture:
     def __init__(
         self,
         config: VoicePipelineConfig,
-        conversation_mode: baml_context.ConversationMode,
+        conversation_mode: baml_turn_context.ConversationMode,
         mode_controller: ConversationModeController | None = None,
         audio_frame_handler: AudioFrameHandler | None = None,
     ) -> None:

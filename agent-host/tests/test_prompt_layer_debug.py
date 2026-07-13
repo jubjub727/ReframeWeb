@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from baml_sdk.task_routing import TaskChoiceDecision
+from baml_sdk.task import TaskChoiceDecision
 from reframe_agent_host.agent_flow.prompt_layer_debug import (
     PromptLayerDebugSession,
 )

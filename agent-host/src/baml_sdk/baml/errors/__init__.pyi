@@ -23,7 +23,23 @@ from __future__ import annotations
 import typing
 import pydantic
 
-from baml_core import BamlPyHandle as _BamlPyHandle
+from baml_bridge import BamlPyHandle as _BamlPyHandle
+
+
+class ErrorContext(pydantic.BaseModel):
+    error: typing.Any
+    stack_trace: StackTrace
+    cause: typing.Optional[ErrorContext]
+    def root_cause(self) -> ErrorContext:
+        """The original error at the tail of the cause chain — walks `cause` to the
+        deepest link. Returns `self` when nothing was superseded."""
+    async def root_cause_async(self) -> ErrorContext:
+        """The original error at the tail of the cause chain — walks `cause` to the
+        deepest link. Returns `self` when nothing was superseded."""
+    def to_string(self) -> str: ...
+    async def to_string_async(self) -> str: ...
+    def _to_string_impl(self) -> str: ...
+    async def _to_string_impl_async(self) -> str: ...
 
 
 class InvalidArgument(pydantic.BaseModel):
@@ -102,6 +118,7 @@ class StackTrace(pydantic.BaseModel):
 
 
 __all__ = [
+    "ErrorContext",
     "InvalidArgument",
     "ParseError",
     "Io",

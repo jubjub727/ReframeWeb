@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import time
 from typing import Any, Mapping
 
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import task_catalog as baml_task_catalog
 from baml_sdk import voice_turn as baml_voice_turn
 from reframe_agent_host.agent_flow.live_conversation import LiveConversationContext
 from reframe_agent_host.agent_flow.machine_state import MachineStateProvider
@@ -62,7 +62,7 @@ class BamlVoiceTurnFlow:
     async def continue_prompt(
         self,
         current_user_request: str,
-        selected_task: baml_task_routing.SelectedTaskContext,
+        selected_task: baml_task_catalog.SelectedTaskContext,
         retrieved_memories: RetrievedMemoryContext,
     ) -> baml_voice_turn.VoicePromptContinuation:
         inputs = await self._context.continuation_inputs(

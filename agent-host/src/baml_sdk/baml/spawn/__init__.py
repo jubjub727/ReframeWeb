@@ -23,7 +23,7 @@ from __future__ import annotations
 import typing
 import pydantic
 
-from baml_core import (
+from baml_bridge import (
     BamlPyHandle as _BamlPyHandle,
     define_function as _define_function,
 )

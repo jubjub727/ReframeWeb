@@ -17,7 +17,7 @@ class ActionHistorySummaryTests(unittest.IsolatedAsyncioTestCase):
             return "The recorded actions replied to the user."
 
         with mock.patch(
-            "reframe_agent_host.agent_flow.action_history.baml_action_history."
+            "reframe_agent_host.agent_flow.action_history.baml_task."
             "SummariseActionHistory_async",
             side_effect=summarize,
         ):

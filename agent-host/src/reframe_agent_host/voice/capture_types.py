@@ -4,7 +4,7 @@ import asyncio
 from dataclasses import dataclass
 from typing import Literal
 
-from baml_sdk import context as baml_context
+from baml_sdk import turn_context as baml_turn_context
 from reframe_agent_host.keyphrases import KeyphraseDetection
 from reframe_agent_host.voice.activity import DetectedUtterance
 
@@ -14,7 +14,7 @@ CaptureStreamEventKind = Literal["endpoint", "resumed", "confirmed", "mode_switc
 
 @dataclass(frozen=True)
 class CaptureResult:
-    conversation_mode: baml_context.ConversationMode
+    conversation_mode: baml_turn_context.ConversationMode
     keyphrase_detection: KeyphraseDetection | None
     utterance: DetectedUtterance | None
     mode_switched: bool

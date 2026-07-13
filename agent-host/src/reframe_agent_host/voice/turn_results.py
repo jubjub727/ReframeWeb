@@ -1,12 +1,8 @@
 from __future__ import annotations
 
-from baml_sdk import context as baml_context
-from baml_sdk import memory_search as baml_memory_search
-from baml_sdk import memory_selection as baml_memory_selection
-from baml_sdk import task_completion as baml_task_completion
-from baml_sdk import task_execution as baml_task_execution
-from baml_sdk import task_prompt as baml_task_prompt
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import turn_context as baml_turn_context
+from baml_sdk import memory as baml_memory
+from baml_sdk import task as baml_task
 from reframe_agent_host.speech.transcription import Transcript
 from reframe_agent_host.speech.triggers import TriggerPhraseDetection
 from reframe_agent_host.task_execution import PrimitiveDispatchResult
@@ -22,7 +18,7 @@ from reframe_memory import RetrievedMemoryContext
 
 def mode_switch_turn_result(
     capture: CaptureResult,
-    conversation_mode: baml_context.ConversationMode,
+    conversation_mode: baml_turn_context.ConversationMode,
     model_prepare_seconds: float,
     total_started_at: float,
 ) -> VoiceTurnResult:
@@ -58,7 +54,7 @@ def mode_switch_turn_result(
 def ignored_turn_result(
     config: VoicePipelineConfig,
     capture: CaptureResult,
-    conversation_mode: baml_context.ConversationMode,
+    conversation_mode: baml_turn_context.ConversationMode,
     model_prepare_seconds: float,
     total_started_at: float,
 ) -> VoiceTurnResult:
@@ -116,23 +112,23 @@ def ignored_turn_result(
 
 def transcribed_turn_result(
     config: VoicePipelineConfig,
-    conversation_mode: baml_context.ConversationMode,
+    conversation_mode: baml_turn_context.ConversationMode,
     capture: CaptureResult,
     transcript: Transcript,
     trigger_detection: TriggerPhraseDetection | None,
     routed_transcript: str,
-    task_choice: baml_task_routing.TaskChoiceDecision | None,
-    memory_search_hints: baml_memory_search.ConversationMemorySearchHints | None,
-    search_depths: baml_memory_search.SearchDepthDecision | None,
+    task_choice: baml_task.TaskChoiceDecision | None,
+    memory_search_hints: baml_memory.ConversationMemorySearchHints | None,
+    search_depths: baml_memory.SearchDepthDecision | None,
     retrieved_memories: RetrievedMemoryContext | None,
-    relevance_decision: baml_memory_selection.RelevantMemoryDecision | None,
+    relevance_decision: baml_memory.RelevantMemoryDecision | None,
     relevant_memories: RetrievedMemoryContext | None,
-    selected_memory_contexts: list[baml_task_prompt.TaskPromptSelectedMemoryContext] | None,
-    task_prompt: baml_task_prompt.TaskPromptDecision | None,
-    task_execution: baml_task_execution.TaskExecutionResult | None,
+    selected_memory_contexts: list[baml_task.TaskPromptSelectedMemoryContext] | None,
+    task_prompt: baml_task.TaskPromptDecision | None,
+    task_execution: baml_task.TaskExecutionResult | None,
     primitive_dispatch: PrimitiveDispatchResult | None,
     action_history_summary: str | None,
-    task_completion: baml_task_completion.CompletionResult | None,
+    task_completion: baml_task.CompletionResult | None,
     timings: dict[str, float | None],
 ) -> VoiceTurnResult:
     return VoiceTurnResult(
@@ -204,7 +200,7 @@ def transcribed_turn_result(
 def transcribed_only_turn_result(
     *,
     config: VoicePipelineConfig,
-    conversation_mode: baml_context.ConversationMode,
+    conversation_mode: baml_turn_context.ConversationMode,
     capture: CaptureResult,
     transcript: Transcript,
     trigger_detection: TriggerPhraseDetection | None,

@@ -5,23 +5,24 @@ import unittest
 
 class TaskModelAssignmentTests(unittest.TestCase):
     def test_task_execution_model_uses_glm51_no_reasoning(self) -> None:
-        body = _client_body(_model_source("task_execution"), "TaskExecutionModel")
+        body = _client_body(_model_source("execution"), "TaskExecutionModel")
 
         self.assertIn('model: "glm-5.1"', body)
         self.assertIn('reasoning_effort: "none"', body)
 
     def test_task_completion_model_uses_glm51_no_reasoning(self) -> None:
-        body = _client_body(_model_source("task_completion"), "TaskCompletionModel")
+        body = _client_body(_model_source("completion"), "TaskCompletionModel")
 
         self.assertIn('model: "glm-5.1"', body)
         self.assertIn('reasoning_effort: "none"', body)
 
 
-def _model_source(stage: str) -> str:
+def _model_source(area: str) -> str:
     path = (
         Path(__file__).resolve().parents[1]
         / "baml_src"
-        / f"ns_{stage}"
+        / "ns_task"
+        / area
         / "client.baml"
     )
     return path.read_text(encoding="utf-8")

@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import time
 from typing import Any, Mapping
 
-from baml_sdk import action_history as baml_action_history
+from baml_sdk import task as baml_task
 from reframe_agent_host.agent_flow.provider_clients import (
     BamlClient,
     client_kwargs,
@@ -57,14 +57,14 @@ class ActionHistorySummarizer:
         }
         request = None
         if prompt_layer_debug is not None:
-            request = await baml_action_history.SummariseActionHistory__build_request_async(
+            request = await baml_task.SummariseActionHistory__build_request_async(
                 **inputs,
                 **kwargs,
             )
 
         started_at = time.perf_counter()
         try:
-            result = await baml_action_history.SummariseActionHistory_async(
+            result = await baml_task.SummariseActionHistory_async(
                 **inputs,
                 **kwargs,
             )

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 
-from baml_sdk import context as baml_context
+from baml_sdk import turn_context as baml_turn_context
 from reframe_agent_host.agent_flow.live_conversation import LiveConversationContext
 from reframe_agent_host.agent_flow.task_execution import TaskExecutionPlanner
 from reframe_agent_host.speech.transcription import (
@@ -65,7 +65,7 @@ class VoiceTurnProcessor:
     async def process(
         self,
         capture: CaptureResult,
-        conversation_mode: baml_context.ConversationMode,
+        conversation_mode: baml_turn_context.ConversationMode,
         model_prepare_seconds: float,
         total_started_at: float,
         on_event: VoicePipelineEventHandler | None,
@@ -191,7 +191,7 @@ class VoiceTurnProcessor:
         self,
         *,
         capture: CaptureResult,
-        conversation_mode: baml_context.ConversationMode,
+        conversation_mode: baml_turn_context.ConversationMode,
         model_prepare_seconds: float,
         total_started_at: float,
         on_event: VoicePipelineEventHandler | None,
@@ -260,7 +260,7 @@ class VoiceTurnProcessor:
         )
 
     def _turn_on_conversation_mode(self, on_event):
-        mode = baml_context.ConversationMode.CONTINUOUS_CONVERSATION
+        mode = baml_turn_context.ConversationMode.CONTINUOUS_CONVERSATION
         changed = self._mode_controller is None or self._mode_controller.set(mode)
         if changed:
             self._emit(on_event, "conversation-mode", mode.value)
@@ -296,7 +296,7 @@ async def _wait_for_speculative_transcription_start(
 
 def _is_continuous_unprompted(mode, capture: CaptureResult) -> bool:
     return (
-        mode == baml_context.ConversationMode.CONTINUOUS_CONVERSATION
+        mode == baml_turn_context.ConversationMode.CONTINUOUS_CONVERSATION
         and capture.keyphrase_detection is None
     )
 

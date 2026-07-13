@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from baml_sdk import context as baml_context
+from baml_sdk import turn_context as baml_turn_context
 
 from reframe_agent_host import __version__
 from reframe_agent_host.commands.benchmark_args import add_benchmark_parsers
@@ -130,8 +130,8 @@ def _add_voice_turn_parser(subparsers) -> None:
     )
     parser.add_argument(
         "--mode",
-        choices=[mode.value for mode in baml_context.ConversationMode],
-        default=baml_context.ConversationMode.WAKE_COMMAND.value,
+        choices=[mode.value for mode in baml_turn_context.ConversationMode],
+        default=baml_turn_context.ConversationMode.WAKE_COMMAND.value,
     )
     add_voice_turn_args(parser)
 

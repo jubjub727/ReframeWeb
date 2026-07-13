@@ -51,8 +51,6 @@ def __getattr__(name):
 import typing
 import pydantic
 
-from baml_core import define_function as _define_function
-
 
 K = typing.TypeVar("K")
 T = typing.TypeVar("T")
@@ -181,8 +179,6 @@ class TypeValue(pydantic.BaseModel):
     `reflect.type_of<User>()` and call methods on them.
     """
     model_config = pydantic.ConfigDict(extra="forbid")
-    to_string       = _define_function("baml.TypeValue$stream.to_string", "sync",  ["self"])
-    to_string_async = _define_function("baml.TypeValue$stream.to_string", "async", ["self"])
 
 
 class Uint8Array(pydantic.BaseModel):
@@ -193,8 +189,6 @@ class Uint8Array(pydantic.BaseModel):
     `push` silently masks values to u8; `from_array` throws `InvalidArgument` for out-of-range values.
     """
     model_config = pydantic.ConfigDict(extra="forbid")
-    to_string       = _define_function("baml.Uint8Array$stream.to_string", "sync",  ["self"])
-    to_string_async = _define_function("baml.Uint8Array$stream.to_string", "async", ["self"])
 
 
 __all__ = [

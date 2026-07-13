@@ -6,11 +6,11 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from baml_core import Collector
+from baml_bridge import Collector
 from baml_sdk import benchmarks as baml_benchmarks
-from baml_sdk import context as baml_context
-from baml_sdk import task_prompt as baml_task_prompt
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import turn_context as baml_turn_context
+from baml_sdk import task_catalog as baml_task_catalog
+from baml_sdk import task as baml_task
 
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.agent_flow.provider_clients import client_kwargs
@@ -27,11 +27,11 @@ from reframe_memory import MemoryDatabase, TaskNode
 class TaskPromptSnapshot:
     case: baml_benchmarks.TaskPromptBenchmarkCase
     current_timestamp: str
-    selected_task: baml_task_routing.SelectedTaskContext | None
-    current_conversation: baml_context.ConversationHistory
-    session_memories: list[baml_context.SessionMemoryContext]
-    selected_memory_contexts: list[baml_task_prompt.TaskPromptSelectedMemoryContext]
-    task_prompt_memories: list[baml_task_prompt.TaskPromptMemoryContext]
+    selected_task: baml_task_catalog.SelectedTaskContext | None
+    current_conversation: baml_turn_context.ConversationHistory
+    session_memories: list[baml_turn_context.SessionMemoryContext]
+    selected_memory_contexts: list[baml_task.TaskPromptSelectedMemoryContext]
+    task_prompt_memories: list[baml_task.TaskPromptMemoryContext]
     latency_seconds: float
     error: str | None = None
 
@@ -161,7 +161,7 @@ async def task_prompt(client, snapshot: TaskPromptSnapshot):
     if snapshot.selected_task is None:
         raise ValueError("task prompt snapshot has no selected task")
     started_at = time.perf_counter()
-    composition = await baml_task_prompt.ComposeTaskInput_async(
+    composition = await baml_task.ComposeTaskInput_async(
         current_user_request=snapshot.case.current_user_request,
         current_conversation=snapshot.current_conversation,
         session_memories=snapshot.session_memories,
@@ -171,7 +171,7 @@ async def task_prompt(client, snapshot: TaskPromptSnapshot):
         machine_state=local_machine_state_context("Benchmark machine state"),
         **client_kwargs(client),
     )
-    decision = await baml_task_prompt.PromptDecision_async(
+    decision = await baml_task.PromptDecision_async(
         snapshot.selected_task.prompt,
         composition,
     )
@@ -179,7 +179,7 @@ async def task_prompt(client, snapshot: TaskPromptSnapshot):
 
 
 def evaluate_task_prompt(
-    decision: baml_task_prompt.TaskPromptDecision,
+    decision: baml_task.TaskPromptDecision,
     snapshot: TaskPromptSnapshot,
 ) -> dict[str, Any]:
     del snapshot
@@ -231,8 +231,8 @@ def _task_named(tasks: list[TaskNode], name: str) -> TaskNode:
     raise ValueError(f"benchmark task not found: {name}")
 
 
-def _selected_task_context(task: TaskNode) -> baml_task_routing.SelectedTaskContext:
-    return baml_task_routing.SelectedTaskContext(
+def _selected_task_context(task: TaskNode) -> baml_task_catalog.SelectedTaskContext:
+    return baml_task_catalog.SelectedTaskContext(
         id=task.id,
         name=task.content.name,
         description=task.content.description,
@@ -246,10 +246,10 @@ def _selected_task_context(task: TaskNode) -> baml_task_routing.SelectedTaskCont
 
 async def _task_prompt_memories(
     database: MemoryDatabase,
-) -> list[baml_task_prompt.TaskPromptMemoryContext]:
+) -> list[baml_task.TaskPromptMemoryContext]:
     memories = await database.task_prompt_memories.search()
     return [
-        baml_task_prompt.TaskPromptMemoryContext(
+        baml_task.TaskPromptMemoryContext(
             title=memory.content.title,
             description=memory.content.description,
             tags=list(memory.tags),

@@ -24,7 +24,7 @@ import typing
 import typing_extensions
 import pydantic
 
-from baml_core import define_function as _define_function
+from baml_bridge import define_function as _define_function
 
 
 T = typing.TypeVar("T")
@@ -85,10 +85,10 @@ to_string_async.__doc__ = """Raises:
 
 to_json       = _define_function("baml.json.to_json", "sync",  ["v"], type_params=["T"])
 to_json.__doc__ = """Raises:
-    JsonSerializationError, JsonParseError"""
+    JsonSerializationError"""
 to_json_async = _define_function("baml.json.to_json", "async", ["v"], type_params=["T"])
 to_json_async.__doc__ = """Raises:
-    JsonSerializationError, JsonParseError"""
+    JsonSerializationError"""
 
 
 from_       = _define_function("baml.json.from", "sync",  ["value"], type_params=["T"])
@@ -176,7 +176,7 @@ drift. Remove this if the host gains a direct way to invoke generic
 compositions without a named landing pad.
 
 Raises:
-    JsonSerializationError, JsonParseError"""
+    JsonSerializationError"""
 serialize_async = _define_function("baml.json.serialize", "async", ["v"], type_params=["T"])
 serialize_async.__doc__ = """Serialize `v` to JSON text, honoring user-defined `to_json` overrides on
 classes (via [`to_json<T>`]). Equivalent to `stringify(to_json<T>(v))`.
@@ -196,7 +196,7 @@ drift. Remove this if the host gains a direct way to invoke generic
 compositions without a named landing pad.
 
 Raises:
-    JsonSerializationError, JsonParseError"""
+    JsonSerializationError"""
 
 
 deserialize       = _define_function("baml.json.deserialize", "sync",  ["s"], type_params=["T"])

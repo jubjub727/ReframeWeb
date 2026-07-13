@@ -26,7 +26,7 @@ import pydantic
 from .... import baml
 from .... import stream_types
 
-from baml_core import BamlPyHandle as _BamlPyHandle
+from baml_bridge import BamlPyHandle as _BamlPyHandle
 
 
 TFinal = typing.TypeVar("TFinal")
@@ -192,8 +192,33 @@ class PrimitiveClientOptions(pydantic.BaseModel):
 
 
 class PromptAst(pydantic.BaseModel):
+    """
+    The rendered prompt produced by `<Fn>$render_prompt` and the built-in
+    `prompt` tag: a structural chat-message tree. Use the accessors below to read
+    it as text or structured messages. To inspect the fully-resolved provider
+    request instead (URL, headers, body, remapped roles), use
+    `<Fn>$build_request`.
+    """
     model_config = pydantic.ConfigDict(extra="forbid")
     _data: _BamlPyHandle
+
+
+class PromptMessage(pydantic.BaseModel):
+    """
+    A single chat message in a rendered prompt: a chat role and its text
+    content. Produced by `PromptAst.messages()` for offline inspection of a
+    rendered prompt (e.g. what `<Fn>$render_prompt` produced).
+
+    Attributes:
+        role: The chat role, e.g. "system", "user", "assistant". Empty for role-less
+            content — a prompt with no `${role(...)}` markers that was never
+            specialized to a client's default role.
+        content: The message's rendered text content. Media parts render as a
+            human-readable placeholder (e.g. `image::url(...)`).
+    """
+    model_config = pydantic.ConfigDict(extra="forbid")
+    role: typing.Optional[str]
+    content: typing.Optional[str]
 
 
 class RetryPolicy(pydantic.BaseModel):
@@ -279,6 +304,7 @@ __all__ = [
     "PrimitiveClient",
     "PrimitiveClientOptions",
     "PromptAst",
+    "PromptMessage",
     "RetryPolicy",
     "Role",
     "Stream",

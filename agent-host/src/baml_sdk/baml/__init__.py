@@ -34,7 +34,6 @@ _LAZY_CHILDREN = frozenset({
     "iter",
     "json",
     "llm",
-    "math",
     "media",
     "net",
     "ops",
@@ -59,9 +58,9 @@ import pydantic
 if typing.TYPE_CHECKING:
     from .. import baml
 
-from baml_core import define_function as _define_function
+from baml_bridge import define_function as _define_function
 
-from baml_core import BamlError as BamlError, BamlPanic as BamlPanic, UNSET as UNSET
+from baml_bridge import BamlError as BamlError, BamlPanic as BamlPanic, UNSET as UNSET
 
 
 A = typing.TypeVar("A")
@@ -147,6 +146,8 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
     model_config = pydantic.ConfigDict(extra="forbid")
     filled       = staticmethod(_define_function("baml.Array.filled", "sync",  ["length", "value"]))
     filled_async = staticmethod(_define_function("baml.Array.filled", "async", ["length", "value"]))
+    generate       = staticmethod(_define_function("baml.Array.generate", "sync",  ["length", "f"], type_params=["E"]))
+    generate_async = staticmethod(_define_function("baml.Array.generate", "async", ["length", "f"], type_params=["E"]))
     length       = _define_function("baml.Array.length", "sync",  ["self"], class_type_params=["T"])
     length_async = _define_function("baml.Array.length", "async", ["self"], class_type_params=["T"])
     at       = _define_function("baml.Array.at", "sync",  ["self", "index"], class_type_params=["T"])
@@ -232,6 +233,30 @@ class Map(pydantic.BaseModel, typing.Generic[K, V]):
     get_or_insert_async = _define_function("baml.Map.get_or_insert", "async", ["self", "key", "default"], class_type_params=["K", "V"])
     clear       = _define_function("baml.Map.clear", "sync",  ["self"], class_type_params=["K", "V"])
     clear_async = _define_function("baml.Map.clear", "async", ["self"], class_type_params=["K", "V"])
+
+
+_sum_int       = _define_function("baml._sum_int", "sync",  ["values"])
+_sum_int_async = _define_function("baml._sum_int", "async", ["values"])
+
+
+_sum_float       = _define_function("baml._sum_float", "sync",  ["values"])
+_sum_float_async = _define_function("baml._sum_float", "async", ["values"])
+
+
+_mean_float       = _define_function("baml._mean_float", "sync",  ["values"])
+_mean_float.__doc__ = """Raises:
+    InvalidArgument"""
+_mean_float_async = _define_function("baml._mean_float", "async", ["values"])
+_mean_float_async.__doc__ = """Raises:
+    InvalidArgument"""
+
+
+_median_float       = _define_function("baml._median_float", "sync",  ["values"])
+_median_float.__doc__ = """Raises:
+    InvalidArgument"""
+_median_float_async = _define_function("baml._median_float", "async", ["values"])
+_median_float_async.__doc__ = """Raises:
+    InvalidArgument"""
 
 
 _to_string_default       = _define_function("baml._to_string_default", "sync",  ["value"], type_params=["T"])
@@ -395,6 +420,10 @@ class Float(pydantic.BaseModel):
     to_degrees_async = _define_function("baml.Float.to_degrees", "async", ["self"])
 
 
+_trunc_to_int       = _define_function("baml._trunc_to_int", "sync",  ["value"])
+_trunc_to_int_async = _define_function("baml._trunc_to_int", "async", ["value"])
+
+
 class Int(pydantic.BaseModel):
     """
     A 63-bit signed integer. Range: -2^62 to 2^62-1
@@ -500,6 +529,8 @@ class String(pydantic.BaseModel):
     index_of_async = _define_function("baml.String.index_of", "async", ["self", "search"])
     char_at       = _define_function("baml.String.char_at", "sync",  ["self", "index"])
     char_at_async = _define_function("baml.String.char_at", "async", ["self", "index"])
+    code_point_at       = _define_function("baml.String.code_point_at", "sync",  ["self", "index"])
+    code_point_at_async = _define_function("baml.String.code_point_at", "async", ["self", "index"])
     repeat       = _define_function("baml.String.repeat", "sync",  ["self", "count"])
     repeat_async = _define_function("baml.String.repeat", "async", ["self", "count"])
     matches       = _define_function("baml.String.matches", "sync",  ["self", "substring"])
@@ -544,6 +575,8 @@ class String(pydantic.BaseModel):
     is_ascii_hex_async = _define_function("baml.String.is_ascii_hex", "async", ["self"])
     to_utf8       = _define_function("baml.String.to_utf8", "sync",  ["self"])
     to_utf8_async = _define_function("baml.String.to_utf8", "async", ["self"])
+    to_code_points       = _define_function("baml.String.to_code_points", "sync",  ["self"])
+    to_code_points_async = _define_function("baml.String.to_code_points", "async", ["self"])
 
 
 class TypeValue(pydantic.BaseModel):

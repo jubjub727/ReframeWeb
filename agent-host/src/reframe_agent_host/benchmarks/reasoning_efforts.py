@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from baml_core import Collector
+from baml_bridge import Collector
 from baml_sdk import benchmarks as baml_benchmarks
 from baml_sdk import opencode_go as baml_opencode_go
 

@@ -23,7 +23,7 @@ from __future__ import annotations
 import typing
 import pydantic
 
-from baml_core import BamlPyHandle as _BamlPyHandle
+from baml_bridge import BamlPyHandle as _BamlPyHandle
 
 
 class File(pydantic.BaseModel):
@@ -149,10 +149,16 @@ async def exists_async(path: str) -> bool:
 def remove(path: str) -> None:
     """Removes the file at `path`. Throws `Io` if the file does not exist or cannot be deleted.
     
+    This handles regular files only. To delete a directory use `remove_dir`
+    (empty directories) or `remove_dir_all` (directory trees).
+    
     Raises:
         Io"""
 async def remove_async(path: str) -> None:
     """Removes the file at `path`. Throws `Io` if the file does not exist or cannot be deleted.
+    
+    This handles regular files only. To delete a directory use `remove_dir`
+    (empty directories) or `remove_dir_all` (directory trees).
     
     Raises:
         Io"""
@@ -243,6 +249,40 @@ async def mkdir_async(path: str, options: MkdirOptions) -> None:
         Io"""
 
 
+def remove_dir(path: str) -> None:
+    """Removes the empty directory at `path`. Throws `Io` if `path` is not a
+    directory, is not empty, or does not exist. Mirrors Bun's `fs.promises.rmdir`.
+    
+    Raises:
+        Io"""
+async def remove_dir_async(path: str) -> None:
+    """Removes the empty directory at `path`. Throws `Io` if `path` is not a
+    directory, is not empty, or does not exist. Mirrors Bun's `fs.promises.rmdir`.
+    
+    Raises:
+        Io"""
+
+
+def remove_dir_all(path: str) -> None:
+    """Recursively removes the directory at `path` and all of its contents.
+    Idempotent: returns successfully if `path` does not exist. Like Bun's
+    `fs.promises.rm(path, { recursive: true, force: true })` for directory trees
+    and missing paths — but, unlike `rm -rf`, it targets directories only and
+    throws `Io` if `path` is a regular file.
+    
+    Raises:
+        Io"""
+async def remove_dir_all_async(path: str) -> None:
+    """Recursively removes the directory at `path` and all of its contents.
+    Idempotent: returns successfully if `path` does not exist. Like Bun's
+    `fs.promises.rm(path, { recursive: true, force: true })` for directory trees
+    and missing paths — but, unlike `rm -rf`, it targets directories only and
+    throws `Io` if `path` is a regular file.
+    
+    Raises:
+        Io"""
+
+
 __all__ = [
     "File",
     "open",
@@ -265,4 +305,8 @@ __all__ = [
     "read_dir_async",
     "mkdir",
     "mkdir_async",
+    "remove_dir",
+    "remove_dir_async",
+    "remove_dir_all",
+    "remove_dir_all_async",
 ]

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import platform
 
-from baml_sdk import context as baml_context
+from baml_sdk import turn_context as baml_turn_context
 
 from reframe_agent_host.agent_flow.geolocation import (
     DEFAULT_GEOLOCATION_ATTEMPTS,
@@ -63,7 +63,7 @@ class MachineStateProvider:
                 self._executor.shutdown(wait=False, cancel_futures=False)
                 self._executor = None
 
-    def context(self) -> baml_context.MachineStateContext:
+    def context(self) -> baml_turn_context.MachineStateContext:
         if self._state is None:
             raise MachineStateError("machine state geolocation has not loaded")
         return machine_state_context(
@@ -87,10 +87,10 @@ def machine_state_context(
     *,
     monitors: list[MachineMonitor] | None = None,
     os_architecture: str | None = None,
-) -> baml_context.MachineStateContext:
+) -> baml_turn_context.MachineStateContext:
     now, utc_now = _current_times()
     resolved_monitors = machine_monitors() if monitors is None else monitors
-    return baml_context.MachineStateContext(
+    return baml_turn_context.MachineStateContext(
         **_local_context_fields(now, utc_now, resolved_monitors),
         os_architecture=os_architecture or machine_os_architecture(),
         geolocation_status="available",
@@ -112,10 +112,10 @@ def machine_state_context(
 
 def local_machine_state_context(
     reason: str = "IP geolocation unavailable",
-) -> baml_context.MachineStateContext:
+) -> baml_turn_context.MachineStateContext:
     now, utc_now = _current_times()
     monitors = machine_monitors()
-    return baml_context.MachineStateContext(
+    return baml_turn_context.MachineStateContext(
         **_local_context_fields(now, utc_now, monitors),
         os_architecture=machine_os_architecture(),
         geolocation_status="unavailable",
@@ -160,7 +160,7 @@ def _local_context_fields(now, utc_now, monitors) -> dict:
         "utc_offset": _utc_offset(now),
         "monitor_count": len(monitors),
         "monitors": [
-            baml_context.MachineMonitorContext(
+            baml_turn_context.MachineMonitorContext(
                 horizontal_resolution=item.horizontal_resolution,
                 vertical_resolution=item.vertical_resolution,
             )

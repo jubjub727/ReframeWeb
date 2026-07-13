@@ -3,7 +3,7 @@ import json
 from tempfile import TemporaryDirectory
 
 from baml_sdk import benchmarks as baml_benchmarks
-from baml_sdk import memory_search as baml_memory_search
+from baml_sdk import memory as baml_memory
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.benchmarks.config import (
     CONVERSATION_EVALUATION_DEFAULT_MODEL_ID,
@@ -21,7 +21,7 @@ from benchmark_fixtures import provider as _provider
 
 
 class ConversationEvaluationBenchmarkTests(unittest.TestCase):
-    def test_cases_convert_to_baml_context_types(self):
+    def test_cases_convert_to_baml_turn_context_types(self):
         cases = baml_benchmarks.ConversationEvaluationCases()
 
         self.assertGreaterEqual(len(cases), 3)
@@ -200,7 +200,7 @@ class ConversationEvaluationClientTests(unittest.IsolatedAsyncioTestCase):
         conversations = baml_benchmarks.ConversationContexts(
             case.session_conversations
         )
-        request = await baml_memory_search.ChooseMemorySearch__build_request_async(
+        request = await baml_memory.ChooseMemorySearch__build_request_async(
             current_user_request=case.current_user_request,
             current_conversation=conversations[0] if conversations else None,
             session_memories=baml_benchmarks.SessionMemoryContexts(

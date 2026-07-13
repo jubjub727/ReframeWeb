@@ -5,7 +5,7 @@ from collections import deque
 
 import numpy as np
 
-from baml_sdk import context as baml_context
+from baml_sdk import turn_context as baml_turn_context
 from reframe_agent_host.voice.activity import (
     UtteranceSegmenter,
     create_voice_activity_detector,
@@ -22,11 +22,11 @@ def create_segmenter(config: VoicePipelineConfig) -> UtteranceSegmenter:
 
 def create_capture_state(
     config: VoicePipelineConfig,
-    conversation_mode: baml_context.ConversationMode,
+    conversation_mode: baml_turn_context.ConversationMode,
 ) -> CaptureState:
     return CaptureState(
         conversation_mode=conversation_mode,
-        keyphrase_required=conversation_mode == baml_context.ConversationMode.WAKE_COMMAND,
+        keyphrase_required=conversation_mode == baml_turn_context.ConversationMode.WAKE_COMMAND,
         keyphrase_carry_frames=frame_deque(
             config,
             config.keyphrases.carry_ms,

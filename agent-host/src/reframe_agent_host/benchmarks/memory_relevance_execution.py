@@ -5,11 +5,11 @@ from dataclasses import dataclass
 import time
 from typing import Any
 
-from baml_core import Collector
+from baml_bridge import Collector
 from baml_sdk import benchmarks as baml_benchmarks
-from baml_sdk import context as baml_context
-from baml_sdk import memory_selection as baml_memory_selection
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import turn_context as baml_turn_context
+from baml_sdk import memory as baml_memory
+from baml_sdk import task_catalog as baml_task_catalog
 
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.agent_flow.provider_clients import client_kwargs
@@ -22,12 +22,12 @@ from reframe_agent_host.benchmarks.reasoning_efforts import (
 @dataclass(frozen=True)
 class MemoryRelevanceSnapshot:
     case: baml_benchmarks.ControlFlowBenchmarkCase
-    selected_task: baml_task_routing.SelectedTaskContext
-    current_conversation: baml_context.ConversationHistory | None
-    session_memories: list[baml_context.SessionMemoryContext]
-    candidate_memories: list[baml_memory_selection.RetrievedMemoryCandidate]
+    selected_task: baml_task_catalog.SelectedTaskContext
+    current_conversation: baml_turn_context.ConversationHistory | None
+    session_memories: list[baml_turn_context.SessionMemoryContext]
+    candidate_memories: list[baml_memory.RetrievedMemoryCandidate]
     expected_kept_memory_ids: tuple[str, ...]
-    relevance_memories: list[baml_memory_selection.RelevanceMemoryContext]
+    relevance_memories: list[baml_memory.RelevanceMemoryContext]
     latency_seconds: float
     error: str | None = None
 
@@ -138,7 +138,7 @@ async def warmup_memory_relevance(client, snapshots, config) -> int:
 
 async def relevant_memories(client, snapshot: MemoryRelevanceSnapshot):
     started_at = time.perf_counter()
-    result = await baml_memory_selection.SelectRelevantMemories_async(
+    result = await baml_memory.SelectRelevantMemories_async(
         current_user_request=snapshot.case.current_user_request,
         current_conversation=snapshot.current_conversation,
         session_memories=snapshot.session_memories,

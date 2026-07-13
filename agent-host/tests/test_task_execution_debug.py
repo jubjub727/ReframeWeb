@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from baml_sdk.task_execution import TaskExecutionResult, TaskReturnItem
+from baml_sdk.task import TaskExecutionResult, TaskReturnItem
 from reframe_agent_host.agent_flow.prompt_layer_debug import (
     PromptLayerDebugSession,
 )
@@ -134,7 +134,7 @@ class TaskExecutionDebugDumpTests(unittest.IsolatedAsyncioTestCase):
                     return_value=root / "task-execution",
                 ):
                     with mock.patch(
-                        "reframe_agent_host.agent_flow.task_execution.baml_task_execution."
+                        "reframe_agent_host.agent_flow.task_execution.baml_task."
                         "PerformTask__build_request_async",
                         return_value=_Request(
                             body=json.dumps(
@@ -153,7 +153,7 @@ class TaskExecutionDebugDumpTests(unittest.IsolatedAsyncioTestCase):
                         ),
                     ):
                         with mock.patch(
-                            "reframe_agent_host.agent_flow.task_execution.baml_task_execution."
+                            "reframe_agent_host.agent_flow.task_execution.baml_task."
                             "PerformTask_async",
                             return_value=TaskExecutionResult(
                                 returns=[
@@ -199,11 +199,11 @@ class TaskExecutionDebugDumpTests(unittest.IsolatedAsyncioTestCase):
         )
 
         with mock.patch(
-            "reframe_agent_host.agent_flow.task_execution.baml_task_execution."
+            "reframe_agent_host.agent_flow.task_execution.baml_task."
             "PerformTask__build_request_async",
         ) as build_request:
             with mock.patch(
-                "reframe_agent_host.agent_flow.task_execution.baml_task_execution.PerformTask_async",
+                "reframe_agent_host.agent_flow.task_execution.baml_task.PerformTask_async",
             ) as perform_task:
                 result = await planner.execute_task(
                     "memory_node:do_nothing_task",

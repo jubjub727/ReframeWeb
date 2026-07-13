@@ -2,13 +2,9 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
-from baml_sdk import context as baml_context
-from baml_sdk import memory_search as baml_memory_search
-from baml_sdk import memory_selection as baml_memory_selection
-from baml_sdk import task_completion as baml_task_completion
-from baml_sdk import task_execution as baml_task_execution
-from baml_sdk import task_prompt as baml_task_prompt
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import turn_context as baml_turn_context
+from baml_sdk import memory as baml_memory
+from baml_sdk import task as baml_task
 from reframe_agent_host.keyphrases import KeyphraseDetection
 from reframe_agent_host.speech.transcription import Transcript
 from reframe_agent_host.speech.triggers import TriggerPhraseDetection
@@ -66,7 +62,7 @@ class VoiceTurnTimings:
 
 @dataclass(frozen=True)
 class VoiceTurnResult:
-    mode: baml_context.ConversationMode
+    mode: baml_turn_context.ConversationMode
     mode_switched: bool
     keyphrase_detection: KeyphraseDetection | None
     trigger_detection: TriggerPhraseDetection | None
@@ -74,18 +70,18 @@ class VoiceTurnResult:
     ignored: bool
     utterance: DetectedUtterance | None
     transcript: Transcript | None
-    task_choice: baml_task_routing.TaskChoiceDecision | None
-    memory_search_hints: baml_memory_search.ConversationMemorySearchHints | None
-    search_depths: baml_memory_search.SearchDepthDecision | None
+    task_choice: baml_task.TaskChoiceDecision | None
+    memory_search_hints: baml_memory.ConversationMemorySearchHints | None
+    search_depths: baml_memory.SearchDepthDecision | None
     retrieved_memories: RetrievedMemoryContext | None
-    relevance_decision: baml_memory_selection.RelevantMemoryDecision | None
+    relevance_decision: baml_memory.RelevantMemoryDecision | None
     relevant_memories: RetrievedMemoryContext | None
-    selected_memory_contexts: list[baml_task_prompt.TaskPromptSelectedMemoryContext] | None
-    task_prompt: baml_task_prompt.TaskPromptDecision | None
-    task_execution: baml_task_execution.TaskExecutionResult | None
+    selected_memory_contexts: list[baml_task.TaskPromptSelectedMemoryContext] | None
+    task_prompt: baml_task.TaskPromptDecision | None
+    task_execution: baml_task.TaskExecutionResult | None
     primitive_dispatch: PrimitiveDispatchResult | None
     action_history_summary: str | None
-    task_completion: baml_task_completion.CompletionResult | None
+    task_completion: baml_task.CompletionResult | None
     timings: VoiceTurnTimings
 
     def to_dict(self) -> dict[str, object]:

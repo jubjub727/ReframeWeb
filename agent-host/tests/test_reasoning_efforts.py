@@ -2,9 +2,9 @@ import json
 import unittest
 from datetime import datetime, timezone
 
-from baml_sdk import memory_search as baml_memory_search
-from baml_sdk import memory_selection as baml_memory_selection
-from baml_sdk import task_routing as baml_task_routing
+from baml_sdk import memory as baml_memory
+from baml_sdk import task_catalog as baml_task_catalog
+from baml_sdk import task as baml_task
 from reframe_agent_host.agent_flow.provider_clients import client_kwargs
 from reframe_agent_host.agent_flow.machine_state import local_machine_state_context
 from reframe_agent_host.benchmarks.reasoning_efforts import (
@@ -18,13 +18,13 @@ from reframe_memory import MemoryNode, MemoryTimestamps, Provider
 
 class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
     async def test_default_task_choice_client_uses_kimi_k25_high(self):
-        request = await baml_task_routing.ChooseTask__build_request_async(
+        request = await baml_task.ChooseTask__build_request_async(
             current_user_request="Install the missing GPU driver for me.",
             current_conversation=None,
             session_memories=[],
             user_preferences=[],
             available_tasks=[
-                baml_task_routing.AvailableTask(
+                baml_task_catalog.AvailableTask(
                     id="task:cannot_handle",
                     name="Explain request cannot be handled",
                     description="Use when the request is unsupported.",
@@ -51,13 +51,13 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
             "low",
         )
 
-        request = await baml_task_routing.ChooseTask__build_request_async(
+        request = await baml_task.ChooseTask__build_request_async(
             current_user_request="Test routing.",
             current_conversation=None,
             session_memories=[],
             user_preferences=[],
             available_tasks=[
-                baml_task_routing.AvailableTask(
+                baml_task_catalog.AvailableTask(
                     id="task:test",
                     name="Test task",
                     description="Used by the benchmark request test.",
@@ -104,12 +104,12 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
             "high",
         )
 
-        request = await baml_memory_search.ChooseMemorySearchDepths__build_request_async(
+        request = await baml_memory.ChooseMemorySearchDepths__build_request_async(
             current_timestamp="2026-07-03T15:00:00Z",
             current_user_request="Open Hacker News compactly.",
             current_conversation=None,
             session_memories=[],
-            selected_task=baml_task_routing.SelectedTaskContext(
+            selected_task=baml_task_catalog.SelectedTaskContext(
                 id="task:visual_panel",
                 name="Visual panel",
                 description="Open a visual panel.",
@@ -121,13 +121,13 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 updated_at="2026-07-03T00:00:00Z",
                 read_at="NONE",
             ),
-            memory_search_hints=baml_memory_search.ConversationMemorySearchHints(
-                tags=baml_memory_search.MemoryTagSearch(any_of=[], all_of=[], none_of=[]),
-                strings=baml_memory_search.MemoryStringSearch(contains=[], equals=[]),
+            memory_search_hints=baml_memory.ConversationMemorySearchHints(
+                tags=baml_memory.MemoryTagSearch(any_of=[], all_of=[], none_of=[]),
+                strings=baml_memory.MemoryStringSearch(contains=[], equals=[]),
                 candidate_memory=None,
             ),
             search_domains=[
-                baml_memory_search.SearchDepthDomain(
+                baml_memory.SearchDepthDomain(
                     id="task_catalog",
                     description="Task records.",
                     searches="Task nodes.",
@@ -145,11 +145,11 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(body["reasoning_effort"], "high")
 
     async def test_default_relevance_client_uses_glm51_none(self):
-        request = await baml_memory_selection.SelectRelevantMemories__build_request_async(
+        request = await baml_memory.SelectRelevantMemories__build_request_async(
             current_user_request="Open Hacker News compactly.",
             current_conversation=None,
             session_memories=[],
-            selected_task=baml_task_routing.SelectedTaskContext(
+            selected_task=baml_task_catalog.SelectedTaskContext(
                 id="task:visual_panel",
                 name="Visual panel",
                 description="Open a visual panel.",
@@ -162,7 +162,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 read_at="NONE",
             ),
             candidate_memories=[
-                baml_memory_selection.RetrievedMemoryCandidate(
+                baml_memory.RetrievedMemoryCandidate(
                     id="memory_node:message1",
                     kind="past_conversation_message",
                     title="human message",

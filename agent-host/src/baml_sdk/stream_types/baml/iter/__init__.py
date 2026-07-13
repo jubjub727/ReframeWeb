@@ -23,11 +23,6 @@ from __future__ import annotations
 import typing
 import pydantic
 
-if typing.TYPE_CHECKING:
-    from .... import baml
-
-from baml_core import define_function as _define_function
-
 
 E = typing.TypeVar("E")
 E2 = typing.TypeVar("E2")
@@ -41,10 +36,6 @@ class ArrayIterator(pydantic.BaseModel, typing.Generic[T]):
     model_config = pydantic.ConfigDict(extra="forbid")
     arr: typing.List[T]
     idx: typing.Optional[int]
-    iter       = _define_function("baml.iter.ArrayIterator$stream.iter", "sync",  ["self"], class_type_params=["T"])
-    iter_async = _define_function("baml.iter.ArrayIterator$stream.iter", "async", ["self"], class_type_params=["T"])
-    next       = _define_function("baml.iter.ArrayIterator$stream.next", "sync",  ["self"], class_type_params=["T"])
-    next_async = _define_function("baml.iter.ArrayIterator$stream.next", "async", ["self"], class_type_params=["T"])
 
 
 class Chain(pydantic.BaseModel, typing.Generic[T, E, E2]):
@@ -52,10 +43,6 @@ class Chain(pydantic.BaseModel, typing.Generic[T, E, E2]):
     first: typing.Optional[typing.Any]
     other: typing.Optional[typing.Any]
     first_done: typing.Optional[bool]
-    iter       = _define_function("baml.iter.Chain$stream.iter", "sync",  ["self"], class_type_params=["T", "E", "E2"])
-    iter_async = _define_function("baml.iter.Chain$stream.iter", "async", ["self"], class_type_params=["T", "E", "E2"])
-    next       = _define_function("baml.iter.Chain$stream.next", "sync",  ["self"], class_type_params=["T", "E", "E2"])
-    next_async = _define_function("baml.iter.Chain$stream.next", "async", ["self"], class_type_params=["T", "E", "E2"])
 
 
 class Done(pydantic.BaseModel):
@@ -66,20 +53,12 @@ class Filter(pydantic.BaseModel, typing.Generic[T, E, E2]):
     model_config = pydantic.ConfigDict(extra="forbid")
     source: typing.Optional[typing.Any]
     predicate: typing.Any
-    iter       = _define_function("baml.iter.Filter$stream.iter", "sync",  ["self"], class_type_params=["T", "E", "E2"])
-    iter_async = _define_function("baml.iter.Filter$stream.iter", "async", ["self"], class_type_params=["T", "E", "E2"])
-    next       = _define_function("baml.iter.Filter$stream.next", "sync",  ["self"], class_type_params=["T", "E", "E2"])
-    next_async = _define_function("baml.iter.Filter$stream.next", "async", ["self"], class_type_params=["T", "E", "E2"])
 
 
 class FilterMap(pydantic.BaseModel, typing.Generic[T, R, E, E2]):
     model_config = pydantic.ConfigDict(extra="forbid")
     source: typing.Optional[typing.Any]
     func: typing.Any
-    iter       = _define_function("baml.iter.FilterMap$stream.iter", "sync",  ["self"], class_type_params=["T", "R", "E", "E2"])
-    iter_async = _define_function("baml.iter.FilterMap$stream.iter", "async", ["self"], class_type_params=["T", "R", "E", "E2"])
-    next       = _define_function("baml.iter.FilterMap$stream.next", "sync",  ["self"], class_type_params=["T", "R", "E", "E2"])
-    next_async = _define_function("baml.iter.FilterMap$stream.next", "async", ["self"], class_type_params=["T", "R", "E", "E2"])
 
 
 class FlatMap(pydantic.BaseModel, typing.Generic[T, R, E, E2, E3]):
@@ -87,30 +66,18 @@ class FlatMap(pydantic.BaseModel, typing.Generic[T, R, E, E2, E3]):
     source: typing.Optional[typing.Any]
     func: typing.Any
     inner: typing.Union[typing.Any, Done, None]
-    iter       = _define_function("baml.iter.FlatMap$stream.iter", "sync",  ["self"], class_type_params=["T", "R", "E", "E2", "E3"])
-    iter_async = _define_function("baml.iter.FlatMap$stream.iter", "async", ["self"], class_type_params=["T", "R", "E", "E2", "E3"])
-    next       = _define_function("baml.iter.FlatMap$stream.next", "sync",  ["self"], class_type_params=["T", "R", "E", "E2", "E3"])
-    next_async = _define_function("baml.iter.FlatMap$stream.next", "async", ["self"], class_type_params=["T", "R", "E", "E2", "E3"])
 
 
 class Flatten(pydantic.BaseModel, typing.Generic[I, R, E, E3]):
     model_config = pydantic.ConfigDict(extra="forbid")
     source: typing.Optional[typing.Any]
     inner: typing.Union[typing.Any, Done, None]
-    iter       = _define_function("baml.iter.Flatten$stream.iter", "sync",  ["self"], class_type_params=["I", "R", "E", "E3"])
-    iter_async = _define_function("baml.iter.Flatten$stream.iter", "async", ["self"], class_type_params=["I", "R", "E", "E3"])
-    next       = _define_function("baml.iter.Flatten$stream.next", "sync",  ["self"], class_type_params=["I", "R", "E", "E3"])
-    next_async = _define_function("baml.iter.Flatten$stream.next", "async", ["self"], class_type_params=["I", "R", "E", "E3"])
 
 
 class Map(pydantic.BaseModel, typing.Generic[T, R, E, E2]):
     model_config = pydantic.ConfigDict(extra="forbid")
     source: typing.Optional[typing.Any]
     func: typing.Any
-    iter       = _define_function("baml.iter.Map$stream.iter", "sync",  ["self"], class_type_params=["T", "R", "E", "E2"])
-    iter_async = _define_function("baml.iter.Map$stream.iter", "async", ["self"], class_type_params=["T", "R", "E", "E2"])
-    next       = _define_function("baml.iter.Map$stream.next", "sync",  ["self"], class_type_params=["T", "R", "E", "E2"])
-    next_async = _define_function("baml.iter.Map$stream.next", "async", ["self"], class_type_params=["T", "R", "E", "E2"])
 
 
 class Peekable(pydantic.BaseModel, typing.Generic[T, E]):
@@ -118,10 +85,6 @@ class Peekable(pydantic.BaseModel, typing.Generic[T, E]):
     source: typing.Optional[typing.Any]
     buffer: typing.Union[T, Done, None]
     has_buffer: typing.Optional[bool]
-    iter       = _define_function("baml.iter.Peekable$stream.iter", "sync",  ["self"], class_type_params=["T", "E"])
-    iter_async = _define_function("baml.iter.Peekable$stream.iter", "async", ["self"], class_type_params=["T", "E"])
-    next       = _define_function("baml.iter.Peekable$stream.next", "sync",  ["self"], class_type_params=["T", "E"])
-    next_async = _define_function("baml.iter.Peekable$stream.next", "async", ["self"], class_type_params=["T", "E"])
 
 
 class Range(pydantic.BaseModel):
@@ -129,20 +92,12 @@ class Range(pydantic.BaseModel):
     i: typing.Optional[int]
     max: typing.Optional[int]
     step: typing.Optional[int]
-    iter       = _define_function("baml.iter.Range$stream.iter", "sync",  ["self"])
-    iter_async = _define_function("baml.iter.Range$stream.iter", "async", ["self"])
-    next       = _define_function("baml.iter.Range$stream.next", "sync",  ["self"])
-    next_async = _define_function("baml.iter.Range$stream.next", "async", ["self"])
 
 
 class Repeat(pydantic.BaseModel, typing.Generic[T]):
     model_config = pydantic.ConfigDict(extra="forbid")
     value: typing.Optional[T]
     count: typing.Optional[int]
-    iter       = _define_function("baml.iter.Repeat$stream.iter", "sync",  ["self"], class_type_params=["T"])
-    iter_async = _define_function("baml.iter.Repeat$stream.iter", "async", ["self"], class_type_params=["T"])
-    next       = _define_function("baml.iter.Repeat$stream.next", "sync",  ["self"], class_type_params=["T"])
-    next_async = _define_function("baml.iter.Repeat$stream.next", "async", ["self"], class_type_params=["T"])
 
 
 class StepBy(pydantic.BaseModel, typing.Generic[T, E]):
@@ -150,10 +105,6 @@ class StepBy(pydantic.BaseModel, typing.Generic[T, E]):
     source: typing.Optional[typing.Any]
     n: typing.Optional[int]
     first: typing.Optional[bool]
-    iter       = _define_function("baml.iter.StepBy$stream.iter", "sync",  ["self"], class_type_params=["T", "E"])
-    iter_async = _define_function("baml.iter.StepBy$stream.iter", "async", ["self"], class_type_params=["T", "E"])
-    next       = _define_function("baml.iter.StepBy$stream.next", "sync",  ["self"], class_type_params=["T", "E"])
-    next_async = _define_function("baml.iter.StepBy$stream.next", "async", ["self"], class_type_params=["T", "E"])
 
 
 __all__ = [

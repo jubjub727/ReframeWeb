@@ -23,10 +23,33 @@ from __future__ import annotations
 import typing
 import pydantic
 
-from baml_core import (
+from baml_bridge import (
     BamlPyHandle as _BamlPyHandle,
     define_function as _define_function,
 )
+
+
+class ErrorContext(pydantic.BaseModel):
+    """
+    The temporal context of a thrown error: the error value itself, where it
+    was thrown, and the error it superseded while the scope was unwinding (its
+    `cause`), if any. Bound by the second parameter of a `catch (e, ctx)`
+    handler.
+    
+    The chain runs newest → oldest through `cause`; `root_cause` walks to the
+    original failure at the tail, and `to_string` renders the whole chain
+    Python-style ("During handling of the above error, another error occurred").
+    """
+    model_config = pydantic.ConfigDict(extra="forbid")
+    error: typing.Any
+    stack_trace: StackTrace
+    cause: typing.Optional[ErrorContext]
+    root_cause       = _define_function("baml.errors.ErrorContext.root_cause", "sync",  ["self"])
+    root_cause_async = _define_function("baml.errors.ErrorContext.root_cause", "async", ["self"])
+    to_string       = _define_function("baml.errors.ErrorContext.to_string", "sync",  ["self"])
+    to_string_async = _define_function("baml.errors.ErrorContext.to_string", "async", ["self"])
+    _to_string_impl       = _define_function("baml.errors.ErrorContext._to_string_impl", "sync",  ["self"])
+    _to_string_impl_async = _define_function("baml.errors.ErrorContext._to_string_impl", "async", ["self"])
 
 
 class InvalidArgument(pydantic.BaseModel):
@@ -153,6 +176,7 @@ class StackTrace(pydantic.BaseModel):
 
 
 __all__ = [
+    "ErrorContext",
     "InvalidArgument",
     "ParseError",
     "Io",

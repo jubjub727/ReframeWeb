@@ -23,11 +23,6 @@ from __future__ import annotations
 import typing
 import pydantic
 
-if typing.TYPE_CHECKING:
-    from .... import baml
-
-from baml_core import define_function as _define_function
-
 
 class Duration(pydantic.BaseModel):
     """
@@ -48,12 +43,6 @@ class Instant(pydantic.BaseModel):
     """
     model_config = pydantic.ConfigDict(extra="forbid")
     _nanoseconds: typing.Optional[int]
-    from_json       = staticmethod(_define_function("baml.time.Instant$stream.from_json", "sync",  ["j"]))
-    from_json_async = staticmethod(_define_function("baml.time.Instant$stream.from_json", "async", ["j"]))
-    to_string       = _define_function("baml.time.Instant$stream.to_string", "sync",  ["self"])
-    to_string_async = _define_function("baml.time.Instant$stream.to_string", "async", ["self"])
-    to_json       = _define_function("baml.time.Instant$stream.to_json", "sync",  ["self"])
-    to_json_async = _define_function("baml.time.Instant$stream.to_json", "async", ["self"])
 
 
 class PlainDate(pydantic.BaseModel):
@@ -69,12 +58,6 @@ class PlainDate(pydantic.BaseModel):
     """
     model_config = pydantic.ConfigDict(extra="forbid")
     _days: typing.Optional[int]
-    from_json       = staticmethod(_define_function("baml.time.PlainDate$stream.from_json", "sync",  ["j"]))
-    from_json_async = staticmethod(_define_function("baml.time.PlainDate$stream.from_json", "async", ["j"]))
-    to_string       = _define_function("baml.time.PlainDate$stream.to_string", "sync",  ["self"])
-    to_string_async = _define_function("baml.time.PlainDate$stream.to_string", "async", ["self"])
-    to_json       = _define_function("baml.time.PlainDate$stream.to_json", "sync",  ["self"])
-    to_json_async = _define_function("baml.time.PlainDate$stream.to_json", "async", ["self"])
 
 
 class PlainDateTime(pydantic.BaseModel):
@@ -93,12 +76,6 @@ class PlainDateTime(pydantic.BaseModel):
     """
     model_config = pydantic.ConfigDict(extra="forbid")
     _nanoseconds: typing.Optional[int]
-    from_json       = staticmethod(_define_function("baml.time.PlainDateTime$stream.from_json", "sync",  ["j"]))
-    from_json_async = staticmethod(_define_function("baml.time.PlainDateTime$stream.from_json", "async", ["j"]))
-    to_string       = _define_function("baml.time.PlainDateTime$stream.to_string", "sync",  ["self"])
-    to_string_async = _define_function("baml.time.PlainDateTime$stream.to_string", "async", ["self"])
-    to_json       = _define_function("baml.time.PlainDateTime$stream.to_json", "sync",  ["self"])
-    to_json_async = _define_function("baml.time.PlainDateTime$stream.to_json", "async", ["self"])
 
 
 class PlainTime(pydantic.BaseModel):
@@ -112,12 +89,6 @@ class PlainTime(pydantic.BaseModel):
     """
     model_config = pydantic.ConfigDict(extra="forbid")
     _nanoseconds: typing.Optional[int]
-    from_json       = staticmethod(_define_function("baml.time.PlainTime$stream.from_json", "sync",  ["j"]))
-    from_json_async = staticmethod(_define_function("baml.time.PlainTime$stream.from_json", "async", ["j"]))
-    to_string       = _define_function("baml.time.PlainTime$stream.to_string", "sync",  ["self"])
-    to_string_async = _define_function("baml.time.PlainTime$stream.to_string", "async", ["self"])
-    to_json       = _define_function("baml.time.PlainTime$stream.to_json", "sync",  ["self"])
-    to_json_async = _define_function("baml.time.PlainTime$stream.to_json", "async", ["self"])
 
 
 class AmbiguousTimeError(pydantic.BaseModel):
@@ -182,12 +153,6 @@ class ZonedDateTime(pydantic.BaseModel):
     _nanoseconds: typing.Optional[int]
     _offset_ns: typing.Optional[int]
     _iana: typing.Optional[str]
-    from_json       = staticmethod(_define_function("baml.time.ZonedDateTime$stream.from_json", "sync",  ["j"]))
-    from_json_async = staticmethod(_define_function("baml.time.ZonedDateTime$stream.from_json", "async", ["j"]))
-    to_string       = _define_function("baml.time.ZonedDateTime$stream.to_string", "sync",  ["self"])
-    to_string_async = _define_function("baml.time.ZonedDateTime$stream.to_string", "async", ["self"])
-    to_json       = _define_function("baml.time.ZonedDateTime$stream.to_json", "sync",  ["self"])
-    to_json_async = _define_function("baml.time.ZonedDateTime$stream.to_json", "async", ["self"])
 
 
 __all__ = [

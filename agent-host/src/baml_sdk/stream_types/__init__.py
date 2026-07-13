@@ -21,17 +21,13 @@
 from __future__ import annotations
 
 _LAZY_CHILDREN = frozenset({
-    "agent_host_catalog",
     "baml",
     "benchmarks",
-    "context",
-    "memory_search",
-    "memory_selection",
+    "memory",
     "opencode_go",
-    "retrieved_memory",
-    "task_execution",
-    "task_prompt",
-    "task_routing",
+    "task",
+    "task_catalog",
+    "turn_context",
     "vendor",
     "voice_turn",
 })

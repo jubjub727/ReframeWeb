@@ -28,7 +28,7 @@ if typing.TYPE_CHECKING:
     from ... import baml
     from ...baml import UNSET as UNSET
 
-from baml_core import BamlPyHandle as _BamlPyHandle
+from baml_bridge import BamlPyHandle as _BamlPyHandle
 
 
 T = typing.TypeVar("T")
@@ -107,8 +107,17 @@ def parse(json: str, *, _types: dict[str, type]) -> TFinal:
     `<STREAM_EXPANDED, ORIGINAL>` as explicit type args.
     Only parses full responses, not partials.
     
+    `$parse` is a purely local, network-free parse of an existing JSON string
+    into the function's return type, so a schema mismatch (e.g. an out-of-enum
+    value) is a *parse* failure — not an LLM/client failure. The underlying
+    schema-aligned parser reports failures as `LlmClient` because it is shared
+    with the network and streaming paths (whose `LlmClient` typing must stay
+    intact); remap it to the parse-flavored `ParseError` here so the surfaced
+    error name matches the operation and the documented
+    `catch (baml.errors.ParseError)` pattern is reachable (no E0063).
+    
     Raises:
-        LlmClient"""
+        ParseError"""
 async def parse_async(json: str, *, _types: dict[str, type]) -> TFinal:
     """UNSAFE: do not call from user code
     
@@ -116,8 +125,17 @@ async def parse_async(json: str, *, _types: dict[str, type]) -> TFinal:
     `<STREAM_EXPANDED, ORIGINAL>` as explicit type args.
     Only parses full responses, not partials.
     
+    `$parse` is a purely local, network-free parse of an existing JSON string
+    into the function's return type, so a schema mismatch (e.g. an out-of-enum
+    value) is a *parse* failure — not an LLM/client failure. The underlying
+    schema-aligned parser reports failures as `LlmClient` because it is shared
+    with the network and streaming paths (whose `LlmClient` typing must stay
+    intact); remap it to the parse-flavored `ParseError` here so the surfaced
+    error name matches the operation and the documented
+    `catch (baml.errors.ParseError)` pattern is reachable (no E0063).
+    
     Raises:
-        LlmClient"""
+        ParseError"""
 
 
 def call_llm_function(client: Client, function_name: str, args: typing.Dict[str, typing.Any], *, prompt_closure: typing.Union[typing.Callable[[Context], PromptAst], None, UNSET] = None, _types: dict[str, type]) -> T:
@@ -156,8 +174,31 @@ async def stream_llm_function_async(client: Client, function_name: str, args: ty
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
+class PromptMessage(pydantic.BaseModel):
+    role: str
+    content: str
+
+
 class PromptAst(pydantic.BaseModel):
     _data: _BamlPyHandle
+    def text(self) -> str:
+        """The rendered prompt as readable plain text: each chat message rendered as a
+        `[role]` header line followed by its content, messages separated by a blank
+        line (role-less content has no header). This is also what
+        `string.from(prompt)`, string interpolation, and `to_string` yield."""
+    async def text_async(self) -> str:
+        """The rendered prompt as readable plain text: each chat message rendered as a
+        `[role]` header line followed by its content, messages separated by a blank
+        line (role-less content has no header). This is also what
+        `string.from(prompt)`, string interpolation, and `to_string` yield."""
+    def messages(self) -> typing.List[PromptMessage]:
+        """The rendered prompt as an ordered list of chat messages (role + text
+        content). The primary structured accessor for offline prompt inspection."""
+    async def messages_async(self) -> typing.List[PromptMessage]:
+        """The rendered prompt as an ordered list of chat messages (role + text
+        content). The primary structured accessor for offline prompt inspection."""
+    def to_string(self) -> str: ...
+    async def to_string_async(self) -> str: ...
 
 
 class OutputFormat(pydantic.BaseModel):
@@ -199,9 +240,21 @@ class ClientType(str, enum.Enum):
 
 class RetryPolicy(pydantic.BaseModel):
     max_retries: int
-    initial_delay_ms: int
-    multiplier: float
-    max_delay_ms: int
+    initial_delay_ms: typing.Optional[int]
+    multiplier: typing.Optional[float]
+    max_delay_ms: typing.Optional[int]
+    def initial_delay_or_default(self) -> float:
+        """Initial backoff delay (ms) as a float; defaults to 200 when unset."""
+    async def initial_delay_or_default_async(self) -> float:
+        """Initial backoff delay (ms) as a float; defaults to 200 when unset."""
+    def multiplier_or_default(self) -> float:
+        """Backoff growth multiplier; defaults to 1.5 when unset."""
+    async def multiplier_or_default_async(self) -> float:
+        """Backoff growth multiplier; defaults to 1.5 when unset."""
+    def max_delay_or_default(self) -> float:
+        """Maximum backoff delay (ms) as a float; defaults to 10000 when unset."""
+    async def max_delay_or_default_async(self) -> float:
+        """Maximum backoff delay (ms) as a float; defaults to 10000 when unset."""
 
 
 class Client(pydantic.BaseModel):
@@ -210,14 +263,32 @@ class Client(pydantic.BaseModel):
     sub_clients: typing.List[Client]
     retry: typing.Optional[RetryPolicy]
     counter: int
-    def to_primitive_client(self) -> PrimitiveClient:
-        """Raises:
+    def to_primitive_client(self, *, lenient: typing.Union[bool, UNSET] = False) -> PrimitiveClient:
+        """Build the primitive client this client resolves to.
+        
+        `lenient` controls how the generated constructor reads `env.X` client
+        options: when true, a missing variable yields "" instead of panicking.
+        Only the offline `render_prompt` path passes `true` — it needs the
+        client's provider/role metadata to render a prompt but never its
+        credentials. Every network path keeps the default `false`, so a missing
+        `api_key` env var still panics for `$call` / `$build_request`.
+        
+        Raises:
             InvalidArgument"""
-    async def to_primitive_client_async(self) -> PrimitiveClient:
-        """Raises:
+    async def to_primitive_client_async(self, *, lenient: typing.Union[bool, UNSET] = False) -> PrimitiveClient:
+        """Build the primitive client this client resolves to.
+        
+        `lenient` controls how the generated constructor reads `env.X` client
+        options: when true, a missing variable yields "" instead of panicking.
+        Only the offline `render_prompt` path passes `true` — it needs the
+        client's provider/role metadata to render a prompt but never its
+        credentials. Every network path keeps the default `false`, so a missing
+        `api_key` env var still panics for `$call` / `$build_request`.
+        
+        Raises:
             InvalidArgument"""
-    def get_constructor(self) -> typing.Callable[[], PrimitiveClient]: ...
-    async def get_constructor_async(self) -> typing.Callable[[], PrimitiveClient]: ...
+    def get_constructor(self) -> typing.Callable[[bool], PrimitiveClient]: ...
+    async def get_constructor_async(self) -> typing.Callable[[bool], PrimitiveClient]: ...
     def build_attempt(self) -> typing.List[OrchestrationStep]:
         """Raises:
             InvalidArgument"""
@@ -390,7 +461,7 @@ class StreamCache(pydantic.BaseModel, typing.Generic[TStream, TFinal]):
         """DO NOT CALL FROM USER CODE"""
 
 
-from baml_core import BamlStream as Stream
+from baml_bridge import BamlStream as Stream
 
 
 class PrimitiveClient(pydantic.BaseModel):
@@ -511,6 +582,30 @@ async def assemble_prompt_ast_async(parts: typing.List[str], values: typing.List
     mechanism of the Jinja path with direct structural assembly."""
 
 
+def render_prompt_values(values: typing.List[typing.Any]) -> typing.List[typing.Any]:
+    """BEP-049 §11. Coerce a tagged prompt's interpolated `values` for assembly so
+    composites render the same as they do in an ordinary backtick string. The
+    template desugaring pushes each `${expr}` into `values` *raw* (uncoerced),
+    which is the right contract for a general tagged template — but the built-in
+    `prompt` tag stringifies its content, so a class/array/map value reaching the
+    assembler unrendered would silently produce an empty string (B-563). Route
+    every value through `string.from` — BAML's implicit `to_string`, the exact
+    conversion an ordinary `${expr}` applies (honoring `baml.ToString` overrides)
+    — except a `Role` marker (from `${role(...)}`), which stays raw so
+    `assemble_prompt_ast` can still use it to split the prompt into chat messages."""
+async def render_prompt_values_async(values: typing.List[typing.Any]) -> typing.List[typing.Any]:
+    """BEP-049 §11. Coerce a tagged prompt's interpolated `values` for assembly so
+    composites render the same as they do in an ordinary backtick string. The
+    template desugaring pushes each `${expr}` into `values` *raw* (uncoerced),
+    which is the right contract for a general tagged template — but the built-in
+    `prompt` tag stringifies its content, so a class/array/map value reaching the
+    assembler unrendered would silently produce an empty string (B-563). Route
+    every value through `string.from` — BAML's implicit `to_string`, the exact
+    conversion an ordinary `${expr}` applies (honoring `baml.ToString` overrides)
+    — except a `Role` marker (from `${role(...)}`), which stays raw so
+    `assemble_prompt_ast` can still use it to split the prompt into chat messages."""
+
+
 def render_output_format(return_type: None) -> str:
     """BEP-049 §10 (M5b). Render `return_type`'s schema with default options — the
     string `ctx.output_format` exposes to a `prompt` body. The orchestrator
@@ -609,6 +704,7 @@ __all__ = [
     "call_llm_function_async",
     "stream_llm_function",
     "stream_llm_function_async",
+    "PromptMessage",
     "PromptAst",
     "OutputFormat",
     "Role",
@@ -633,6 +729,8 @@ __all__ = [
     "get_jinja_template_async",
     "assemble_prompt_ast",
     "assemble_prompt_ast_async",
+    "render_prompt_values",
+    "render_prompt_values_async",
     "render_output_format",
     "render_output_format_async",
     "build_output_format",

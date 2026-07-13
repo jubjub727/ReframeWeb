@@ -26,7 +26,7 @@ import pydantic
 
 from ... import baml
 
-from baml_core import (
+from baml_bridge import (
     BamlPyHandle as _BamlPyHandle,
     define_function as _define_function,
 )
@@ -120,8 +120,17 @@ Used by LLM function `$parse` companions, which pass
 `<STREAM_EXPANDED, ORIGINAL>` as explicit type args.
 Only parses full responses, not partials.
 
+`$parse` is a purely local, network-free parse of an existing JSON string
+into the function's return type, so a schema mismatch (e.g. an out-of-enum
+value) is a *parse* failure — not an LLM/client failure. The underlying
+schema-aligned parser reports failures as `LlmClient` because it is shared
+with the network and streaming paths (whose `LlmClient` typing must stay
+intact); remap it to the parse-flavored `ParseError` here so the surfaced
+error name matches the operation and the documented
+`catch (baml.errors.ParseError)` pattern is reachable (no E0063).
+
 Raises:
-    LlmClient"""
+    ParseError"""
 parse_async = _define_function("baml.llm.parse", "async", ["json"], type_params=["TStream", "TFinal"])
 parse_async.__doc__ = """UNSAFE: do not call from user code
 
@@ -129,8 +138,17 @@ Used by LLM function `$parse` companions, which pass
 `<STREAM_EXPANDED, ORIGINAL>` as explicit type args.
 Only parses full responses, not partials.
 
+`$parse` is a purely local, network-free parse of an existing JSON string
+into the function's return type, so a schema mismatch (e.g. an out-of-enum
+value) is a *parse* failure — not an LLM/client failure. The underlying
+schema-aligned parser reports failures as `LlmClient` because it is shared
+with the network and streaming paths (whose `LlmClient` typing must stay
+intact); remap it to the parse-flavored `ParseError` here so the surfaced
+error name matches the operation and the documented
+`catch (baml.errors.ParseError)` pattern is reachable (no E0063).
+
 Raises:
-    LlmClient"""
+    ParseError"""
 
 
 call_llm_function       = _define_function("baml.llm.call_llm_function", "sync",  ["client", "function_name", "args"], ["prompt_closure"], type_params=["T"])
@@ -169,9 +187,40 @@ Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
+class PromptMessage(pydantic.BaseModel):
+    """
+    A single chat message in a rendered prompt: a chat role and its text
+    content. Produced by `PromptAst.messages()` for offline inspection of a
+    rendered prompt (e.g. what `<Fn>$render_prompt` produced).
+
+    Attributes:
+        role: The chat role, e.g. "system", "user", "assistant". Empty for role-less
+            content — a prompt with no `${role(...)}` markers that was never
+            specialized to a client's default role.
+        content: The message's rendered text content. Media parts render as a
+            human-readable placeholder (e.g. `image::url(...)`).
+    """
+    model_config = pydantic.ConfigDict(extra="forbid")
+    role: str
+    content: str
+
+
 class PromptAst(pydantic.BaseModel):
+    """
+    The rendered prompt produced by `<Fn>$render_prompt` and the built-in
+    `prompt` tag: a structural chat-message tree. Use the accessors below to read
+    it as text or structured messages. To inspect the fully-resolved provider
+    request instead (URL, headers, body, remapped roles), use
+    `<Fn>$build_request`.
+    """
     model_config = pydantic.ConfigDict(extra="forbid")
     _data: _BamlPyHandle
+    text       = _define_function("baml.llm.PromptAst.text", "sync",  ["self"])
+    text_async = _define_function("baml.llm.PromptAst.text", "async", ["self"])
+    messages       = _define_function("baml.llm.PromptAst.messages", "sync",  ["self"])
+    messages_async = _define_function("baml.llm.PromptAst.messages", "async", ["self"])
+    to_string       = _define_function("baml.llm.PromptAst.to_string", "sync",  ["self"])
+    to_string_async = _define_function("baml.llm.PromptAst.to_string", "async", ["self"])
 
 
 class OutputFormat(pydantic.BaseModel):
@@ -257,9 +306,15 @@ class RetryPolicy(pydantic.BaseModel):
     """Configures automatic retry behavior for an LLM client."""
     model_config = pydantic.ConfigDict(extra="forbid")
     max_retries: int
-    initial_delay_ms: int
-    multiplier: float
-    max_delay_ms: int
+    initial_delay_ms: typing.Optional[int]
+    multiplier: typing.Optional[float]
+    max_delay_ms: typing.Optional[int]
+    initial_delay_or_default       = _define_function("baml.llm.RetryPolicy.initial_delay_or_default", "sync",  ["self"])
+    initial_delay_or_default_async = _define_function("baml.llm.RetryPolicy.initial_delay_or_default", "async", ["self"])
+    multiplier_or_default       = _define_function("baml.llm.RetryPolicy.multiplier_or_default", "sync",  ["self"])
+    multiplier_or_default_async = _define_function("baml.llm.RetryPolicy.multiplier_or_default", "async", ["self"])
+    max_delay_or_default       = _define_function("baml.llm.RetryPolicy.max_delay_or_default", "sync",  ["self"])
+    max_delay_or_default_async = _define_function("baml.llm.RetryPolicy.max_delay_or_default", "async", ["self"])
 
 
 class Client(pydantic.BaseModel):
@@ -273,8 +328,8 @@ class Client(pydantic.BaseModel):
     sub_clients: typing.List[Client]
     retry: typing.Optional[RetryPolicy]
     counter: int
-    to_primitive_client       = _define_function("baml.llm.Client.to_primitive_client", "sync",  ["self"])
-    to_primitive_client_async = _define_function("baml.llm.Client.to_primitive_client", "async", ["self"])
+    to_primitive_client       = _define_function("baml.llm.Client.to_primitive_client", "sync",  ["self"], ["lenient"])
+    to_primitive_client_async = _define_function("baml.llm.Client.to_primitive_client", "async", ["self"], ["lenient"])
     get_constructor       = _define_function("baml.llm.Client.get_constructor", "sync",  ["self"])
     get_constructor_async = _define_function("baml.llm.Client.get_constructor", "async", ["self"])
     build_attempt       = _define_function("baml.llm.Client.build_attempt", "sync",  ["self"])
@@ -395,7 +450,7 @@ class StreamCache(pydantic.BaseModel, typing.Generic[TStream, TFinal]):
     new_async = staticmethod(_define_function("baml.llm.StreamCache.new", "async", ["t_stream", "t_final"]))
 
 
-from baml_core import BamlStream as Stream
+from baml_bridge import BamlStream as Stream
 
 
 class PrimitiveClient(pydantic.BaseModel):
@@ -439,6 +494,10 @@ get_jinja_template_async.__doc__ = """Raises:
 
 assemble_prompt_ast       = _define_function("baml.llm.assemble_prompt_ast", "sync",  ["parts", "values"])
 assemble_prompt_ast_async = _define_function("baml.llm.assemble_prompt_ast", "async", ["parts", "values"])
+
+
+render_prompt_values       = _define_function("baml.llm.render_prompt_values", "sync",  ["values"])
+render_prompt_values_async = _define_function("baml.llm.render_prompt_values", "async", ["values"])
 
 
 render_output_format       = _define_function("baml.llm.render_output_format", "sync",  ["return_type"])
@@ -511,6 +570,7 @@ __all__ = [
     "call_llm_function_async",
     "stream_llm_function",
     "stream_llm_function_async",
+    "PromptMessage",
     "PromptAst",
     "OutputFormat",
     "Role",
@@ -535,6 +595,8 @@ __all__ = [
     "get_jinja_template_async",
     "assemble_prompt_ast",
     "assemble_prompt_ast_async",
+    "render_prompt_values",
+    "render_prompt_values_async",
     "render_output_format",
     "render_output_format_async",
     "build_output_format",
