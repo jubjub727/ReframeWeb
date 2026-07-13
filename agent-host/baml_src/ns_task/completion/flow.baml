@@ -3,7 +3,7 @@ function CheckTaskCompletion(
     output_summary: string,
 ) -> CompletionResult {
     client: TaskCompletionModel
-    prompt: `
+    prompt: #"
         {{ _.role("system") }}
 
         You are a task completion checker.
@@ -26,5 +26,5 @@ function CheckTaskCompletion(
         PASS or FAIL
 
         {{ ctx.output_format }}
-    `
+    "#
 }

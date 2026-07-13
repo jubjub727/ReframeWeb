@@ -88,6 +88,11 @@ class ProviderClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("Task output summary", prompt_text)
         self.assertIn("Return exactly one token", prompt_text)
         self.assertIn("PASS or FAIL", prompt_text)
+        self.assertIn("The user received a useful spoken reply", prompt_text)
+        self.assertIn("The recorded actions replied to the user.", prompt_text)
+        self.assertNotIn("{{ completion_string }}", prompt_text)
+        self.assertNotIn("{{ output_summary }}", prompt_text)
+        self.assertNotIn("{{ ctx.output_format }}", prompt_text)
         self.assertNotIn("confidence", prompt_text.lower())
         self.assertNotIn("too vague", prompt_text.lower())
 
