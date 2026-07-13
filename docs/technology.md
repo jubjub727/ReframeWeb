@@ -22,7 +22,13 @@ BAML is used for the agentic flow logic called from the Python Agent Host.
 Spoken prompts are processed through the audio pipeline, transcribed, and passed
 into BAML so the host can decide what should happen next.
 
-The current scaffold uses `baml-py` and BAML's generated Python client.
+The current scaffold uses `baml-core` and BAML's generated Python/Pydantic SDK.
+
+The generated Python/Pydantic SDK is also the required integration for agent
+workspace planning and checkpoint decisions. Runtime subprocess calls through
+`baml run` are not part of the workspace design. Generated BAML models are
+translated by the Agent Host into stable IPC DTOs before they are sent to the
+Rust filesystem daemon.
 
 Model calls are intended to go through OpenCode Go using its OpenAI-compatible
 endpoint. The Agent Host reads `OPENCODE_GO_API_KEY` from the environment.
@@ -132,6 +138,25 @@ Expected Rust-owned areas include:
 - Compute Modules.
 - Memory-related runtime components.
 - Store implementations compiled to WebAssembly.
+- The projected agent workspace daemon, persistent snapshot store, cache, and
+  platform mount adapters.
+
+## Agent Workspace
+
+Codex, OpenCode, and their child processes will operate inside an ordinary
+mounted directory backed by a Rust daemon. The workspace combines lazily
+projected memory or snapshot files, a writable ephemeral overlay, direct-disk
+scratch redirections such as `node_modules`, and immutable retained
+checkpoints.
+
+The Python Agent Host owns workspace lifecycle and BAML policy calls. It talks
+to the Rust daemon through versioned local IPC; Python and BAML are never placed
+on the filesystem operation path.
+
+The accepted choices are recorded in
+[Agent Workspace Architecture Decisions](agent-workspace-decisions.md). The
+proposed build sequence is in
+[Agent Workspace Implementation Design](agent-workspace-implementation-design.md).
 
 ## Memory Graph
 

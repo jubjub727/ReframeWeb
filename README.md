@@ -65,6 +65,9 @@ workflow layer, not to preserve the browser as the underlying concept.
   repeated behavior, because overusing them would slow down the agentic flow.
 - **Memory Graph**: A graph-backed memory system for preferences, task context,
   user habits, and recent relevant memories.
+- **Agent Workspace**: A transparent projected filesystem for Codex, OpenCode,
+  and their child processes. It combines memory-derived files, ephemeral working
+  state, direct-disk dependency trees, and policy-controlled retained snapshots.
 
 ## Underlying Technology
 
@@ -72,9 +75,14 @@ ReframeWeb is driven by a small set of deliberate technology choices:
 
 More detail is tracked in [Technology](docs/technology.md).
 
-- **Rust** for native CEF/window agentic bindings, Data Lenses, Compute Modules,
-  memory-related runtime components, and likely Store implementations compiled
-  to WebAssembly.
+The projected agent workspace is specified separately in
+[Agent Workspace Architecture Decisions](docs/agent-workspace-decisions.md),
+with a phased delivery plan in the
+[Agent Workspace Implementation Design](docs/agent-workspace-implementation-design.md).
+
+- **Rust** for native CEF/window agentic bindings, the projected workspace
+  daemon, Data Lenses, Compute Modules, memory-related runtime components, and
+  likely Store implementations compiled to WebAssembly.
 - **CEF** as the embedded rendering and native windowing foundation for Visual
   Panels. CEF is infrastructure here, not the conceptual model of the product.
 - **React** for Visual Panel content, display state, Store-backed data fetching,
@@ -100,9 +108,9 @@ talking without destroying the underlying work the agent was already performing.
 ## Current Status
 
 This repository now contains a working Agent Host prototype. The native
-CEF/React Visual Panel layer, Semantic Store runtime, Data Lens runtime, and
-Compute Module runtime are still future-facing architecture, but the Python
-voice loop and graph-backed memory flow are active code.
+CEF/React Visual Panel layer, Agent Workspace, Semantic Store runtime, Data Lens
+runtime, and Compute Module runtime are still future-facing architecture, but
+the Python voice loop and graph-backed memory flow are active code.
 
 Implemented pieces include:
 
