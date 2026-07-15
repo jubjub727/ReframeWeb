@@ -135,8 +135,14 @@ class VoiceTurnProcessor:
             )
 
         await _wait_until_committed(turn_control)
+        human_reply_created_at = None
         if routed_transcript:
-            self._side_effects.remember_live_human_reply(routed_transcript)
+            human_reply_created_at = self._side_effects.remember_live_human_reply(
+                routed_transcript
+            )
+            bind_human_reply = getattr(self._turn_flow, "bind_human_reply", None)
+            if bind_human_reply is not None:
+                bind_human_reply(human_reply_created_at)
             self._emit(on_event, "human-reply", routed_transcript)
             self._side_effects.record_human_reply_in_background(
                 routed_transcript, on_event
@@ -148,7 +154,7 @@ class VoiceTurnProcessor:
                 f"{trigger_detection.kind} {trigger_detection.phrase!r}",
             )
 
-        return await process_agent_turn(
+        result = await process_agent_turn(
             config=self._config,
             turn_flow=self._turn_flow,
             side_effects=self._side_effects,
@@ -164,6 +170,8 @@ class VoiceTurnProcessor:
             post_vad_started_at=post_vad_started_at,
             transcription_seconds=transcription_seconds,
         )
+        self._side_effects.resolve_live_human_reply(human_reply_created_at)
+        return result
 
     async def _transcribe(self, capture, on_event, turn_control):
         utterance = capture.utterance

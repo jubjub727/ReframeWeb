@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import time
 
+from baml_sdk import voice_turn as baml_voice_turn
 from baml_sdk import turn_context as baml_turn_context
 from reframe_agent_host.agent_flow.retrieved_memory_graph import (
     BamlRetrievedMemoryContext,
@@ -15,6 +16,7 @@ from reframe_agent_host.voice.pipeline_config import (
 from reframe_agent_host.voice.task_flow_host import VoiceTaskFlowHost
 from reframe_agent_host.voice.turn_data import VoiceTurnResult
 from reframe_agent_host.voice.turn_results import (
+    no_action_turn_result,
     transcribed_only_turn_result,
     transcribed_turn_result,
 )
@@ -73,16 +75,38 @@ async def process_agent_turn(
     )
     result = await turn_flow.run_voice_turn(routed_transcript, host)
 
+    if isinstance(result, baml_voice_turn.VoiceTaskNoActionResult):
+        return no_action_turn_result(
+            config=config,
+            conversation_mode=conversation_mode,
+            capture=capture,
+            transcript=transcript,
+            trigger_detection=trigger_detection,
+            routed_transcript=routed_transcript,
+            task_choice=result.task_choice,
+            model_prepare_seconds=model_prepare_seconds,
+            total_started_at=total_started_at,
+            post_vad_transcript_seconds=time.perf_counter() - post_vad_started_at,
+            post_vad_task_choice_seconds=time.perf_counter() - post_vad_started_at,
+            transcription_seconds=transcription_seconds,
+            task_choice_seconds=_seconds(result.task_choice_ms),
+        )
+
     cycle = host.cycles[result.cycle_id]
     attempt = host.attempts[result.attempt_id]
     attempt.post_vad_task_completion_seconds = (
         time.perf_counter() - post_vad_started_at
     )
-    _emit(
-        on_event,
-        "task-completion-reviewed",
-        result.task_completion.value,
-    )
+    if any(
+        review.attempt_id == result.attempt_id
+        for review in result.completion_reviews
+    ):
+        _emit(
+            on_event,
+            "task-completion-reviewed",
+            f"{result.task_completion.value} "
+            f"({_seconds(result.task_completion_ms):.3f}s)",
+        )
     if turn_control is not None:
         await turn_control.checkpoint()
     understanding = result.understanding

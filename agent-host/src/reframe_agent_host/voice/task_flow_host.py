@@ -38,6 +38,8 @@ class VoiceTaskFlowHost:
             name: self._sync(getattr(self, name))
             for name in (
                 "load_context",
+                "load_task_conversation_scope",
+                "report_task_choice",
                 "retrieve_memories",
                 "execute_task",
                 "dispatch_task_outputs",
@@ -50,30 +52,66 @@ class VoiceTaskFlowHost:
         self._cycle_number += 1
         cycle_id = f"voice-cycle-{self._cycle_number}"
         inputs = await self.turn_flow.voice_turn_inputs(self.current_user_request)
-        self.cycles[cycle_id] = VoiceTaskCycleState()
+        self.cycles[cycle_id] = VoiceTaskCycleState(
+            context_inputs={
+                "current_user_request": self.current_user_request,
+                **inputs,
+            },
+        )
         return baml_voice_turn.VoiceTaskFlowContext(cycle_id=cycle_id, **inputs)
 
-    async def retrieve_memories(self, cycle_id, understanding):
+    async def report_task_choice(
+        self,
+        cycle_id,
+        task_choice,
+        selected_task,
+        task_choice_ms,
+    ) -> bool:
         cycle = self.cycles[cycle_id]
-        cycle.post_vad_understanding_seconds = self._post_vad_seconds()
-        timings = understanding.timings
+        record_task_choice = getattr(self.turn_flow, "record_task_choice", None)
+        if record_task_choice is not None and cycle.context_inputs is not None:
+            await record_task_choice(
+                cycle.context_inputs,
+                task_choice,
+                task_choice_ms,
+            )
         _emit(
             self.on_event,
             "task-chosen",
-            f"selected: {understanding.selected_task.name} "
-            f"({_seconds(timings.task_choice_ms):.3f}s)",
+            f"selected: {selected_task.name} "
+            f"({_seconds(task_choice_ms):.3f}s)",
         )
+        _emit_candidate_memory(self.on_event, task_choice.candidate_memory)
+        await self._checkpoint()
+        return True
+
+    async def retrieve_memories(self, cycle_id, understanding):
+        cycle = self.cycles[cycle_id]
+        cycle.understanding = understanding
+        record_understanding = getattr(self.turn_flow, "record_understanding", None)
+        if record_understanding is not None and cycle.context_inputs is not None:
+            await record_understanding(cycle.context_inputs, understanding)
+        cycle.post_vad_understanding_seconds = self._post_vad_seconds()
+        timings = understanding.timings
         _emit(
             self.on_event,
             "memory-search-hints",
             f"{understanding.memory_search_hints.model_dump(mode='json')} "
             f"({_seconds(timings.memory_search_ms):.3f}s)",
         )
+        _emit_candidate_memory(
+            self.on_event,
+            understanding.memory_search_hints.candidate_memory,
+        )
         _emit(
             self.on_event,
             "search-depths",
             f"{understanding.search_depths.model_dump(mode='json')} "
             f"({_seconds(timings.search_depth_ms):.3f}s)",
+        )
+        _emit_candidate_memory(
+            self.on_event,
+            understanding.search_depths.candidate_memory,
         )
         await self._checkpoint()
         result, seconds, post_seconds = await self.side_effects.retrieve_memories(
@@ -87,7 +125,16 @@ class VoiceTaskFlowHost:
         cycle.memory_retrieval_seconds = seconds
         cycle.post_vad_memory_retrieval_seconds = post_seconds
         await self._checkpoint()
-        return retrieved_memory_graph(result or RetrievedMemoryContext())
+        graph = retrieved_memory_graph(result or RetrievedMemoryContext())
+        cycle.retrieved_memory_graph = graph
+        return graph
+
+    async def load_task_conversation_scope(self):
+        scope = self.turn_flow.task_conversation_scope()
+        cycle = self.cycles.get(f"voice-cycle-{self._cycle_number}")
+        if cycle is not None and cycle.context_inputs is not None:
+            cycle.context_inputs.update(scope)
+        return baml_voice_turn.VoiceTaskConversationScope(**scope)
 
     async def execute_task(
         self,
@@ -98,6 +145,19 @@ class VoiceTaskFlowHost:
     ):
         cycle = self.cycles[cycle_id]
         if cycle.post_vad_continuation_seconds is None:
+            record_continuation = getattr(self.turn_flow, "record_continuation", None)
+            if (
+                record_continuation is not None
+                and cycle.context_inputs is not None
+                and cycle.understanding is not None
+                and cycle.retrieved_memory_graph is not None
+            ):
+                await record_continuation(
+                    cycle.context_inputs,
+                    cycle.understanding.selected_task,
+                    cycle.retrieved_memory_graph,
+                    continuation,
+                )
             cycle.post_vad_continuation_seconds = self._post_vad_seconds()
             timings = continuation.timings
             _emit(
@@ -106,11 +166,19 @@ class VoiceTaskFlowHost:
                 f"{continuation.relevance_decision.model_dump(mode='json')} "
                 f"({_seconds(timings.memory_relevance_ms):.3f}s)",
             )
+            _emit_candidate_memory(
+                self.on_event,
+                continuation.relevance_decision.candidate_memory,
+            )
             _emit(
                 self.on_event,
                 "task-prompt-generated",
                 f"{len(full_prompt)} chars "
                 f"({_seconds(timings.task_prompt_ms):.3f}s)",
+            )
+            _emit_candidate_memory(
+                self.on_event,
+                continuation.task_prompt.candidate_memory,
             )
             await self._checkpoint()
         self._attempt_number += 1
@@ -184,3 +252,8 @@ def _seconds(milliseconds) -> float:
 def _emit(on_event, stage: str, message: str) -> None:
     if on_event is not None:
         on_event(stage, message)
+
+
+def _emit_candidate_memory(on_event, candidate_memory) -> None:
+    if candidate_memory is not None:
+        _emit(on_event, "candidate-memory", candidate_memory.model_dump_json())

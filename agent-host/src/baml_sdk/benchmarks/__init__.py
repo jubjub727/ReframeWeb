@@ -267,6 +267,7 @@ class BenchmarkTask(pydantic.BaseModel):
     output: str
     prompt: str
     provider_id: str
+    model_id: str
     created_at: str
     updated_at: str
     read_at: str

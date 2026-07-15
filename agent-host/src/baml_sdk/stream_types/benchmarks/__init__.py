@@ -90,6 +90,7 @@ class BenchmarkTask(pydantic.BaseModel):
     output: typing.Optional[str]
     prompt: typing.Optional[str]
     provider_id: typing.Optional[str]
+    model_id: typing.Optional[str]
     created_at: typing.Optional[str]
     updated_at: typing.Optional[str]
     read_at: typing.Optional[str]

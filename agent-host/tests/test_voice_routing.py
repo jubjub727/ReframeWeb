@@ -16,7 +16,10 @@ from baml_sdk import task_catalog as baml_task_catalog
 from baml_sdk import task as baml_task
 from baml_sdk import voice_turn as baml_voice_turn
 from reframe_agent_host.agent_flow.live_conversation import LiveConversationContext
-from reframe_agent_host.commands.voice_output import VoiceTurnEventPrinter
+from reframe_agent_host.commands.voice_output import (
+    VoiceTurnEventPrinter,
+    print_turn_completed,
+)
 from reframe_agent_host.commands.voice_turn import _ensure_voice_memory_context, run_voice_turn
 from reframe_agent_host.memory_readiness import MemoryReadinessError
 from reframe_agent_host.keyphrases import KeyphraseDetection, KeyphraseSpotterConfig
@@ -103,6 +106,7 @@ class RecordingBamlTurnFlow:
                 output="Question",
                 prompt="Ask only for what matters.",
                 provider_id="provider:test",
+                model_id="glm-5.1",
                 created_at="2026-01-01T00:00:00Z",
                 updated_at="2026-01-01T00:00:00Z",
                 read_at="2026-01-01T00:00:00Z",
@@ -165,6 +169,12 @@ class RecordingBamlTurnFlow:
         cycle_id = "test-voice-cycle"
         host.cycles[cycle_id] = VoiceTaskCycleState()
         understanding = await self.understand_prompt(current_user_request)
+        await host.report_task_choice(
+            cycle_id,
+            understanding.task_choice,
+            understanding.selected_task,
+            understanding.timings.task_choice_ms,
+        )
         await host.retrieve_memories(cycle_id, understanding)
         continuation = await self.continue_prompt(
             current_user_request,
@@ -195,6 +205,52 @@ class RecordingBamlTurnFlow:
             attempt_id=execution.attempt_id,
             task_completion=completion,
             task_completion_ms=1,
+            completion_reviews=[
+                baml_voice_turn.VoiceTaskCompletionReview(
+                    attempt_id=execution.attempt_id,
+                    completion_string=understanding.selected_task.output,
+                    output_summary="The task completed.",
+                    completion=completion,
+                    elapsed_ms=1,
+                )
+            ],
+            failure_reviews=[],
+        )
+
+
+class NoActionBamlTurnFlow:
+    async def run_voice_turn(self, _current_user_request, host):
+        cycle_id = "no-action-cycle"
+        host.cycles[cycle_id] = VoiceTaskCycleState()
+        task_choice = baml_task.TaskChoiceDecision(
+            selected_task_id="task:do_nothing",
+            confidence=1.0,
+            candidate_memory=None,
+        )
+        selected_task = baml_task_catalog.SelectedTaskContext(
+            id="task:do_nothing",
+            name="Do nothing",
+            description="Take no action.",
+            input="The user's request.",
+            output="",
+            prompt="Do nothing.",
+            provider_id="provider:do_nothing",
+            model_id="magic:do-nothing",
+            created_at="2026-01-01T00:00:00Z",
+            updated_at="2026-01-01T00:00:00Z",
+            read_at="2026-01-01T00:00:00Z",
+        )
+        await host.report_task_choice(
+            cycle_id,
+            task_choice,
+            selected_task,
+            10,
+        )
+        return baml_voice_turn.VoiceTaskNoActionResult(
+            cycle_id=cycle_id,
+            task_choice=task_choice,
+            selected_task=selected_task,
+            task_choice_ms=10,
         )
 
 
@@ -472,6 +528,43 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.relevance_decision.kept_memory_ids, [])
         self.assertIn("Task:\nAsk only for what matters.", result.task_prompt.full_task_prompt)
 
+    async def test_do_nothing_stops_after_task_choice(self):
+        memory_retrieval = RecordingMemoryRetrieval()
+        events = []
+        processor = VoiceTurnProcessor(
+            config=_voice_config(),
+            transcriber=StubTranscriber(),
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            memory_retrieval=memory_retrieval,
+            turn_flow=NoActionBamlTurnFlow(),
+        )
+
+        result = await processor.process(
+            capture=_capture_result(),
+            conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
+            model_prepare_seconds=0.0,
+            total_started_at=time.perf_counter(),
+            on_event=lambda stage, message: events.append((stage, message)),
+        )
+
+        self.assertEqual(result.task_completion, baml_task.CompletionResult.PASS)
+        self.assertIsNone(result.memory_search_hints)
+        self.assertIsNone(result.search_depths)
+        self.assertIsNone(result.task_prompt)
+        self.assertIsNone(result.task_execution)
+        self.assertIsNone(memory_retrieval.memory_search_hints)
+        stages = [stage for stage, _message in events]
+        self.assertIn("task-chosen", stages)
+        for skipped in (
+            "memory-search-hints",
+            "search-depths",
+            "memory-relevance-decision",
+            "task-prompt-generated",
+            "task-executed",
+            "task-completion-reviewed",
+        ):
+            self.assertNotIn(skipped, stages)
+
     async def test_speculative_turn_emits_human_reply_after_commit(self):
         events = []
         processor = VoiceTurnProcessor(
@@ -649,6 +742,47 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             [(message.role, message.content) for message in conversation.messages],
             [("human", "do this")],
         )
+        self.assertEqual(
+            live_conversation.active_human_reply_created_at(
+                "memory_node:conversation"
+            ),
+            [],
+        )
+
+    async def test_live_conversation_reports_active_human_reply_identity(self):
+        live_conversation = LiveConversationContext()
+        first = live_conversation.add_message(
+            "memory_node:conversation",
+            role="human",
+            content="first request",
+        )
+        second = live_conversation.add_message(
+            "memory_node:conversation",
+            role="human",
+            content="second request",
+        )
+        conversation = live_conversation.merge(None, "memory_node:conversation")
+
+        self.assertEqual(
+            [message.content for message in conversation.messages],
+            ["first request", "second request"],
+        )
+
+        self.assertEqual(
+            live_conversation.active_human_reply_created_at(
+                "memory_node:conversation"
+            ),
+            [first, second],
+        )
+
+        live_conversation.resolve_human_reply(first)
+
+        self.assertEqual(
+            live_conversation.active_human_reply_created_at(
+                "memory_node:conversation"
+            ),
+            [second],
+        )
 
     async def test_validation_reply_is_persisted_and_visible_live(self):
         database = RecordingTurnMemoryDatabase()
@@ -797,6 +931,12 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             [stage for stage, _message in events if stage.endswith("reviewed")],
             ["task-completion-reviewed"],
         )
+        completion_event = next(
+            message
+            for stage, message in events
+            if stage == "task-completion-reviewed"
+        )
+        self.assertEqual(completion_event, "PASS (0.001s)")
 
     async def test_conversation_on_confirmation_turns_mode_on_without_human_reply(self):
         transcriber = StubTranscriber("conversation on")
@@ -878,6 +1018,14 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             "[Input Started]",
             "[Input Stopped]",
         ])
+
+    def test_cli_prints_completed_turn_latency(self):
+        output = io.StringIO()
+
+        with contextlib.redirect_stdout(output):
+            print_turn_completed(12.3456)
+
+        self.assertEqual(output.getvalue().splitlines(), ["[completed in 12.346s]"])
 
     def test_barge_in_frame_handler_only_interrupts_active_tts_once(self):
         pipeline = object.__new__(VoiceTurnPipeline)
@@ -1011,6 +1159,10 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         with contextlib.redirect_stdout(output):
             printer("memory-search-hints", "{} (0.120s)")
+            printer(
+                "candidate-memory",
+                '{"title":"Remember this","description":"Useful detail"}',
+            )
             printer("search-depths", "{} (0.085s)")
             printer("memory-relevance-decision", "{} (0.090s)")
             printer("task-prompt-generated", "64 chars (0.240s)")
@@ -1019,11 +1171,12 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(output.getvalue().splitlines(), [
             "[memory_search 120ms]",
+            'candidate_memory: {"title":"Remember this","description":"Useful detail"}',
             "[search_depth 85ms]",
             "[memory_relevance 90ms]",
             "[task_prompt 240ms]",
             "[action_history_summary 110ms]",
-            "[task_completion 75ms]",
+            "[task_review 75ms]",
         ])
 
     async def test_voice_context_setup_does_not_seed_core_tasks_by_default(self):

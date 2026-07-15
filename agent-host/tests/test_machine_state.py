@@ -364,7 +364,6 @@ class MachineStatePromptLayerTests(unittest.IsolatedAsyncioTestCase):
             full_task_prompt="Reply directly.",
         )
         review = await baml_task.SummariseActionHistory__build_request_async(
-            current_conversation=None,
             recorded_action_history="No actions.",
         )
 
@@ -417,6 +416,7 @@ def _available_task() -> baml_task_catalog.AvailableTask:
         output="A reply.",
         prompt="Reply directly.",
         provider_id="provider:test",
+        model_id="glm-5.1",
         created_at="2026-01-01T00:00:00Z",
         updated_at="2026-01-01T00:00:00Z",
         read_at="NONE",

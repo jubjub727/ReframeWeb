@@ -32,6 +32,7 @@ class BenchmarkTask {
     output: string,
     prompt: string,
     provider_id: string,
+    model_id: string,
     created_at: string,
     updated_at: string,
     read_at: string,

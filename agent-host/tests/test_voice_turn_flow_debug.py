@@ -12,7 +12,7 @@ from baml_sdk import task_catalog as baml_task_catalog
 from baml_sdk import task as baml_task
 from baml_sdk import voice_turn as baml_voice_turn
 from reframe_agent_host.agent_flow.voice_turn_flow import BamlVoiceTurnFlow
-from reframe_memory import MemoryNode, MemoryTimestamps, RetrievedMemoryContext, Task
+from reframe_memory import MemoryNode, MemoryTimestamps, Provider, RetrievedMemoryContext, Task
 
 
 class VoiceTurnFlowDebugTests(unittest.IsolatedAsyncioTestCase):
@@ -48,10 +48,72 @@ class VoiceTurnFlowDebugTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("06-compose_task_input.json", layer_names)
         self.assertEqual(compose["result"]["task_input"], "Tell me a joke.")
 
+    async def test_top_level_flow_records_inlined_layers_and_completion(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            flow = BamlVoiceTurnFlow(database=_FakeDatabase())
+            with mock.patch(
+                "reframe_agent_host.agent_flow.prompt_layer_debug._dump_dir",
+                return_value=Path(temp_dir),
+            ):
+                with _mock_baml_calls():
+                    inputs = {
+                        "current_user_request": "Tell me a joke.",
+                        **await flow.voice_turn_inputs("Tell me a joke."),
+                    }
+                    understanding = await _understand()
+                    await flow.record_understanding(inputs, understanding)
+                    retrieved = baml_memory.RetrievedMemoryGraph(
+                        task_catalog=[],
+                        past_sessions=[],
+                        current_session_memories=[],
+                    )
+                    continuation = await _continue()
+                    await flow.record_continuation(
+                        inputs,
+                        understanding.selected_task,
+                        retrieved,
+                        continuation,
+                    )
+                    result = _voice_task_result(
+                        understanding,
+                        continuation,
+                        retrieved,
+                    )
+                    with mock.patch(
+                        "reframe_agent_host.agent_flow.voice_turn_flow."
+                        "baml_voice_turn.RunVoiceTurn_async",
+                        return_value=result,
+                    ):
+                        with mock.patch(
+                            "reframe_agent_host.agent_flow.task_review_debug."
+                            "baml_task.CheckTaskCompletion__build_request_async",
+                            return_value=_Request("CheckTaskCompletion"),
+                        ):
+                            await flow.run_voice_turn("Tell me a joke.", _Host())
+
+            latest = Path(temp_dir) / "latest"
+            layer_names = sorted(path.name for path in latest.glob("*.json"))
+
+        self.assertEqual(
+            layer_names,
+            [
+                "00-understand_voice_prompt.json",
+                "01-choose_task.json",
+                "02-choose_memory_search.json",
+                "03-choose_memory_search_depths.json",
+                "04-continue_voice_prompt.json",
+                "05-select_relevant_memories.json",
+                "06-compose_task_input.json",
+                "09-check_task_completion.json",
+                "index.json",
+            ],
+        )
+
 
 class _FakeDatabase:
     def __init__(self) -> None:
         self.tasks = _SearchStore([_task_node()])
+        self.providers = _SearchStore([_provider_node()])
         self.user_preferences = _SearchStore([])
         self.task_choice_memories = _SearchStore([])
         self.conversation_evaluation_memories = _SearchStore([])
@@ -86,6 +148,10 @@ class _Request:
                 ],
             },
         )
+
+
+class _Host:
+    callbacks = {}
 
 
 def _mock_baml_calls():
@@ -194,9 +260,31 @@ def _selected_task() -> baml_task_catalog.SelectedTaskContext:
         output="agent_reply",
         prompt="Reply.",
         provider_id="memory_node:provider",
+        model_id="glm-5.1",
         created_at="2026-01-01T00:00:00Z",
         updated_at="2026-01-01T00:00:00Z",
         read_at="NONE",
+    )
+
+
+def _voice_task_result(understanding, continuation, retrieved):
+    completion = baml_voice_turn.VoiceTaskCompletionReview(
+        attempt_id="attempt-1",
+        completion_string="agent_reply",
+        output_summary="The user received a useful reply.",
+        completion=baml_task.CompletionResult.PASS,
+        elapsed_ms=75,
+    )
+    return baml_voice_turn.VoiceTaskFlowResult(
+        cycle_id="cycle-1",
+        understanding=understanding,
+        retrieved_memories=retrieved,
+        continuation=continuation,
+        attempt_id="attempt-1",
+        task_completion=baml_task.CompletionResult.PASS,
+        task_completion_ms=75,
+        completion_reviews=[completion],
+        failure_reviews=[],
     )
 
 
@@ -212,6 +300,20 @@ def _task_node() -> MemoryNode[Task]:
             output="agent_reply",
             prompt="Reply.",
             provider_id="memory_node:provider",
+        ),
+    )
+
+
+def _provider_node() -> MemoryNode[Provider]:
+    return MemoryNode(
+        id="memory_node:provider",
+        tags=("provider",),
+        timestamps=_timestamps(),
+        content=Provider(
+            name="Test provider",
+            description="Test provider.",
+            baml_surface="TaskPromptModel",
+            model_id="glm-5.1",
         ),
     )
 

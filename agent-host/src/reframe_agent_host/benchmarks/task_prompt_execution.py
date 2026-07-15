@@ -69,7 +69,10 @@ async def build_task_prompt_snapshot(
     task_prompt_memories = await _task_prompt_memories(database)
     try:
         task = _task_named(await _core_tasks(database), case.expected_task_name)
-        selected_task = _selected_task_context(task)
+        task_provider = await database.providers.get(task.content.provider_id)
+        if task_provider is None or not task_provider.content.model_id:
+            raise ValueError(f"task provider has no model: {task.content.provider_id}")
+        selected_task = _selected_task_context(task, task_provider.content.model_id)
         error = None
     except Exception as caught:
         selected_task = None
@@ -231,7 +234,10 @@ def _task_named(tasks: list[TaskNode], name: str) -> TaskNode:
     raise ValueError(f"benchmark task not found: {name}")
 
 
-def _selected_task_context(task: TaskNode) -> baml_task_catalog.SelectedTaskContext:
+def _selected_task_context(
+    task: TaskNode,
+    model_id: str,
+) -> baml_task_catalog.SelectedTaskContext:
     return baml_task_catalog.SelectedTaskContext(
         id=task.id,
         name=task.content.name,
@@ -240,6 +246,7 @@ def _selected_task_context(task: TaskNode) -> baml_task_catalog.SelectedTaskCont
         output=task.content.output,
         prompt=task.content.prompt,
         provider_id=task.content.provider_id,
+        model_id=model_id,
         **timestamp_fields(task),
     )
 

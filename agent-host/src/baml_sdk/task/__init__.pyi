@@ -35,22 +35,22 @@ if typing.TYPE_CHECKING:
     from ..baml import UNSET as UNSET
 
 
-def SummariseActionHistory(current_conversation: typing.Optional[turn_context.ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> str:
+def SummariseActionHistory(recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> str:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def SummariseActionHistory_async(current_conversation: typing.Optional[turn_context.ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> str:
+async def SummariseActionHistory_async(recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> str:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-def SummariseActionHistory__build_request(current_conversation: typing.Optional[turn_context.ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def SummariseActionHistory__build_request(recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def SummariseActionHistory__build_request_async(current_conversation: typing.Optional[turn_context.ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def SummariseActionHistory__build_request_async(recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def SummariseActionHistory__build_request_stream(current_conversation: typing.Optional[turn_context.ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def SummariseActionHistory__build_request_stream(recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def SummariseActionHistory__build_request_stream_async(current_conversation: typing.Optional[turn_context.ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def SummariseActionHistory__build_request_stream_async(recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
 def SummariseActionHistory__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> str:
@@ -65,16 +65,16 @@ def SummariseActionHistory__parse_stream(sse: baml.http.SseStream, *, client: ty
 async def SummariseActionHistory__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[str], str]:
     """Raises:
         InvalidArgument, LlmClient"""
-def SummariseActionHistory__render_prompt(current_conversation: typing.Optional[turn_context.ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+def SummariseActionHistory__render_prompt(recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def SummariseActionHistory__render_prompt_async(current_conversation: typing.Optional[turn_context.ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+async def SummariseActionHistory__render_prompt_async(recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def SummariseActionHistory_stream(current_conversation: typing.Optional[turn_context.ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[str], str]:
+def SummariseActionHistory_stream(recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[str], str]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def SummariseActionHistory_stream_async(current_conversation: typing.Optional[turn_context.ConversationHistory], recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[str], str]:
+async def SummariseActionHistory_stream_async(recorded_action_history: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[str], str]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 

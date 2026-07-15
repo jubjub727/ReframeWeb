@@ -32,6 +32,12 @@ class TaskFailureFlowOwnershipTests(unittest.TestCase):
         positions = [source.index(step) for step in steps]
         self.assertEqual(positions, sorted(positions))
         self.assertIn("CheckTaskCompletion(", source)
+        self.assertIn('if (selected_task.model_id == "magic:do-nothing")', source)
+        self.assertIn("//# Complete without action", source)
+        self.assertLess(
+            source.index('if (selected_task.model_id == "magic:do-nothing")'),
+            source.index("//# Plan memory search"),
+        )
         self.assertIn("ResolveTaskFailure(", source)
         self.assertIn("if (resolution.can_refine)", source)
         self.assertGreaterEqual(source.count("while (true)"), 2)

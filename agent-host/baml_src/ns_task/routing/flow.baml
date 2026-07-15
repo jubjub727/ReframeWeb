@@ -18,7 +18,7 @@ function ChooseTask(
         Use the available task information and context to decide which task should
         run next.
 
-        When the usual appropriate task would violate a user preference either follow that preferences guidance or simply do nothing.
+        When the usual appropriate task would violate a user preference either follow that preferences guidance or simply choose do nothing.
 
         Stop once you have the right task.
 
@@ -34,7 +34,7 @@ function ChooseTask(
 
         Optional output available in this step:
         - candidate_memory: a vague remembered observation that could be useful to
-          preserve.
+          preserve. Only include observations not commentary.
 
         Rules:
         - Select exactly one task from Available tasks.

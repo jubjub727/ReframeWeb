@@ -146,8 +146,8 @@ the API key from `OPENCODE_GO_API_KEY`.
 Model use is a BAML choice, not user-selected global configuration and not
 Python-side model routing. Each agentic task should have an explicit model
 assignment through a memory Provider node that points at a BAML surface. The
-current task-choice flow uses `kimi-k2.5` with high reasoning effort. The
-conversation-evaluation and search-depth flows use `glm-5.1`.
+current task-choice, conversation-evaluation, and search-depth flows use
+`glm-5.1` without reasoning effort.
 
 Current benchmarked OpenCode Go model IDs include:
 

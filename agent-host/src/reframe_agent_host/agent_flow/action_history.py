@@ -13,15 +13,12 @@ from reframe_agent_host.agent_flow.provider_clients import (
 from reframe_agent_host.agent_flow.prompt_layer_debug import (
     PromptLayerDebugSession,
 )
-from reframe_agent_host.agent_flow.session_context import current_conversation_history
 from reframe_memory import MemoryDatabase, open_memory_database
 
 
 @dataclass
 class ActionHistorySummarizer:
     database: MemoryDatabase | None = None
-    session_id: str | None = None
-    conversation_id: str | None = None
     client_name: str | None = None
     _owns_database: bool = field(init=False)
 
@@ -35,16 +32,8 @@ class ActionHistorySummarizer:
         prompt_layer_debug: PromptLayerDebugSession | None = None,
     ) -> str:
         database = await self._get_database()
-        current_conversation = await current_conversation_history(
-            database,
-            self.session_id,
-            self.conversation_id,
-        )
         recorded_action_history = await database.task_history.render(task_history_id)
-        inputs = {
-            "current_conversation": current_conversation,
-            "recorded_action_history": recorded_action_history,
-        }
+        inputs = {"recorded_action_history": recorded_action_history}
         client, client_name = await self._summary_client(
             database,
             selected_task_id,

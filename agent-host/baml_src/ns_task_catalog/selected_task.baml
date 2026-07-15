@@ -15,6 +15,7 @@ function SelectedTask(
                 output: task.output,
                 prompt: task.prompt,
                 provider_id: task.provider_id,
+                model_id: task.model_id,
                 created_at: task.created_at,
                 updated_at: task.updated_at,
                 read_at: task.read_at,

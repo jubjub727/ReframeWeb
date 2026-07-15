@@ -3,6 +3,10 @@ from __future__ import annotations
 import time
 
 
+def print_turn_completed(total_seconds: float) -> None:
+    print(f"[completed in {total_seconds:.3f}s]", flush=True)
+
+
 class VoiceTurnEventPrinter:
     _DISPLAY_NAMES = {
         "primitive-dispatch": "response-items",
@@ -20,7 +24,7 @@ class VoiceTurnEventPrinter:
         "task-prompt-generated": "task_prompt",
         "task-executed": "task_execution",
         "action-history-summarized": "action_history_summary",
-        "task-completion-reviewed": "task_completion",
+        "task-completion-reviewed": "task_review",
     }
     _DEBUG_STAGES = {
         "preparing",
@@ -45,6 +49,7 @@ class VoiceTurnEventPrinter:
         "memory-relevance-decision",
         "task-prompt",
         "task-prompt-generated",
+        "candidate-memory",
         "task-execution",
         "task-executed",
         "primitive-dispatch",
@@ -87,6 +92,9 @@ class VoiceTurnEventPrinter:
             return
         if stage == "input-stopped":
             self._print_live("[Input Stopped]")
+            return
+        if stage == "candidate-memory":
+            self._print_live(f"candidate_memory: {single_line(message)}")
             return
         if self._debug_output:
             if stage in self._DEBUG_STAGES:

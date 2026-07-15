@@ -9,7 +9,10 @@ from reframe_agent_host.agent_flow.machine_state import MachineStateError
 from reframe_agent_host.commands.timing import print_timing_summary
 from reframe_agent_host.commands.voice_config import voice_pipeline_config
 from reframe_agent_host.commands.voice_loop import run_voice_turn_loop
-from reframe_agent_host.commands.voice_output import VoiceTurnEventPrinter
+from reframe_agent_host.commands.voice_output import (
+    VoiceTurnEventPrinter,
+    print_turn_completed,
+)
 from reframe_agent_host.commands.voice_result_output import print_turn_result
 from reframe_agent_host.memory_readiness import (
     MemoryReadinessError,
@@ -18,6 +21,7 @@ from reframe_agent_host.memory_readiness import (
 from reframe_agent_host.speech.transcription import TranscriptionRuntimeError
 from reframe_agent_host.voice.pipeline import VoiceTurnPipeline
 from reframe_agent_host.voice.pipeline_config import VoicePipelineConfig
+from reframe_agent_host.voice.turn_data import VoiceTurnResult
 from reframe_memory import Conversation, Session, open_memory_database
 from reframe_memory.ids import memory_node_record_id
 
@@ -41,7 +45,7 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
                 debug_output=debug_output,
                 turn_started_at=started_at,
             ),
-            result_handler=lambda result: print_turn_result(
+            result_handler=lambda result: _print_completed_turn(
                 result,
                 config,
                 debug_output=debug_output,
@@ -78,6 +82,22 @@ async def run_voice_turn(args: argparse.Namespace) -> int:
 def _configure_baml_logging(debug_output: bool) -> None:
     if not debug_output:
         os.environ["BAML_LOG"] = "OFF"
+
+
+def _print_completed_turn(
+    result: VoiceTurnResult,
+    config: VoicePipelineConfig,
+    *,
+    debug_output: bool,
+    verbose_context: bool,
+) -> None:
+    print_turn_result(
+        result,
+        config,
+        debug_output=debug_output,
+        verbose_context=verbose_context,
+    )
+    print_turn_completed(result.timings.total_seconds)
 
 
 async def _prepared_voice_pipeline_config(

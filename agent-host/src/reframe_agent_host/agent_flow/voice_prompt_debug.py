@@ -14,28 +14,12 @@ async def dump_understanding_layers(
     result: baml_voice_turn.VoicePromptUnderstanding,
     kwargs: dict[str, Any],
 ) -> None:
-    choose_task_inputs = {
-        key: inputs[key]
-        for key in (
-            "current_user_request",
-            "current_conversation",
-            "session_memories",
-            "user_preferences",
-            "available_tasks",
-            "task_choice_memories",
-            "machine_state",
-        )
-    }
-    await _write_prompt_layer(
+    await dump_task_choice_layer(
         debug,
-        1,
-        "choose_task",
-        inputs=choose_task_inputs,
-        result=result.task_choice,
-        elapsed_seconds=_seconds_from_ms(result.timings.task_choice_ms),
-        build_request=lambda: baml_task.ChooseTask__build_request_async(
-            **choose_task_inputs, **kwargs
-        ),
+        inputs,
+        result.task_choice,
+        result.timings.task_choice_ms,
+        kwargs,
     )
 
     memory_search_inputs = {
@@ -80,6 +64,38 @@ async def dump_understanding_layers(
         elapsed_seconds=_seconds_from_ms(result.timings.search_depth_ms),
         build_request=lambda: baml_memory.ChooseMemorySearchDepths__build_request_async(
             **search_depth_inputs, **kwargs
+        ),
+    )
+
+
+async def dump_task_choice_layer(
+    debug: PromptLayerDebugSession,
+    inputs: Mapping[str, Any],
+    task_choice: baml_task.TaskChoiceDecision,
+    task_choice_ms,
+    kwargs: dict[str, Any],
+) -> None:
+    choose_task_inputs = {
+        key: inputs[key]
+        for key in (
+            "current_user_request",
+            "current_conversation",
+            "session_memories",
+            "user_preferences",
+            "available_tasks",
+            "task_choice_memories",
+            "machine_state",
+        )
+    }
+    await _write_prompt_layer(
+        debug,
+        1,
+        "choose_task",
+        inputs=choose_task_inputs,
+        result=task_choice,
+        elapsed_seconds=_seconds_from_ms(task_choice_ms),
+        build_request=lambda: baml_task.ChooseTask__build_request_async(
+            **choose_task_inputs, **kwargs
         ),
     )
 

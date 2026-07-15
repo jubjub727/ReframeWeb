@@ -28,9 +28,32 @@ if typing.TYPE_CHECKING:
     from ... import task
 
 
+class VoiceTaskCompletionReview(pydantic.BaseModel):
+    attempt_id: typing.Optional[str]
+    completion_string: typing.Optional[str]
+    output_summary: typing.Optional[str]
+    completion: typing.Optional[task.CompletionResult]
+    elapsed_ms: typing.Optional[int]
+
+
+class VoiceTaskConversationScope(pydantic.BaseModel):
+    current_human_reply_created_at: typing.Optional[str]
+    active_human_reply_created_at: typing.List[str]
+
+
 class VoiceTaskExecutionBoundaryResult(pydantic.BaseModel):
     attempt_id: typing.Optional[str]
     task_execution: typing.Optional[stream_types.task.TaskExecutionResult]
+
+
+class VoiceTaskFailureReview(pydantic.BaseModel):
+    attempt_id: typing.Optional[str]
+    task_prompt: typing.Optional[str]
+    completion_string: typing.Optional[str]
+    output_summary: typing.Optional[str]
+    earlier_refusal_reply_text: typing.Optional[str]
+    decision: typing.Optional[stream_types.task.TaskFailureDecision]
+    elapsed_ms: typing.Optional[int]
 
 
 class VoiceTaskFlowContext(pydantic.BaseModel):
@@ -57,6 +80,18 @@ class VoiceTaskFlowResult(pydantic.BaseModel):
     attempt_id: typing.Optional[str]
     task_completion: typing.Optional[task.CompletionResult]
     task_completion_ms: typing.Optional[int]
+    completion_reviews: typing.List[VoiceTaskCompletionReview]
+    failure_reviews: typing.List[VoiceTaskFailureReview]
+
+
+class VoiceTaskNoActionResult(pydantic.BaseModel):
+    cycle_id: typing.Optional[str]
+    task_choice: typing.Optional[stream_types.task.TaskChoiceDecision]
+    selected_task: typing.Optional[stream_types.task_catalog.SelectedTaskContext]
+    task_choice_ms: typing.Optional[int]
+
+
+VoiceTaskRunResult: typing.TypeAlias = typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]
 
 
 class VoicePromptContinuation(pydantic.BaseModel):
@@ -87,9 +122,14 @@ class VoicePromptUnderstandingTimings(pydantic.BaseModel):
 
 
 __all__ = [
+    "VoiceTaskCompletionReview",
+    "VoiceTaskConversationScope",
     "VoiceTaskExecutionBoundaryResult",
+    "VoiceTaskFailureReview",
     "VoiceTaskFlowContext",
     "VoiceTaskFlowResult",
+    "VoiceTaskNoActionResult",
+    "VoiceTaskRunResult",
     "VoicePromptContinuation",
     "VoicePromptContinuationTimings",
     "VoicePromptUnderstanding",

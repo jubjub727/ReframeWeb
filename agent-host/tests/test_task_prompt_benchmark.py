@@ -269,6 +269,7 @@ def _snapshot():
         output="Ask for the information needed to continue.",
         prompt="Ask only for the information needed to continue.",
         provider_id="memory_node:core_provider",
+        model_id="glm-5.1",
         created_at="2026-07-05T00:00:00+00:00",
         updated_at="2026-07-05T00:00:00+00:00",
         read_at="NONE",

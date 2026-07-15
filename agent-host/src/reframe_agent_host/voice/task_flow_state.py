@@ -5,7 +5,10 @@ from dataclasses import dataclass
 
 @dataclass
 class VoiceTaskCycleState:
+    context_inputs: object | None = None
+    understanding: object | None = None
     retrieved_memories: object | None = None
+    retrieved_memory_graph: object | None = None
     post_vad_understanding_seconds: float | None = None
     memory_retrieval_seconds: float | None = None
     post_vad_memory_retrieval_seconds: float | None = None

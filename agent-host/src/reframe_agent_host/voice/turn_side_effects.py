@@ -43,13 +43,18 @@ class TurnSideEffects:
             if close is not None:
                 await close()
 
-    def remember_live_human_reply(self, transcript: str) -> None:
+    def remember_live_human_reply(self, transcript: str) -> str | None:
         if self.live_conversation is not None:
-            self.live_conversation.add_message(
+            return self.live_conversation.add_message(
                 self.config.conversation_id,
                 role="human",
                 content=transcript,
             )
+        return None
+
+    def resolve_live_human_reply(self, captured_at: str | None) -> None:
+        if self.live_conversation is not None:
+            self.live_conversation.resolve_human_reply(captured_at)
 
     def record_human_reply_in_background(
         self,
@@ -155,10 +160,7 @@ class TurnSideEffects:
             return None, None, None
         _emit(on_event, "action-history-summary", "summarizing recorded action history")
         started_at = time.perf_counter()
-        summarizer = ActionHistorySummarizer(
-            session_id=self.config.session_id,
-            conversation_id=self.config.conversation_id,
-        )
+        summarizer = ActionHistorySummarizer()
         try:
             result = await summarizer.summarize(
                 dispatch.task_history_id,

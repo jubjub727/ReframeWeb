@@ -10,8 +10,14 @@ from reframe_agent_host.agent_flow.live_conversation import LiveConversationCont
 from reframe_agent_host.agent_flow.machine_state import MachineStateProvider
 from reframe_agent_host.agent_flow.prompt_layer_debug import PromptLayerDebugSession
 from reframe_agent_host.agent_flow.provider_clients import client_kwargs
+from reframe_agent_host.agent_flow.task_review_debug import dump_task_reviews
+from reframe_agent_host.agent_flow.voice_turn_debug import (
+    record_continuation_layers,
+    record_understanding_layers,
+)
 from reframe_agent_host.agent_flow.voice_prompt_debug import (
     dump_continuation_layers,
+    dump_task_choice_layer,
     dump_understanding_layers,
 )
 from reframe_agent_host.agent_flow.voice_turn_context import VoiceTurnContext
@@ -89,12 +95,81 @@ class BamlVoiceTurnFlow:
             )
         return await self._context.voice_turn_inputs(current_user_request)
 
+    def bind_human_reply(self, created_at: str | None) -> None:
+        self._context.current_human_reply_created_at = created_at
+
+    def task_conversation_scope(self) -> dict:
+        return self._context.task_conversation_scope()
+
+    async def record_task_choice(self, inputs, task_choice, task_choice_ms) -> None:
+        if self._prompt_debug is not None:
+            try:
+                await dump_task_choice_layer(
+                    self._prompt_debug,
+                    inputs,
+                    task_choice,
+                    task_choice_ms,
+                    client_kwargs(self.client_name),
+                )
+            except Exception:
+                pass
+
     async def run_voice_turn(self, current_user_request: str, host):
-        return await baml_voice_turn.RunVoiceTurn_async(
-            current_user_request=current_user_request,
-            **host.callbacks,
-            **client_kwargs(self.client_name),
-        )
+        try:
+            result = await baml_voice_turn.RunVoiceTurn_async(
+                current_user_request=current_user_request,
+                **host.callbacks,
+                **client_kwargs(self.client_name),
+            )
+        except Exception as error:
+            self._write_debug_layer(
+                99,
+                "run_voice_turn",
+                inputs={"current_user_request": current_user_request},
+                error=error,
+            )
+            raise
+        if (
+            self._prompt_debug is not None
+            and isinstance(result, baml_voice_turn.VoiceTaskFlowResult)
+        ):
+            try:
+                await dump_task_reviews(self._prompt_debug, result)
+            except Exception:
+                pass
+        return result
+
+    async def record_understanding(self, inputs, result) -> None:
+        if self._prompt_debug is not None:
+            try:
+                await record_understanding_layers(
+                    self._prompt_debug,
+                    inputs,
+                    result,
+                    client_kwargs(self.client_name),
+                )
+            except Exception:
+                pass
+
+    async def record_continuation(
+        self,
+        context_inputs,
+        selected_task,
+        retrieved_memories,
+        result,
+    ) -> None:
+        if self._prompt_debug is not None:
+            try:
+                await record_continuation_layers(
+                    self._prompt_debug,
+                    context_inputs,
+                    selected_task,
+                    retrieved_memories,
+                    result,
+                    client_kwargs(self.client_name),
+                )
+            except Exception:
+                pass
 
     async def _run_understanding(
         self,

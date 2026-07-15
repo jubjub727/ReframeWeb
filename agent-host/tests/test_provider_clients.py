@@ -2,7 +2,6 @@ import json
 import unittest
 
 from baml_sdk import task as baml_task
-from baml_sdk import turn_context as baml_turn_context
 from baml_sdk import baml as baml_std
 from reframe_agent_host.agent_flow.provider_clients import (
     client_kwargs,
@@ -26,24 +25,8 @@ class ProviderClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(body["model"], "deepseek-v4-flash")
         self.assertEqual(body["reasoning_effort"], "high")
 
-    async def test_action_history_summary_prompt_uses_history_and_conversation(self):
+    async def test_action_history_summary_prompt_is_scoped_to_task_actions(self):
         request = await baml_task.SummariseActionHistory__build_request_async(
-            current_conversation=baml_turn_context.ConversationHistory(
-                id="memory_node:conversation",
-                name="Current conversation",
-                created_at="2026-07-13T00:00:00Z",
-                updated_at="2026-07-13T00:01:00Z",
-                read_at="NONE",
-                messages=[
-                    baml_turn_context.ConversationHistoryMessage(
-                        created_at="2026-07-13T00:00:00Z",
-                        updated_at="2026-07-13T00:00:00Z",
-                        read_at="NONE",
-                        role="user",
-                        content="Please finish the task.",
-                    )
-                ],
-            ),
             recorded_action_history=(
                 "- Session: memory_node:session\n"
                 "  Conversation: memory_node:conversation\n"
@@ -61,14 +44,14 @@ class ProviderClientTests(unittest.IsolatedAsyncioTestCase):
         prompt_text = json.dumps(body["messages"])
 
         self.assertIn(
-            "Given the current conversation and the recorded action history",
+            "Summarize what the recorded actions for this task attempt did",
             prompt_text,
         )
-        self.assertIn("Recorded action history", prompt_text)
+        self.assertIn("Recorded actions for this task attempt", prompt_text)
         self.assertIn("memory_node:conversation", prompt_text)
-        self.assertIn("Please finish the task.", prompt_text)
         self.assertIn("agent_reply", prompt_text)
-        self.assertNotIn("Current task", prompt_text)
+        self.assertNotIn("Current conversation", prompt_text)
+        self.assertNotIn("Please finish the task.", prompt_text)
 
     async def test_task_completion_prompt_uses_glm51_pass_fail_gate(self):
         request = await baml_task.CheckTaskCompletion__build_request_async(

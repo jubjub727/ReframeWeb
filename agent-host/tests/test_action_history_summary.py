@@ -33,6 +33,11 @@ class ActionHistorySummaryTests(unittest.IsolatedAsyncioTestCase):
             captured["client"].name,
             "OpenCodeGoModelGlm51ReasoningNone",
         )
+        self.assertEqual(
+            captured["recorded_action_history"],
+            "- Session: memory_node:session\n  Conversation: memory_node:conversation",
+        )
+        self.assertNotIn("current_conversation", captured)
 
 
 class _FakeDatabase:

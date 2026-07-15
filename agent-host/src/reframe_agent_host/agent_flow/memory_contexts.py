@@ -11,6 +11,15 @@ from reframe_memory import MemoryDatabase
 async def available_tasks(
     database: MemoryDatabase,
 ) -> list[baml_task_catalog.AvailableTask]:
+    tasks = await database.tasks.search()
+    providers = (
+        {
+            provider.id: provider.content.model_id
+            for provider in await database.providers.search()
+        }
+        if tasks
+        else {}
+    )
     return [
         baml_task_catalog.AvailableTask(
             id=task.id,
@@ -20,10 +29,20 @@ async def available_tasks(
             output=task.content.output,
             prompt=task.content.prompt,
             provider_id=task.content.provider_id,
+            model_id=_task_model_id(task.id, task.content.provider_id, providers),
             **timestamp_fields(task),
         )
-        for task in await database.tasks.search()
+        for task in tasks
     ]
+
+
+def _task_model_id(task_id: str, provider_id: str, providers: dict[str, str]) -> str:
+    model_id = providers.get(provider_id)
+    if not model_id:
+        raise ValueError(
+            f"task {task_id} has no provider model: {provider_id}"
+        )
+    return model_id
 
 
 async def user_preferences(

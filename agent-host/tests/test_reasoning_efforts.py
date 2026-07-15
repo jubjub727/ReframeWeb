@@ -17,7 +17,7 @@ from reframe_memory import MemoryNode, MemoryTimestamps, Provider
 
 
 class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
-    async def test_default_task_choice_client_uses_kimi_k25_high(self):
+    async def test_default_task_choice_client_uses_glm51_none(self):
         request = await baml_task.ChooseTask__build_request_async(
             current_user_request="Install the missing GPU driver for me.",
             current_conversation=None,
@@ -32,6 +32,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                     output="A task choice.",
                     prompt="Explain the limitation.",
                     provider_id="provider:test",
+                    model_id="glm-5.1",
                     created_at="2026-07-03T00:00:00Z",
                     updated_at="2026-07-03T00:00:00Z",
                     read_at="NONE",
@@ -42,8 +43,8 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
         )
         body = json.loads(request.body)
 
-        self.assertEqual(body["model"], "kimi-k2.5")
-        self.assertEqual(body["reasoning_effort"], "high")
+        self.assertEqual(body["model"], "glm-5.1")
+        self.assertEqual(body["reasoning_effort"], "none")
 
     async def test_compiled_client_adds_reasoning_effort_to_request(self):
         client, client_name = opencode_reasoning_effort_client(
@@ -65,6 +66,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                     output="A task choice.",
                     prompt="Choose the task.",
                     provider_id="provider:test",
+                    model_id="glm-5.1",
                     created_at="2026-07-03T00:00:00Z",
                     updated_at="2026-07-03T00:00:00Z",
                     read_at="NONE",
@@ -117,6 +119,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 output="A rendered panel.",
                 prompt="Use the store and panel.",
                 provider_id="provider:test",
+                model_id="glm-5.1",
                 created_at="2026-07-03T00:00:00Z",
                 updated_at="2026-07-03T00:00:00Z",
                 read_at="NONE",
@@ -157,6 +160,7 @@ class ReasoningEffortBenchmarkTests(unittest.IsolatedAsyncioTestCase):
                 output="A rendered panel.",
                 prompt="Use the store and panel.",
                 provider_id="provider:test",
+                model_id="glm-5.1",
                 created_at="2026-07-03T00:00:00Z",
                 updated_at="2026-07-03T00:00:00Z",
                 read_at="NONE",

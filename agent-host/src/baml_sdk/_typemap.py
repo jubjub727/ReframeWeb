@@ -437,12 +437,20 @@ _CLASS_ENTRIES = {
     "user.voice_turn.VoicePromptUnderstanding$stream": ("baml_sdk.stream_types.voice_turn", "VoicePromptUnderstanding"),
     "user.voice_turn.VoicePromptUnderstandingTimings": ("baml_sdk.voice_turn", "VoicePromptUnderstandingTimings"),
     "user.voice_turn.VoicePromptUnderstandingTimings$stream": ("baml_sdk.stream_types.voice_turn", "VoicePromptUnderstandingTimings"),
+    "user.voice_turn.VoiceTaskCompletionReview": ("baml_sdk.voice_turn", "VoiceTaskCompletionReview"),
+    "user.voice_turn.VoiceTaskCompletionReview$stream": ("baml_sdk.stream_types.voice_turn", "VoiceTaskCompletionReview"),
+    "user.voice_turn.VoiceTaskConversationScope": ("baml_sdk.voice_turn", "VoiceTaskConversationScope"),
+    "user.voice_turn.VoiceTaskConversationScope$stream": ("baml_sdk.stream_types.voice_turn", "VoiceTaskConversationScope"),
     "user.voice_turn.VoiceTaskExecutionBoundaryResult": ("baml_sdk.voice_turn", "VoiceTaskExecutionBoundaryResult"),
     "user.voice_turn.VoiceTaskExecutionBoundaryResult$stream": ("baml_sdk.stream_types.voice_turn", "VoiceTaskExecutionBoundaryResult"),
+    "user.voice_turn.VoiceTaskFailureReview": ("baml_sdk.voice_turn", "VoiceTaskFailureReview"),
+    "user.voice_turn.VoiceTaskFailureReview$stream": ("baml_sdk.stream_types.voice_turn", "VoiceTaskFailureReview"),
     "user.voice_turn.VoiceTaskFlowContext": ("baml_sdk.voice_turn", "VoiceTaskFlowContext"),
     "user.voice_turn.VoiceTaskFlowContext$stream": ("baml_sdk.stream_types.voice_turn", "VoiceTaskFlowContext"),
     "user.voice_turn.VoiceTaskFlowResult": ("baml_sdk.voice_turn", "VoiceTaskFlowResult"),
     "user.voice_turn.VoiceTaskFlowResult$stream": ("baml_sdk.stream_types.voice_turn", "VoiceTaskFlowResult"),
+    "user.voice_turn.VoiceTaskNoActionResult": ("baml_sdk.voice_turn", "VoiceTaskNoActionResult"),
+    "user.voice_turn.VoiceTaskNoActionResult$stream": ("baml_sdk.stream_types.voice_turn", "VoiceTaskNoActionResult"),
 }
 
 _ENUM_ENTRIES = {
@@ -484,6 +492,8 @@ _ALIAS_ENTRIES = {
     "testing.TestSetReportThunk$stream": ("baml_sdk.stream_types.vendor.testing", "TestSetReportThunk"),
     "testing.TestSetRunner": ("baml_sdk.vendor.testing", "TestSetRunner"),
     "testing.TestSetRunner$stream": ("baml_sdk.stream_types.vendor.testing", "TestSetRunner"),
+    "user.voice_turn.VoiceTaskRunResult": ("baml_sdk.voice_turn", "VoiceTaskRunResult"),
+    "user.voice_turn.VoiceTaskRunResult$stream": ("baml_sdk.stream_types.voice_turn", "VoiceTaskRunResult"),
 }
 
 _TYPE_MAP = BamlTypeMap.from_lazy_entries(

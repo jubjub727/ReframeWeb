@@ -19,6 +19,18 @@ class VoiceTaskExecutionBoundaryResult {
     task_execution: root.task.TaskExecutionResult?,
 }
 
+class VoiceTaskConversationScope {
+    current_human_reply_created_at: string?,
+    active_human_reply_created_at: string[],
+}
+
+class VoiceTaskNoActionResult {
+    cycle_id: string,
+    task_choice: root.task.TaskChoiceDecision,
+    selected_task: root.task_catalog.SelectedTaskContext,
+    task_choice_ms: bigint,
+}
+
 class VoiceTaskFlowResult {
     cycle_id: string,
     understanding: VoicePromptUnderstanding,
@@ -27,4 +39,26 @@ class VoiceTaskFlowResult {
     attempt_id: string,
     task_completion: root.task.CompletionResult,
     task_completion_ms: bigint,
+    completion_reviews: VoiceTaskCompletionReview[],
+    failure_reviews: VoiceTaskFailureReview[],
+}
+
+type VoiceTaskRunResult = VoiceTaskFlowResult | VoiceTaskNoActionResult;
+
+class VoiceTaskCompletionReview {
+    attempt_id: string,
+    completion_string: string,
+    output_summary: string,
+    completion: root.task.CompletionResult,
+    elapsed_ms: bigint,
+}
+
+class VoiceTaskFailureReview {
+    attempt_id: string,
+    task_prompt: string,
+    completion_string: string,
+    output_summary: string,
+    earlier_refusal_reply_text: string,
+    decision: root.task.TaskFailureDecision,
+    elapsed_ms: bigint,
 }

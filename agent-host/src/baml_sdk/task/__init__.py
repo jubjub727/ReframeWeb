@@ -45,22 +45,22 @@ if typing.TYPE_CHECKING:
 from baml_bridge import define_function as _define_function
 
 
-SummariseActionHistory       = _define_function("user.task.SummariseActionHistory", "sync",  ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory       = _define_function("user.task.SummariseActionHistory", "sync",  ["recorded_action_history"], ["client"])
 SummariseActionHistory.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-SummariseActionHistory_async = _define_function("user.task.SummariseActionHistory", "async", ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory_async = _define_function("user.task.SummariseActionHistory", "async", ["recorded_action_history"], ["client"])
 SummariseActionHistory_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-SummariseActionHistory__build_request       = _define_function("user.task.SummariseActionHistory$build_request", "sync",  ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__build_request       = _define_function("user.task.SummariseActionHistory$build_request", "sync",  ["recorded_action_history"], ["client"])
 SummariseActionHistory__build_request.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-SummariseActionHistory__build_request_async = _define_function("user.task.SummariseActionHistory$build_request", "async", ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__build_request_async = _define_function("user.task.SummariseActionHistory$build_request", "async", ["recorded_action_history"], ["client"])
 SummariseActionHistory__build_request_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-SummariseActionHistory__build_request_stream       = _define_function("user.task.SummariseActionHistory$build_request_stream", "sync",  ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__build_request_stream       = _define_function("user.task.SummariseActionHistory$build_request_stream", "sync",  ["recorded_action_history"], ["client"])
 SummariseActionHistory__build_request_stream.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-SummariseActionHistory__build_request_stream_async = _define_function("user.task.SummariseActionHistory$build_request_stream", "async", ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__build_request_stream_async = _define_function("user.task.SummariseActionHistory$build_request_stream", "async", ["recorded_action_history"], ["client"])
 SummariseActionHistory__build_request_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
 SummariseActionHistory__parse       = _define_function("user.task.SummariseActionHistory$parse", "sync",  ["json"], ["client"])
@@ -75,16 +75,16 @@ SummariseActionHistory__parse_stream.__doc__ = """Raises:
 SummariseActionHistory__parse_stream_async = _define_function("user.task.SummariseActionHistory$parse_stream", "async", ["sse"], ["client"])
 SummariseActionHistory__parse_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient"""
-SummariseActionHistory__render_prompt       = _define_function("user.task.SummariseActionHistory$render_prompt", "sync",  ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__render_prompt       = _define_function("user.task.SummariseActionHistory$render_prompt", "sync",  ["recorded_action_history"], ["client"])
 SummariseActionHistory__render_prompt.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-SummariseActionHistory__render_prompt_async = _define_function("user.task.SummariseActionHistory$render_prompt", "async", ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory__render_prompt_async = _define_function("user.task.SummariseActionHistory$render_prompt", "async", ["recorded_action_history"], ["client"])
 SummariseActionHistory__render_prompt_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-SummariseActionHistory_stream       = _define_function("user.task.SummariseActionHistory$stream", "sync",  ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory_stream       = _define_function("user.task.SummariseActionHistory$stream", "sync",  ["recorded_action_history"], ["client"])
 SummariseActionHistory_stream.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-SummariseActionHistory_stream_async = _define_function("user.task.SummariseActionHistory$stream", "async", ["current_conversation", "recorded_action_history"], ["client"])
+SummariseActionHistory_stream_async = _define_function("user.task.SummariseActionHistory$stream", "async", ["recorded_action_history"], ["client"])
 SummariseActionHistory_stream_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 

@@ -35,6 +35,7 @@ class VoiceTurnContext:
     conversation_id: str | None = None
     machine_state_provider: MachineStateProvider | None = None
     live_conversation: LiveConversationContext | None = None
+    current_human_reply_created_at: str | None = None
     _owns_database: bool = field(init=False)
 
     def __post_init__(self) -> None:
@@ -111,6 +112,19 @@ class VoiceTurnContext:
     async def task_name(self, task_id: str) -> str | None:
         task = await (await self._get_database()).tasks.get(task_id)
         return None if task is None else task.content.name
+
+    def task_conversation_scope(self) -> dict:
+        active = (
+            []
+            if self.live_conversation is None
+            else self.live_conversation.active_human_reply_created_at(
+                self.conversation_id
+            )
+        )
+        return {
+            "current_human_reply_created_at": self.current_human_reply_created_at,
+            "active_human_reply_created_at": active,
+        }
 
     async def close(self) -> None:
         if self.database is not None and self._owns_database:

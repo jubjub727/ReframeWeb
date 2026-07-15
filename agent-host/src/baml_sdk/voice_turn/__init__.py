@@ -47,12 +47,16 @@ ContinueVoicePrompt_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-RunVoiceTurn       = _define_function("user.voice_turn.RunVoiceTurn", "sync",  ["current_user_request", "load_context", "retrieve_memories", "execute_task", "dispatch_task_outputs", "summarize_task_actions", "record_validation_reply"])
+RunVoiceTurn       = _define_function("user.voice_turn.RunVoiceTurn", "sync",  ["current_user_request", "load_context", "load_task_conversation_scope", "report_task_choice", "retrieve_memories", "execute_task", "dispatch_task_outputs", "summarize_task_actions", "record_validation_reply"])
 RunVoiceTurn.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-RunVoiceTurn_async = _define_function("user.voice_turn.RunVoiceTurn", "async", ["current_user_request", "load_context", "retrieve_memories", "execute_task", "dispatch_task_outputs", "summarize_task_actions", "record_validation_reply"])
+RunVoiceTurn_async = _define_function("user.voice_turn.RunVoiceTurn", "async", ["current_user_request", "load_context", "load_task_conversation_scope", "report_task_choice", "retrieve_memories", "execute_task", "dispatch_task_outputs", "summarize_task_actions", "record_validation_reply"])
 RunVoiceTurn_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+TaskConversation       = _define_function("user.voice_turn.TaskConversation", "sync",  ["conversation", "scope"])
+TaskConversation_async = _define_function("user.voice_turn.TaskConversation", "async", ["conversation", "scope"])
 
 
 class VoiceTaskFlowContext(pydantic.BaseModel):
@@ -78,6 +82,20 @@ class VoiceTaskExecutionBoundaryResult(pydantic.BaseModel):
     task_execution: typing.Optional[task.TaskExecutionResult]
 
 
+class VoiceTaskConversationScope(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    current_human_reply_created_at: typing.Optional[str]
+    active_human_reply_created_at: typing.List[str]
+
+
+class VoiceTaskNoActionResult(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    cycle_id: str
+    task_choice: task.TaskChoiceDecision
+    selected_task: task_catalog.SelectedTaskContext
+    task_choice_ms: int
+
+
 class VoiceTaskFlowResult(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     cycle_id: str
@@ -87,6 +105,31 @@ class VoiceTaskFlowResult(pydantic.BaseModel):
     attempt_id: str
     task_completion: task.CompletionResult
     task_completion_ms: int
+    completion_reviews: typing.List[VoiceTaskCompletionReview]
+    failure_reviews: typing.List[VoiceTaskFailureReview]
+
+
+VoiceTaskRunResult: typing.TypeAlias = typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]
+
+
+class VoiceTaskCompletionReview(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    attempt_id: str
+    completion_string: str
+    output_summary: str
+    completion: task.CompletionResult
+    elapsed_ms: int
+
+
+class VoiceTaskFailureReview(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    attempt_id: str
+    task_prompt: str
+    completion_string: str
+    output_summary: str
+    earlier_refusal_reply_text: str
+    decision: task.TaskFailureDecision
+    elapsed_ms: int
 
 
 class VoicePromptUnderstanding(pydantic.BaseModel):
@@ -127,9 +170,16 @@ __all__ = [
     "ContinueVoicePrompt_async",
     "RunVoiceTurn",
     "RunVoiceTurn_async",
+    "TaskConversation",
+    "TaskConversation_async",
     "VoiceTaskFlowContext",
     "VoiceTaskExecutionBoundaryResult",
+    "VoiceTaskConversationScope",
+    "VoiceTaskNoActionResult",
     "VoiceTaskFlowResult",
+    "VoiceTaskRunResult",
+    "VoiceTaskCompletionReview",
+    "VoiceTaskFailureReview",
     "VoicePromptUnderstanding",
     "VoicePromptContinuation",
     "VoicePromptUnderstandingTimings",
