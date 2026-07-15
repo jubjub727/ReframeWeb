@@ -1,4 +1,4 @@
-//# Layout-memory case
+// Layout-memory case
 
 function RememberedViewPreference() -> ConversationEvaluationBenchmarkCase {
     ConversationEvaluationBenchmarkCase {
@@ -51,7 +51,7 @@ function RememberedViewPreference() -> ConversationEvaluationBenchmarkCase {
     }
 }
 
-//# Ambiguous request
+// Ambiguous request
 
 function AmbiguousFollowup() -> ConversationEvaluationBenchmarkCase {
     ConversationEvaluationBenchmarkCase {
@@ -100,7 +100,7 @@ function AmbiguousFollowup() -> ConversationEvaluationBenchmarkCase {
     }
 }
 
-//# Capability case
+// Capability case
 
 function CapabilityLimitWithSensitiveAction() -> ConversationEvaluationBenchmarkCase {
     ConversationEvaluationBenchmarkCase {
@@ -160,7 +160,7 @@ function CapabilityLimitWithSensitiveAction() -> ConversationEvaluationBenchmark
     }
 }
 
-//# Voice-memory case
+// Voice-memory case
 
 function VoicePreferenceRecall() -> ConversationEvaluationBenchmarkCase {
     ConversationEvaluationBenchmarkCase {
@@ -220,7 +220,7 @@ function VoicePreferenceRecall() -> ConversationEvaluationBenchmarkCase {
     }
 }
 
-//# Scroll-memory case
+// Scroll-memory case
 
 function ScrollBehaviorPreference() -> ConversationEvaluationBenchmarkCase {
     ConversationEvaluationBenchmarkCase {

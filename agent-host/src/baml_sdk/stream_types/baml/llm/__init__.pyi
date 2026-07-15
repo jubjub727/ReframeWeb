@@ -96,6 +96,14 @@ class ContextClient(pydantic.BaseModel):
     allowed_roles: typing.List[str]
 
 
+class GoogleAiOptions(pydantic.BaseModel):
+    enterprise: typing.Optional[bool]
+    credentials: typing.Optional[str]
+    credentials_content: typing.Optional[str]
+    location: typing.Optional[str]
+    project_id: typing.Optional[str]
+
+
 class MediaUrlHandler(pydantic.BaseModel):
     image: typing.Optional[str]
     audio: typing.Optional[str]
@@ -124,7 +132,7 @@ class PrimitiveClientOptions(pydantic.BaseModel):
     allowed_roles: typing.Optional[typing.List[str]]
     remap_roles: typing.Optional[typing.Dict[str, str]]
     api_key: typing.Optional[str]
-    provider_options: typing.Union[AnthropicOptions, AzureOpenAiOptions, BedrockOptions, VertexAiOptions, None]
+    provider_options: typing.Union[AnthropicOptions, AzureOpenAiOptions, BedrockOptions, GoogleAiOptions, VertexAiOptions, None]
     media_url_handler: typing.Optional[MediaUrlHandler]
     headers: typing.Dict[str, str]
     query_params: typing.Dict[str, str]
@@ -184,6 +192,7 @@ __all__ = [
     "Client",
     "Context",
     "ContextClient",
+    "GoogleAiOptions",
     "MediaUrlHandler",
     "OutputFormat",
     "PrimitiveClient",

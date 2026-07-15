@@ -53,6 +53,11 @@ class VoiceTurnEventPrinter:
         "action-history-summarized",
         "task-completion-review",
         "task-completion-reviewed",
+        "validation-reply",
+        "task-refinement",
+        "task-reselection",
+        "task-failure-reply",
+        "task-failure-resolved",
         "turn-understanding",
         "turn-continuation",
         "agent-reply",
@@ -98,7 +103,12 @@ class VoiceTurnEventPrinter:
                 self._startup_reported = True
                 elapsed = latency(time.perf_counter() - self._turn_started_at)
                 self._print_live(f"[startup {elapsed}] ready")
-        elif stage in {"human-reply", "agent-thought", "agent-reply"}:
+        elif stage in {
+            "human-reply",
+            "agent-thought",
+            "agent-reply",
+            "validation-reply",
+        }:
             self._print_live(f"{stage.replace('-', '_')}: {single_line(message)}")
         elif stage == "agent-reply-interrupted":
             detail = single_line(message)

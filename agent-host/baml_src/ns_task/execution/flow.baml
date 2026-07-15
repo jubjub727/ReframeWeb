@@ -15,6 +15,9 @@ function PerformTask(full_task_prompt: string) -> TaskExecutionResult {
         - You must only return response items for which you have direct evidence of its name and structure.
         - Guessing return names you do not know is not allowed.
         - Do not add extra commentary outside the structured result.
+        - Previous Replies and Refusal Reply, when present, are private task-local
+          context. Use them to improve continuity and correct the outcome while
+          keeping returned messages focused on the task and user.
         - Return an empty returns array when the task prompt does not request any
           response item.
         - Do not put any extra fields in the payload that is not specified in the return item layout.
@@ -28,4 +31,3 @@ function PerformTask(full_task_prompt: string) -> TaskExecutionResult {
         {{ ctx.output_format }}
     "#
 }
-

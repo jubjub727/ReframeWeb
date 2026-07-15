@@ -96,6 +96,26 @@ class ProviderClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("confidence", prompt_text.lower())
         self.assertNotIn("too vague", prompt_text.lower())
 
+    async def test_failure_reply_prompt_runs_after_existing_fail_gate(self):
+        request = await baml_task.WriteValidationReply__build_request_async(
+            task_prompt="Task:\nReply usefully.\n\nInput:\nPlease help.",
+            completion_string="The user received a useful reply.",
+            output_summary="The recorded actions did not answer the request.",
+            earlier_refusal_reply_text="- Include the missing answer.",
+        )
+        body = json.loads(request.body)
+        prompt_text = json.dumps(body["messages"])
+
+        self.assertEqual(body["model"], "glm-5.1")
+        self.assertIn("unsuccessful task attempt", prompt_text)
+        self.assertIn("validation_reply", prompt_text)
+        self.assertIn("can_refine", prompt_text)
+        self.assertIn("Earlier refusal replies from this task session", prompt_text)
+        self.assertIn("Include the missing answer", prompt_text)
+        self.assertNotIn("reconsider", prompt_text.lower())
+        self.assertNotIn("do not mention", prompt_text.lower())
+        self.assertNotIn("bool or null", prompt_text)
+
 
 if __name__ == "__main__":
     unittest.main()

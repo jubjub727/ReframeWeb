@@ -1,4 +1,4 @@
-//# Visual-panel task
+// Visual-panel task
 
 function VisualPanelTask() -> BenchmarkTask {
     BenchmarkTask {
@@ -15,7 +15,7 @@ function VisualPanelTask() -> BenchmarkTask {
     }
 }
 
-//# Input-needed task
+// Input-needed task
 
 function NeedsInformationTask() -> BenchmarkTask {
     BenchmarkTask {
@@ -32,7 +32,7 @@ function NeedsInformationTask() -> BenchmarkTask {
     }
 }
 
-//# Unsupported task
+// Unsupported task
 
 function CannotHandleTask() -> BenchmarkTask {
     BenchmarkTask {
@@ -49,7 +49,7 @@ function CannotHandleTask() -> BenchmarkTask {
     }
 }
 
-//# Model-choice task
+// Model-choice task
 
 function ModelSelectionTask() -> BenchmarkTask {
     BenchmarkTask {

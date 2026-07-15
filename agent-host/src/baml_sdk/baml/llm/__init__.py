@@ -372,7 +372,7 @@ class PrimitiveClientOptions(pydantic.BaseModel):
     allowed_roles: typing.Optional[typing.List[str]]
     remap_roles: typing.Optional[typing.Dict[str, str]]
     api_key: typing.Optional[str]
-    provider_options: typing.Union[AnthropicOptions, AzureOpenAiOptions, BedrockOptions, VertexAiOptions, None]
+    provider_options: typing.Union[AnthropicOptions, AzureOpenAiOptions, BedrockOptions, GoogleAiOptions, VertexAiOptions, None]
     media_url_handler: typing.Optional[MediaUrlHandler]
     headers: typing.Dict[str, str]
     query_params: typing.Dict[str, str]
@@ -394,8 +394,45 @@ class AnthropicOptions(pydantic.BaseModel):
     max_tokens: typing.Optional[int]
 
 
+class GoogleAiOptions(pydantic.BaseModel):
+    """
+    Provider-specific options for `google-ai` clients.
+
+    The Google Cloud fields are ignored while the client uses the Gemini API.
+    When `enterprise` or a `GOOGLE_GENAI_USE_*` environment flag selects the
+    Vertex backend, they have exactly the same meaning as on `VertexAiOptions`.
+
+    Attributes:
+        enterprise: Route this client through the Gemini Enterprise backend, an alias for
+            Vertex AI (google-genai's `GOOGLE_GENAI_USE_ENTERPRISE`). Uses Google
+            Cloud credentials (ADC), and an unset location defaults to `global`.
+            Equivalent to setting `GOOGLE_GENAI_USE_ENTERPRISE=true`.
+        credentials
+        credentials_content
+        location
+        project_id
+    """
+    model_config = pydantic.ConfigDict(extra="forbid")
+    enterprise: typing.Optional[bool]
+    credentials: typing.Optional[str]
+    credentials_content: typing.Optional[str]
+    location: typing.Optional[str]
+    project_id: typing.Optional[str]
+
+
 class VertexAiOptions(pydantic.BaseModel):
-    """Provider-specific options for `vertex-ai` clients."""
+    """
+    Provider-specific options for `vertex-ai` clients.
+
+    Attributes:
+        credentials: Path to a Google credential JSON file (service account, authorized user,
+            workload identity federation, or impersonated service account). Inline
+            JSON is not supported here; use `credentials_content` for inline
+            credentials. When neither is set, Application Default Credentials apply.
+        credentials_content: Inline credential JSON string. Used when `credentials` is not set.
+        location
+        project_id
+    """
     model_config = pydantic.ConfigDict(extra="forbid")
     credentials: typing.Optional[str]
     credentials_content: typing.Optional[str]
@@ -583,6 +620,7 @@ __all__ = [
     "PrimitiveClientOptions",
     "AzureOpenAiOptions",
     "AnthropicOptions",
+    "GoogleAiOptions",
     "VertexAiOptions",
     "BedrockOptions",
     "StreamAccumulator",

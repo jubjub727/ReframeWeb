@@ -36,6 +36,11 @@ class TaskReturnItem(pydantic.BaseModel):
     payload: typing.Optional[typing.Dict[str, str]]
 
 
+class TaskAttemptReply(pydantic.BaseModel):
+    role: typing.Optional[str]
+    content: typing.Optional[str]
+
+
 class TaskPromptComposition(pydantic.BaseModel):
     task_input: typing.Optional[str]
     candidate_memory: typing.Optional[stream_types.memory.CandidateMemory]
@@ -64,6 +69,23 @@ class TaskPromptSelectedMemoryContext(pydantic.BaseModel):
     read_at: typing.Optional[str]
 
 
+class TaskFailureDecision(pydantic.BaseModel):
+    validation_reply: typing.Optional[str]
+    can_refine: typing.Optional[bool]
+
+
+class TaskFailureResolution(pydantic.BaseModel):
+    validation_reply: typing.Optional[str]
+    can_refine: typing.Optional[bool]
+    retry_context: typing.Optional[TaskRetryContext]
+    retry_prompt: typing.Optional[str]
+
+
+class TaskRetryContext(pydantic.BaseModel):
+    previous_replies: typing.List[TaskAttemptReply]
+    refusal_replies: typing.List[str]
+
+
 class TaskChoiceDecision(pydantic.BaseModel):
     selected_task_id: typing.Optional[str]
     confidence: typing.Optional[float]
@@ -82,10 +104,14 @@ class TaskChoiceMemoryContext(pydantic.BaseModel):
 __all__ = [
     "TaskExecutionResult",
     "TaskReturnItem",
+    "TaskAttemptReply",
     "TaskPromptComposition",
     "TaskPromptDecision",
     "TaskPromptMemoryContext",
     "TaskPromptSelectedMemoryContext",
+    "TaskFailureDecision",
+    "TaskFailureResolution",
+    "TaskRetryContext",
     "TaskChoiceDecision",
     "TaskChoiceMemoryContext",
 ]

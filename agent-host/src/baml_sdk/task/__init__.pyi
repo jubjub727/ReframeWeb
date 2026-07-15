@@ -20,6 +20,8 @@
 
 from __future__ import annotations
 
+from . import internal
+
 import enum
 import typing
 import pydantic
@@ -179,12 +181,12 @@ class TaskExecutionResult(pydantic.BaseModel):
     returns: typing.List[TaskReturnItem]
 
 
-def PromptText(selected_task_prompt: str, task_input: str) -> str: ...
-async def PromptText_async(selected_task_prompt: str, task_input: str) -> str: ...
-
-
 def PromptDecision(selected_task_prompt: str, composition: TaskPromptComposition) -> TaskPromptDecision: ...
 async def PromptDecision_async(selected_task_prompt: str, composition: TaskPromptComposition) -> TaskPromptDecision: ...
+
+
+def PromptWithRetryContext(full_task_prompt: str, previous_replies: typing.List[TaskAttemptReply], refusal_replies: typing.List[str]) -> str: ...
+async def PromptWithRetryContext_async(full_task_prompt: str, previous_replies: typing.List[TaskAttemptReply], refusal_replies: typing.List[str]) -> str: ...
 
 
 def ComposeTaskInput(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], session_memories: typing.List[turn_context.SessionMemoryContext], selected_task: task_catalog.SelectedTaskContext, selected_memories: typing.List[TaskPromptSelectedMemoryContext], task_prompt_memories: typing.List[TaskPromptMemoryContext], machine_state: turn_context.MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskPromptComposition:
@@ -235,38 +237,6 @@ def PromptContexts(memories: memory.RetrievedMemoryGraph, selected_memory_ids: t
 async def PromptContexts_async(memories: memory.RetrievedMemoryGraph, selected_memory_ids: typing.List[str], current_session_id: typing.Optional[str], user_preferences: typing.List[turn_context.UserPreferenceMemoryContext]) -> typing.List[TaskPromptSelectedMemoryContext]: ...
 
 
-def ContextFromTask(task: memory.RetrievedTaskNode) -> TaskPromptSelectedMemoryContext: ...
-async def ContextFromTask_async(task: memory.RetrievedTaskNode) -> TaskPromptSelectedMemoryContext: ...
-
-
-def ContextFromSession(session: memory.RetrievedSessionGraph, is_current_session: bool) -> TaskPromptSelectedMemoryContext: ...
-async def ContextFromSession_async(session: memory.RetrievedSessionGraph, is_current_session: bool) -> TaskPromptSelectedMemoryContext: ...
-
-
-def ContextFromConversation(session: memory.RetrievedSessionGraph, conversation: memory.RetrievedConversationGraph, is_current_session: bool) -> TaskPromptSelectedMemoryContext: ...
-async def ContextFromConversation_async(session: memory.RetrievedSessionGraph, conversation: memory.RetrievedConversationGraph, is_current_session: bool) -> TaskPromptSelectedMemoryContext: ...
-
-
-def ContextFromSessionMemory(memory: memory.RetrievedSessionMemoryNode) -> TaskPromptSelectedMemoryContext: ...
-async def ContextFromSessionMemory_async(memory: memory.RetrievedSessionMemoryNode) -> TaskPromptSelectedMemoryContext: ...
-
-
-def ContextFromUserPreference(preference: turn_context.UserPreferenceMemoryContext) -> TaskPromptSelectedMemoryContext: ...
-async def ContextFromUserPreference_async(preference: turn_context.UserPreferenceMemoryContext) -> TaskPromptSelectedMemoryContext: ...
-
-
-def ContextFromMessage(message: memory.RetrievedConversationMessageNode) -> TaskPromptSelectedMemoryContext: ...
-async def ContextFromMessage_async(message: memory.RetrievedConversationMessageNode) -> TaskPromptSelectedMemoryContext: ...
-
-
-def KeepSessionContext(session: memory.RetrievedSessionGraph, selected_ids: typing.List[str]) -> bool: ...
-async def KeepSessionContext_async(session: memory.RetrievedSessionGraph, selected_ids: typing.List[str]) -> bool: ...
-
-
-def KeepConversationContext(conversation: memory.RetrievedConversationGraph, selected_ids: typing.List[str]) -> bool: ...
-async def KeepConversationContext_async(conversation: memory.RetrievedConversationGraph, selected_ids: typing.List[str]) -> bool: ...
-
-
 class TaskPromptMemoryContext(pydantic.BaseModel):
     title: str
     description: str
@@ -293,6 +263,80 @@ class TaskPromptDecision(pydantic.BaseModel):
 class TaskPromptComposition(pydantic.BaseModel):
     task_input: str
     candidate_memory: typing.Optional[memory.CandidateMemory]
+
+
+class TaskAttemptReply(pydantic.BaseModel):
+    role: str
+    content: str
+
+
+def ResolveTaskFailure(base_task_prompt: str, completion_string: str, output_summary: str, failed_execution: TaskExecutionResult, retry_context: TaskRetryContext) -> TaskFailureResolution:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def ResolveTaskFailure_async(base_task_prompt: str, completion_string: str, output_summary: str, failed_execution: TaskExecutionResult, retry_context: TaskRetryContext) -> TaskFailureResolution:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+def WriteValidationReply(task_prompt: str, completion_string: str, output_summary: str, earlier_refusal_reply_text: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskFailureDecision:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def WriteValidationReply_async(task_prompt: str, completion_string: str, output_summary: str, earlier_refusal_reply_text: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskFailureDecision:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+def WriteValidationReply__build_request(task_prompt: str, completion_string: str, output_summary: str, earlier_refusal_reply_text: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def WriteValidationReply__build_request_async(task_prompt: str, completion_string: str, output_summary: str, earlier_refusal_reply_text: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def WriteValidationReply__build_request_stream(task_prompt: str, completion_string: str, output_summary: str, earlier_refusal_reply_text: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def WriteValidationReply__build_request_stream_async(task_prompt: str, completion_string: str, output_summary: str, earlier_refusal_reply_text: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def WriteValidationReply__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskFailureDecision:
+    """Raises:
+        ParseError"""
+async def WriteValidationReply__parse_async(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskFailureDecision:
+    """Raises:
+        ParseError"""
+def WriteValidationReply__parse_stream(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.task.TaskFailureDecision], TaskFailureDecision]:
+    """Raises:
+        InvalidArgument, LlmClient"""
+async def WriteValidationReply__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.task.TaskFailureDecision], TaskFailureDecision]:
+    """Raises:
+        InvalidArgument, LlmClient"""
+def WriteValidationReply__render_prompt(task_prompt: str, completion_string: str, output_summary: str, earlier_refusal_reply_text: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def WriteValidationReply__render_prompt_async(task_prompt: str, completion_string: str, output_summary: str, earlier_refusal_reply_text: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def WriteValidationReply_stream(task_prompt: str, completion_string: str, output_summary: str, earlier_refusal_reply_text: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.task.TaskFailureDecision], TaskFailureDecision]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def WriteValidationReply_stream_async(task_prompt: str, completion_string: str, output_summary: str, earlier_refusal_reply_text: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.task.TaskFailureDecision], TaskFailureDecision]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+class TaskFailureDecision(pydantic.BaseModel):
+    validation_reply: str
+    can_refine: bool
+
+
+class TaskRetryContext(pydantic.BaseModel):
+    previous_replies: typing.List[TaskAttemptReply]
+    refusal_replies: typing.List[str]
+
+
+class TaskFailureResolution(pydantic.BaseModel):
+    validation_reply: str
+    can_refine: bool
+    retry_context: TaskRetryContext
+    retry_prompt: str
 
 
 def ChooseTask(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], session_memories: typing.List[turn_context.SessionMemoryContext], user_preferences: typing.List[turn_context.UserPreferenceMemoryContext], available_tasks: typing.List[task_catalog.AvailableTask], task_choice_memories: typing.List[TaskChoiceMemoryContext], machine_state: turn_context.MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> TaskChoiceDecision:
@@ -400,10 +444,10 @@ __all__ = [
     "PerformTask_stream_async",
     "TaskReturnItem",
     "TaskExecutionResult",
-    "PromptText",
-    "PromptText_async",
     "PromptDecision",
     "PromptDecision_async",
+    "PromptWithRetryContext",
+    "PromptWithRetryContext_async",
     "ComposeTaskInput",
     "ComposeTaskInput_async",
     "ComposeTaskInput__build_request",
@@ -420,26 +464,30 @@ __all__ = [
     "ComposeTaskInput_stream_async",
     "PromptContexts",
     "PromptContexts_async",
-    "ContextFromTask",
-    "ContextFromTask_async",
-    "ContextFromSession",
-    "ContextFromSession_async",
-    "ContextFromConversation",
-    "ContextFromConversation_async",
-    "ContextFromSessionMemory",
-    "ContextFromSessionMemory_async",
-    "ContextFromUserPreference",
-    "ContextFromUserPreference_async",
-    "ContextFromMessage",
-    "ContextFromMessage_async",
-    "KeepSessionContext",
-    "KeepSessionContext_async",
-    "KeepConversationContext",
-    "KeepConversationContext_async",
     "TaskPromptMemoryContext",
     "TaskPromptSelectedMemoryContext",
     "TaskPromptDecision",
     "TaskPromptComposition",
+    "TaskAttemptReply",
+    "ResolveTaskFailure",
+    "ResolveTaskFailure_async",
+    "WriteValidationReply",
+    "WriteValidationReply_async",
+    "WriteValidationReply__build_request",
+    "WriteValidationReply__build_request_async",
+    "WriteValidationReply__build_request_stream",
+    "WriteValidationReply__build_request_stream_async",
+    "WriteValidationReply__parse",
+    "WriteValidationReply__parse_async",
+    "WriteValidationReply__parse_stream",
+    "WriteValidationReply__parse_stream_async",
+    "WriteValidationReply__render_prompt",
+    "WriteValidationReply__render_prompt_async",
+    "WriteValidationReply_stream",
+    "WriteValidationReply_stream_async",
+    "TaskFailureDecision",
+    "TaskRetryContext",
+    "TaskFailureResolution",
     "ChooseTask",
     "ChooseTask_async",
     "ChooseTask__build_request",

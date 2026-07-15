@@ -1,4 +1,4 @@
-//# Build message
+// Build message
 
 function Message(
     role: string,
@@ -14,7 +14,7 @@ function Message(
     }
 }
 
-//# Build conversation
+// Build conversation
 
 function Conversation(
     id_suffix: string,
@@ -31,7 +31,7 @@ function Conversation(
     }
 }
 
-//# Build memory
+// Build memory
 
 function Memory(
     title: string,
@@ -49,7 +49,7 @@ function Memory(
     }
 }
 
-//# Build session
+// Build session
 
 function Session(
     id_suffix: string,

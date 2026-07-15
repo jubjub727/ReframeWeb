@@ -20,6 +20,8 @@
 
 from __future__ import annotations
 
+from . import internal
+
 import typing
 import pydantic
 
@@ -257,46 +259,6 @@ def Candidates(memories: RetrievedMemoryGraph, current_session_id: typing.Option
 async def Candidates_async(memories: RetrievedMemoryGraph, current_session_id: typing.Optional[str], user_preferences: typing.List[turn_context.UserPreferenceMemoryContext]) -> typing.List[RetrievedMemoryCandidate]: ...
 
 
-def TaskCandidate(task: RetrievedTaskNode) -> RetrievedMemoryCandidate: ...
-async def TaskCandidate_async(task: RetrievedTaskNode) -> RetrievedMemoryCandidate: ...
-
-
-def CurrentSessionMemoryCandidate(memory: RetrievedSessionMemoryNode, current_session_id: typing.Optional[str]) -> RetrievedMemoryCandidate: ...
-async def CurrentSessionMemoryCandidate_async(memory: RetrievedSessionMemoryNode, current_session_id: typing.Optional[str]) -> RetrievedMemoryCandidate: ...
-
-
-def UserPreferenceCandidate(preference: turn_context.UserPreferenceMemoryContext) -> RetrievedMemoryCandidate: ...
-async def UserPreferenceCandidate_async(preference: turn_context.UserPreferenceMemoryContext) -> RetrievedMemoryCandidate: ...
-
-
-def TaskCandidateDescription(task: RetrievedTaskNode) -> str: ...
-async def TaskCandidateDescription_async(task: RetrievedTaskNode) -> str: ...
-
-
-def SessionCandidate(session: RetrievedSessionGraph, is_current_session: bool) -> RetrievedMemoryCandidate: ...
-async def SessionCandidate_async(session: RetrievedSessionGraph, is_current_session: bool) -> RetrievedMemoryCandidate: ...
-
-
-def SessionMemoryCandidate(session: RetrievedSessionGraph, memory: RetrievedSessionMemoryNode, is_current_session: bool) -> RetrievedMemoryCandidate: ...
-async def SessionMemoryCandidate_async(session: RetrievedSessionGraph, memory: RetrievedSessionMemoryNode, is_current_session: bool) -> RetrievedMemoryCandidate: ...
-
-
-def ConversationCandidate(session: RetrievedSessionGraph, conversation: RetrievedConversationGraph, is_current_session: bool) -> RetrievedMemoryCandidate: ...
-async def ConversationCandidate_async(session: RetrievedSessionGraph, conversation: RetrievedConversationGraph, is_current_session: bool) -> RetrievedMemoryCandidate: ...
-
-
-def ConversationMessageCandidate(session: RetrievedSessionGraph, conversation: RetrievedConversationGraph, message: RetrievedConversationMessageNode, is_current_session: bool) -> RetrievedMemoryCandidate: ...
-async def ConversationMessageCandidate_async(session: RetrievedSessionGraph, conversation: RetrievedConversationGraph, message: RetrievedConversationMessageNode, is_current_session: bool) -> RetrievedMemoryCandidate: ...
-
-
-def MessageMatchedMemorySearch(conversation: RetrievedConversationGraph, message: RetrievedConversationMessageNode) -> bool: ...
-async def MessageMatchedMemorySearch_async(conversation: RetrievedConversationGraph, message: RetrievedConversationMessageNode) -> bool: ...
-
-
-def IsCurrentSession(session: RetrievedSessionGraph, current_session_id: typing.Optional[str]) -> bool: ...
-async def IsCurrentSession_async(session: RetrievedSessionGraph, current_session_id: typing.Optional[str]) -> bool: ...
-
-
 def SelectRelevantMemories(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], session_memories: typing.List[turn_context.SessionMemoryContext], selected_task: task_catalog.SelectedTaskContext, candidate_memories: typing.List[RetrievedMemoryCandidate], relevance_memories: typing.List[RelevanceMemoryContext], machine_state: turn_context.MachineStateContext, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> RelevantMemoryDecision:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
@@ -343,14 +305,6 @@ async def SelectRelevantMemories_stream_async(current_user_request: str, current
 
 def SelectedGraph(memories: RetrievedMemoryGraph, decision: RelevantMemoryDecision) -> RetrievedMemoryGraph: ...
 async def SelectedGraph_async(memories: RetrievedMemoryGraph, decision: RelevantMemoryDecision) -> RetrievedMemoryGraph: ...
-
-
-def RelevantSessionGraph(session: RetrievedSessionGraph, kept_ids: typing.List[str]) -> typing.Optional[RetrievedSessionGraph]: ...
-async def RelevantSessionGraph_async(session: RetrievedSessionGraph, kept_ids: typing.List[str]) -> typing.Optional[RetrievedSessionGraph]: ...
-
-
-def RelevantConversationGraph(conversation: RetrievedConversationGraph, kept_ids: typing.List[str]) -> typing.Optional[RetrievedConversationGraph]: ...
-async def RelevantConversationGraph_async(conversation: RetrievedConversationGraph, kept_ids: typing.List[str]) -> typing.Optional[RetrievedConversationGraph]: ...
 
 
 class RelevanceMemoryContext(pydantic.BaseModel):
@@ -431,26 +385,6 @@ __all__ = [
     "SearchDepthDecision",
     "Candidates",
     "Candidates_async",
-    "TaskCandidate",
-    "TaskCandidate_async",
-    "CurrentSessionMemoryCandidate",
-    "CurrentSessionMemoryCandidate_async",
-    "UserPreferenceCandidate",
-    "UserPreferenceCandidate_async",
-    "TaskCandidateDescription",
-    "TaskCandidateDescription_async",
-    "SessionCandidate",
-    "SessionCandidate_async",
-    "SessionMemoryCandidate",
-    "SessionMemoryCandidate_async",
-    "ConversationCandidate",
-    "ConversationCandidate_async",
-    "ConversationMessageCandidate",
-    "ConversationMessageCandidate_async",
-    "MessageMatchedMemorySearch",
-    "MessageMatchedMemorySearch_async",
-    "IsCurrentSession",
-    "IsCurrentSession_async",
     "SelectRelevantMemories",
     "SelectRelevantMemories_async",
     "SelectRelevantMemories__build_request",
@@ -467,10 +401,6 @@ __all__ = [
     "SelectRelevantMemories_stream_async",
     "SelectedGraph",
     "SelectedGraph_async",
-    "RelevantSessionGraph",
-    "RelevantSessionGraph_async",
-    "RelevantConversationGraph",
-    "RelevantConversationGraph_async",
     "RelevanceMemoryContext",
     "RetrievedMemoryCandidate",
     "RelevantMemoryDecision",

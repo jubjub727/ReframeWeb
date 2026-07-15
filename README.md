@@ -43,11 +43,11 @@ workflow layer, not to preserve the browser as the underlying concept.
 
 ## Main Components
 
-- **Agent Host**: A Python manager that handles conversational flow, audio input,
-  transcription, BAML-driven agent logic, routing, memory coordination, and TTS
-  playback.
-- **BAML Flow**: The first agentic decision layer. Audio is transcribed and
-  passed into BAML so the host can decide what should happen next.
+- **Agent Host**: A Python manager that handles audio input, transcription,
+  typed data and side-effect boundaries, memory persistence, and TTS playback.
+- **BAML Flow**: The complete routed voice-turn orchestrator. Audio is
+  transcribed and handed to one top-level BAML flow that owns agentic decisions,
+  branches, retries, and task reselection.
 - **Transport Layer**: A protocol surface, similar in role to HTTP, that will
   define routing, calls, streaming, and component interaction between Stores,
   Lenses, Views, and Compute.
@@ -87,9 +87,10 @@ with a phased delivery plan in the
   Panels. CEF is infrastructure here, not the conceptual model of the product.
 - **React** for Visual Panel content, display state, Store-backed data fetching,
   and any user-visible controls.
-- **Python** for the Agent Host, which owns setup, the main agentic flow, audio
-  processing, transport coordination, memory coordination, and TTS playback.
-- **BAML** for driving the agentic flow logic from the Python Agent Host.
+- **Python** for the Agent Host, which owns setup, audio processing, transport
+  and memory I/O, persistence, and TTS playback through typed BAML boundaries.
+- **BAML** for the complete routed voice-turn flow and all agentic decisions,
+  branches, loops, retries, and task reselection.
 - **WebAssembly** for Semantic Stores that implement the transport layer spec.
 - **Graph database storage** for memory, including tagged memory nodes,
   descriptions, created/read/modified timestamps, relationships, and recency-aware
@@ -191,12 +192,22 @@ BAML control flow, retrieves graph memory context, and prints concise per-stage
 summaries and latencies. When memory retrieval runs, the CLI prints the
 retrieved memories directly instead of dumping the full turn result as JSON.
 
-The current BAML control-flow path is:
+The current top-level BAML voice-turn path is:
 
 1. Choose an initial task from the task catalog.
 2. Generate memory search hints from the conversation and selected task.
 3. Choose timestamp breadth for each search domain.
-4. Retrieve memories from the graph.
+4. Retrieve graph memories through a typed host boundary.
+5. Select relevant memories and compose the task prompt.
+6. Execute the task through a typed host boundary and summarize its actions.
+7. Run the existing completion pass/fail check.
+8. On failure, generate and persist a `validation_reply`, then either retry the
+   same task with stacked task-session replies or return to task selection.
+9. On success, return the turn result without retaining task-local retry data.
+
+Python supplies data and performs external side effects at the named boundaries.
+It does not decide which BAML path runs. The complete agentic turn is kept in a
+single BAML graph so the operational flow remains inspectable.
 
 Memory retrieval is relation-first rather than table-wide. The task catalog is
 searched from the task root. Past conversation context is searched through

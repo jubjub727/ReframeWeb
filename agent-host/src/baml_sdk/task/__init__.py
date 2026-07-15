@@ -20,6 +20,16 @@
 
 from __future__ import annotations
 
+_LAZY_CHILDREN = frozenset({
+    "internal",
+})
+
+def __getattr__(name):
+    if name in _LAZY_CHILDREN:
+        import importlib
+        return importlib.import_module(f".{name}", __name__)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 import enum
 import typing
 import pydantic
@@ -183,12 +193,12 @@ class TaskExecutionResult(pydantic.BaseModel):
     returns: typing.List[TaskReturnItem]
 
 
-PromptText       = _define_function("user.task.PromptText", "sync",  ["selected_task_prompt", "task_input"])
-PromptText_async = _define_function("user.task.PromptText", "async", ["selected_task_prompt", "task_input"])
-
-
 PromptDecision       = _define_function("user.task.PromptDecision", "sync",  ["selected_task_prompt", "composition"])
 PromptDecision_async = _define_function("user.task.PromptDecision", "async", ["selected_task_prompt", "composition"])
+
+
+PromptWithRetryContext       = _define_function("user.task.PromptWithRetryContext", "sync",  ["full_task_prompt", "previous_replies", "refusal_replies"])
+PromptWithRetryContext_async = _define_function("user.task.PromptWithRetryContext", "async", ["full_task_prompt", "previous_replies", "refusal_replies"])
 
 
 ComposeTaskInput       = _define_function("user.task.ComposeTaskInput", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "selected_memories", "task_prompt_memories", "machine_state"], ["client"])
@@ -239,38 +249,6 @@ PromptContexts       = _define_function("user.task.PromptContexts", "sync",  ["m
 PromptContexts_async = _define_function("user.task.PromptContexts", "async", ["memories", "selected_memory_ids", "current_session_id", "user_preferences"])
 
 
-ContextFromTask       = _define_function("user.task.ContextFromTask", "sync",  ["task"])
-ContextFromTask_async = _define_function("user.task.ContextFromTask", "async", ["task"])
-
-
-ContextFromSession       = _define_function("user.task.ContextFromSession", "sync",  ["session", "is_current_session"])
-ContextFromSession_async = _define_function("user.task.ContextFromSession", "async", ["session", "is_current_session"])
-
-
-ContextFromConversation       = _define_function("user.task.ContextFromConversation", "sync",  ["session", "conversation", "is_current_session"])
-ContextFromConversation_async = _define_function("user.task.ContextFromConversation", "async", ["session", "conversation", "is_current_session"])
-
-
-ContextFromSessionMemory       = _define_function("user.task.ContextFromSessionMemory", "sync",  ["memory"])
-ContextFromSessionMemory_async = _define_function("user.task.ContextFromSessionMemory", "async", ["memory"])
-
-
-ContextFromUserPreference       = _define_function("user.task.ContextFromUserPreference", "sync",  ["preference"])
-ContextFromUserPreference_async = _define_function("user.task.ContextFromUserPreference", "async", ["preference"])
-
-
-ContextFromMessage       = _define_function("user.task.ContextFromMessage", "sync",  ["message"])
-ContextFromMessage_async = _define_function("user.task.ContextFromMessage", "async", ["message"])
-
-
-KeepSessionContext       = _define_function("user.task.KeepSessionContext", "sync",  ["session", "selected_ids"])
-KeepSessionContext_async = _define_function("user.task.KeepSessionContext", "async", ["session", "selected_ids"])
-
-
-KeepConversationContext       = _define_function("user.task.KeepConversationContext", "sync",  ["conversation", "selected_ids"])
-KeepConversationContext_async = _define_function("user.task.KeepConversationContext", "async", ["conversation", "selected_ids"])
-
-
 class TaskPromptMemoryContext(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     title: str
@@ -301,6 +279,84 @@ class TaskPromptComposition(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     task_input: str
     candidate_memory: typing.Optional[memory.CandidateMemory]
+
+
+class TaskAttemptReply(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    role: str
+    content: str
+
+
+ResolveTaskFailure       = _define_function("user.task.ResolveTaskFailure", "sync",  ["base_task_prompt", "completion_string", "output_summary", "failed_execution", "retry_context"])
+ResolveTaskFailure.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+ResolveTaskFailure_async = _define_function("user.task.ResolveTaskFailure", "async", ["base_task_prompt", "completion_string", "output_summary", "failed_execution", "retry_context"])
+ResolveTaskFailure_async.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+WriteValidationReply       = _define_function("user.task.WriteValidationReply", "sync",  ["task_prompt", "completion_string", "output_summary", "earlier_refusal_reply_text"], ["client"])
+WriteValidationReply.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+WriteValidationReply_async = _define_function("user.task.WriteValidationReply", "async", ["task_prompt", "completion_string", "output_summary", "earlier_refusal_reply_text"], ["client"])
+WriteValidationReply_async.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+WriteValidationReply__build_request       = _define_function("user.task.WriteValidationReply$build_request", "sync",  ["task_prompt", "completion_string", "output_summary", "earlier_refusal_reply_text"], ["client"])
+WriteValidationReply__build_request.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+WriteValidationReply__build_request_async = _define_function("user.task.WriteValidationReply$build_request", "async", ["task_prompt", "completion_string", "output_summary", "earlier_refusal_reply_text"], ["client"])
+WriteValidationReply__build_request_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+WriteValidationReply__build_request_stream       = _define_function("user.task.WriteValidationReply$build_request_stream", "sync",  ["task_prompt", "completion_string", "output_summary", "earlier_refusal_reply_text"], ["client"])
+WriteValidationReply__build_request_stream.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+WriteValidationReply__build_request_stream_async = _define_function("user.task.WriteValidationReply$build_request_stream", "async", ["task_prompt", "completion_string", "output_summary", "earlier_refusal_reply_text"], ["client"])
+WriteValidationReply__build_request_stream_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+WriteValidationReply__parse       = _define_function("user.task.WriteValidationReply$parse", "sync",  ["json"], ["client"])
+WriteValidationReply__parse.__doc__ = """Raises:
+    ParseError"""
+WriteValidationReply__parse_async = _define_function("user.task.WriteValidationReply$parse", "async", ["json"], ["client"])
+WriteValidationReply__parse_async.__doc__ = """Raises:
+    ParseError"""
+WriteValidationReply__parse_stream       = _define_function("user.task.WriteValidationReply$parse_stream", "sync",  ["sse"], ["client"])
+WriteValidationReply__parse_stream.__doc__ = """Raises:
+    InvalidArgument, LlmClient"""
+WriteValidationReply__parse_stream_async = _define_function("user.task.WriteValidationReply$parse_stream", "async", ["sse"], ["client"])
+WriteValidationReply__parse_stream_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient"""
+WriteValidationReply__render_prompt       = _define_function("user.task.WriteValidationReply$render_prompt", "sync",  ["task_prompt", "completion_string", "output_summary", "earlier_refusal_reply_text"], ["client"])
+WriteValidationReply__render_prompt.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+WriteValidationReply__render_prompt_async = _define_function("user.task.WriteValidationReply$render_prompt", "async", ["task_prompt", "completion_string", "output_summary", "earlier_refusal_reply_text"], ["client"])
+WriteValidationReply__render_prompt_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+WriteValidationReply_stream       = _define_function("user.task.WriteValidationReply$stream", "sync",  ["task_prompt", "completion_string", "output_summary", "earlier_refusal_reply_text"], ["client"])
+WriteValidationReply_stream.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+WriteValidationReply_stream_async = _define_function("user.task.WriteValidationReply$stream", "async", ["task_prompt", "completion_string", "output_summary", "earlier_refusal_reply_text"], ["client"])
+WriteValidationReply_stream_async.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+class TaskFailureDecision(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    validation_reply: str
+    can_refine: bool
+
+
+class TaskRetryContext(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    previous_replies: typing.List[TaskAttemptReply]
+    refusal_replies: typing.List[str]
+
+
+class TaskFailureResolution(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    validation_reply: str
+    can_refine: bool
+    retry_context: TaskRetryContext
+    retry_prompt: str
 
 
 ChooseTask       = _define_function("user.task.ChooseTask", "sync",  ["current_user_request", "current_conversation", "session_memories", "user_preferences", "available_tasks", "task_choice_memories", "machine_state"], ["client"])
@@ -410,10 +466,10 @@ __all__ = [
     "PerformTask_stream_async",
     "TaskReturnItem",
     "TaskExecutionResult",
-    "PromptText",
-    "PromptText_async",
     "PromptDecision",
     "PromptDecision_async",
+    "PromptWithRetryContext",
+    "PromptWithRetryContext_async",
     "ComposeTaskInput",
     "ComposeTaskInput_async",
     "ComposeTaskInput__build_request",
@@ -430,26 +486,30 @@ __all__ = [
     "ComposeTaskInput_stream_async",
     "PromptContexts",
     "PromptContexts_async",
-    "ContextFromTask",
-    "ContextFromTask_async",
-    "ContextFromSession",
-    "ContextFromSession_async",
-    "ContextFromConversation",
-    "ContextFromConversation_async",
-    "ContextFromSessionMemory",
-    "ContextFromSessionMemory_async",
-    "ContextFromUserPreference",
-    "ContextFromUserPreference_async",
-    "ContextFromMessage",
-    "ContextFromMessage_async",
-    "KeepSessionContext",
-    "KeepSessionContext_async",
-    "KeepConversationContext",
-    "KeepConversationContext_async",
     "TaskPromptMemoryContext",
     "TaskPromptSelectedMemoryContext",
     "TaskPromptDecision",
     "TaskPromptComposition",
+    "TaskAttemptReply",
+    "ResolveTaskFailure",
+    "ResolveTaskFailure_async",
+    "WriteValidationReply",
+    "WriteValidationReply_async",
+    "WriteValidationReply__build_request",
+    "WriteValidationReply__build_request_async",
+    "WriteValidationReply__build_request_stream",
+    "WriteValidationReply__build_request_stream_async",
+    "WriteValidationReply__parse",
+    "WriteValidationReply__parse_async",
+    "WriteValidationReply__parse_stream",
+    "WriteValidationReply__parse_stream_async",
+    "WriteValidationReply__render_prompt",
+    "WriteValidationReply__render_prompt_async",
+    "WriteValidationReply_stream",
+    "WriteValidationReply_stream_async",
+    "TaskFailureDecision",
+    "TaskRetryContext",
+    "TaskFailureResolution",
     "ChooseTask",
     "ChooseTask_async",
     "ChooseTask__build_request",

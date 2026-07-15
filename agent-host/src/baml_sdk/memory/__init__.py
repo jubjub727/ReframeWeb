@@ -20,6 +20,16 @@
 
 from __future__ import annotations
 
+_LAZY_CHILDREN = frozenset({
+    "internal",
+})
+
+def __getattr__(name):
+    if name in _LAZY_CHILDREN:
+        import importlib
+        return importlib.import_module(f".{name}", __name__)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 import typing
 import pydantic
 
@@ -275,46 +285,6 @@ Candidates       = _define_function("user.memory.Candidates", "sync",  ["memorie
 Candidates_async = _define_function("user.memory.Candidates", "async", ["memories", "current_session_id", "user_preferences"])
 
 
-TaskCandidate       = _define_function("user.memory.TaskCandidate", "sync",  ["task"])
-TaskCandidate_async = _define_function("user.memory.TaskCandidate", "async", ["task"])
-
-
-CurrentSessionMemoryCandidate       = _define_function("user.memory.CurrentSessionMemoryCandidate", "sync",  ["memory", "current_session_id"])
-CurrentSessionMemoryCandidate_async = _define_function("user.memory.CurrentSessionMemoryCandidate", "async", ["memory", "current_session_id"])
-
-
-UserPreferenceCandidate       = _define_function("user.memory.UserPreferenceCandidate", "sync",  ["preference"])
-UserPreferenceCandidate_async = _define_function("user.memory.UserPreferenceCandidate", "async", ["preference"])
-
-
-TaskCandidateDescription       = _define_function("user.memory.TaskCandidateDescription", "sync",  ["task"])
-TaskCandidateDescription_async = _define_function("user.memory.TaskCandidateDescription", "async", ["task"])
-
-
-SessionCandidate       = _define_function("user.memory.SessionCandidate", "sync",  ["session", "is_current_session"])
-SessionCandidate_async = _define_function("user.memory.SessionCandidate", "async", ["session", "is_current_session"])
-
-
-SessionMemoryCandidate       = _define_function("user.memory.SessionMemoryCandidate", "sync",  ["session", "memory", "is_current_session"])
-SessionMemoryCandidate_async = _define_function("user.memory.SessionMemoryCandidate", "async", ["session", "memory", "is_current_session"])
-
-
-ConversationCandidate       = _define_function("user.memory.ConversationCandidate", "sync",  ["session", "conversation", "is_current_session"])
-ConversationCandidate_async = _define_function("user.memory.ConversationCandidate", "async", ["session", "conversation", "is_current_session"])
-
-
-ConversationMessageCandidate       = _define_function("user.memory.ConversationMessageCandidate", "sync",  ["session", "conversation", "message", "is_current_session"])
-ConversationMessageCandidate_async = _define_function("user.memory.ConversationMessageCandidate", "async", ["session", "conversation", "message", "is_current_session"])
-
-
-MessageMatchedMemorySearch       = _define_function("user.memory.MessageMatchedMemorySearch", "sync",  ["conversation", "message"])
-MessageMatchedMemorySearch_async = _define_function("user.memory.MessageMatchedMemorySearch", "async", ["conversation", "message"])
-
-
-IsCurrentSession       = _define_function("user.memory.IsCurrentSession", "sync",  ["session", "current_session_id"])
-IsCurrentSession_async = _define_function("user.memory.IsCurrentSession", "async", ["session", "current_session_id"])
-
-
 SelectRelevantMemories       = _define_function("user.memory.SelectRelevantMemories", "sync",  ["current_user_request", "current_conversation", "session_memories", "selected_task", "candidate_memories", "relevance_memories", "machine_state"], ["client"])
 SelectRelevantMemories.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
@@ -361,14 +331,6 @@ SelectRelevantMemories_stream_async.__doc__ = """Raises:
 
 SelectedGraph       = _define_function("user.memory.SelectedGraph", "sync",  ["memories", "decision"])
 SelectedGraph_async = _define_function("user.memory.SelectedGraph", "async", ["memories", "decision"])
-
-
-RelevantSessionGraph       = _define_function("user.memory.RelevantSessionGraph", "sync",  ["session", "kept_ids"])
-RelevantSessionGraph_async = _define_function("user.memory.RelevantSessionGraph", "async", ["session", "kept_ids"])
-
-
-RelevantConversationGraph       = _define_function("user.memory.RelevantConversationGraph", "sync",  ["conversation", "kept_ids"])
-RelevantConversationGraph_async = _define_function("user.memory.RelevantConversationGraph", "async", ["conversation", "kept_ids"])
 
 
 class RelevanceMemoryContext(pydantic.BaseModel):
@@ -452,26 +414,6 @@ __all__ = [
     "SearchDepthDecision",
     "Candidates",
     "Candidates_async",
-    "TaskCandidate",
-    "TaskCandidate_async",
-    "CurrentSessionMemoryCandidate",
-    "CurrentSessionMemoryCandidate_async",
-    "UserPreferenceCandidate",
-    "UserPreferenceCandidate_async",
-    "TaskCandidateDescription",
-    "TaskCandidateDescription_async",
-    "SessionCandidate",
-    "SessionCandidate_async",
-    "SessionMemoryCandidate",
-    "SessionMemoryCandidate_async",
-    "ConversationCandidate",
-    "ConversationCandidate_async",
-    "ConversationMessageCandidate",
-    "ConversationMessageCandidate_async",
-    "MessageMatchedMemorySearch",
-    "MessageMatchedMemorySearch_async",
-    "IsCurrentSession",
-    "IsCurrentSession_async",
     "SelectRelevantMemories",
     "SelectRelevantMemories_async",
     "SelectRelevantMemories__build_request",
@@ -488,10 +430,6 @@ __all__ = [
     "SelectRelevantMemories_stream_async",
     "SelectedGraph",
     "SelectedGraph_async",
-    "RelevantSessionGraph",
-    "RelevantSessionGraph_async",
-    "RelevantConversationGraph",
-    "RelevantConversationGraph_async",
     "RelevanceMemoryContext",
     "RetrievedMemoryCandidate",
     "RelevantMemoryDecision",

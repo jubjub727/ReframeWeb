@@ -173,6 +173,31 @@ class TurnSideEffects:
         _emit(on_event, "action-history-summarized", f"{len(result)} chars ({seconds:.3f}s)")
         return result, seconds, time.perf_counter() - post_vad_started_at
 
+    async def record_validation_reply(
+        self,
+        reply: str | None,
+        on_event: VoicePipelineEventHandler | None,
+    ) -> None:
+        clean = " ".join((reply or "").split())
+        if not clean:
+            return
+        if self.live_conversation is not None:
+            self.live_conversation.add_message(
+                self.config.conversation_id,
+                role="validation_reply",
+                content=clean,
+            )
+        if self.config.conversation_id is not None:
+            database = await open_memory_database()
+            try:
+                await database.conversations.add_message(
+                    self.config.conversation_id,
+                    ConversationMessage(role="validation_reply", content=clean),
+                )
+            finally:
+                await database.close()
+        _emit(on_event, "validation-reply", clean)
+
     async def check_task_completion(
         self,
         selected_task: baml_task_catalog.SelectedTaskContext | None,

@@ -1,4 +1,4 @@
-//# Map conversation
+// Map conversation
 
 function ConversationContext(
     conversation: BenchmarkConversation,

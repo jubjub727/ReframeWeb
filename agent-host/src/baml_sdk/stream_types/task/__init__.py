@@ -37,6 +37,12 @@ class TaskReturnItem(pydantic.BaseModel):
     payload: typing.Optional[typing.Dict[str, str]]
 
 
+class TaskAttemptReply(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    role: typing.Optional[str]
+    content: typing.Optional[str]
+
+
 class TaskPromptComposition(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     task_input: typing.Optional[str]
@@ -69,6 +75,26 @@ class TaskPromptSelectedMemoryContext(pydantic.BaseModel):
     read_at: typing.Optional[str]
 
 
+class TaskFailureDecision(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    validation_reply: typing.Optional[str]
+    can_refine: typing.Optional[bool]
+
+
+class TaskFailureResolution(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    validation_reply: typing.Optional[str]
+    can_refine: typing.Optional[bool]
+    retry_context: typing.Optional[TaskRetryContext]
+    retry_prompt: typing.Optional[str]
+
+
+class TaskRetryContext(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    previous_replies: typing.List[TaskAttemptReply]
+    refusal_replies: typing.List[str]
+
+
 class TaskChoiceDecision(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     selected_task_id: typing.Optional[str]
@@ -89,10 +115,14 @@ class TaskChoiceMemoryContext(pydantic.BaseModel):
 __all__ = [
     "TaskExecutionResult",
     "TaskReturnItem",
+    "TaskAttemptReply",
     "TaskPromptComposition",
     "TaskPromptDecision",
     "TaskPromptMemoryContext",
     "TaskPromptSelectedMemoryContext",
+    "TaskFailureDecision",
+    "TaskFailureResolution",
+    "TaskRetryContext",
     "TaskChoiceDecision",
     "TaskChoiceMemoryContext",
 ]

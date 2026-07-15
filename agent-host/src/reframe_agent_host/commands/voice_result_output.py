@@ -163,6 +163,7 @@ def _selected_context_summary(result) -> str | None:
             "agent",
             "agent_thought",
             "agent_reply_interrupted",
+            "validation_reply",
         )
     }
     return (
@@ -171,6 +172,7 @@ def _selected_context_summary(result) -> str | None:
         f"human_message={roles['human']} agent_message={roles['agent']} "
         f"agent_thought_message={roles['agent_thought']} "
         f"agent_reply_interrupted_message={roles['agent_reply_interrupted']} "
+        f"validation_reply_message={roles['validation_reply']} "
         f"other={len(contexts) - messages} "
         f"description_chars={sum(len(item.description) for item in contexts)}"
     )

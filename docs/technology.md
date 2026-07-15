@@ -9,18 +9,24 @@ temporary or cut-down version of it.
 Python is used for the Agent Host, which is the first runtime surface being
 scaffolded.
 
-The Agent Host owns setup and the main agentic flow. It coordinates processed
-audio from the user's microphone, BAML-driven agent logic, transport calls,
-memory access, native window calls, and TTS playback.
+The Agent Host owns setup and external I/O. It coordinates processed audio from
+the user's microphone, data retrieval and persistence, transport calls, native
+window calls, and TTS playback. After transcription and routing, Python hands
+the complete voice turn to BAML and exposes typed boundary calls for those host
+operations; it does not reproduce BAML decisions or loops.
 
 The project uses `uv` for Python dependency and environment management.
 
 ## BAML
 
-BAML is used for the agentic flow logic called from the Python Agent Host.
+BAML owns the complete routed voice-turn orchestration called from the Python
+Agent Host. Task choice, memory-search planning, relevance selection, prompt
+construction, task completion checks, refusal replies, retry loops, and task
+reselection remain in one inspectable BAML flow.
 
 Spoken prompts are processed through the audio pipeline, transcribed, and passed
-into BAML so the host can decide what should happen next.
+into BAML, which decides what happens next. Python callbacks retrieve data or
+perform effects but do not choose the next agentic step.
 
 The current scaffold uses `baml-core` and BAML's generated Python/Pydantic SDK.
 

@@ -46,6 +46,45 @@ async def ContinueVoicePrompt_async(current_user_request: str, current_conversat
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
+def RunVoiceTurn(current_user_request: str, load_context: typing.Callable[[], VoiceTaskFlowContext], retrieve_memories: typing.Callable[[str, VoicePromptUnderstanding], memory.RetrievedMemoryGraph], execute_task: typing.Callable[[str, task.TaskChoiceDecision, str, VoicePromptContinuation], VoiceTaskExecutionBoundaryResult], dispatch_task_outputs: typing.Callable[[str], bool], summarize_task_actions: typing.Callable[[str, task.TaskChoiceDecision], typing.Optional[str]], record_validation_reply: typing.Callable[[str, str], bool]) -> VoiceTaskFlowResult:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def RunVoiceTurn_async(current_user_request: str, load_context: typing.Callable[[], VoiceTaskFlowContext], retrieve_memories: typing.Callable[[str, VoicePromptUnderstanding], memory.RetrievedMemoryGraph], execute_task: typing.Callable[[str, task.TaskChoiceDecision, str, VoicePromptContinuation], VoiceTaskExecutionBoundaryResult], dispatch_task_outputs: typing.Callable[[str], bool], summarize_task_actions: typing.Callable[[str, task.TaskChoiceDecision], typing.Optional[str]], record_validation_reply: typing.Callable[[str, str], bool]) -> VoiceTaskFlowResult:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+class VoiceTaskFlowContext(pydantic.BaseModel):
+    cycle_id: str
+    current_timestamp: str
+    current_conversation: typing.Optional[turn_context.ConversationHistory]
+    session_memories: typing.List[turn_context.SessionMemoryContext]
+    user_preferences: typing.List[turn_context.UserPreferenceMemoryContext]
+    available_tasks: typing.List[task_catalog.AvailableTask]
+    task_choice_memories: typing.List[task.TaskChoiceMemoryContext]
+    conversation_evaluation_memories: typing.List[memory.ConversationEvaluationMemoryContext]
+    search_depth_memories: typing.List[memory.SearchDepthMemoryContext]
+    current_session_id: typing.Optional[str]
+    relevance_memories: typing.List[memory.RelevanceMemoryContext]
+    task_prompt_memories: typing.List[task.TaskPromptMemoryContext]
+    machine_state: turn_context.MachineStateContext
+
+
+class VoiceTaskExecutionBoundaryResult(pydantic.BaseModel):
+    attempt_id: str
+    task_execution: typing.Optional[task.TaskExecutionResult]
+
+
+class VoiceTaskFlowResult(pydantic.BaseModel):
+    cycle_id: str
+    understanding: VoicePromptUnderstanding
+    retrieved_memories: memory.RetrievedMemoryGraph
+    continuation: VoicePromptContinuation
+    attempt_id: str
+    task_completion: task.CompletionResult
+    task_completion_ms: int
+
+
 class VoicePromptUnderstanding(pydantic.BaseModel):
     task_choice: task.TaskChoiceDecision
     selected_task: task_catalog.SelectedTaskContext
@@ -78,6 +117,11 @@ __all__ = [
     "UnderstandVoicePrompt_async",
     "ContinueVoicePrompt",
     "ContinueVoicePrompt_async",
+    "RunVoiceTurn",
+    "RunVoiceTurn_async",
+    "VoiceTaskFlowContext",
+    "VoiceTaskExecutionBoundaryResult",
+    "VoiceTaskFlowResult",
     "VoicePromptUnderstanding",
     "VoicePromptContinuation",
     "VoicePromptUnderstandingTimings",

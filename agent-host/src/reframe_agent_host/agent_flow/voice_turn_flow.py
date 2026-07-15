@@ -82,6 +82,20 @@ class BamlVoiceTurnFlow:
             pass
         return result
 
+    async def voice_turn_inputs(self, current_user_request: str) -> dict:
+        if self._prompt_debug is None:
+            self._prompt_debug = PromptLayerDebugSession.begin(
+                current_user_request=current_user_request,
+            )
+        return await self._context.voice_turn_inputs(current_user_request)
+
+    async def run_voice_turn(self, current_user_request: str, host):
+        return await baml_voice_turn.RunVoiceTurn_async(
+            current_user_request=current_user_request,
+            **host.callbacks,
+            **client_kwargs(self.client_name),
+        )
+
     async def _run_understanding(
         self,
         inputs: Mapping[str, Any],

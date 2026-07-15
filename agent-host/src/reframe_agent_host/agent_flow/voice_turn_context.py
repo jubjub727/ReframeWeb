@@ -95,6 +95,19 @@ class VoiceTurnContext:
             "machine_state": self._machine_state_context(),
         }
 
+    async def voice_turn_inputs(self, current_user_request: str) -> dict:
+        inputs = await self.understanding_inputs(current_user_request)
+        inputs.pop("current_user_request")
+        database = await self._get_database()
+        inputs.update(
+            {
+                "current_session_id": self.session_id,
+                "relevance_memories": await relevance_memories(database),
+                "task_prompt_memories": await task_prompt_memories(database),
+            }
+        )
+        return inputs
+
     async def task_name(self, task_id: str) -> str | None:
         task = await (await self._get_database()).tasks.get(task_id)
         return None if task is None else task.content.name

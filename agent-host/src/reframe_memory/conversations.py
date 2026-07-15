@@ -267,10 +267,17 @@ def _parse_conversation(content: Mapping[str, Any]) -> Conversation:
 
 def _parse_conversation_message(content: Mapping[str, Any]) -> ConversationMessage:
     role = str(content["role"])
-    if role not in ("human", "agent", "agent_thought", "agent_reply_interrupted"):
+    if role not in (
+        "human",
+        "agent",
+        "agent_thought",
+        "agent_reply_interrupted",
+        "validation_reply",
+    ):
         msg = (
             "conversation message role must be human, agent, agent_thought, "
-            f"or agent_reply_interrupted, got {role!r}"
+            "agent_reply_interrupted, or validation_reply, "
+            f"got {role!r}"
         )
         raise ValueError(msg)
 

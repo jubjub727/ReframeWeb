@@ -25,6 +25,38 @@ import pydantic
 
 if typing.TYPE_CHECKING:
     from ... import stream_types
+    from ... import task
+
+
+class VoiceTaskExecutionBoundaryResult(pydantic.BaseModel):
+    attempt_id: typing.Optional[str]
+    task_execution: typing.Optional[stream_types.task.TaskExecutionResult]
+
+
+class VoiceTaskFlowContext(pydantic.BaseModel):
+    cycle_id: typing.Optional[str]
+    current_timestamp: typing.Optional[str]
+    current_conversation: typing.Optional[stream_types.turn_context.ConversationHistory]
+    session_memories: typing.List[stream_types.turn_context.SessionMemoryContext]
+    user_preferences: typing.List[stream_types.turn_context.UserPreferenceMemoryContext]
+    available_tasks: typing.List[stream_types.task_catalog.AvailableTask]
+    task_choice_memories: typing.List[stream_types.task.TaskChoiceMemoryContext]
+    conversation_evaluation_memories: typing.List[stream_types.memory.ConversationEvaluationMemoryContext]
+    search_depth_memories: typing.List[stream_types.memory.SearchDepthMemoryContext]
+    current_session_id: typing.Optional[str]
+    relevance_memories: typing.List[stream_types.memory.RelevanceMemoryContext]
+    task_prompt_memories: typing.List[stream_types.task.TaskPromptMemoryContext]
+    machine_state: typing.Optional[stream_types.turn_context.MachineStateContext]
+
+
+class VoiceTaskFlowResult(pydantic.BaseModel):
+    cycle_id: typing.Optional[str]
+    understanding: typing.Optional[VoicePromptUnderstanding]
+    retrieved_memories: typing.Optional[stream_types.memory.RetrievedMemoryGraph]
+    continuation: typing.Optional[VoicePromptContinuation]
+    attempt_id: typing.Optional[str]
+    task_completion: typing.Optional[task.CompletionResult]
+    task_completion_ms: typing.Optional[int]
 
 
 class VoicePromptContinuation(pydantic.BaseModel):
@@ -55,6 +87,9 @@ class VoicePromptUnderstandingTimings(pydantic.BaseModel):
 
 
 __all__ = [
+    "VoiceTaskExecutionBoundaryResult",
+    "VoiceTaskFlowContext",
+    "VoiceTaskFlowResult",
     "VoicePromptContinuation",
     "VoicePromptContinuationTimings",
     "VoicePromptUnderstanding",

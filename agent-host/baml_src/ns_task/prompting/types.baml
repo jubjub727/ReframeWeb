@@ -25,3 +25,8 @@ class TaskPromptComposition {
     task_input: string,
     candidate_memory: root.memory.CandidateMemory?,
 }
+
+class TaskAttemptReply {
+    role: string,
+    content: string,
+}

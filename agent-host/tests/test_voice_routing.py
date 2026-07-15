@@ -33,6 +33,7 @@ from reframe_agent_host.voice.pipeline import VoiceTurnPipeline
 from reframe_agent_host.voice.turn_processor import VoiceTurnProcessor
 from reframe_agent_host.voice.capture_types import CaptureResult, VoiceTurnControl
 from reframe_agent_host.voice.pipeline_config import VoicePipelineConfig
+from reframe_agent_host.voice.task_flow_state import VoiceTaskCycleState
 from reframe_agent_host.task_execution import (
     PrimitiveDispatchRecord,
     PrimitiveDispatchResult,
@@ -80,9 +81,10 @@ class RecordingMemoryRetrieval:
 
 
 class RecordingBamlTurnFlow:
-    def __init__(self):
+    def __init__(self, order=None):
         self.understanding_request = None
         self.continuation_request = None
+        self.order = order
 
     async def understand_prompt(self, current_user_request):
         self.understanding_request = current_user_request
@@ -157,6 +159,42 @@ class RecordingBamlTurnFlow:
                 memory_relevance_ms=90,
                 task_prompt_ms=240,
             ),
+        )
+
+    async def run_voice_turn(self, current_user_request, host):
+        cycle_id = "test-voice-cycle"
+        host.cycles[cycle_id] = VoiceTaskCycleState()
+        understanding = await self.understand_prompt(current_user_request)
+        await host.retrieve_memories(cycle_id, understanding)
+        continuation = await self.continue_prompt(
+            current_user_request,
+            understanding.selected_task,
+            host.cycles[cycle_id].retrieved_memories,
+        )
+        execution = await host.execute_task(
+            cycle_id,
+            understanding.task_choice,
+            continuation.task_prompt.full_task_prompt,
+            continuation,
+        )
+        await host.dispatch_task_outputs(execution.attempt_id)
+        await host.summarize_task_actions(
+            execution.attempt_id,
+            understanding.task_choice,
+        )
+        if self.order is not None:
+            self.order.append("review-start")
+        completion = baml_task.CompletionResult.PASS
+        if self.order is not None:
+            self.order.append("review-end")
+        return baml_voice_turn.VoiceTaskFlowResult(
+            cycle_id=cycle_id,
+            understanding=understanding,
+            retrieved_memories=continuation.selected_memories,
+            continuation=continuation,
+            attempt_id=execution.attempt_id,
+            task_completion=completion,
+            task_completion_ms=1,
         )
 
 
@@ -612,6 +650,50 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             [("human", "do this")],
         )
 
+    async def test_validation_reply_is_persisted_and_visible_live(self):
+        database = RecordingTurnMemoryDatabase()
+        live_conversation = LiveConversationContext()
+        processor = VoiceTurnProcessor(
+            config=_voice_config(
+                session_id="memory_node:session",
+                conversation_id="memory_node:conversation",
+            ),
+            transcriber=StubTranscriber(),
+            trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
+            memory_retrieval=RecordingMemoryRetrieval(),
+            live_conversation=live_conversation,
+        )
+        events = []
+
+        async def fake_open_memory_database():
+            return database
+
+        with patch(
+            "reframe_agent_host.voice.turn_side_effects.open_memory_database",
+            fake_open_memory_database,
+        ):
+            await processor._side_effects.record_validation_reply(
+                "The required answer is still missing.",
+                lambda stage, message: events.append((stage, message)),
+            )
+
+        self.assertEqual(
+            database.conversations.messages,
+            [
+                (
+                    "memory_node:conversation",
+                    "validation_reply",
+                    "The required answer is still missing.",
+                )
+            ],
+        )
+        conversation = live_conversation.merge(None, "memory_node:conversation")
+        self.assertEqual(conversation.messages[0].role, "validation_reply")
+        self.assertIn(
+            ("validation-reply", "The required answer is still missing."),
+            events,
+        )
+
     async def test_empty_task_execution_result_skips_later_dispatch_layers(self):
         events = []
         processor = VoiceTurnProcessor(
@@ -639,7 +721,6 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_completion_review_runs_after_dispatched_primitives_and_summary(self):
         order = []
-        completion_inputs = {}
         events = []
         processor = VoiceTurnProcessor(
             config=_voice_config(),
@@ -647,7 +728,7 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             trigger_matcher=TriggerPhraseMatcher(TriggerPhraseConfig()),
             memory_retrieval=RecordingMemoryRetrieval(),
             task_execution=RecordingTaskExecution(),
-            turn_flow=RecordingBamlTurnFlow(),
+            turn_flow=RecordingBamlTurnFlow(order),
         )
 
         class OrderedPrimitiveDispatcher:
@@ -684,14 +765,6 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
             async def close(self):
                 order.append("summary-close")
 
-        class OrderedTaskCompletionChecker:
-            async def check(self, **kwargs):
-                order.append("review-start")
-                completion_inputs.update(kwargs)
-                await asyncio.sleep(0)
-                order.append("review-end")
-                return baml_task.CompletionResult.PASS
-
         async def fake_open_memory_database():
             return ClosingOnlyDatabase()
 
@@ -704,30 +777,21 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
                 OrderedActionHistorySummarizer,
             ):
                 with patch(
-                    "reframe_agent_host.voice.turn_side_effects.TaskCompletionChecker",
-                    OrderedTaskCompletionChecker,
+                    "reframe_agent_host.voice.turn_side_effects.open_memory_database",
+                    fake_open_memory_database,
                 ):
-                    with patch(
-                        "reframe_agent_host.voice.turn_side_effects.open_memory_database",
-                        fake_open_memory_database,
-                    ):
-                        result = await processor.process(
-                            capture=_capture_result(),
-                            conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
-                            model_prepare_seconds=0.0,
-                            total_started_at=time.perf_counter(),
-                            on_event=lambda stage, message: events.append(
-                                (stage, message),
-                            ),
-                        )
+                    result = await processor.process(
+                        capture=_capture_result(),
+                        conversation_mode=baml_turn_context.ConversationMode.WAKE_COMMAND,
+                        model_prepare_seconds=0.0,
+                        total_started_at=time.perf_counter(),
+                        on_event=lambda stage, message: events.append(
+                            (stage, message),
+                        ),
+                    )
 
         self.assertLess(order.index("dispatch-end"), order.index("summary-start"))
         self.assertLess(order.index("summary-end"), order.index("review-start"))
-        self.assertEqual(completion_inputs["completion_string"], "Question")
-        self.assertEqual(
-            completion_inputs["output_summary"],
-            "The recorded actions asked the user a question.",
-        )
         self.assertEqual(result.task_completion, baml_task.CompletionResult.PASS)
         self.assertEqual(
             [stage for stage, _message in events if stage.endswith("reviewed")],
@@ -889,6 +953,21 @@ class VoiceRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(output.getvalue().splitlines(), [
             "agent_reply_interrupted: Last fully spoken word beta at character 10",
         ])
+
+    def test_cli_prints_validation_reply(self):
+        output = io.StringIO()
+        printer = VoiceTurnEventPrinter(
+            debug_output=False,
+            turn_started_at=time.perf_counter(),
+        )
+
+        with contextlib.redirect_stdout(output):
+            printer("validation-reply", "The requested outcome is still missing.")
+
+        self.assertEqual(
+            output.getvalue().splitlines(),
+            ["validation_reply: The requested outcome is still missing."],
+        )
 
     def test_cli_prints_barge_in_event(self):
         output = io.StringIO()

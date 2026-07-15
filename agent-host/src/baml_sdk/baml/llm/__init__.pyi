@@ -367,7 +367,7 @@ class PrimitiveClientOptions(pydantic.BaseModel):
     allowed_roles: typing.Optional[typing.List[str]]
     remap_roles: typing.Optional[typing.Dict[str, str]]
     api_key: typing.Optional[str]
-    provider_options: typing.Union[AnthropicOptions, AzureOpenAiOptions, BedrockOptions, VertexAiOptions, None]
+    provider_options: typing.Union[AnthropicOptions, AzureOpenAiOptions, BedrockOptions, GoogleAiOptions, VertexAiOptions, None]
     media_url_handler: typing.Optional[MediaUrlHandler]
     headers: typing.Dict[str, str]
     query_params: typing.Dict[str, str]
@@ -383,6 +383,14 @@ class AzureOpenAiOptions(pydantic.BaseModel):
 
 class AnthropicOptions(pydantic.BaseModel):
     max_tokens: typing.Optional[int]
+
+
+class GoogleAiOptions(pydantic.BaseModel):
+    enterprise: typing.Optional[bool]
+    credentials: typing.Optional[str]
+    credentials_content: typing.Optional[str]
+    location: typing.Optional[str]
+    project_id: typing.Optional[str]
 
 
 class VertexAiOptions(pydantic.BaseModel):
@@ -717,6 +725,7 @@ __all__ = [
     "PrimitiveClientOptions",
     "AzureOpenAiOptions",
     "AnthropicOptions",
+    "GoogleAiOptions",
     "VertexAiOptions",
     "BedrockOptions",
     "StreamAccumulator",
