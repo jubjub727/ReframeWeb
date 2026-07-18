@@ -1,0 +1,14 @@
+[project]
+name = "reframe-workspace-daemon"
+version = "0.1.0"
+description = "Internal projected-filesystem backing service for ReframeWeb"
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["maturin>=1.9,<2"]
+build-backend = "maturin"
+
+[tool.maturin]
+bindings = "bin"
+manifest-path = "crates/workspace-daemon/Cargo.toml"
+strip = true

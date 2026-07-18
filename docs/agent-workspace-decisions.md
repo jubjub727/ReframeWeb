@@ -17,8 +17,8 @@ An agent workspace should look like an ordinary directory while combining:
 - Files created or modified during the current task.
 - High-volume dependency and build trees that must use disk but must not be
   retained.
-- A bounded RAM and disk cache in front of persistent storage.
-- BAML judgments about what to materialize and retain.
+- A resident RAM tier plus explicit direct-disk scratch and persistent storage.
+- Typed manual policy surfaces that future agent logic can drive when requested.
 - Consistent operation on Linux, macOS, and Windows.
 
 Codex, OpenCode, shells, compilers, package managers, and other child processes
@@ -29,14 +29,13 @@ directory and use normal operating-system filesystem calls.
 
 ReframeWeb will implement an EdenFS-shaped projected workspace. A long-lived
 Rust filesystem daemon will expose a mounted directory and route paths between
-lazy projected content, a writable working overlay, direct-disk scratch
-redirections, and retained content-addressed snapshots.
+resident projected content, direct-disk scratch redirections, and retained
+content-addressed snapshots.
 
-The Python Agent Host will own workspace orchestration and BAML policy calls.
-BAML will be called through the existing generated Python/Pydantic SDK. The
-Agent Host will communicate with the Rust daemon through a versioned local IPC
-protocol. BAML and Python will never participate in individual filesystem
-operations.
+The Python Agent Host owns workspace orchestration, graph-memory access, and
+translation of typed policy values. The Agent Host communicates with the Rust
+daemon through the repository's single internal local IPC protocol. BAML and
+Python never participate in individual filesystem operations.
 
 ## Storage Properties Are Independent
 
@@ -53,9 +52,9 @@ concepts and should use distinct names in code.
 
 | Path class | Active workspace | After unmount |
 | --- | --- | --- |
-| Memory-derived input | Lazy projection with bounded caching | Keep its source reference |
-| Ordinary agent edits | Writable disk overlay | Discard unless selected |
-| Selected deliverable | Overlay followed by checkpoint | Keep an immutable snapshot |
+| Memory-derived input | Hash-deduplicated resident bytes | Keep its source reference |
+| Ordinary agent edits | Resident writable VFS | Discard unless selected |
+| Selected deliverable | Resident bytes followed by checkpoint | Keep an immutable snapshot |
 | `node_modules`, `target`, build output | Direct native-disk redirection | Delete |
 | Small transient metadata | RAM or cache | Delete |
 
@@ -103,18 +102,18 @@ The initial storage stack is:
 - **SQLite through `rusqlite`** for workspace metadata, immutable manifests,
   workspace heads, memory references, tombstones, and the change journal. Use
   WAL mode and a controlled writer boundary.
-- **BLAKE3 content addressing** for retained file data. Large files are split
-  into fixed-size chunks, initially targeting 1-4 MiB pending benchmarks.
-- **`object_store`** behind the blob persistence interface so local storage and
-  remote object storage can share the same core.
-- **`foyer`** behind a project-owned `ChunkCache` trait for bounded RAM and disk
-  caching. It must remain replaceable because it is still evolving.
+- **BLAKE3 content addressing** for retained file data and deduplication in the
+  resident store. Whole-file objects remain the measured starting point.
+- **Provider-owned resident buffers** for every ordinary active-workspace file.
+  Source and checkpoint objects are read and verified before mount; callbacks
+  never reopen their backing files.
 - **`globset`** for compiled path rules with explicit separator,
   case-sensitivity, and normalization behavior.
 
-The cache and persistent content-addressed store must use separate locations.
-Cache eviction must never delete retained data. Kernel page caching and Windows
-placeholder hydration should be used before adding duplicate userspace copies.
+The resident store and persistent content-addressed store are separate. An
+uncheckpointed file has no durable content copy. Windows uses temporary-file
+cache semantics and removes dirty/full ProjFS items after absorbing writes;
+Linux and macOS FUSE callbacks read and write resident buffers directly.
 
 ## Direct-Disk Redirections
 
@@ -132,12 +131,14 @@ retained, it must be written outside a scratch redirect. This follows the
 
 ## BAML Policy Boundary
 
-BAML makes typed decisions at workspace lifecycle boundaries, not on the
-filesystem hot path. The initial BAML surfaces are:
+BAML can carry typed decisions at workspace lifecycle boundaries, never on the
+filesystem hot path. The implemented non-LLM BAML surfaces are:
 
-- `PlanWorkspace`: choose projected memories, prefetch candidates, and policy
-  rules before the agent starts.
-- `ChooseCheckpoint`: choose which changed files should survive after the task.
+- `ManualWorkspacePlan`: validate explicit memory and prefetch selections.
+- `ManualCheckpoint`: validate explicit paths chosen for retention.
+
+They contain no client, prompt, or model call. Any future LLM policy function
+requires a separate direct instruction and is not implied by this design.
 
 The existing generator in `agent-host/baml.toml` remains authoritative:
 
@@ -153,8 +154,8 @@ of `baml run` is explicitly not part of this design. The BAML toolchain version
 and Python `baml-core` dependency must remain exactly matched, generation must
 run after schema changes, and CI should fail when regeneration produces a diff.
 
-Generated BAML models are not IPC models. Python converts them into small,
-versioned protocol DTOs before sending policy to Rust.
+Generated BAML models are not IPC models. Python converts them into small
+protocol DTOs before sending policy to Rust.
 
 Policy precedence is deterministic:
 
@@ -166,15 +167,12 @@ Policy precedence is deterministic:
 
 ## Local IPC
 
-Python controls the daemon through a versioned local protocol containing
+Python controls the daemon through the repository's local protocol containing
 operations such as mount, apply policy, prefetch, read journal, checkpoint,
-unmount, and health.
-
-The first implementation may use framed JSON over child-process stdio. The
-production transport should use Unix-domain sockets on Linux/macOS and named
-pipes on Windows, with Rust's
-[`interprocess`](https://docs.rs/interprocess/latest/interprocess/local_socket/)
-as the initial abstraction. The transport remains local-only and user-scoped.
+unmount, and health. Four-byte length-prefixed JSON travels over a user-local
+Unix-domain socket on Linux/macOS or native named pipe on Windows. Each
+connection carries one request and response so a task shell cannot monopolize
+the daemon. Unix endpoints are mode `0600`; Windows rejects remote clients.
 
 ## Checkpoint Atomicity
 
@@ -185,9 +183,9 @@ A checkpoint is committed in this order:
 3. Atomically advance the workspace head in SQLite.
 4. Only then discard ephemeral state.
 
-Garbage collection is mark-and-sweep from retained manifest roots. LLM output
-may select retention candidates, but it cannot directly delete persistent
-chunks or bypass transaction rules.
+Garbage collection is mark-and-sweep from retained manifest roots. Any future
+agent-selected retention candidates cannot directly delete persistent chunks
+or bypass transaction rules.
 
 ## Consequences and Open Questions
 
@@ -199,7 +197,6 @@ identically across adapters.
 
 The following remain implementation-time decisions:
 
-- Final IPC encoding after the framed-JSON prototype.
 - The macOS support floor and whether a native FSKit shim is required at launch.
 - Exact chunk size and cache admission/eviction policy after benchmarks.
 - Whether a remote object store is required for the first release.

@@ -30,6 +30,7 @@ _LAZY_CHILDREN = frozenset({
     "turn_context",
     "vendor",
     "voice_turn",
+    "workspace",
 })
 
 def __getattr__(name):

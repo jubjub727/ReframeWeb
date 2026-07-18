@@ -13,6 +13,8 @@ from reframe_memory.models import (
     ConversationNode,
     MemoryNode,
     MemoryTimestamps,
+    FilesystemMemory,
+    FilesystemMemoryNode,
     Provider,
     ProviderNode,
     RelevanceMemory,
@@ -39,6 +41,7 @@ from reframe_memory.models import (
     UserPreferenceMemoryNode,
 )
 from reframe_memory.providers import ProviderMemory, ProviderSearch
+from reframe_memory.filesystem_memories import FilesystemMemoryStore
 from reframe_memory.schema import SCHEMA_STATEMENTS
 from reframe_memory.graph_retrieval import (
     GraphMemoryRetriever,
@@ -87,6 +90,9 @@ __all__ = [
     "ConversationNode",
     "ConversationSearch",
     "GraphMemoryRetriever",
+    "FilesystemMemory",
+    "FilesystemMemoryNode",
+    "FilesystemMemoryStore",
     "GraphRetrievalRequest",
     "GraphSearchHints",
     "MemoryConfig",

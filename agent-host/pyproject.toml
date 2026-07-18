@@ -18,6 +18,7 @@ dependencies = [
     "surrealdb>=2.0.0",
     "baml-bridge",
     "kokoro-onnx>=0.5.0",
+    "reframe-workspace-daemon==0.1.0",
 ]
 
 [project.scripts]
@@ -29,3 +30,4 @@ build-backend = "uv_build"
 
 [tool.uv.sources]
 baml-bridge = { path = "../../baml-jubjub/baml/baml_language/sdks/python", editable = true }
+reframe-workspace-daemon = { path = "../workspace-fs" }

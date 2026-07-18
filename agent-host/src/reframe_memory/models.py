@@ -80,6 +80,31 @@ class SessionMemory:
 
 
 @dataclass(frozen=True)
+class FilesystemMemory:
+    title: str
+    description: str
+    source_kind: Literal["directory", "checkpoint"]
+    source_path: str | None = None
+    backing_store: str | None = None
+    manifest_id: str | None = None
+    base_memory_ids: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.source_kind not in {"directory", "checkpoint"}:
+            raise ValueError(f"unsupported filesystem memory source: {self.source_kind}")
+        directory = self.source_kind == "directory"
+        if directory != (self.source_path is not None):
+            raise ValueError("directory filesystem memories require only source_path")
+        checkpoint = self.source_kind == "checkpoint"
+        if checkpoint != (self.backing_store is not None and self.manifest_id is not None):
+            raise ValueError(
+                "checkpoint filesystem memories require backing_store and manifest_id"
+            )
+        if directory and (self.backing_store is not None or self.manifest_id is not None):
+            raise ValueError("directory filesystem memories cannot reference a checkpoint")
+
+
+@dataclass(frozen=True)
 class ContextMemory:
     title: str
     description: str
@@ -114,6 +139,7 @@ SessionNode: TypeAlias = MemoryNode[Session]
 ConversationNode: TypeAlias = MemoryNode[Conversation]
 ConversationMessageNode: TypeAlias = MemoryNode[ConversationMessage]
 SessionMemoryNode: TypeAlias = MemoryNode[SessionMemory]
+FilesystemMemoryNode: TypeAlias = MemoryNode[FilesystemMemory]
 UserPreferenceMemory: TypeAlias = ContextMemory
 TaskChoiceMemory: TypeAlias = ContextMemory
 ConversationEvaluationMemory: TypeAlias = ContextMemory

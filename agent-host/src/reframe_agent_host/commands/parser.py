@@ -7,6 +7,7 @@ from baml_sdk import turn_context as baml_turn_context
 from reframe_agent_host import __version__
 from reframe_agent_host.commands.benchmark_args import add_benchmark_parsers
 from reframe_agent_host.commands.voice_args import add_voice_turn_args
+from reframe_agent_host.commands.workspace_args import add_workspace_parser
 from reframe_agent_host.speech.transcription import (
     DEFAULT_CPU_COMPUTE_TYPE,
     TRANSCRIPTION_BACKENDS,
@@ -42,6 +43,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_debug_wake_audio_parser(subparsers)
     _add_record_wake_audio_parser(subparsers)
     _add_voice_turn_parser(subparsers)
+    add_workspace_parser(subparsers)
     return parser
 
 

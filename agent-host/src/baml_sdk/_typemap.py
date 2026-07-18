@@ -451,6 +451,16 @@ _CLASS_ENTRIES = {
     "user.voice_turn.VoiceTaskFlowResult$stream": ("baml_sdk.stream_types.voice_turn", "VoiceTaskFlowResult"),
     "user.voice_turn.VoiceTaskNoActionResult": ("baml_sdk.voice_turn", "VoiceTaskNoActionResult"),
     "user.voice_turn.VoiceTaskNoActionResult$stream": ("baml_sdk.stream_types.voice_turn", "VoiceTaskNoActionResult"),
+    "user.workspace.CheckpointSelection": ("baml_sdk.workspace", "CheckpointSelection"),
+    "user.workspace.CheckpointSelection$stream": ("baml_sdk.stream_types.workspace", "CheckpointSelection"),
+    "user.workspace.FilesystemMemoryReference": ("baml_sdk.workspace", "FilesystemMemoryReference"),
+    "user.workspace.FilesystemMemoryReference$stream": ("baml_sdk.stream_types.workspace", "FilesystemMemoryReference"),
+    "user.workspace.WorkspaceChange": ("baml_sdk.workspace", "WorkspaceChange"),
+    "user.workspace.WorkspaceChange$stream": ("baml_sdk.stream_types.workspace", "WorkspaceChange"),
+    "user.workspace.WorkspacePlan": ("baml_sdk.workspace", "WorkspacePlan"),
+    "user.workspace.WorkspacePlan$stream": ("baml_sdk.stream_types.workspace", "WorkspacePlan"),
+    "user.workspace.WorkspacePolicyRule": ("baml_sdk.workspace", "WorkspacePolicyRule"),
+    "user.workspace.WorkspacePolicyRule$stream": ("baml_sdk.stream_types.workspace", "WorkspacePolicyRule"),
 }
 
 _ENUM_ENTRIES = {
@@ -459,6 +469,8 @@ _ENUM_ENTRIES = {
     "baml.llm.ClientType": ("baml_sdk.baml.llm", "ClientType"),
     "user.task.CompletionResult": ("baml_sdk.task", "CompletionResult"),
     "user.turn_context.ConversationMode": ("baml_sdk.turn_context", "ConversationMode"),
+    "user.workspace.Materialization": ("baml_sdk.workspace", "Materialization"),
+    "user.workspace.Retention": ("baml_sdk.workspace", "Retention"),
 }
 
 _ALIAS_ENTRIES = {

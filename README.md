@@ -109,9 +109,10 @@ talking without destroying the underlying work the agent was already performing.
 ## Current Status
 
 This repository now contains a working Agent Host prototype. The native
-CEF/React Visual Panel layer, Agent Workspace, Semantic Store runtime, Data Lens
-runtime, and Compute Module runtime are still future-facing architecture, but
-the Python voice loop and graph-backed memory flow are active code.
+The Python voice loop, graph-backed memory flow, and the first complete Windows
+Agent Workspace adapter are active code. The CEF/React Visual Panel layer,
+Semantic Store runtime, Data Lens runtime, and Compute Module runtime remain
+future-facing architecture.
 
 Implemented pieces include:
 
@@ -129,6 +130,13 @@ Implemented pieces include:
    parent wrappers needed to explain valid child matches.
 6. Benchmark harnesses for task choice, conversation evaluation, and control
    flow/search-depth behavior.
+7. A Rust Agent Workspace daemon and uv-integrated Agent Host surface with
+   Windows ProjFS plus Linux/macOS FUSE mounts, resident deduplicated file bytes,
+   SQLite metadata, BLAKE3 retained blobs, SurrealDB-backed filesystem memory
+   nodes, native scratch paths, journals, checkpoints, and remount support.
+   The daemon is installed by `uv sync` and controlled through the existing
+   `reframe-agent-host workspace` CLI over user-local IPC. See
+   [Agent Workspace usage](workspace-fs/README.md).
 
 ## Agent Host Setup
 

@@ -110,7 +110,7 @@ class Context(pydantic.BaseModel):
     Carries the same per-attempt data BAML's Jinja runtime injects today
     (client info, runtime tags, output-format schema), resolved AFTER the
     orchestrator picks the client for this attempt — preserving lazy eval.
-    
+
     `output_format` is the default-rendered schema string for the call's return
     type — the dominant `${ctx.output_format}` usage, byte-equivalent to Jinja's
     `{{ ctx.output_format }}`. `output_format_with(...)` re-renders the schema

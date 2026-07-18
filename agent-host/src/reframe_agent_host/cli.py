@@ -35,9 +35,11 @@ from reframe_agent_host.commands.task_choice import (
     run_seed_opencode_go_providers,
 )
 from reframe_agent_host.commands.voice_turn import run_voice_turn
+from reframe_agent_host.commands.workspace import run_workspace
 from reframe_agent_host.commands.debug_wake_audio import run_debug_wake_audio
 from reframe_agent_host.commands.record_wake_audio import run_record_wake_audio
 from reframe_agent_host.memory_readiness import MemoryReadinessError
+from reframe_agent_host.workspace import WorkspaceError
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -46,6 +48,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     except MemoryReadinessError as error:
         print(f"[memory] {error}", file=sys.stderr)
         raise SystemExit(5) from None
+    except WorkspaceError as error:
+        print(f"[workspace] {error}", file=sys.stderr)
+        raise SystemExit(6) from None
 
 
 def _main(argv: Sequence[str] | None = None) -> None:
@@ -247,6 +252,9 @@ def _main(argv: Sequence[str] | None = None) -> None:
 
     if args.command == "voice-turn":
         raise SystemExit(_run_voice_turn(args))
+
+    if args.command == "workspace":
+        raise SystemExit(run_workspace(args))
 
     parser.error(f"Unknown command: {args.command}")
 

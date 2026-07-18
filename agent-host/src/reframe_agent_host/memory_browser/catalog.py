@@ -28,6 +28,7 @@ VIEWS: tuple[BrowserView, ...] = (
             "memory_root:relevance_memories",
             "memory_root:task_prompt_memories",
             "memory_root:user_preferences",
+            "memory_root:filesystem_memories",
         ),
     ),
     BrowserView("providers", "Providers", ("memory_root:providers",)),

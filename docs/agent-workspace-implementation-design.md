@@ -1,12 +1,12 @@
 # Agent Workspace Implementation Design
 
-**Status:** Proposed implementation sequence
+**Status:** Implemented vertical slice with remaining hardening guidance
 
 **Depends on:** [Agent Workspace Architecture Decisions](agent-workspace-decisions.md)
 
-This document describes a rough path from the accepted workspace architecture
-to a production implementation. It intentionally separates filesystem
-correctness from BAML judgment so each can be tested without the other.
+This document records the implemented vertical slice and the remaining
+production-hardening path. Filesystem correctness is independent from future
+agent judgment and can be tested without an LLM.
 
 ## Target Runtime Shape
 
@@ -16,7 +16,7 @@ Python Agent Host
   workspace lifecycle coordinator
   IPC client
             |
-            | versioned local protocol
+            | user-local framed protocol
             v
 Rust workspace daemon
   protocol server
@@ -29,25 +29,24 @@ Rust workspace daemon
   ordinary workspace path used by Codex/OpenCode
 ```
 
-The Agent Host starts or connects to the daemon, asks BAML to plan the
-workspace, mounts it, launches the agent with the mount as its working
-directory, and later asks BAML to choose a checkpoint from the daemon's journal.
+The Agent Host starts or connects to the daemon, resolves explicit filesystem
+memories through Python, mounts the resident VFS, and launches the requested
+child with the mount as its working directory. Manual checkpoint selections
+are typed by deterministic BAML helpers; no LLM function is present.
 
-## Proposed Source Layout
+## Implemented Source Layout
 
-Keep crates and modules small and named by intent. A likely Rust workspace is:
+The current vertical slice keeps one deployable crate split into small modules:
 
 ```text
 workspace-fs/
   crates/
-    workspace-model/       paths, entries, manifests, policy types
-    workspace-store/       SQLite metadata, CAS, object_store backend
-    workspace-cache/       ChunkCache trait and foyer adapter
-    workspace-protocol/    versioned request and response DTOs
-    workspace-daemon/      lifecycle, IPC, recovery, orchestration
-    workspace-linux/       fuser adapter and redirect mounts
-    workspace-windows/     ProjFS adapter and reconciliation
-    workspace-macos/       FUSE/FSKit-facing adapter
+    workspace-daemon/
+      daemon/              lifecycle, operations, IPC, idempotency
+      resident/            provider-owned bytes, directories, mutations
+      session/             state, scans, journal, checkpoints
+      windows_vfs/         ProjFS callbacks and reconciliation
+      unix_vfs/            Linux/macOS FUSE callbacks and scratch routing
 ```
 
 The Python side should add small workspace modules under
@@ -90,7 +89,8 @@ must be explicit rather than inherited accidentally from the host OS.
 
 ## Control Protocol
 
-Start with a protocol version in every request and response. Initial commands:
+Requests and responses use the repository's single internal protocol without a
+redundant public version field. Commands include:
 
 - `Hello` and `Health`
 - `CreateWorkspace`
@@ -103,20 +103,21 @@ Start with a protocol version in every request and response. Initial commands:
 - `UnmountWorkspace`
 - `DestroyEphemeralWorkspace`
 
-Use length-prefixed JSON over stdio for the first vertical slice. Define the
-DTOs in Rust with `serde` and mirror them with hand-written Pydantic models in
-Python. Do not serialize generated BAML models directly onto the wire.
+Use length-prefixed JSON over a Windows named pipe or Linux/macOS Unix-domain
+socket. Define DTOs in Rust with `serde` and mirror them with hand-written
+Pydantic models in Python. Do not serialize generated BAML models directly onto
+the wire.
 
 The daemon should return structured errors containing a stable code, operation,
 workspace ID, and safe diagnostic text. Requests that mutate state carry an
 idempotency key so Python can safely retry after a lost response.
 
-Before moving to local sockets, add:
+The implemented transport includes:
 
-- User-only endpoint permissions.
-- A random session token inherited from the Agent Host.
-- Connection and request timeouts.
-- Graceful shutdown and stale-daemon detection.
+- User-only endpoint permissions and remote-client rejection.
+- Request IDs and durable idempotency keys for mutations.
+- Request-scoped connections so long-running children do not block IPC.
+- Graceful acknowledged shutdown and stale-endpoint replacement.
 
 ## Workspace Lifecycle
 
@@ -124,7 +125,7 @@ Before moving to local sockets, add:
 
 1. Python retrieves relevant memory metadata and the previous retained
    manifest, if one exists.
-2. `PlanWorkspace` returns a typed generated-SDK model.
+2. Explicit manual policy input returns a typed generated-SDK model.
 3. Python translates it to protocol DTOs.
 4. Rust validates paths, globs, quotas, and rule precedence.
 5. Rust creates metadata, overlay, cache, and scratch locations.
@@ -136,9 +137,9 @@ Before moving to local sockets, add:
 
 1. Directory lookup resolves the path through the compiled policy router.
 2. Projected content resolves to a memory or blob reference.
-3. Reads check the OS cache, then the chunk cache, then persistent storage.
-4. The first write materializes projected content into the writable overlay.
-5. Overlay mutations append compact journal records.
+3. Reads resolve an immutable buffer from the resident content map.
+4. Writes replace or resize resident buffers and never create a durable copy.
+5. Resident mutations update compact journal records.
 6. Scratch paths bypass the overlay and journal and go directly to native disk.
 
 No step invokes Python or BAML.
@@ -146,12 +147,14 @@ No step invokes Python or BAML.
 ### Checkpoint and Unmount
 
 1. Python requests the compact change journal and bounded file summaries.
-2. `ChooseCheckpoint` returns candidate paths and reasons.
+2. Explicit manual checkpoint input returns typed candidate paths.
 3. Rust revalidates candidates against hard rules and current filesystem state.
 4. Rust writes chunks, writes the immutable manifest, and advances the head in
    one durable commit sequence.
-5. The daemon unmounts and removes overlay and scratch data.
-6. Cache entries remain subject only to normal cache quotas.
+5. The daemon unmounts and removes the OS-visible projection; resident session
+   state remains available to later CLI calls.
+6. Closing or destroying the session drops uncheckpointed resident bytes and
+   its direct-disk scratch tree.
 
 ## Delivery Phases
 
@@ -203,32 +206,33 @@ The current development host makes Windows ProjFS a practical first slice, but
 the core contract must also be exercised by the platform-neutral harness so
 ProjFS behavior does not become the universal model.
 
-### Phase 4: Python and Generated BAML SDK Integration
+### Phase 4: Python and Generated BAML SDK Integration (implemented)
 
-- Add BAML types and `PlanWorkspace`/`ChooseCheckpoint` functions.
-- Run `baml generate` and import the generated async Python functions.
+- Add BAML types plus deterministic `ManualWorkspacePlan` and
+  `ManualCheckpoint` functions without clients or prompts.
+- Run `baml generate` and expose the generated Python types.
 - Add explicit translators from generated models to IPC DTOs.
-- Add framed-JSON daemon startup, health, mount, journal, checkpoint, and
-  unmount calls.
+- Add user-local framed-JSON daemon startup, health, mount, journal,
+  checkpoint, and unmount calls.
 - Pin BAML toolchain and `baml-core` versions and add a generation-diff CI check.
 
 Exit criterion: an Agent Host integration test can mount, run a scripted child
 process, checkpoint one selected output, discard another, and remount.
 
-### Phase 5: Scratch Redirections
+### Phase 5: Scratch Redirections (implemented)
 
-- Compile built-in and BAML-suggested redirect rules through `globset`.
-- Implement Linux bind mounts and platform-appropriate Windows/macOS behavior.
+- Compile built-in redirect rules through `globset`.
+- Route scratch operations to per-session native-disk trees on every adapter.
 - Route package-manager caches and temporary directories outside retained data.
 - Enforce that redirected paths cannot be checkpointed.
 
 Exit criterion: installing dependencies creates a usable `node_modules` tree,
 does not add it to the journal, and leaves no retained chunks after teardown.
 
-### Phase 6: Remaining Platform Adapters
+### Phase 6: Remaining Platform Adapters (implemented; native validation ongoing)
 
-Add Linux, Windows, and macOS adapters against the same conformance harness.
-Adapter-specific reconciliation is expected:
+Linux, Windows, and macOS adapters share the same resident core. Continued
+native conformance work should cover:
 
 - Windows must reconcile ProjFS full files, tombstones, and offline changes.
 - Linux must manage mount cleanup, invalidation, and bind redirects.
@@ -237,7 +241,7 @@ Adapter-specific reconciliation is expected:
 
 ### Phase 7: Hardening
 
-- Move IPC from stdio to authenticated local sockets/named pipes if needed.
+- Add optional per-launch authentication if the user-local OS boundary proves insufficient.
 - Add quotas for RAM cache, disk cache, overlay, scratch, and retained writes.
 - Add cancellation, backpressure, metrics, and structured tracing.
 - Add startup recovery, orphan mount detection, and administrative cleanup.

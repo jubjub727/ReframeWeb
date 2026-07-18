@@ -1668,6 +1668,7 @@ dependencies = [
     { name = "nvidia-cuda-runtime-cu12", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'" },
     { name = "pocketsphinx" },
     { name = "pydantic" },
+    { name = "reframe-workspace-daemon" },
     { name = "silero-vad" },
     { name = "sounddevice" },
     { name = "surrealdb" },
@@ -1683,10 +1684,16 @@ requires-dist = [
     { name = "nvidia-cuda-runtime-cu12", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'", specifier = ">=12.0.0" },
     { name = "pocketsphinx", specifier = ">=5.0.0" },
     { name = "pydantic", specifier = ">=2" },
+    { name = "reframe-workspace-daemon", directory = "../workspace-fs" },
     { name = "silero-vad", specifier = ">=6.2.1" },
     { name = "sounddevice", specifier = ">=0.5.5" },
     { name = "surrealdb", specifier = ">=2.0.0" },
 ]
+
+[[package]]
+name = "reframe-workspace-daemon"
+version = "0.1.0"
+source = { directory = "../workspace-fs" }
 
 [[package]]
 name = "regex"

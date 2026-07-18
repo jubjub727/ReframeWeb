@@ -156,7 +156,7 @@ scratch redirections such as `node_modules`, and immutable retained
 checkpoints.
 
 The Python Agent Host owns workspace lifecycle and BAML policy calls. It talks
-to the Rust daemon through versioned local IPC; Python and BAML are never placed
+to the Rust daemon through the repository's user-local IPC; Python and BAML are never placed
 on the filesystem operation path.
 
 The accepted choices are recorded in

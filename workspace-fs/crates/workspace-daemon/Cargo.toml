@@ -1,0 +1,26 @@
+[package]
+name = "reframe-workspace-daemon"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+blake3.workspace = true
+globset.workspace = true
+rusqlite.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+walkdir.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+windows.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+fuser.workspace = true
+libc.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+fuser = { workspace = true, features = ["libfuse", "macfuse-4-compat"] }
+libc.workspace = true

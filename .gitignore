@@ -14,6 +14,11 @@ agent-host/.venv/
 .env.*
 !.env.example
 .reframe-memory/
+.reframe-workspace/
+.reframe-workspace-*/
+workspace-fs/target/
+/Agent Sessions
+/Agent Sessions.lnk
 
 # Audio/model artifacts
 .debug-audio/

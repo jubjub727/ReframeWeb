@@ -78,6 +78,7 @@ class MemoryDatabase:
         await self.relevance_memories.ensure_root()
         await self.task_prompt_memories.ensure_root()
         await self.user_preferences.ensure_root()
+        await self.filesystem_memories.ensure_root()
 
     @property
     def tasks(self) -> "TaskMemory":
@@ -152,6 +153,12 @@ class MemoryDatabase:
         from reframe_memory.task_history import TaskHistoryStore
 
         return TaskHistoryStore(self)
+
+    @property
+    def filesystem_memories(self) -> "FilesystemMemoryStore":
+        from reframe_memory.filesystem_memories import FilesystemMemoryStore
+
+        return FilesystemMemoryStore(self)
 
 
 async def open_memory_database(config: MemoryConfig | None = None) -> MemoryDatabase:
