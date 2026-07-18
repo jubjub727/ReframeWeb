@@ -204,29 +204,10 @@ wheels = [
 [[package]]
 name = "baml-bridge"
 version = "0.15.0"
-source = { editable = "../../baml-jubjub/baml/baml_language/sdks/python" }
+source = { git = "https://github.com/jubjub727/baml.git?subdirectory=baml_language%2Fsdks%2Fpython&rev=bbb99a793d707175663c4e9236400a9bcd830f57#bbb99a793d707175663c4e9236400a9bcd830f57" }
 dependencies = [
     { name = "protobuf" },
     { name = "typing-extensions" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "protobuf", specifier = ">=6.31.1" },
-    { name = "typing-extensions", specifier = ">=4.14.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "grpcio-tools", specifier = ">=1.50" },
-    { name = "maturin", specifier = ">=1.9.4,<2.0" },
-    { name = "pydantic", specifier = ">=2" },
-    { name = "pyright", specifier = ">=1.1.410" },
-    { name = "pytest", specifier = ">=7" },
-    { name = "pytest-asyncio", specifier = ">=0.21" },
-    { name = "pytest-xdist", specifier = ">=3" },
-    { name = "ruff" },
-    { name = "ty" },
 ]
 
 [[package]]
@@ -1676,7 +1657,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "baml-bridge", editable = "../../baml-jubjub/baml/baml_language/sdks/python" },
+    { name = "baml-bridge", git = "https://github.com/jubjub727/baml.git?subdirectory=baml_language%2Fsdks%2Fpython&rev=bbb99a793d707175663c4e9236400a9bcd830f57" },
     { name = "faster-whisper", specifier = ">=1.2.1" },
     { name = "kokoro-onnx", specifier = ">=0.5.0" },
     { name = "numpy", specifier = ">=2.0.0" },

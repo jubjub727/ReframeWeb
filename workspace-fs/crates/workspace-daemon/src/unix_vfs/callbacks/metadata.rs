@@ -1,110 +1,113 @@
-    fn lookup(&self, _request: &Request, parent: INodeNo, name: &OsStr, reply: ReplyEntry) {
-        match self.child_path(parent, name) {
-            Ok(path) if self.contains(&path) => self.reply_entry(&path, reply),
-            Ok(_) => reply.error(Errno::ENOENT),
-            Err(error) => reply.error(error),
-        }
+use std::ffi::OsStr;
+use std::time::SystemTime;
+
+use fuser::{
+    FileHandle, FopenFlags, INodeNo, OpenFlags, ReplyAttr, ReplyCreate, ReplyEntry, ReplyOpen,
+    Request, TimeOrNow,
+};
+
+use super::super::filesystem::{ResidentFuse, TTL};
+
+pub(super) fn forget(fs: &ResidentFuse, _request: &Request, inode: INodeNo, count: u64) {
+    if let Ok(mut inodes) = fs.inodes.lock() {
+        inodes.forget(inode, count);
+    }
 }
-    fn getattr(
-        &self,
-        _request: &Request,
-        inode: INodeNo,
-        _fh: Option<FileHandle>,
-        reply: ReplyAttr,
-    ) {
-        match self.path(inode).and_then(|path| self.attr(&path)) {
-            Ok(attr) => reply.attr(&TTL, &attr),
-            Err(error) => reply.error(error),
-        }
-    }
-    fn setattr(
-        &self,
-        _request: &Request,
-        inode: INodeNo,
-        _mode: Option<u32>,
-        _uid: Option<u32>,
-        _gid: Option<u32>,
-        size: Option<u64>,
-        _atime: Option<TimeOrNow>,
-        _mtime: Option<TimeOrNow>,
-        _ctime: Option<SystemTime>,
-        _fh: Option<FileHandle>,
-        _crtime: Option<SystemTime>,
-        _chgtime: Option<SystemTime>,
-        _bkuptime: Option<SystemTime>,
-        _flags: Option<fuser::BsdFileFlags>,
-        reply: ReplyAttr,
-    ) {
-        let result = self.path(inode).and_then(|path| {
-            if let Some(size) = size {
-                if self.resident.is_scratch(&path) {
-                    self.scratch.resize(&path, size).map_err(|_| Errno::EIO)?;
-                } else {
-                    self.resident.resize(&path, size).map_err(|_| Errno::EIO)?;
-                }
-            }
-            self.attr(&path)
-        });
-        match result {
-            Ok(attr) => reply.attr(&TTL, &attr),
-            Err(error) => reply.error(error),
-        }
-    }
 
-    fn mkdir(
-        &self,
-        _request: &Request,
-        parent: INodeNo,
-        name: &OsStr,
-        _mode: u32,
-        _umask: u32,
-        reply: ReplyEntry,
-    ) {
-        match self.child_path(parent, name) {
-            Ok(path) if self.contains(&path) => reply.error(Errno::EEXIST),
-            Ok(path) => match if self.resident.is_scratch(&path) {
-                self.scratch.create_directory(&path)
-            } else {
-                self.resident.create_directory(&path)
-            } {
-                Ok(()) => self.reply_entry(&path, reply),
-                Err(_) => reply.error(Errno::EIO),
-            },
-            Err(error) => reply.error(error),
-        }
+pub(super) fn lookup(
+    fs: &ResidentFuse,
+    _request: &Request,
+    parent: INodeNo,
+    name: &OsStr,
+    reply: ReplyEntry,
+) {
+    match fs.lookup_child(parent, name) {
+        Ok((attr, generation)) => reply.entry(&TTL, &attr, generation),
+        Err(error) => reply.error(error),
     }
+}
 
-    fn create(
-        &self,
-        _request: &Request,
-        parent: INodeNo,
-        name: &OsStr,
-        _mode: u32,
-        _umask: u32,
-        _flags: i32,
-        reply: ReplyCreate,
-    ) {
-        let result = self.child_path(parent, name).and_then(|path| {
-            if self.contains(&path) {
-                return Err(Errno::EEXIST);
-            }
-            if self.resident.is_scratch(&path) {
-                self.scratch.create_file(&path).map_err(|_| Errno::EIO)?;
-            } else {
-                self.resident
-                    .replace(&path, Vec::new())
-                    .map_err(|_| Errno::EIO)?;
-            }
-            Ok((path.clone(), self.attr(&path)?))
-        });
-        match result {
-            Ok((_path, attr)) => reply.created(
-                &TTL,
-                &attr,
-                Generation(0),
-                FileHandle(attr.ino.0),
-                FopenFlags::FOPEN_DIRECT_IO,
-            ),
-            Err(error) => reply.error(error),
-        }
+pub(super) fn getattr(
+    fs: &ResidentFuse,
+    _request: &Request,
+    inode: INodeNo,
+    fh: Option<FileHandle>,
+    reply: ReplyAttr,
+) {
+    match fs.getattr_inode(inode, fh) {
+        Ok(attr) => reply.attr(&TTL, &attr),
+        Err(error) => reply.error(error),
     }
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(super) fn setattr(
+    fs: &ResidentFuse,
+    _request: &Request,
+    inode: INodeNo,
+    _mode: Option<u32>,
+    _uid: Option<u32>,
+    _gid: Option<u32>,
+    size: Option<u64>,
+    _atime: Option<TimeOrNow>,
+    _mtime: Option<TimeOrNow>,
+    _ctime: Option<SystemTime>,
+    fh: Option<FileHandle>,
+    _crtime: Option<SystemTime>,
+    _chgtime: Option<SystemTime>,
+    _bkuptime: Option<SystemTime>,
+    _flags: Option<fuser::BsdFileFlags>,
+    reply: ReplyAttr,
+) {
+    match fs.setattr_inode(inode, fh, size) {
+        Ok(attr) => reply.attr(&TTL, &attr),
+        Err(error) => reply.error(error),
+    }
+}
+
+pub(super) fn mkdir(
+    fs: &ResidentFuse,
+    _request: &Request,
+    parent: INodeNo,
+    name: &OsStr,
+    _mode: u32,
+    _umask: u32,
+    reply: ReplyEntry,
+) {
+    match fs.create_directory_child(parent, name) {
+        Ok((attr, generation)) => reply.entry(&TTL, &attr, generation),
+        Err(error) => reply.error(error),
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(super) fn create(
+    fs: &ResidentFuse,
+    _request: &Request,
+    parent: INodeNo,
+    name: &OsStr,
+    _mode: u32,
+    _umask: u32,
+    flags: i32,
+    reply: ReplyCreate,
+) {
+    match fs.create_file_child(parent, name, OpenFlags(flags)) {
+        Ok((attr, generation, handle)) => {
+            reply.created(&TTL, &attr, generation, handle, FopenFlags::FOPEN_DIRECT_IO)
+        }
+        Err(error) => reply.error(error),
+    }
+}
+
+pub(super) fn open(
+    fs: &ResidentFuse,
+    _request: &Request,
+    inode: INodeNo,
+    flags: OpenFlags,
+    reply: ReplyOpen,
+) {
+    match fs.open_inode(inode, flags) {
+        Ok(handle) => reply.opened(handle, FopenFlags::FOPEN_DIRECT_IO),
+        Err(error) => reply.error(error),
+    }
+}

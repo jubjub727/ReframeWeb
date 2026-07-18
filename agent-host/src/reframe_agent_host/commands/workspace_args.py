@@ -28,8 +28,9 @@ def _add_session_parser(areas) -> None:
     commands = session.add_subparsers(dest="workspace_action", required=True)
 
     create = commands.add_parser("create", help="Create a projected task session.")
-    create.add_argument("--memory", action="append", default=[])
-    create.add_argument(
+    source = create.add_mutually_exclusive_group()
+    source.add_argument("--memory", action="append", default=[])
+    source.add_argument(
         "--continue",
         dest="continue_session",
         nargs="?",

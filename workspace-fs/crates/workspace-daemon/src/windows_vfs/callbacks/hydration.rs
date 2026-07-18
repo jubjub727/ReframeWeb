@@ -1,3 +1,5 @@
+use super::*;
+
 pub unsafe extern "system" fn get_placeholder(data: *const PRJ_CALLBACK_DATA) -> HRESULT {
     guard("get_placeholder_info", || {
         let runtime = runtime(data)?;

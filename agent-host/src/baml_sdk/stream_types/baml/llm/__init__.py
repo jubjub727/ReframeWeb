@@ -276,10 +276,10 @@ class Role(pydantic.BaseModel):
 class Stream(pydantic.BaseModel, typing.Generic[TStream, TFinal]):
     """
     `Stream` provides a streaming interface for LLM calls.
-    
+
     It is a pull-based interface: the sse stream is only flushed into the accumulator
     and the value is only parsed when `next()` or `final()` is called.
-    
+
     Created by `<LLM function>$stream` companion functions,
     internally using `baml.llm.stream_llm_function`.
     """
@@ -299,7 +299,7 @@ class StreamCache(pydantic.BaseModel, typing.Generic[TStream, TFinal]):
     """
     DO NOT USE FROM USER CODE
     Cached data for a stream. Contains type information, assert check cache, etc.
-    
+
     Intended for use in `baml.llm.Stream`
     """
     model_config = pydantic.ConfigDict(extra="forbid")

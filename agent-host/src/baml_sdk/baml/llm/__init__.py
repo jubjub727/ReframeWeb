@@ -478,7 +478,7 @@ class StreamCache(pydantic.BaseModel, typing.Generic[TStream, TFinal]):
     """
     DO NOT USE FROM USER CODE
     Cached data for a stream. Contains type information, assert check cache, etc.
-    
+
     Intended for use in `baml.llm.Stream`
     """
     model_config = pydantic.ConfigDict(extra="forbid")

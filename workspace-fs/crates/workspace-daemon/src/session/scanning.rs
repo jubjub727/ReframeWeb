@@ -1,4 +1,14 @@
-fn scan_source(root: &Path, scratch: &ScratchMatcher) -> Result<Vec<FileRecord>> {
+use std::collections::BTreeMap;
+use std::fs;
+use std::path::Path;
+
+use anyhow::{Result, bail};
+use walkdir::WalkDir;
+
+use crate::model::{FileRecord, RecordSource};
+use crate::paths::{NormalizedPath, ScratchMatcher, native_path};
+
+pub(super) fn scan_source(root: &Path, scratch: &ScratchMatcher) -> Result<Vec<FileRecord>> {
     let mut records = Vec::new();
     let entries = WalkDir::new(root)
         .follow_links(false)
@@ -23,35 +33,32 @@ fn scan_source(root: &Path, scratch: &ScratchMatcher) -> Result<Vec<FileRecord>>
             );
         }
         if entry.file_type().is_dir() && entry.path() != root {
-            let relative = entry.path().strip_prefix(root)?;
             records.push(FileRecord {
-                path: normalize_relative(relative)?,
+                path: NormalizedPath::parse(entry.path().strip_prefix(root)?)?,
                 hash: String::new(),
                 size: 0,
-                source_kind: "directory".into(),
-                source_ref: None,
+                source: RecordSource::Directory,
             });
             continue;
         }
         if !entry.file_type().is_file() {
             continue;
         }
-        let relative = entry.path().strip_prefix(root)?;
-        let path = normalize_relative(relative)?;
+        let path = NormalizedPath::parse(entry.path().strip_prefix(root)?)?;
         let bytes = fs::read(entry.path())?;
         records.push(FileRecord {
             path,
             hash: blake3::hash(&bytes).to_hex().to_string(),
             size: bytes.len() as u64,
-            source_kind: "overlay".into(),
-            source_ref: None,
+            source: RecordSource::Overlay,
         });
     }
     Ok(records)
 }
-fn scan_worktree(
+
+pub(super) fn scan_worktree(
     root: &Path,
-    baseline: &BTreeMap<String, FileRecord>,
+    baseline: &BTreeMap<NormalizedPath, FileRecord>,
     scratch: &ScratchMatcher,
 ) -> Result<Vec<FileRecord>> {
     let mut records = Vec::new();
@@ -60,9 +67,9 @@ fn scan_worktree(
         if !entry.file_type().is_file() {
             continue;
         }
-        let path = normalize_relative(entry.path().strip_prefix(root)?)?;
-        if scratch.matches(&path)
-            || projected_file_is_unchanged(entry.path(), baseline.contains_key(&path))
+        let path = NormalizedPath::parse(entry.path().strip_prefix(root)?)?;
+        if scratch.matches(path.as_str())
+            || projected_file_is_unchanged(entry.path(), baseline.contains_key(path.as_str()))
         {
             continue;
         }
@@ -71,8 +78,7 @@ fn scan_worktree(
             path,
             hash: blake3::hash(&bytes).to_hex().to_string(),
             size: bytes.len() as u64,
-            source_kind: "overlay".into(),
-            source_ref: None,
+            source: RecordSource::Overlay,
         });
     }
     Ok(records)
@@ -104,7 +110,7 @@ fn projected_file_is_unchanged(_path: &Path, _in_baseline: bool) -> bool {
 }
 
 #[cfg(windows)]
-fn baseline_path_deleted(root: &Path, path: &str) -> bool {
+pub(super) fn baseline_path_deleted(root: &Path, path: &NormalizedPath) -> bool {
     use std::os::windows::ffi::OsStrExt;
     use windows::Win32::Storage::ProjectedFileSystem::{
         PRJ_FILE_STATE_TOMBSTONE, PrjGetOnDiskFileState,
@@ -118,6 +124,6 @@ fn baseline_path_deleted(root: &Path, path: &str) -> bool {
 }
 
 #[cfg(not(windows))]
-fn baseline_path_deleted(root: &Path, path: &str) -> bool {
+pub(super) fn baseline_path_deleted(root: &Path, path: &NormalizedPath) -> bool {
     !native_path(root, path).exists()
 }

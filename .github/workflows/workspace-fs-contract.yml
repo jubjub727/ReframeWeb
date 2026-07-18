@@ -1,0 +1,73 @@
+name: Workspace FS Contract
+
+on:
+  push:
+    paths:
+      - ".github/workflows/workspace-fs-contract.yml"
+      - "workspace-fs/**"
+      - "agent-host/src/baml_sdk/workspace/**"
+      - "agent-host/src/reframe_agent_host/workspace/**"
+      - "agent-host/src/reframe_memory/**"
+      - "agent-host/tests/test_filesystem_*.py"
+      - "agent-host/tests/test_workspace_*.py"
+  pull_request:
+    paths:
+      - ".github/workflows/workspace-fs-contract.yml"
+      - "workspace-fs/**"
+      - "agent-host/src/baml_sdk/workspace/**"
+      - "agent-host/src/reframe_agent_host/workspace/**"
+      - "agent-host/src/reframe_memory/**"
+      - "agent-host/tests/test_filesystem_*.py"
+      - "agent-host/tests/test_workspace_*.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: workspace-fs-contract-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: Python/Rust contract (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            daemon: workspace-fs/target/debug/reframe-workspace-daemon
+          - os: windows-latest
+            daemon: workspace-fs/target/debug/reframe-workspace-daemon.exe
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Check out ReframeWeb
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83e3 # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Rust
+        run: rustup toolchain install 1.85.0 --profile minimal
+
+      - name: Build workspace daemon
+        run: >-
+          cargo +1.85.0 build --locked
+          --manifest-path workspace-fs/Cargo.toml
+          --bin reframe-workspace-daemon
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Run IPC unit and cross-language contract tests
+        working-directory: agent-host
+        env:
+          PYTHONPATH: ${{ github.workspace }}/agent-host/src
+          REFRAME_WORKSPACE_DAEMON: ${{ github.workspace }}/${{ matrix.daemon }}
+        run: >-
+          uv run --no-project --python 3.12 --with pydantic
+          python -m unittest tests.test_workspace_ipc tests.test_workspace_contract -v

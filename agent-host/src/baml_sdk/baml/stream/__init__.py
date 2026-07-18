@@ -36,7 +36,7 @@ class StreamFinished(pydantic.BaseModel):
 class StreamNoYield(pydantic.BaseModel):
     """
     (internal)
-    
+
     A sentinel used when a partial parse didn't return anything and we should wait for more data.
     """
     model_config = pydantic.ConfigDict(extra="forbid")

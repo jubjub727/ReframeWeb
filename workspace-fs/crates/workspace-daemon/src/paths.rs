@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::fmt;
 use std::path::{Component, Path, PathBuf};
 
 use anyhow::{Result, bail};
@@ -21,6 +23,45 @@ pub const SCRATCH_SEGMENTS: &[&str] = &[
     ".cache",
     "__pycache__",
 ];
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct NormalizedPath(String);
+
+impl NormalizedPath {
+    pub fn parse(value: &Path) -> Result<Self> {
+        normalize_relative(value).map(Self)
+    }
+
+    pub fn parse_str(value: &str) -> Result<Self> {
+        Self::parse(Path::new(value))
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    pub fn into_string(self) -> String {
+        self.0
+    }
+}
+
+impl AsRef<str> for NormalizedPath {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl Borrow<str> for NormalizedPath {
+    fn borrow(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl fmt::Display for NormalizedPath {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(self.as_str())
+    }
+}
 
 pub fn normalize_relative(value: &Path) -> Result<String> {
     if value.as_os_str().is_empty() || value.is_absolute() {
@@ -54,8 +95,9 @@ pub fn normalize_relative(value: &Path) -> Result<String> {
     Ok(parts.join("/"))
 }
 
-pub fn native_path(root: &Path, normalized: &str) -> PathBuf {
+pub fn native_path(root: &Path, normalized: impl AsRef<str>) -> PathBuf {
     normalized
+        .as_ref()
         .split('/')
         .fold(root.to_path_buf(), |path, part| path.join(part))
 }
@@ -145,6 +187,10 @@ mod tests {
         );
         assert!(normalize_relative(Path::new("../secret")).is_err());
         assert!(normalize_relative(Path::new("/rooted")).is_err());
+        assert_eq!(
+            NormalizedPath::parse_str("src/main.rs").unwrap().as_str(),
+            "src/main.rs"
+        );
     }
 
     #[test]

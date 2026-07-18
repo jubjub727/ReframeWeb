@@ -1,0 +1,4 @@
+agent-host/src/baml_sdk/** linguist-generated=true
+agent-host/src/baml_sdk/**/*.py text eol=lf
+agent-host/src/baml_sdk/**/*.pyi text eol=lf
+agent-host/src/baml_sdk/_inlinedbaml.bin binary

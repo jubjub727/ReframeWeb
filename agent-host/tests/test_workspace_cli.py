@@ -1,24 +1,24 @@
 from __future__ import annotations
 
 import asyncio
+from contextlib import redirect_stderr
 from io import BytesIO
+from io import StringIO
+import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 from unittest import mock
 
+from baml_sdk.workspace import WorkspacePlan
 from reframe_agent_host.commands.parser import build_parser
-from reframe_agent_host.commands.workspace import (
-    _checkpoint_memory_id,
-    _latest_summary,
-    _resolve_memory_sources,
-)
+from reframe_agent_host.workspace.coordinator import WorkspaceCoordinator
 from reframe_agent_host.workspace import WorkspaceError
 from reframe_agent_host.workspace.service import (
     _read_frame,
     _write_frame,
-    backing_service_command,
 )
+from reframe_agent_host.workspace.daemon_process import backing_service_command
 from reframe_agent_host.workspace.shortcuts import create_sessions_shortcut
 
 
@@ -28,12 +28,6 @@ class ShortReadStream(BytesIO):
 
 
 class WorkspaceCliParserTests(unittest.TestCase):
-    def test_manifest_ids_become_valid_memory_record_ids(self) -> None:
-        self.assertEqual(
-            _checkpoint_memory_id("manifest-19f7330bcb0-7a60"),
-            "memory_node:manifest_19f7330bcb0_7a60",
-        )
-
     def test_core_commands_need_no_paths_or_session_ids(self) -> None:
         parser = build_parser()
 
@@ -58,14 +52,46 @@ class WorkspaceCliParserTests(unittest.TestCase):
 
         self.assertEqual(args.workspace_action, "shortcut")
 
-    def test_plain_session_does_not_implicitly_project_the_repository(self) -> None:
-        with mock.patch(
-            "reframe_agent_host.commands.workspace.open_memory_database",
-            side_effect=AssertionError("empty sessions must not open the memory graph"),
-        ):
-            resolved = asyncio.run(_resolve_memory_sources([], []))
+    def test_session_create_rejects_memory_with_continue(self) -> None:
+        with redirect_stderr(StringIO()):
+            with self.assertRaises(SystemExit) as raised:
+                build_parser().parse_args(
+                    [
+                        "workspace",
+                        "session",
+                        "create",
+                        "--memory",
+                        "memory_node:project",
+                        "--continue",
+                    ]
+                )
 
-        self.assertEqual(resolved, [])
+        self.assertEqual(raised.exception.code, 2)
+
+    def test_plain_session_does_not_implicitly_project_the_repository(self) -> None:
+        daemon = _FakeDaemon([])
+
+        async def no_database():
+            raise AssertionError("empty sessions must not open the memory graph")
+
+        async def manual_plan(memory_ids, prefetch_paths, _scratch):
+            return WorkspacePlan(
+                memory_ids=memory_ids,
+                prefetch_paths=prefetch_paths,
+                rules=[],
+            )
+
+        coordinator = WorkspaceCoordinator(
+            daemon,
+            database_factory=no_database,
+            workspace_plan=manual_plan,
+        )
+        created = asyncio.run(
+            coordinator.create_session(memory_ids=[], continue_session=None)
+        )
+
+        self.assertEqual(created.memory_ids, [])
+        self.assertEqual(daemon.created_memory_sources, [])
 
 
 class WorkspaceProtocolTests(unittest.TestCase):
@@ -89,12 +115,44 @@ class WorkspaceProtocolTests(unittest.TestCase):
 
     def test_backing_service_comes_from_uv_environment_path(self) -> None:
         with mock.patch(
-            "reframe_agent_host.workspace.service.shutil.which",
+            "reframe_agent_host.workspace.daemon_process.shutil.which",
             return_value="D:\\project\\.venv\\Scripts\\reframe-workspace-daemon.exe",
         ):
             command = backing_service_command(Path("D:\\workspace-store"))
 
         self.assertEqual(command[0], "D:\\project\\.venv\\Scripts\\reframe-workspace-daemon.exe")
+        self.assertEqual(command[-1], "serve-socket")
+
+    def test_backing_service_falls_back_to_the_interpreter_environment(self) -> None:
+        with TemporaryDirectory() as temporary:
+            scripts = Path(temporary) / "Scripts"
+            scripts.mkdir()
+            name = (
+                "reframe-workspace-daemon.exe"
+                if os.name == "nt"
+                else "reframe-workspace-daemon"
+            )
+            executable = scripts / name
+            executable.touch()
+            executable.chmod(0o755)
+
+            with (
+                mock.patch(
+                    "reframe_agent_host.workspace.daemon_process.shutil.which",
+                    return_value=None,
+                ),
+                mock.patch(
+                    "reframe_agent_host.workspace.daemon_process.sys.executable",
+                    str(scripts / "python.exe"),
+                ),
+                mock.patch(
+                    "reframe_agent_host.workspace.daemon_process.sysconfig.get_path",
+                    return_value=str(scripts),
+                ),
+            ):
+                command = backing_service_command(Path(temporary) / "store")
+
+        self.assertEqual(Path(command[0]), executable.resolve())
         self.assertEqual(command[-1], "serve-socket")
 
     def test_closed_latest_session_is_not_silently_skipped(self) -> None:
@@ -106,7 +164,9 @@ class WorkspaceProtocolTests(unittest.TestCase):
         )
 
         with self.assertRaises(WorkspaceError):
-            _latest_summary(daemon, active_only=True)
+            asyncio.run(
+                WorkspaceCoordinator(daemon).latest_summary(require_active=True)
+            )
 
     def test_unix_shortcut_is_generated_for_the_current_clone(self) -> None:
         with TemporaryDirectory() as temporary:
@@ -128,11 +188,29 @@ class WorkspaceProtocolTests(unittest.TestCase):
 class _FakeDaemon:
     def __init__(self, summaries) -> None:
         self.summaries = summaries
+        self.created_memory_sources = None
+        self.store = Path("D:/workspace-store")
 
-    def request(self, operation: str, **_arguments):
-        if operation != "list_workspaces":
-            raise AssertionError(operation)
+    def list_workspaces(self, *, active_only: bool = False):
+        del active_only
         return self.summaries
+
+    def create_workspace(
+        self,
+        *,
+        name,
+        session_id,
+        memory_sources,
+        scratch_paths,
+    ):
+        del name, session_id, scratch_paths
+        self.created_memory_sources = list(memory_sources)
+        return {
+            "session_id": "task-one",
+            "worktree": "D:/workspace-store/sessions/task-one/worktree",
+            "memory_ids": [],
+            "projected_files": 0,
+        }
 
 
 def _summary(session_id: str, state: str, created_at: int) -> dict:

@@ -1,47 +1,60 @@
 from __future__ import annotations
 
-import json
 import os
 from pathlib import Path
-import shutil
-import socket
-import struct
 import subprocess
+import threading
 import time
 from typing import Any, BinaryIO
 from uuid import uuid4
+import warnings
 
-from reframe_agent_host.workspace.protocol import (
-    MAX_FRAME_BYTES,
-    WorkspaceResponse,
-    request_payload,
+from pydantic import ValidationError
+
+from reframe_agent_host.workspace.client_operations import TypedWorkspaceOperations
+from reframe_agent_host.workspace.daemon_process import (
+    launch_service,
+    startup_diagnostics,
+)
+from reframe_agent_host.workspace.errors import (
+    WorkspaceError,
+    WorkspaceOutcomeUnknownError,
+    WorkspaceRemoteError,
+    WorkspaceTransportError,
 )
 from reframe_agent_host.workspace.location import persistent_store
+from reframe_agent_host.workspace.protocol import (
+    IdempotencyScope,
+    WorkspaceOperation,
+    WorkspaceResponse,
+    operation_metadata,
+    request_payload,
+)
+from reframe_agent_host.workspace.transport import (
+    LocalConnection,
+    connect_local,
+    daemon_endpoint,
+    encode_frame,
+    read_frame as _transport_read_frame,
+    write_encoded_frame,
+    write_frame as _transport_write_frame,
+)
 
 
-_MUTATING_OPERATIONS = {
-    "create_workspace",
-    "apply_policy",
-    "mount_workspace",
-    "prefetch",
-    "commit_checkpoint",
-    "unmount_workspace",
-    "close_workspace",
-    "destroy_ephemeral_workspace",
-    "shutdown",
-}
+_STARTUP_TIMEOUT_SECONDS = 10.0
+_REQUEST_ATTEMPTS = 2
 
 
-class WorkspaceError(RuntimeError):
-    pass
+class WorkspaceDaemon(TypedWorkspaceOperations):
+    """Connection lifecycle and retry policy for the typed workspace client."""
 
-
-class WorkspaceDaemon:
     def __init__(self, store: Path | None = None) -> None:
         self.store = (store or default_store()).resolve()
-        self._socket: socket.socket | None = None
-        self._stream: BinaryIO | None = None
+        self._connection: LocalConnection | None = None
         self._request_number = 0
+        self._request_lock = threading.RLock()
+        self._launched_process: subprocess.Popen[bytes] | None = None
+        self._diagnostic_log: Path | None = None
 
     def __enter__(self) -> "WorkspaceDaemon":
         self.start()
@@ -51,79 +64,137 @@ class WorkspaceDaemon:
         self.close()
 
     def start(self) -> None:
-        if self._stream is not None:
-            return
-        self.store.mkdir(parents=True, exist_ok=True)
         try:
-            self._connect()
-        except OSError:
-            self._launch_service()
-            self._connect_with_retry()
-        try:
-            self.request("hello")
+            with self._request_lock:
+                if self._connection is not None:
+                    return
+                self._ensure_connection()
+            self.hello()
         except Exception:
             self.close()
+            self._terminate_failed_launch()
             raise
 
+    def close(self) -> None:
+        with self._request_lock:
+            self._close_connection()
+
     def request(self, operation: str, **arguments: Any) -> Any:
-        if self._stream is None:
-            self._connect_with_retry()
+        """Compatibility shim for callers migrating to the typed methods."""
+        warnings.warn(
+            "WorkspaceDaemon.request() is deprecated; use a typed operation method",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         try:
-            stream = self._require_stream()
+            typed_operation = WorkspaceOperation(operation)
+        except ValueError as error:
+            raise WorkspaceError(f"unsupported workspace operation: {operation}") from error
+        return self._request(typed_operation, **arguments)
+
+    def _request(self, operation: WorkspaceOperation, **arguments: Any) -> Any:
+        with self._request_lock:
             self._request_number += 1
             request_id = f"host-{self._request_number}"
-            idempotency_key = None
-            if operation in _MUTATING_OPERATIONS:
-                idempotency_key = f"{operation}-{uuid4()}"
+            metadata = operation_metadata(operation)
+            idempotency_key = (
+                f"{operation.value}-{uuid4()}" if metadata.mutates else None
+            )
             payload = request_payload(
                 operation,
                 request_id,
                 idempotency_key=idempotency_key,
                 arguments=arguments,
             )
-            _write_frame(stream, payload)
-            response = WorkspaceResponse.model_validate(_read_frame(stream))
-            if response.request_id != request_id:
-                raise WorkspaceError("workspace response request id did not match")
-            if not response.ok:
-                detail = response.error
-                if detail is None:
-                    raise WorkspaceError(f"workspace {operation} failed")
-                raise WorkspaceError(f"{detail.code}: {detail.message}")
-            return response.result
-        finally:
-            self.close()
+            frame = encode_frame(payload)
+            last_error: WorkspaceTransportError | None = None
+            attempts = (
+                1
+                if metadata.idempotency_scope is IdempotencyScope.PROCESS_LOCAL
+                else _REQUEST_ATTEMPTS
+            )
+            for _attempt in range(attempts):
+                try:
+                    if self._connection is None:
+                        self._ensure_connection()
+                    stream = self._require_connection().stream
+                    write_encoded_frame(stream, frame)
+                    response = WorkspaceResponse.model_validate(
+                        _transport_read_frame(stream)
+                    )
+                    if response.request_id != request_id:
+                        raise WorkspaceError(
+                            "workspace response request id did not match"
+                        )
+                    if not response.ok:
+                        assert response.error is not None
+                        raise WorkspaceRemoteError(response.error)
+                    return response.result
+                except WorkspaceTransportError as error:
+                    last_error = error
+                except OSError as error:
+                    last_error = WorkspaceTransportError(
+                        "workspace daemon transport failed"
+                    )
+                    last_error.__cause__ = error
+                except ValidationError as error:
+                    raise WorkspaceError(
+                        f"workspace {operation.value} returned an invalid response envelope"
+                    ) from error
+                finally:
+                    self._close_connection()
+            assert last_error is not None
+            diagnostics = startup_diagnostics(self._diagnostic_log)
+            if metadata.idempotency_scope is IdempotencyScope.PROCESS_LOCAL:
+                detail = (
+                    f"workspace {operation.value} transport failed; its outcome is "
+                    "unknown and the process-local mutation was not retried because "
+                    "the daemon may have restarted"
+                )
+                if diagnostics:
+                    detail += f"; recent daemon output:\n{diagnostics}"
+                raise WorkspaceOutcomeUnknownError(detail) from last_error
+            if diagnostics:
+                raise WorkspaceTransportError(
+                    f"{last_error}; recent daemon output:\n{diagnostics}"
+                ) from last_error
+            raise last_error
 
-    def close(self) -> None:
+    def _after_shutdown(self) -> None:
+        if self._launched_process is None:
+            return
         try:
-            if self._stream is not None:
-                self._stream.close()
-        finally:
-            self._stream = None
-            if self._socket is not None:
-                self._socket.close()
-            self._socket = None
+            self._launched_process.wait(timeout=5)
+        except subprocess.TimeoutExpired as error:
+            raise WorkspaceError(
+                "workspace daemon accepted shutdown but did not exit"
+            ) from error
 
-    def _require_stream(self) -> BinaryIO:
-        if self._stream is None:
-            raise WorkspaceError("workspace backing service is not running")
-        return self._stream
+    def _require_connection(self) -> LocalConnection:
+        if self._connection is None:
+            raise WorkspaceTransportError("workspace backing service is not running")
+        return self._connection
 
     def _connect(self) -> None:
-        if os.name == "nt":
-            self._stream = _open_windows_pipe(daemon_endpoint(self.store))
-            return
-        client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self._connection = connect_local(self.store)
+
+    def _ensure_connection(self) -> None:
+        self.store.mkdir(parents=True, exist_ok=True)
         try:
-            client.connect(str(daemon_endpoint(self.store)))
-        except Exception:
-            client.close()
-            raise
-        self._socket = client
-        self._stream = client.makefile("rwb", buffering=0)
+            self._connect()
+        except OSError:
+            process = self._launched_process
+            if process is None or process.poll() is not None:
+                self._launched_process = None
+                self._launch_service()
+            try:
+                self._connect_with_retry()
+            except Exception:
+                self._terminate_failed_launch()
+                raise
 
     def _connect_with_retry(self) -> None:
-        deadline = time.monotonic() + 10
+        deadline = time.monotonic() + _STARTUP_TIMEOUT_SECONDS
         error: OSError | None = None
         while time.monotonic() < deadline:
             try:
@@ -132,25 +203,54 @@ class WorkspaceDaemon:
             except OSError as caught:
                 error = caught
                 time.sleep(0.05)
-        raise WorkspaceError("workspace backing service did not open its local socket") from error
+        status = (
+            self._launched_process.poll()
+            if self._launched_process is not None
+            else None
+        )
+        detail = "workspace backing service did not open its local endpoint"
+        if status is not None:
+            detail += f" (daemon exited with status {status})"
+        diagnostics = startup_diagnostics(self._diagnostic_log)
+        if diagnostics:
+            detail += f"; recent daemon output:\n{diagnostics}"
+        raise WorkspaceTransportError(detail) from error
 
     def _launch_service(self) -> None:
-        command = backing_service_command(self.store)
-        options: dict[str, Any] = {
-            "stdin": subprocess.DEVNULL,
-            "stdout": subprocess.DEVNULL,
-            "stderr": subprocess.DEVNULL,
-            "close_fds": True,
-        }
-        if os.name == "nt":
-            options["creationflags"] = (
-                subprocess.CREATE_NEW_PROCESS_GROUP
-                | subprocess.DETACHED_PROCESS
-                | subprocess.CREATE_NO_WINDOW
+        if (
+            self._launched_process is not None
+            and self._launched_process.poll() is None
+        ):
+            raise WorkspaceTransportError(
+                "workspace backing service is already starting"
             )
-        else:
-            options["start_new_session"] = True
-        subprocess.Popen(command, **options)
+        self._launched_process, self._diagnostic_log = launch_service(self.store)
+
+    def _terminate_failed_launch(self) -> None:
+        process = self._launched_process
+        if process is None:
+            return
+        if process.poll() is not None:
+            self._launched_process = None
+            return
+        try:
+            process.terminate()
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            try:
+                process.kill()
+                process.wait(timeout=5)
+            except (OSError, subprocess.TimeoutExpired):
+                pass
+        except OSError:
+            pass
+        if process.poll() is not None:
+            self._launched_process = None
+
+    def _close_connection(self) -> None:
+        if self._connection is not None:
+            self._connection.close()
+            self._connection = None
 
 
 def default_store() -> Path:
@@ -158,89 +258,10 @@ def default_store() -> Path:
     return Path(configured) if configured else persistent_store()
 
 
-def backing_service_command(store: Path) -> list[str]:
-    configured = os.getenv("REFRAME_WORKSPACE_DAEMON")
-    if configured:
-        executable = Path(configured).expanduser().resolve()
-        if not executable.is_file():
-            raise WorkspaceError(f"workspace backing service does not exist: {executable}")
-        return [str(executable), "--store", str(store), "serve-socket"]
-
-    binary = shutil.which("reframe-workspace-daemon")
-    if binary is None:
-        raise WorkspaceError(
-            "workspace backing service is not installed; run 'uv sync' in agent-host"
-        )
-    return [binary, "--store", str(store), "serve-socket"]
-
-
-def daemon_endpoint(store: Path) -> str:
-    if os.name != "nt":
-        return str(store / "workspace-daemon.sock")
-    normalized = str(store).replace("/", "\\").lower().encode()
-    value = 0xCBF29CE484222325
-    for byte in normalized:
-        value ^= byte
-        value = (value * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
-    return rf"\\.\pipe\reframe-workspace-{value:016x}"
-
-
-def _open_windows_pipe(name: str) -> BinaryIO:
-    import ctypes
-    import msvcrt
-    from ctypes import wintypes
-
-    create_file = ctypes.windll.kernel32.CreateFileW
-    create_file.argtypes = (
-        wintypes.LPCWSTR,
-        wintypes.DWORD,
-        wintypes.DWORD,
-        wintypes.LPVOID,
-        wintypes.DWORD,
-        wintypes.DWORD,
-        wintypes.HANDLE,
-    )
-    create_file.restype = wintypes.HANDLE
-    handle = create_file(
-        name,
-        0x80000000 | 0x40000000,
-        0,
-        None,
-        3,
-        0,
-        None,
-    )
-    if handle == wintypes.HANDLE(-1).value:
-        raise ctypes.WinError()
-    try:
-        descriptor = msvcrt.open_osfhandle(handle, os.O_RDWR | os.O_BINARY)
-    except Exception:
-        ctypes.windll.kernel32.CloseHandle(handle)
-        raise
-    return os.fdopen(descriptor, "r+b", buffering=0)
-
-
+# Kept import-compatible while callers move framing tests to the transport module.
 def _write_frame(stream: BinaryIO, payload: dict[str, Any]) -> None:
-    encoded = json.dumps(payload, separators=(",", ":")).encode("utf-8")
-    if len(encoded) > MAX_FRAME_BYTES:
-        raise WorkspaceError("workspace request exceeds the protocol frame limit")
-    stream.write(struct.pack("<I", len(encoded)))
-    stream.write(encoded)
-    stream.flush()
+    _transport_write_frame(stream, payload)
 
 
 def _read_frame(stream: BinaryIO) -> dict[str, Any]:
-    length = struct.unpack("<I", _read_exact(stream, 4))[0]
-    if length > MAX_FRAME_BYTES:
-        raise WorkspaceError("workspace response exceeds the protocol frame limit")
-    return json.loads(_read_exact(stream, length))
-
-
-def _read_exact(stream: BinaryIO, length: int) -> bytes:
-    value = bytearray()
-    while len(value) < length:
-        chunk = stream.read(length - len(value))
-        if not chunk:
-            raise WorkspaceError("workspace backing service closed its protocol stream")
-        value.extend(chunk)
-    return bytes(value)
+    return _transport_read_frame(stream)

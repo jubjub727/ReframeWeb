@@ -1,19 +1,16 @@
-use std::collections::{BTreeMap, BTreeSet};
-use std::fs;
-use std::path::{Path, PathBuf};
+mod checkpoint;
+mod create;
+mod lifecycle;
+mod scanning;
+mod state;
+mod worktree_guard;
 
-use anyhow::{Context, Result, bail};
-use rusqlite::{OptionalExtension, params};
-use walkdir::WalkDir;
+#[cfg(test)]
+mod tests;
 
-use crate::model::{
-    Change, ChangeKind, CheckpointResult, FileRecord, SessionCreated, SessionStatus, SessionSummary,
-};
-use crate::paths::{ScratchMatcher, native_path, normalize_relative, scratch_rules};
-use crate::store::{PersistedMemorySource, Store, now_millis, validate_id};
-
-include!("session/create.rs");
-include!("session/lifecycle.rs");
-include!("session/checkpoint.rs");
-include!("session/state.rs");
-include!("session/tests.rs");
+pub use checkpoint::{checkpoint, checkpoint_resident};
+#[cfg(test)]
+pub use create::create;
+pub use create::create_with_sources;
+pub use lifecycle::{apply_scratch_paths, close, destroy_ephemeral, status};
+pub use state::{baseline, ensure_active, list, replace_journal, scratch_matcher, worktree};

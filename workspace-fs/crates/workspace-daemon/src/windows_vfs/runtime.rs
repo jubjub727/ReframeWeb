@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
@@ -26,8 +26,6 @@ pub struct Enumeration {
 }
 
 pub struct Runtime {
-    store_root: PathBuf,
-    session_id: String,
     worktree: PathBuf,
     worktree_wide: Vec<u16>,
     resident: Arc<ResidentWorkspace>,
@@ -36,19 +34,12 @@ pub struct Runtime {
 }
 
 impl Runtime {
-    pub fn load(
-        store_root: &Path,
-        session_id: &str,
-        resident: Arc<ResidentWorkspace>,
-    ) -> Result<Self> {
-        let store = Store::open(store_root)?;
-        let worktree = session::worktree(&store, session_id)?;
+    pub fn load(store: &Store, session_id: &str, resident: Arc<ResidentWorkspace>) -> Result<Self> {
+        let worktree = session::worktree(store, session_id)?;
         let mut worktree_wide: Vec<u16> = worktree.as_os_str().encode_wide().collect();
         worktree_wide.push(0);
-        let scratch = session::scratch_matcher(&store, session_id)?;
+        let scratch = session::scratch_matcher(store, session_id)?;
         Ok(Self {
-            store_root: store_root.to_path_buf(),
-            session_id: session_id.into(),
             worktree,
             worktree_wide,
             resident,
@@ -83,13 +74,12 @@ impl Runtime {
 
     pub fn absorb_native_file(&self, path: &str) -> Result<()> {
         let bytes = std::fs::read(native_path(&self.worktree, path))?;
-        let kind = self.resident.replace(path, bytes)?;
-        self.record_notification(path, kind.as_str())
+        self.resident.replace(path, bytes)?;
+        Ok(())
     }
 
     pub fn remove_resident(&self, path: &str) -> Result<()> {
-        self.resident.remove(path)?;
-        self.record_notification(path, "delete")
+        self.resident.remove(path)
     }
 
     pub fn create_resident_directory(&self, path: &str) -> Result<()> {
@@ -97,9 +87,7 @@ impl Runtime {
     }
 
     pub fn rename_resident(&self, source: &str, destination: &str) -> Result<()> {
-        self.resident.rename(source, destination)?;
-        self.record_notification(source, "delete")?;
-        self.record_notification(destination, "create")
+        self.resident.rename(source, destination)
     }
 
     pub fn mark_temporary(&self, path: &str) -> Result<()> {
@@ -111,19 +99,6 @@ impl Runtime {
 
     pub fn is_scratch(&self, path: &str) -> bool {
         self.scratch.matches(path)
-    }
-
-    pub fn record_notification(&self, path: &str, kind: &str) -> Result<()> {
-        if self.scratch.matches(path) {
-            return Ok(());
-        }
-        let store = Store::open(&self.store_root)?;
-        store.connection().execute(
-            "INSERT INTO journal_events(workspace_id,path,kind,size,scanned_at) VALUES (?1,?2,?3,NULL,?4)\
-             ON CONFLICT(workspace_id,path) DO UPDATE SET kind=excluded.kind,size=NULL,scanned_at=excluded.scanned_at",
-            rusqlite::params![self.session_id, path, kind, crate::store::now_millis()],
-        )?;
-        Ok(())
     }
 }
 

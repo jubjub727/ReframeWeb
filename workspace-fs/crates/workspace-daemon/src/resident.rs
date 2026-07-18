@@ -1,13 +1,21 @@
+mod mutations;
+mod state;
+mod storage;
+
+#[cfg(test)]
+mod tests;
+
 use std::collections::{BTreeMap, BTreeSet};
-use std::path::PathBuf;
 use std::sync::{Arc, RwLock};
 
-use anyhow::{Context, Result, bail};
+use anyhow::Result;
 
-use crate::model::{Change, ChangeKind, FileRecord};
-use crate::paths::{ScratchMatcher, native_path};
+use crate::model::{Change, FileRecord, RecordSource};
+use crate::paths::{NormalizedPath, ScratchMatcher};
 use crate::session;
 use crate::store::Store;
+
+use self::storage::{load_record, validate_content};
 
 #[derive(Clone)]
 pub struct ResidentFile {
@@ -21,28 +29,33 @@ pub struct ResidentStats {
     pub bytes: u64,
 }
 
+#[derive(Default)]
+struct ResidentState {
+    baseline: BTreeMap<NormalizedPath, FileRecord>,
+    files: BTreeMap<NormalizedPath, ResidentFile>,
+    directories: BTreeSet<NormalizedPath>,
+    changes: BTreeMap<NormalizedPath, Change>,
+}
+
 pub struct ResidentWorkspace {
-    baseline: RwLock<BTreeMap<String, FileRecord>>,
-    files: RwLock<BTreeMap<String, ResidentFile>>,
-    directories: RwLock<BTreeSet<String>>,
-    deleted: RwLock<BTreeSet<String>>,
+    state: RwLock<ResidentState>,
     scratch: ScratchMatcher,
 }
 
 impl ResidentWorkspace {
     pub fn load(store: &Store, session_id: &str) -> Result<Arc<Self>> {
         let mut baseline = session::baseline(store, session_id)?;
-        baseline.retain(|_, record| record.source_kind != "tombstone");
+        baseline.retain(|_, record| record.source != RecordSource::Tombstone);
         let mut by_hash: BTreeMap<String, Arc<[u8]>> = BTreeMap::new();
         let mut files = BTreeMap::new();
         let mut directories = BTreeSet::new();
         for (path, record) in &baseline {
-            if record.source_kind == "directory" {
-                add_parent_directories(&mut directories, path);
+            if record.source == RecordSource::Directory {
+                add_parent_directories(&mut directories, path.as_str())?;
                 directories.insert(path.clone());
                 continue;
             }
-            add_parent_directories(&mut directories, path);
+            add_parent_directories(&mut directories, path.as_str())?;
             let bytes = if let Some(bytes) = by_hash.get(&record.hash) {
                 Arc::clone(bytes)
             } else {
@@ -60,43 +73,41 @@ impl ResidentWorkspace {
             );
         }
         Ok(Arc::new(Self {
-            baseline: RwLock::new(baseline),
-            files: RwLock::new(files),
-            directories: RwLock::new(directories),
-            deleted: RwLock::new(BTreeSet::new()),
+            state: RwLock::new(ResidentState {
+                baseline,
+                files,
+                directories,
+                changes: BTreeMap::new(),
+            }),
             scratch: session::scratch_matcher(store, session_id)?,
         }))
     }
 
     pub fn file(&self, path: &str) -> Option<ResidentFile> {
-        self.files.read().ok()?.get(path).cloned()
+        self.state.read().ok()?.files.get(path).cloned()
     }
 
     #[cfg_attr(windows, allow(dead_code))]
     pub fn contains_file(&self, path: &str) -> bool {
-        self.files
+        self.state
             .read()
-            .map(|files| files.contains_key(path))
+            .map(|state| state.files.contains_key(path))
             .unwrap_or(false)
     }
 
     pub fn contains_path(&self, path: &str) -> bool {
-        if path.is_empty()
-            || self
-                .directories
-                .read()
-                .map(|directories| directories.contains(path))
-                .unwrap_or(false)
-        {
+        if path.is_empty() {
             return true;
         }
-        let Ok(files) = self.files.read() else {
+        let Ok(state) = self.state.read() else {
             return false;
         };
-        files.contains_key(path)
-            || files
+        state.directories.contains(path)
+            || state.files.contains_key(path)
+            || state
+                .files
                 .keys()
-                .any(|candidate| candidate.starts_with(&format!("{path}/")))
+                .any(|candidate| has_prefix(candidate.as_str(), path))
     }
 
     #[cfg_attr(windows, allow(dead_code))]
@@ -110,23 +121,15 @@ impl ResidentWorkspace {
         } else {
             format!("{directory}/")
         };
-        let Ok(files) = self.files.read() else {
+        let Ok(state) = self.state.read() else {
             return Vec::new();
         };
         let mut entries = BTreeMap::new();
-        if let Ok(directories) = self.directories.read() {
-            for path in directories.iter() {
-                let Some(remainder) = path.strip_prefix(&prefix) else {
-                    continue;
-                };
-                let name = remainder.split('/').next().unwrap_or_default();
-                if !name.is_empty() {
-                    entries.insert(name.to_owned(), (name.to_owned(), true, 0));
-                }
-            }
+        for path in &state.directories {
+            add_directory_entry(&mut entries, path.as_str(), &prefix);
         }
-        for (path, file) in files.iter() {
-            let Some(remainder) = path.strip_prefix(&prefix) else {
+        for (path, file) in &state.files {
+            let Some(remainder) = path.as_str().strip_prefix(&prefix) else {
                 continue;
             };
             let mut parts = remainder.splitn(2, '/');
@@ -149,16 +152,56 @@ impl ResidentWorkspace {
     }
 
     pub fn stats(&self) -> ResidentStats {
-        let Ok(files) = self.files.read() else {
+        let Ok(state) = self.state.read() else {
             return ResidentStats { files: 0, bytes: 0 };
         };
         ResidentStats {
-            files: files.len(),
-            bytes: files.values().map(|file| file.bytes.len() as u64).sum(),
+            files: state.files.len(),
+            bytes: state
+                .files
+                .values()
+                .map(|file| file.bytes.len() as u64)
+                .sum(),
         }
     }
 }
 
-include!("resident/mutations.rs");
-include!("resident/storage.rs");
-include!("resident/tests.rs");
+fn add_directory_entry(
+    entries: &mut BTreeMap<String, (String, bool, u64)>,
+    path: &str,
+    prefix: &str,
+) {
+    let Some(remainder) = path.strip_prefix(prefix) else {
+        return;
+    };
+    let name = remainder.split('/').next().unwrap_or_default();
+    if !name.is_empty() {
+        entries.insert(name.to_owned(), (name.to_owned(), true, 0));
+    }
+}
+
+fn add_parent_directories(directories: &mut BTreeSet<NormalizedPath>, path: &str) -> Result<()> {
+    let mut current = String::new();
+    let mut parts = path.split('/').peekable();
+    while let Some(part) = parts.next() {
+        if parts.peek().is_none() {
+            break;
+        }
+        if !current.is_empty() {
+            current.push('/');
+        }
+        current.push_str(part);
+        directories.insert(NormalizedPath::parse_str(&current)?);
+    }
+    Ok(())
+}
+
+fn has_prefix(candidate: &str, prefix: &str) -> bool {
+    candidate
+        .strip_prefix(prefix)
+        .is_some_and(|suffix| suffix.starts_with('/'))
+}
+
+fn lock_error<T>(_error: std::sync::PoisonError<T>) -> anyhow::Error {
+    anyhow::anyhow!("resident workspace lock was poisoned")
+}

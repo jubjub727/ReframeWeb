@@ -47,3 +47,12 @@ test "manual checkpoint retains only explicit paths" {
     assert.equal(selection.paths, ["src/result.rs"]);
     assert.equal(selection.reasons.get("src/result.rs"), "manually selected")
 }
+
+test "empty manual selections stay empty" {
+    let plan = ManualWorkspacePlan([], [], []);
+    let selection = ManualCheckpoint([]);
+    assert.equal(plan.memory_ids, []);
+    assert.equal(plan.prefetch_paths, []);
+    assert.equal(plan.rules, []);
+    assert.equal(selection.paths, [])
+}

@@ -16,18 +16,24 @@ dependencies = [
     "silero-vad>=6.2.1",
     "sounddevice>=0.5.5",
     "surrealdb>=2.0.0",
-    "baml-bridge",
+    "baml-bridge @ git+https://github.com/jubjub727/baml.git@bbb99a793d707175663c4e9236400a9bcd830f57#subdirectory=baml_language/sdks/python",
     "kokoro-onnx>=0.5.0",
     "reframe-workspace-daemon==0.1.0",
 ]
 
 [project.scripts]
 reframe-agent-host = "reframe_agent_host.cli:main"
+reframe-generate-baml = "reframe_agent_host.baml_generation:generate"
+reframe-check-baml = "reframe_agent_host.baml_generation:check"
 
 [build-system]
 requires = ["uv_build>=0.11.25,<0.12.0"]
 build-backend = "uv_build"
 
+[tool.uv.build-backend]
+# These are sibling runtime imports. Without the explicit list, uv_build only
+# includes reframe_agent_host and silently omits the memory layer and BAML SDK.
+module-name = ["reframe_agent_host", "reframe_memory", "baml_sdk"]
+
 [tool.uv.sources]
-baml-bridge = { path = "../../baml-jubjub/baml/baml_language/sdks/python", editable = true }
 reframe-workspace-daemon = { path = "../workspace-fs" }

@@ -5,6 +5,11 @@ edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
 
+[features]
+# GitHub's macOS runners do not provide macFUSE. This keeps production builds
+# linked to macFUSE while allowing the full callback surface to compile in CI.
+ci-macos-no-mount = ["fuser/macos-no-mount"]
+
 [dependencies]
 anyhow.workspace = true
 blake3.workspace = true
@@ -12,6 +17,7 @@ globset.workspace = true
 rusqlite.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+uuid.workspace = true
 walkdir.workspace = true
 
 [target.'cfg(windows)'.dependencies]

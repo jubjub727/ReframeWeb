@@ -1,9 +1,27 @@
+use std::path::{Path, PathBuf};
+
+use anyhow::{Context, Result, bail};
+use serde_json::json;
+
+use crate::paths::normalize_relative;
+use crate::protocol::Operation;
+use crate::session;
+
+use super::Daemon;
+
 impl Daemon {
-    fn execute(&mut self, operation: &Operation) -> Result<serde_json::Value> {
+    pub(super) fn execute(&mut self, operation: &Operation) -> Result<serde_json::Value> {
         match operation {
-            Operation::Hello => Ok(json!({"service":"reframe-workspace-daemon"})),
-            Operation::Health => {
-                Ok(json!({"status":"ready","mounted_workspaces":self.mounts.len()}))
+            Operation::Hello {} => Ok(json!({
+                "service": "reframe-workspace-daemon",
+                "protocol_version": crate::protocol::PROTOCOL_VERSION,
+                "max_frame_bytes": crate::protocol::MAX_FRAME_BYTES,
+                "capabilities": crate::protocol::CAPABILITIES,
+                "operations": crate::protocol::OPERATIONS,
+                "build_fingerprint": crate::protocol::BUILD_FINGERPRINT,
+            })),
+            Operation::Health {} => {
+                Ok(json!({"status":"ready","mounted_workspaces":self.mounted_count()}))
             }
             Operation::CreateWorkspace {
                 name,
@@ -11,36 +29,32 @@ impl Daemon {
                 memory_sources,
                 scratch_paths,
             } => {
-                for memory in memory_sources {
-                    match memory.source_kind.as_str() {
-                        "directory" => self.store.persist_memory_source(
-                            &memory.memory_id,
-                            Path::new(memory.source_path.as_deref().context(
-                                "directory memory source is missing source_path",
-                            )?),
-                        )?,
-                        "checkpoint" => self.store.persist_checkpoint_source(
-                            &memory.memory_id,
-                            Path::new(memory.backing_store.as_deref().context(
-                                "checkpoint memory source is missing backing_store",
-                            )?),
-                            memory.manifest_id.as_deref().context(
-                                "checkpoint memory source is missing manifest_id",
-                            )?,
-                        )?,
-                        kind => bail!("unsupported memory source kind: {kind}"),
-                    }
-                }
-                let memory_ids = memory_sources
+                let prepared_sources = memory_sources
                     .iter()
-                    .map(|memory| memory.memory_id.clone())
-                    .collect::<Vec<_>>();
+                    .map(|memory| match memory {
+                        crate::protocol::MemorySourceDto::Directory {
+                            memory_id,
+                            source_path,
+                        } => self
+                            .store
+                            .prepare_directory_source(memory_id, Path::new(source_path)),
+                        crate::protocol::MemorySourceDto::Checkpoint {
+                            memory_id,
+                            backing_store,
+                            manifest_id,
+                        } => self.store.prepare_checkpoint_source(
+                            memory_id,
+                            Path::new(backing_store),
+                            manifest_id,
+                        ),
+                    })
+                    .collect::<Result<Vec<_>>>()?;
                 let scratch = scratch_paths.iter().map(PathBuf::from).collect::<Vec<_>>();
-                Ok(serde_json::to_value(session::create(
+                Ok(serde_json::to_value(session::create_with_sources(
                     &mut self.store,
                     name,
                     session_id.as_deref(),
-                    &memory_ids,
+                    &prepared_sources,
                     &scratch,
                 )?)?)
             }
@@ -60,7 +74,7 @@ impl Daemon {
                 self.mount(session_id)
             }
             Operation::Prefetch { session_id, paths } => {
-                if !self.mounts.contains_key(session_id) {
+                if !self.is_mounted(session_id) {
                     bail!("workspace is not mounted");
                 }
                 let resident = self
@@ -78,9 +92,17 @@ impl Daemon {
                 }
                 Ok(json!({"session_id":session_id,"files":paths.len(),"bytes":bytes}))
             }
-            Operation::GetChangeJournal { session_id } => Ok(serde_json::to_value(
-                session::status(&mut self.store, session_id, true)?.changes,
-            )?),
+            Operation::GetChangeJournal { session_id } => {
+                self.sync_resident_journal(session_id)?;
+                Ok(serde_json::to_value(
+                    session::status(
+                        &mut self.store,
+                        session_id,
+                        !self.residents.contains_key(session_id),
+                    )?
+                    .changes,
+                )?)
+            }
             Operation::GetWorkspaceStatus { session_id } => {
                 self.sync_resident_journal(session_id)?;
                 Ok(serde_json::to_value(session::status(
@@ -89,15 +111,16 @@ impl Daemon {
                     !self.residents.contains_key(session_id),
                 )?)?)
             }
-            Operation::ListWorkspaces { active_only } => {
-                Ok(serde_json::to_value(session::list(&self.store, *active_only)?)?)
-            }
+            Operation::ListWorkspaces { active_only } => Ok(serde_json::to_value(session::list(
+                &self.store,
+                *active_only,
+            )?)?),
             Operation::ReadFileSummary {
                 session_id,
                 path,
                 max_bytes,
             } => {
-                if !self.mounts.contains_key(session_id) {
+                if !self.is_mounted(session_id) {
                     bail!("workspace is not mounted");
                 }
                 let normalized = normalize_relative(Path::new(path))?;
@@ -139,6 +162,21 @@ impl Daemon {
                 };
                 Ok(serde_json::to_value(result)?)
             }
+            Operation::ListPendingCheckpointPublications {} => Ok(serde_json::to_value(
+                self.store.pending_checkpoint_publications()?,
+            )?),
+            Operation::CompleteCheckpointPublication {
+                manifest_id,
+                memory_id,
+            } => {
+                self.store
+                    .mark_checkpoint_publication_published(manifest_id, memory_id)?;
+                Ok(json!({
+                    "manifest_id": manifest_id,
+                    "memory_id": memory_id,
+                    "published": true
+                }))
+            }
             Operation::UnmountWorkspace { session_id } => self.unmount(session_id),
             Operation::CloseWorkspace { session_id } => {
                 if self.mounts.contains_key(session_id) {
@@ -148,10 +186,8 @@ impl Daemon {
                 self.residents.remove(session_id);
                 Ok(json!({"session_id":session_id,"state":"closed"}))
             }
-            Operation::DestroyEphemeralWorkspace { session_id } => {
-                self.destroy(session_id)
-            }
-            Operation::Shutdown => {
+            Operation::DestroyEphemeralWorkspace { session_id } => self.destroy(session_id),
+            Operation::Shutdown {} => {
                 let ids = self.mounts.keys().cloned().collect::<Vec<_>>();
                 for id in ids {
                     self.unmount(&id)?;

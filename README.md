@@ -143,10 +143,20 @@ Implemented pieces include:
 ```shell
 cd agent-host
 uv sync
-uv run baml check
-uv run baml generate
+uv run reframe-generate-baml
+uv run reframe-check-baml
 uv run reframe-agent-host doctor
 ```
+
+Use `reframe-generate-baml` after editing `agent-host/baml_src`. It checks the
+BAML project, runs the deterministic workspace BAML tests, generates the Python
+SDK, and normalizes embedded source paths so generated artifacts are portable
+between checkouts. `reframe-check-baml` runs the same pipeline and fails if it
+changes a generated file; use it in CI and before committing. Both commands
+resolve the developer checkout from the current directory and fail clearly
+outside one; BAML sources are not part of the runtime wheel. Do not invoke
+`baml generate` directly, because its raw bytecode module contains
+checkout-specific absolute source paths.
 
 The Agent Host uses OpenCode Go through its OpenAI-compatible endpoint and reads
 the API key from `OPENCODE_GO_API_KEY`.

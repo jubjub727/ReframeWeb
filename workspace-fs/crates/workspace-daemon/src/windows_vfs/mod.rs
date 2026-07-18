@@ -10,9 +10,10 @@ use windows::Win32::Storage::ProjectedFileSystem::{
     PRJ_CALLBACKS, PRJ_FLAG_USE_NEGATIVE_PATH_CACHE, PRJ_NAMESPACE_VIRTUALIZATION_CONTEXT,
     PRJ_NOTIFICATION_MAPPING, PRJ_NOTIFY_FILE_HANDLE_CLOSED_FILE_DELETED,
     PRJ_NOTIFY_FILE_HANDLE_CLOSED_FILE_MODIFIED, PRJ_NOTIFY_FILE_RENAMED,
-    PRJ_NOTIFY_NEW_FILE_CREATED, PRJ_STARTVIRTUALIZING_OPTIONS, PRJ_UPDATE_ALLOW_DIRTY_DATA,
-    PRJ_UPDATE_ALLOW_DIRTY_METADATA, PRJ_UPDATE_ALLOW_READ_ONLY, PRJ_UPDATE_ALLOW_TOMBSTONE,
-    PrjDeleteFile, PrjMarkDirectoryAsPlaceholder, PrjStartVirtualizing, PrjStopVirtualizing,
+    PRJ_NOTIFY_NEW_FILE_CREATED, PRJ_NOTIFY_PRE_RENAME, PRJ_NOTIFY_PRE_SET_HARDLINK,
+    PRJ_STARTVIRTUALIZING_OPTIONS, PRJ_UPDATE_ALLOW_DIRTY_DATA, PRJ_UPDATE_ALLOW_DIRTY_METADATA,
+    PRJ_UPDATE_ALLOW_READ_ONLY, PRJ_UPDATE_ALLOW_TOMBSTONE, PrjDeleteFile,
+    PrjMarkDirectoryAsPlaceholder, PrjStartVirtualizing, PrjStopVirtualizing,
 };
 use windows::core::{GUID, HRESULT, PCWSTR};
 
@@ -23,7 +24,8 @@ use runtime::Runtime;
 
 pub struct Provider {
     context: PRJ_NAMESPACE_VIRTUALIZATION_CONTEXT,
-    runtime_ptr: *mut Runtime,
+    _runtime: Box<Runtime>,
+    stopped: bool,
     pub worktree: std::path::PathBuf,
 }
 
@@ -34,7 +36,11 @@ impl Provider {
         resident: std::sync::Arc<ResidentWorkspace>,
     ) -> Result<Self> {
         let worktree = session::worktree(store, session_id)?;
-        let runtime = Box::new(Runtime::load(store.root(), session_id, resident)?);
+        let runtime = Box::new(Runtime::load(store, session_id, resident)?);
+        // Resolve every store-backed input before ProjFS receives a pointer to
+        // `runtime`. After startup, all error paths must stop virtualization
+        // before that boxed callback context can be dropped.
+        let scratch_paths = store.scratch_paths(session_id)?;
         let instance_id = instance_id(session_id);
         unsafe {
         PrjMarkDirectoryAsPlaceholder(
@@ -59,6 +65,8 @@ impl Provider {
             NotificationBitMask: PRJ_NOTIFY_NEW_FILE_CREATED
                 | PRJ_NOTIFY_FILE_HANDLE_CLOSED_FILE_MODIFIED
                 | PRJ_NOTIFY_FILE_HANDLE_CLOSED_FILE_DELETED
+                | PRJ_NOTIFY_PRE_RENAME
+                | PRJ_NOTIFY_PRE_SET_HARDLINK
                 | PRJ_NOTIFY_FILE_RENAMED,
             NotificationRoot: PCWSTR::from_raw(notification_root.as_ptr()),
         };
@@ -69,24 +77,18 @@ impl Provider {
             NotificationMappings: &mut mapping,
             NotificationMappingsCount: 1,
         };
-        let runtime_ptr = Box::into_raw(runtime);
         let context = match unsafe {
             PrjStartVirtualizing(
-                PCWSTR::from_raw((*runtime_ptr).worktree_wide().as_ptr()),
+                PCWSTR::from_raw(runtime.worktree_wide().as_ptr()),
                 &callbacks,
-                Some(runtime_ptr.cast()),
+                Some((&*runtime as *const Runtime).cast_mut().cast()),
                 Some(&options),
             )
         } {
             Ok(context) => context,
-            Err(error) => {
-                unsafe {
-                    drop(Box::from_raw(runtime_ptr));
-                }
-                return Err(error).context("start ProjFS virtualization");
-            }
+            Err(error) => return Err(error).context("start ProjFS virtualization"),
         };
-        for path in session::scratch_paths(store, session_id)? {
+        for path in scratch_paths {
             if !crate::paths::is_literal_rule(&path) {
                 continue;
             }
@@ -94,7 +96,6 @@ impl Provider {
             {
                 unsafe {
                     PrjStopVirtualizing(context);
-                    drop(Box::from_raw(runtime_ptr));
                 }
                 return Err(error).context("create direct-disk scratch path");
             }
@@ -102,7 +103,8 @@ impl Provider {
 
         Ok(Self {
             context,
-            runtime_ptr,
+            _runtime: runtime,
+            stopped: false,
             worktree,
         })
     }
@@ -137,14 +139,30 @@ impl Provider {
         }
         Ok(())
     }
+
+    pub fn unmount(&mut self) -> Result<()> {
+        self.clear_cached_tree()?;
+        self.stop();
+        Ok(())
+    }
+
+    pub fn is_mounted(&self) -> bool {
+        !self.stopped
+    }
+
+    fn stop(&mut self) {
+        if !self.stopped {
+            unsafe {
+                PrjStopVirtualizing(self.context);
+            }
+            self.stopped = true;
+        }
+    }
 }
 
 impl Drop for Provider {
     fn drop(&mut self) {
-        unsafe {
-            PrjStopVirtualizing(self.context);
-            drop(Box::from_raw(self.runtime_ptr));
-        }
+        self.stop();
     }
 }
 

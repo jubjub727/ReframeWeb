@@ -15,7 +15,7 @@ from reframe_agent_host.workspace.planning import (
     filesystem_memory_catalog,
     resolve_workspace_plan,
 )
-from reframe_memory import FilesystemMemory, MemoryNode, MemoryTimestamps
+from reframe_memory import DirectoryFilesystemMemory, MemoryNode, MemoryTimestamps
 
 
 class WorkspacePlanningTests(unittest.IsolatedAsyncioTestCase):
@@ -56,7 +56,7 @@ class WorkspacePlanningTests(unittest.IsolatedAsyncioTestCase):
 
 
 class _FakeFilesystemMemories:
-    def __init__(self, node: MemoryNode[FilesystemMemory]) -> None:
+    def __init__(self, node: MemoryNode[DirectoryFilesystemMemory]) -> None:
         self.node = node
 
     async def get(self, memory_id: str):
@@ -67,20 +67,19 @@ class _FakeFilesystemMemories:
 
 
 class _FakeDatabase:
-    def __init__(self, node: MemoryNode[FilesystemMemory]) -> None:
+    def __init__(self, node: MemoryNode[DirectoryFilesystemMemory]) -> None:
         self.filesystem_memories = _FakeFilesystemMemories(node)
 
 
-def _node(source_path: str) -> MemoryNode[FilesystemMemory]:
+def _node(source_path: str) -> MemoryNode[DirectoryFilesystemMemory]:
     now = datetime.now(timezone.utc)
     return MemoryNode(
         id="memory_node:design",
         tags=("workspace",),
         timestamps=MemoryTimestamps(now, now, None),
-        content=FilesystemMemory(
+        content=DirectoryFilesystemMemory(
             title="Design",
             description="Workspace design memory",
-            source_kind="directory",
             source_path=source_path,
         ),
     )

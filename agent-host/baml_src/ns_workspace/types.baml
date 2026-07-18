@@ -33,8 +33,8 @@ class WorkspacePlan {
 
 class WorkspaceChange {
     path: string,
-    change_kind: "create" | "write" | "rename" | "delete" | "metadata",
-    size_bytes: int?,
+    kind: "create" | "write" | "delete",
+    size: int?,
 }
 
 class CheckpointSelection {

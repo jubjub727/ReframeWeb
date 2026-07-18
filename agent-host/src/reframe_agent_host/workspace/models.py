@@ -1,31 +1,31 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal, TypeAlias
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class WorkspaceModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class MemorySource(WorkspaceModel):
+class DirectoryMemorySource(WorkspaceModel):
     memory_id: str
-    source_kind: Literal["directory", "checkpoint"]
-    source_path: str | None = None
-    backing_store: str | None = None
-    manifest_id: str | None = None
+    source_kind: Literal["directory"] = "directory"
+    source_path: str
 
-    @model_validator(mode="after")
-    def validate_locator(self) -> "MemorySource":
-        if self.source_kind == "directory":
-            if self.source_path is None or self.backing_store or self.manifest_id:
-                raise ValueError("directory memory source requires only source_path")
-        elif self.source_path or self.backing_store is None or self.manifest_id is None:
-            raise ValueError(
-                "checkpoint memory source requires backing_store and manifest_id"
-            )
-        return self
+
+class CheckpointMemorySource(WorkspaceModel):
+    memory_id: str
+    source_kind: Literal["checkpoint"] = "checkpoint"
+    backing_store: str
+    manifest_id: str
+
+
+MemorySource: TypeAlias = Annotated[
+    DirectoryMemorySource | CheckpointMemorySource,
+    Field(discriminator="source_kind"),
+]
 
 
 class WorkspaceChange(WorkspaceModel):
@@ -44,7 +44,7 @@ class WorkspaceCreated(WorkspaceModel):
 class WorkspaceStatus(WorkspaceModel):
     session_id: str
     name: str
-    state: str
+    state: Literal["active", "closed"]
     worktree: str
     head_manifest: str | None
     memory_ids: list[str]
@@ -54,19 +54,30 @@ class WorkspaceStatus(WorkspaceModel):
 class WorkspaceSummary(WorkspaceModel):
     session_id: str
     name: str
-    state: str
+    state: Literal["active", "closed"]
     head_manifest: str | None
     memory_ids: list[str]
     created_at: int
     updated_at: int
 
 
-class CheckpointResult(WorkspaceModel):
+class DaemonCheckpointResult(WorkspaceModel):
     session_id: str
     manifest_id: str
     retained_paths: list[str]
     remaining_changes: list[WorkspaceChange]
-    memory_id: str | None = None
+
+
+class PublishedCheckpointResult(DaemonCheckpointResult):
+    memory_id: str
+
+
+class PendingCheckpointPublication(WorkspaceModel):
+    manifest_id: str
+    session_id: str
+    session_name: str
+    base_memory_ids: list[str]
+    retained_count: int
 
 
 class MountedWorkspace(WorkspaceModel):

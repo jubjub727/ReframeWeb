@@ -1,4 +1,6 @@
-fn runtime<'a>(data: *const PRJ_CALLBACK_DATA) -> Result<&'a Runtime, HRESULT> {
+use super::*;
+
+pub(super) fn runtime<'a>(data: *const PRJ_CALLBACK_DATA) -> Result<&'a Runtime, HRESULT> {
     if data.is_null() {
         return Err(E_INVALIDARG);
     }
@@ -9,7 +11,7 @@ fn runtime<'a>(data: *const PRJ_CALLBACK_DATA) -> Result<&'a Runtime, HRESULT> {
     Ok(unsafe { &*context })
 }
 
-fn guard(label: &str, operation: impl FnOnce() -> Result<(), HRESULT>) -> HRESULT {
+pub(super) fn guard(label: &str, operation: impl FnOnce() -> Result<(), HRESULT>) -> HRESULT {
     match catch_unwind(AssertUnwindSafe(operation)) {
         Ok(Ok(())) => S_OK,
         Ok(Err(code)) => {
@@ -25,7 +27,12 @@ fn guard(label: &str, operation: impl FnOnce() -> Result<(), HRESULT>) -> HRESUL
     }
 }
 
-fn wide(value: PCWSTR) -> Result<String, HRESULT> {
+pub(super) fn callback_error(label: &str, error: &dyn std::fmt::Display) -> HRESULT {
+    eprintln!("[projfs] {label} failed: {error}");
+    E_FAIL
+}
+
+pub(super) fn wide(value: PCWSTR) -> Result<String, HRESULT> {
     if value.is_null() {
         return Ok(String::new());
     }
@@ -34,11 +41,11 @@ fn wide(value: PCWSTR) -> Result<String, HRESULT> {
         .map_err(|_| E_INVALIDARG)
 }
 
-fn wide_null(value: &str) -> Vec<u16> {
+pub(super) fn wide_null(value: &str) -> Vec<u16> {
     value.encode_utf16().chain([0]).collect()
 }
 
-fn matches_name(name: &str, expression: &str) -> bool {
+pub(super) fn matches_name(name: &str, expression: &str) -> bool {
     let name = wide_null(name);
     let expression = wide_null(expression);
     unsafe {
@@ -49,7 +56,7 @@ fn matches_name(name: &str, expression: &str) -> bool {
     }
 }
 
-fn compare_name(left: &str, right: &str) -> std::cmp::Ordering {
+pub(super) fn compare_name(left: &str, right: &str) -> std::cmp::Ordering {
     let left = wide_null(left);
     let right = wide_null(right);
     unsafe {
@@ -61,7 +68,7 @@ fn compare_name(left: &str, right: &str) -> std::cmp::Ordering {
     .cmp(&0)
 }
 
-fn basic_info(is_directory: bool, size: u64) -> PRJ_FILE_BASIC_INFO {
+pub(super) fn basic_info(is_directory: bool, size: u64) -> PRJ_FILE_BASIC_INFO {
     PRJ_FILE_BASIC_INFO {
         IsDirectory: is_directory,
         FileSize: size as i64,

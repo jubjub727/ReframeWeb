@@ -1,23 +1,28 @@
-use std::ffi::OsStr;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime};
 
-use fuser::{
-    Errno, FileAttr, FileHandle, FileType, Filesystem, FopenFlags, Generation, INodeNo, OpenFlags,
-    RenameFlags, ReplyAttr, ReplyCreate, ReplyData, ReplyDirectory, ReplyEmpty, ReplyEntry,
-    ReplyOpen, ReplyStatfs, ReplyWrite, Request, TimeOrNow, WriteFlags,
-};
+use fuser::{Errno, FileAttr, FileType, INodeNo};
 
-use super::index::{InodeTable, ROOT_INODE, child, parent};
-use super::scratch::{ScratchBackend, ensure_same_storage};
+use super::error::errno;
+use super::handles::OpenFileTable;
+use super::index::InodeTable;
+use super::scratch::ScratchBackend;
 use crate::resident::ResidentWorkspace;
 
-const TTL: Duration = Duration::from_millis(50);
+pub(super) const TTL: Duration = Duration::from_millis(50);
+
+#[derive(Clone, Copy)]
+pub(in crate::unix_vfs) struct PathMetadata {
+    pub kind: FileType,
+    pub size: u64,
+    pub perm: u16,
+}
 
 pub struct ResidentFuse {
-    resident: Arc<ResidentWorkspace>,
-    scratch: ScratchBackend,
-    inodes: Mutex<InodeTable>,
+    pub(super) resident: Arc<ResidentWorkspace>,
+    pub(super) scratch: ScratchBackend,
+    pub(super) inodes: Mutex<InodeTable>,
+    pub(super) handles: Mutex<OpenFileTable>,
     created: SystemTime,
 }
 
@@ -30,31 +35,17 @@ impl ResidentFuse {
             resident,
             scratch: ScratchBackend::new(scratch_root)?,
             inodes: Mutex::new(InodeTable::new()),
+            handles: Mutex::new(OpenFileTable::new()),
             created: SystemTime::now(),
         })
     }
 
-    fn path(&self, inode: INodeNo) -> Result<String, Errno> {
-        self.inodes
-            .lock()
-            .map_err(|_| Errno::EIO)?
-            .path(inode)
-            .ok_or(Errno::ENOENT)
-    }
-
-    fn child_path(&self, parent: INodeNo, name: &OsStr) -> Result<String, Errno> {
-        let parent = self.path(parent)?;
-        child(&parent, name).ok_or(Errno::EINVAL)
-    }
-
-    fn inode(&self, path: &str) -> Result<INodeNo, Errno> {
-        Ok(self.inodes.lock().map_err(|_| Errno::EIO)?.ensure(path))
-    }
-
-    fn attr(&self, path: &str) -> Result<FileAttr, Errno> {
+    pub(in crate::unix_vfs) fn path_metadata(&self, path: &str) -> Result<PathMetadata, Errno> {
         let scratch = self.resident.is_scratch(path);
         let metadata = if scratch {
-            self.scratch.metadata(path)
+            self.scratch
+                .metadata(path)
+                .map_err(|error| errno("read scratch metadata", &error))?
         } else {
             None
         };
@@ -69,8 +60,76 @@ impl ResidentFuse {
         } else {
             return Err(Errno::ENOENT);
         };
-        Ok(FileAttr {
-            ino: self.inode(path)?,
+        Ok(PathMetadata { kind, size, perm })
+    }
+
+    pub(in crate::unix_vfs) fn attr_from_metadata(
+        &self,
+        inode: INodeNo,
+        metadata: PathMetadata,
+    ) -> FileAttr {
+        self.make_attr(
+            inode,
+            metadata.size,
+            metadata.kind,
+            metadata.perm,
+            if metadata.kind == FileType::Directory {
+                2
+            } else {
+                1
+            },
+        )
+    }
+
+    pub(in crate::unix_vfs) fn contains_unlocked(&self, path: &str) -> Result<bool, Errno> {
+        match self.path_metadata(path) {
+            Ok(_) => Ok(true),
+            Err(error) if error.code() == libc::ENOENT => Ok(false),
+            Err(error) => Err(error),
+        }
+    }
+
+    pub(in crate::unix_vfs) fn entries_unlocked(
+        &self,
+        path: &str,
+    ) -> Result<Vec<(String, bool, u64)>, Errno> {
+        if self.resident.is_scratch(path) {
+            return self
+                .scratch
+                .entries(path)
+                .map_err(|error| errno("read scratch directory", &error));
+        }
+        let mut entries = self.resident.entries(path);
+        let scratch_entries = self
+            .scratch
+            .entries(path)
+            .map_err(|error| errno("read overlaid scratch directory", &error))?;
+        for entry in scratch_entries {
+            let child = if path.is_empty() {
+                entry.0.clone()
+            } else {
+                format!("{path}/{}", entry.0)
+            };
+            if self.resident.is_scratch(&child)
+                && !entries.iter().any(|existing| existing.0 == entry.0)
+            {
+                entries.push(entry);
+            }
+        }
+        entries.sort_by(|left, right| left.0.cmp(&right.0));
+        Ok(entries)
+    }
+
+    pub(in crate::unix_vfs) fn make_attr(
+        &self,
+        inode: INodeNo,
+        size: u64,
+        kind: FileType,
+        perm: u16,
+        nlink: u32,
+    ) -> FileAttr {
+        FileAttr {
+            ino: inode,
             size,
             blocks: 0,
             atime: self.created,
@@ -79,94 +138,12 @@ impl ResidentFuse {
             crtime: self.created,
             kind,
             perm,
-            nlink: if kind == FileType::Directory { 2 } else { 1 },
+            nlink,
             uid: unsafe { libc::getuid() },
             gid: unsafe { libc::getgid() },
             rdev: 0,
             blksize: 4096,
             flags: 0,
-        })
-    }
-
-    fn reply_entry(&self, path: &str, reply: ReplyEntry) {
-        match self.attr(path) {
-            Ok(attr) => reply.entry(&TTL, &attr, Generation(0)),
-            Err(error) => reply.error(error),
-        }
-    }
-
-    fn contains(&self, path: &str) -> bool {
-        if self.resident.is_scratch(path) {
-            self.scratch.metadata(path).is_some()
-        } else {
-            self.resident.contains_path(path)
-        }
-    }
-
-    fn entries(&self, path: &str) -> Vec<(String, bool, u64)> {
-        if self.resident.is_scratch(path) {
-            self.scratch.entries(path).unwrap_or_default()
-        } else {
-            let mut entries = self.resident.entries(path);
-            for entry in self.scratch.entries(path).unwrap_or_default() {
-                let child = if path.is_empty() {
-                    entry.0.clone()
-                } else {
-                    format!("{path}/{}", entry.0)
-                };
-                if self.resident.is_scratch(&child)
-                    && !entries.iter().any(|existing| existing.0 == entry.0)
-                {
-                    entries.push(entry);
-                }
-            }
-            entries.sort_by(|left, right| left.0.cmp(&right.0));
-            entries
-        }
-    }
-}
-
-impl Filesystem for ResidentFuse {
-    include!("callbacks/metadata.rs");
-    include!("callbacks/io.rs");
-    include!("callbacks/tree.rs");
-}
-impl ResidentFuse {
-    fn remove_child(
-        &self,
-        parent_inode: INodeNo,
-        entry_name: &OsStr,
-        directory: bool,
-        reply: ReplyEmpty,
-    ) {
-        let result = self.child_path(parent_inode, entry_name).and_then(|path| {
-            let scratch = self.resident.is_scratch(&path);
-            let is_directory = self
-                .attr(&path)
-                .is_ok_and(|attr| attr.kind == FileType::Directory);
-            if directory {
-                if !is_directory {
-                    return Err(Errno::ENOTDIR);
-                }
-                if !self.entries(&path).is_empty() {
-                    return Err(Errno::ENOTEMPTY);
-                }
-            } else if is_directory {
-                return Err(Errno::EISDIR);
-            } else if !self.contains(&path) {
-                return Err(Errno::ENOENT);
-            }
-            if scratch {
-                self.scratch
-                    .remove(&path, directory)
-                    .map_err(|_| Errno::EIO)
-            } else {
-                self.resident.remove(&path).map_err(|_| Errno::EIO)
-            }
-        });
-        match result {
-            Ok(()) => reply.ok(),
-            Err(error) => reply.error(error),
         }
     }
 }

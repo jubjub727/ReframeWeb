@@ -3,11 +3,22 @@
 This directory contains the internal Rust filesystem service used by the
 uv-managed Agent Host. It is not a separate user-facing application.
 
-`agent-host` declares `reframe-workspace-daemon` as a local Python dependency.
-The package uses maturin's binary bindings, so `uv sync` compiles the optimized
-Rust service and installs its executable into the same virtual environment as
-`reframe-agent-host`. Python connects to one persistent per-user daemon over
-the local framed IPC boundary described below.
+`agent-host` declares a version-matched `reframe-workspace-daemon` companion
+distribution. During development,
+uv resolves that dependency from this directory and maturin installs the Rust
+executable into the same virtual environment as `reframe-agent-host`. The Agent
+Host wheel does not embed the daemon or a checkout-relative path: a release must
+publish the companion platform wheel alongside the Agent Host wheel. Packaging
+CI resolves the published dependency graph, builds and installs both
+distributions together, then exercises the generated BAML runtime and daemon
+lookup. Python connects to one persistent per-user daemon over the local framed
+IPC boundary described below.
+
+The Agent Host also records its BAML bridge as an exact PEP 508 Git reference,
+including the commit and repository subdirectory, so ordinary installation may
+need Git plus a Rust build toolchain. The intended release channel must permit
+direct references. Moving to a registry-only channel requires publishing that
+exact bridge build first and replacing the direct reference deliberately.
 
 The mounted filesystem never calls Python, BAML, an LLM, or the network.
 Python owns memory graph access, policy orchestration, child-process launching,
@@ -105,6 +116,9 @@ the shared backing store and manifest plus its base memories; it does not own or
 duplicate those stored objects. Any number of memory nodes can reference the
 same persistent manifest. `--continue` resolves the published checkpoint memory
 through the normal Python memory surface and projects it like any other memory.
+Manifest commit and a SQLite publication-outbox row share one transaction, so a
+host or graph-database failure cannot lose a committed checkpoint; the Agent
+Host reconciles pending rows idempotently on a later invocation.
 
 Commands can run non-interactively through the same mounted lifecycle:
 
@@ -122,8 +136,17 @@ The installed daemon serves four-byte little-endian length-prefixed JSON over a
 user-local named pipe on Windows and a Unix-domain socket on Linux/macOS. Every
 request and response carries a request ID. Connections carry one request and
 close after its response, so a long-lived task shell never monopolizes IPC.
-Mutating requests require idempotency keys; responses are
-persisted in SQLite and replayed safely after retries.
+Mutating requests require idempotency keys. Durable workspace mutations persist
+their responses in SQLite for replay, while process-local lifecycle operations
+such as mount, prefetch, unmount, and shutdown re-evaluate the current daemon
+state after a restart. The hello handshake validates the protocol version,
+frame limit, capabilities, and operation idempotency-scope table before normal
+requests proceed. Both transports enforce bounded I/O, and an exclusive store
+lock prevents two daemon processes from
+owning the same endpoint and SQLite store.
+Completed durable replay records and published outbox entries are retained for
+30 days; pending reservations and publications remain until explicitly
+reconciled so crash recovery evidence is never pruned automatically.
 
 Implemented operations cover hello/health, create/apply-policy, mount/prefetch,
 journal/status/file-summary, checkpoint, unmount, close, destroy, and shutdown.
@@ -136,14 +159,26 @@ need a disk surrogate. Python launches the requested child only after
 `agent-host/baml_src/ns_workspace` contains deterministic workspace policy and
 checkpoint types plus manual helper functions. They make the future policy call
 surface typed without introducing an LLM function or prompt. Generated Python
-models live in the existing `baml_sdk.workspace` namespace.
+models live in the existing `baml_sdk.workspace` namespace. After changing this
+BAML source, run these checkout-only commands from `agent-host`:
+
+```powershell
+uv run reframe-generate-baml
+uv run reframe-check-baml
+```
+
+The wrapper also normalizes embedded source paths so generated artifacts remain
+portable. The check command verifies that committed output is current. These
+developer commands resolve BAML sources from the current checkout rather than
+assuming they were packaged into the runtime wheel.
 
 ## Storage
 
 The workspace store contains:
 
-- SQLite WAL metadata for resolved source references, workspaces, direct-disk
-  policy, baselines, journals, immutable manifests, heads, and idempotency.
+- Versioned SQLite WAL metadata for resolved source references, workspaces,
+  direct-disk policy, baselines, journals, immutable manifests, heads,
+  idempotency, and checkpoint publication outbox state.
 - Immutable BLAKE3-addressed retained blobs written before head advancement.
 - Per-session mountpoints that are empty while unmounted.
 - Provider-owned, hash-deduplicated RAM for active session files and empty

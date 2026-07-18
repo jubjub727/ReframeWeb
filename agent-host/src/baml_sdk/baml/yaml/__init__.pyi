@@ -48,7 +48,7 @@ def deserialize(s: str, *, _types: dict[str, type]) -> T:
     `baml.json.deserialize<T>`. Parsing throws `YamlParseError`; decoding the
     resulting `json` into `T` throws `JsonDecodeError` (decoding never re-parses,
     so no `JsonParseError` arises here).
-    
+
     Raises:
         YamlParseError, JsonDecodeError"""
 async def deserialize_async(s: str, *, _types: dict[str, type]) -> T:
@@ -57,7 +57,7 @@ async def deserialize_async(s: str, *, _types: dict[str, type]) -> T:
     `baml.json.deserialize<T>`. Parsing throws `YamlParseError`; decoding the
     resulting `json` into `T` throws `JsonDecodeError` (decoding never re-parses,
     so no `JsonParseError` arises here).
-    
+
     Raises:
         YamlParseError, JsonDecodeError"""
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Generic, Literal, TypeAlias, TypeVar
 
@@ -79,29 +80,39 @@ class SessionMemory:
     description: str
 
 
-@dataclass(frozen=True)
-class FilesystemMemory:
+@dataclass(frozen=True, kw_only=True)
+class FilesystemMemory(ABC):
     title: str
     description: str
-    source_kind: Literal["directory", "checkpoint"]
-    source_path: str | None = None
-    backing_store: str | None = None
-    manifest_id: str | None = None
     base_memory_ids: tuple[str, ...] = ()
 
+    @property
+    @abstractmethod
+    def source_kind(self) -> Literal["directory", "checkpoint"]:
+        """Discriminator supplied by concrete, persistable memory variants."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class DirectoryFilesystemMemory(FilesystemMemory):
+    source_path: str
+    source_kind: Literal["directory"] = field(default="directory", init=False)
+
     def __post_init__(self) -> None:
-        if self.source_kind not in {"directory", "checkpoint"}:
-            raise ValueError(f"unsupported filesystem memory source: {self.source_kind}")
-        directory = self.source_kind == "directory"
-        if directory != (self.source_path is not None):
-            raise ValueError("directory filesystem memories require only source_path")
-        checkpoint = self.source_kind == "checkpoint"
-        if checkpoint != (self.backing_store is not None and self.manifest_id is not None):
+        if not self.source_path:
+            raise ValueError("directory filesystem memory source_path cannot be empty")
+
+
+@dataclass(frozen=True, kw_only=True)
+class CheckpointFilesystemMemory(FilesystemMemory):
+    backing_store: str
+    manifest_id: str
+    source_kind: Literal["checkpoint"] = field(default="checkpoint", init=False)
+
+    def __post_init__(self) -> None:
+        if not self.backing_store or not self.manifest_id:
             raise ValueError(
                 "checkpoint filesystem memories require backing_store and manifest_id"
             )
-        if directory and (self.backing_store is not None or self.manifest_id is not None):
-            raise ValueError("directory filesystem memories cannot reference a checkpoint")
 
 
 @dataclass(frozen=True)

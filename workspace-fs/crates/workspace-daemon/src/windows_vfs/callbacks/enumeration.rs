@@ -1,3 +1,5 @@
+use super::*;
+
 pub unsafe extern "system" fn start_enumeration(
     data: *const PRJ_CALLBACK_DATA,
     id: *const GUID,

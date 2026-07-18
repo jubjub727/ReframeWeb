@@ -65,15 +65,15 @@ class Bigint(pydantic.BaseModel):
     @staticmethod
     def parse(text: str) -> int:
         """Parses `text` as a base-ten signed integer.
-        
+
         Accepts an optional leading `+` or `-` sign followed by one or more
         ASCII digits. No surrounding whitespace, no underscore separators,
         no hex / octal / binary prefix (`0x` / `0o` / `0b`), no Unicode digits,
         no scientific notation. Callers needing those should preprocess the
         string.
-        
+
         Throws `ParseError` if `text` is empty or contains a non-digit character.
-        
+
         # Examples
         ```
         bigint.parse("42")       // 42n
@@ -86,21 +86,21 @@ class Bigint(pydantic.BaseModel):
         bigint.parse(" 5 ")      // throws — whitespace not allowed; trim first
         bigint.parse("99999999999999999999")  // 99999999999999999999n
         ```
-        
+
         Raises:
             ParseError"""
     @staticmethod
     async def parse_async(text: str) -> int:
         """Parses `text` as a base-ten signed integer.
-        
+
         Accepts an optional leading `+` or `-` sign followed by one or more
         ASCII digits. No surrounding whitespace, no underscore separators,
         no hex / octal / binary prefix (`0x` / `0o` / `0b`), no Unicode digits,
         no scientific notation. Callers needing those should preprocess the
         string.
-        
+
         Throws `ParseError` if `text` is empty or contains a non-digit character.
-        
+
         # Examples
         ```
         bigint.parse("42")       // 42n
@@ -113,18 +113,18 @@ class Bigint(pydantic.BaseModel):
         bigint.parse(" 5 ")      // throws — whitespace not allowed; trim first
         bigint.parse("99999999999999999999")  // 99999999999999999999n
         ```
-        
+
         Raises:
             ParseError"""
     @staticmethod
     def random(lower: int, upper: int) -> int:
         """Returns a uniformly distributed random integer in the half-open range
         `[lower, upper)`.
-        
+
         Throws `InvalidArgument` if `lower >= upper` (the range would be empty).
         Uses the host's cryptographic entropy source — no user-supplied RNG
         handle.
-        
+
         # Examples
         ```
         bigint.random(0n, 10n)         // some value in {0, 1, ..., 9}
@@ -133,18 +133,18 @@ class Bigint(pydantic.BaseModel):
         bigint.random(5n, 5n)          // throws — empty range
         bigint.random(10n, 0n)         // throws — lower > upper
         ```
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     async def random_async(lower: int, upper: int) -> int:
         """Returns a uniformly distributed random integer in the half-open range
         `[lower, upper)`.
-        
+
         Throws `InvalidArgument` if `lower >= upper` (the range would be empty).
         Uses the host's cryptographic entropy source — no user-supplied RNG
         handle.
-        
+
         # Examples
         ```
         bigint.random(0n, 10n)         // some value in {0, 1, ..., 9}
@@ -153,7 +153,7 @@ class Bigint(pydantic.BaseModel):
         bigint.random(5n, 5n)          // throws — empty range
         bigint.random(10n, 0n)         // throws — lower > upper
         ```
-        
+
         Raises:
             InvalidArgument"""
     def abs(self) -> int:
@@ -174,7 +174,7 @@ class Bigint(pydantic.BaseModel):
         ```"""
     def min(self, other: int) -> int:
         """Returns the smaller of `self` and `other`.
-        
+
         # Examples
         ```
         (3n).min(5n)   // 3n
@@ -183,7 +183,7 @@ class Bigint(pydantic.BaseModel):
         ```"""
     async def min_async(self, other: int) -> int:
         """Returns the smaller of `self` and `other`.
-        
+
         # Examples
         ```
         (3n).min(5n)   // 3n
@@ -192,7 +192,7 @@ class Bigint(pydantic.BaseModel):
         ```"""
     def max(self, other: int) -> int:
         """Returns the larger of `self` and `other`.
-        
+
         # Examples
         ```
         (3n).max(5n)   // 5n
@@ -201,7 +201,7 @@ class Bigint(pydantic.BaseModel):
         ```"""
     async def max_async(self, other: int) -> int:
         """Returns the larger of `self` and `other`.
-        
+
         # Examples
         ```
         (3n).max(5n)   // 5n
@@ -210,11 +210,11 @@ class Bigint(pydantic.BaseModel):
         ```"""
     def clamp(self, min: int, max: int) -> int:
         """Clamps `self` into the range `[min, max]`.
-        
+
         Equivalent to `self.min(max).max(min)`. Callers should pass `min <= max`;
         if `min > max` the result is always `min` (the lower-clamp wins because
         it runs after the upper-clamp).
-        
+
         # Examples
         ```
         (5n).clamp(0n, 10n)    // 5n
@@ -223,11 +223,11 @@ class Bigint(pydantic.BaseModel):
         ```"""
     async def clamp_async(self, min: int, max: int) -> int:
         """Clamps `self` into the range `[min, max]`.
-        
+
         Equivalent to `self.min(max).max(min)`. Callers should pass `min <= max`;
         if `min > max` the result is always `min` (the lower-clamp wins because
         it runs after the upper-clamp).
-        
+
         # Examples
         ```
         (5n).clamp(0n, 10n)    // 5n
@@ -237,9 +237,9 @@ class Bigint(pydantic.BaseModel):
     def isqrt(self) -> int:
         """Returns the integer square root of `self` — that is, the largest `bigint`
         `r` such that `r * r <= self`.
-        
+
         Throws `InvalidArgument` if `self` is negative.
-        
+
         # Examples
         ```
         (10n).isqrt()   // 3n
@@ -247,15 +247,15 @@ class Bigint(pydantic.BaseModel):
         (0n).isqrt()    // 0n
         (-1n).isqrt()   // throws
         ```
-        
+
         Raises:
             InvalidArgument"""
     async def isqrt_async(self) -> int:
         """Returns the integer square root of `self` — that is, the largest `bigint`
         `r` such that `r * r <= self`.
-        
+
         Throws `InvalidArgument` if `self` is negative.
-        
+
         # Examples
         ```
         (10n).isqrt()   // 3n
@@ -263,7 +263,7 @@ class Bigint(pydantic.BaseModel):
         (0n).isqrt()    // 0n
         (-1n).isqrt()   // throws
         ```
-        
+
         Raises:
             InvalidArgument"""
     def pow(self, exp: int) -> int: ...
@@ -271,9 +271,9 @@ class Bigint(pydantic.BaseModel):
     def ilog(self, base: int) -> int:
         """Returns the integer logarithm of `self` in the given `base`, rounded
         down — i.e. the largest `n` such that `base ** n <= self`.
-        
+
         Throws `InvalidArgument` if `self <= 0` or `base < 2`.
-        
+
         # Examples
         ```
         (1000n).ilog(10n)   // 3n
@@ -282,15 +282,15 @@ class Bigint(pydantic.BaseModel):
         (0n).ilog(10n)      // throws
         (10n).ilog(1n)      // throws
         ```
-        
+
         Raises:
             InvalidArgument"""
     async def ilog_async(self, base: int) -> int:
         """Returns the integer logarithm of `self` in the given `base`, rounded
         down — i.e. the largest `n` such that `base ** n <= self`.
-        
+
         Throws `InvalidArgument` if `self <= 0` or `base < 2`.
-        
+
         # Examples
         ```
         (1000n).ilog(10n)   // 3n
@@ -299,7 +299,7 @@ class Bigint(pydantic.BaseModel):
         (0n).ilog(10n)      // throws
         (10n).ilog(1n)      // throws
         ```
-        
+
         Raises:
             InvalidArgument"""
 
@@ -314,13 +314,13 @@ async def _compare_shim_async(a: T, b: T, *, _types: dict[str, type]) -> int: ..
 
 def _float_total_cmp(a: float, b: float) -> int:
     """Three-way compares two floats by IEEE 754 `totalOrder` (`f64::total_cmp`).
-    
+
     Internal shim backing `Comparable for float` (above) and kept bit-exact
     with the float comparator inside the native `_rust_sort`; not part of the
     public `Comparable`/`Sortable` surface."""
 async def _float_total_cmp_async(a: float, b: float) -> int:
     """Three-way compares two floats by IEEE 754 `totalOrder` (`f64::total_cmp`).
-    
+
     Internal shim backing `Comparable for float` (above) and kept bit-exact
     with the float comparator inside the native `_rust_sort`; not part of the
     public `Comparable`/`Sortable` surface."""
@@ -338,34 +338,34 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
     @staticmethod
     def filled(length: int, value: T) -> typing.List[T]:
         """Builds a new array of `length` elements, each equal to `value`.
-        
+
         This is the idiomatic way to allocate a runtime-sized, pre-initialized
         buffer — Fenwick trees, DP tables, adjacency lists — without a manual
         `while`/`push` loop. (Remember a 1-indexed structure needs `length + 1`
         slots.)
-        
+
         # Parameters
         - `length`: the number of elements to create. A negative or zero `length`
           produces an empty array.
         - `value`: the value stored in every slot.
-        
+
         # Warning
         `Array.filled` reuses the exact same `value` for every slot. For reference
         types (arrays, maps, class instances), every slot aliases the same object.
         Mutating one slot mutates all slots.
-        
+
         To get independent per-slot values, use `Array.generate`, which calls a
         factory once per index:
         ```
         Array.generate(3, (i: int) -> int[] { [] })   // three independent []s
         ```
-        
+
         # Returns
         A fresh `T[]` of length `max(length, 0)` with every element equal to
         `value`.
-        
+
         Never throws.
-        
+
         # Examples
         ```
         Array.filled(3, 0)     // [0, 0, 0]
@@ -377,34 +377,34 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
     @staticmethod
     async def filled_async(length: int, value: T) -> typing.List[T]:
         """Builds a new array of `length` elements, each equal to `value`.
-        
+
         This is the idiomatic way to allocate a runtime-sized, pre-initialized
         buffer — Fenwick trees, DP tables, adjacency lists — without a manual
         `while`/`push` loop. (Remember a 1-indexed structure needs `length + 1`
         slots.)
-        
+
         # Parameters
         - `length`: the number of elements to create. A negative or zero `length`
           produces an empty array.
         - `value`: the value stored in every slot.
-        
+
         # Warning
         `Array.filled` reuses the exact same `value` for every slot. For reference
         types (arrays, maps, class instances), every slot aliases the same object.
         Mutating one slot mutates all slots.
-        
+
         To get independent per-slot values, use `Array.generate`, which calls a
         factory once per index:
         ```
         Array.generate(3, (i: int) -> int[] { [] })   // three independent []s
         ```
-        
+
         # Returns
         A fresh `T[]` of length `max(length, 0)` with every element equal to
         `value`.
-        
+
         Never throws.
-        
+
         # Examples
         ```
         Array.filled(3, 0)     // [0, 0, 0]
@@ -416,23 +416,23 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
     @staticmethod
     def generate(length: int, f: typing.Callable[[int], T], *, _types: dict[str, type]) -> typing.List[T]:
         """Builds a new array of `length` elements by calling `f` once per index.
-        
+
         `f` is invoked with each index `0, 1, ..., length - 1` in order, and its
         result is stored in that slot. Unlike `Array.filled`, which reuses one
         shared value, `generate` produces an **independent value per slot** — the
         alias-free way to build runtime-sized buffers of reference types (rows of a
         grid, per-slot maps or class instances). It mirrors JavaScript's
         `Array.from({ length }, f)` and a Python list comprehension.
-        
+
         # Parameters
         - `length`: the number of elements to create. A negative or zero `length`
           produces an empty array and never calls `f`.
         - `f`: called once per index to produce that slot's value. Any error it
           throws propagates to the caller, halting generation.
-        
+
         # Returns
         A fresh `T[]` of length `max(length, 0)` whose element `i` is `f(i)`.
-        
+
         # Examples
         ```
         Array.generate(3, (i: int) -> int { i * i })      // [0, 1, 4]
@@ -443,23 +443,23 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
     @staticmethod
     async def generate_async(length: int, f: typing.Callable[[int], T], *, _types: dict[str, type]) -> typing.List[T]:
         """Builds a new array of `length` elements by calling `f` once per index.
-        
+
         `f` is invoked with each index `0, 1, ..., length - 1` in order, and its
         result is stored in that slot. Unlike `Array.filled`, which reuses one
         shared value, `generate` produces an **independent value per slot** — the
         alias-free way to build runtime-sized buffers of reference types (rows of a
         grid, per-slot maps or class instances). It mirrors JavaScript's
         `Array.from({ length }, f)` and a Python list comprehension.
-        
+
         # Parameters
         - `length`: the number of elements to create. A negative or zero `length`
           produces an empty array and never calls `f`.
         - `f`: called once per index to produce that slot's value. Any error it
           throws propagates to the caller, halting generation.
-        
+
         # Returns
         A fresh `T[]` of length `max(length, 0)` whose element `i` is `f(i)`.
-        
+
         # Examples
         ```
         Array.generate(3, (i: int) -> int { i * i })      // [0, 1, 4]
@@ -473,9 +473,9 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
         """Returns the number of elements in the array."""
     def at(self, index: int) -> typing.Optional[T]:
         """Returns the element at `index`, or `null` if out of bounds.
-        
+
         Negative indices count from the end: `-1` is the last element.
-        
+
         # Examples
         ```
         [10, 20, 30].at(0)    // 10
@@ -485,9 +485,9 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
         ```"""
     async def at_async(self, index: int) -> typing.Optional[T]:
         """Returns the element at `index`, or `null` if out of bounds.
-        
+
         Negative indices count from the end: `-1` is the last element.
-        
+
         # Examples
         ```
         [10, 20, 30].at(0)    // 10
@@ -529,10 +529,10 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
     async def sort_by_key_async(self, key: typing.Callable[[T], U], *, _types: dict[str, type]) -> typing.List[T]: ...
     def slice(self, start: int, end: int) -> typing.List[T]:
         """Returns a sub-array from index `start` (inclusive) to `end` (exclusive).
-        
+
         Negative indices count from the end. Out-of-range indices are clamped, and
         an `end` that resolves at or before `start` yields an empty array.
-        
+
         # Examples
         ```
         [1, 2, 3, 4].slice(1, 3)   // [2, 3]
@@ -541,10 +541,10 @@ class Array(pydantic.BaseModel, typing.Generic[T]):
         ```"""
     async def slice_async(self, start: int, end: int) -> typing.List[T]:
         """Returns a sub-array from index `start` (inclusive) to `end` (exclusive).
-        
+
         Negative indices count from the end. Out-of-range indices are clamped, and
         an `end` that resolves at or before `start` yields an empty array.
-        
+
         # Examples
         ```
         [1, 2, 3, 4].slice(1, 3)   // [2, 3]
@@ -699,16 +699,16 @@ class Float(pydantic.BaseModel):
     @staticmethod
     def parse(text: str) -> float:
         """Parses `text` as a floating-point number.
-        
+
         Accepts decimal notation (`1.5`, `-0.25`), scientific notation
         (`1e3`, `-1.5E-3`), and the special tokens `inf` / `infinity` / `nan`
         (case-insensitive). An optional leading `+` or `-` sign is allowed.
         No surrounding whitespace, no underscore separators.
-        
+
         Throws `ParseError` if `text` cannot be parsed. Note that successfully
         parsing `"nan"` gives a NaN value — use `result.is_nan()` to detect it
         rather than equality.
-        
+
         # Examples
         ```
         float.parse("1.5")        // 1.5
@@ -720,22 +720,22 @@ class Float(pydantic.BaseModel):
         float.parse("hello")      // throws — non-numeric
         float.parse(" 1.0 ")      // throws — whitespace not allowed; trim first
         ```
-        
+
         Raises:
             ParseError"""
     @staticmethod
     async def parse_async(text: str) -> float:
         """Parses `text` as a floating-point number.
-        
+
         Accepts decimal notation (`1.5`, `-0.25`), scientific notation
         (`1e3`, `-1.5E-3`), and the special tokens `inf` / `infinity` / `nan`
         (case-insensitive). An optional leading `+` or `-` sign is allowed.
         No surrounding whitespace, no underscore separators.
-        
+
         Throws `ParseError` if `text` cannot be parsed. Note that successfully
         parsing `"nan"` gives a NaN value — use `result.is_nan()` to detect it
         rather than equality.
-        
+
         # Examples
         ```
         float.parse("1.5")        // 1.5
@@ -747,7 +747,7 @@ class Float(pydantic.BaseModel):
         float.parse("hello")      // throws — non-numeric
         float.parse(" 1.0 ")      // throws — whitespace not allowed; trim first
         ```
-        
+
         Raises:
             ParseError"""
     @staticmethod
@@ -790,10 +790,10 @@ class Float(pydantic.BaseModel):
         """Returns `true` if `self` is NaN (a "not a number" sentinel produced by
         invalid operations such as `(-1.0).sqrt()` or `float.inf() - float.inf()`).
         Note `0.0 / 0.0` throws `DivisionByZero` rather than producing NaN.
-        
+
         NaN is the only float value that is not equal to itself (`x != x` iff
         `x.is_nan()`), so this predicate is the only correct way to test for NaN.
-        
+
         # Examples
         ```
         (0.0).is_nan()         // false
@@ -804,10 +804,10 @@ class Float(pydantic.BaseModel):
         """Returns `true` if `self` is NaN (a "not a number" sentinel produced by
         invalid operations such as `(-1.0).sqrt()` or `float.inf() - float.inf()`).
         Note `0.0 / 0.0` throws `DivisionByZero` rather than producing NaN.
-        
+
         NaN is the only float value that is not equal to itself (`x != x` iff
         `x.is_nan()`), so this predicate is the only correct way to test for NaN.
-        
+
         # Examples
         ```
         (0.0).is_nan()         // false
@@ -816,7 +816,7 @@ class Float(pydantic.BaseModel):
         ```"""
     def is_infinite(self) -> bool:
         """Returns `true` if `self` is positive or negative infinity.
-        
+
         # Examples
         ```
         float.inf().is_infinite()                 // true
@@ -826,7 +826,7 @@ class Float(pydantic.BaseModel):
         ```"""
     async def is_infinite_async(self) -> bool:
         """Returns `true` if `self` is positive or negative infinity.
-        
+
         # Examples
         ```
         float.inf().is_infinite()                 // true
@@ -837,7 +837,7 @@ class Float(pydantic.BaseModel):
     def is_finite(self) -> bool:
         """Returns `true` if `self` is neither NaN nor infinite (i.e. an ordinary
         finite float, including subnormals and `±0.0`).
-        
+
         # Examples
         ```
         (3.14).is_finite()         // true
@@ -848,7 +848,7 @@ class Float(pydantic.BaseModel):
     async def is_finite_async(self) -> bool:
         """Returns `true` if `self` is neither NaN nor infinite (i.e. an ordinary
         finite float, including subnormals and `±0.0`).
-        
+
         # Examples
         ```
         (3.14).is_finite()         // true
@@ -858,7 +858,7 @@ class Float(pydantic.BaseModel):
         ```"""
     def abs(self) -> float:
         """Returns the absolute value of `self`. Preserves NaN.
-        
+
         # Examples
         ```
         (-3.5).abs()           // 3.5
@@ -868,7 +868,7 @@ class Float(pydantic.BaseModel):
         ```"""
     async def abs_async(self) -> float:
         """Returns the absolute value of `self`. Preserves NaN.
-        
+
         # Examples
         ```
         (-3.5).abs()           // 3.5
@@ -878,11 +878,11 @@ class Float(pydantic.BaseModel):
         ```"""
     def min(self, other: float) -> float:
         """Returns the smaller of `self` and `other`.
-        
+
         **NaN handling:** if exactly one operand is NaN, returns the non-NaN one
         (ergonomic NaN suppression — matches Rust `f64::min`). If both are NaN,
         the result is NaN. Use `is_nan()` upstream if you need stricter handling.
-        
+
         # Examples
         ```
         (3.0).min(5.0)              // 3.0
@@ -891,11 +891,11 @@ class Float(pydantic.BaseModel):
         ```"""
     async def min_async(self, other: float) -> float:
         """Returns the smaller of `self` and `other`.
-        
+
         **NaN handling:** if exactly one operand is NaN, returns the non-NaN one
         (ergonomic NaN suppression — matches Rust `f64::min`). If both are NaN,
         the result is NaN. Use `is_nan()` upstream if you need stricter handling.
-        
+
         # Examples
         ```
         (3.0).min(5.0)              // 3.0
@@ -904,22 +904,22 @@ class Float(pydantic.BaseModel):
         ```"""
     def max(self, other: float) -> float:
         """Returns the larger of `self` and `other`.
-        
+
         NaN handling matches `min`: a non-NaN operand is preferred over NaN."""
     async def max_async(self, other: float) -> float:
         """Returns the larger of `self` and `other`.
-        
+
         NaN handling matches `min`: a non-NaN operand is preferred over NaN."""
     def clamp(self, min: float, max: float) -> float:
         """Clamps `self` into the range `[min, max]`.
-        
+
         Equivalent to `self.min(max).max(min)`. Callers should pass `min <= max`;
         if `min > max` the result is always `min` (the lower-clamp wins because
         it runs after the upper-clamp).
-        
+
         NaN propagates through both `min` and `max` calls — if `self` is NaN,
         the result is NaN.
-        
+
         # Examples
         ```
         (5.0).clamp(0.0, 10.0)     // 5.0
@@ -928,14 +928,14 @@ class Float(pydantic.BaseModel):
         ```"""
     async def clamp_async(self, min: float, max: float) -> float:
         """Clamps `self` into the range `[min, max]`.
-        
+
         Equivalent to `self.min(max).max(min)`. Callers should pass `min <= max`;
         if `min > max` the result is always `min` (the lower-clamp wins because
         it runs after the upper-clamp).
-        
+
         NaN propagates through both `min` and `max` calls — if `self` is NaN,
         the result is NaN.
-        
+
         # Examples
         ```
         (5.0).clamp(0.0, 10.0)     // 5.0
@@ -945,7 +945,7 @@ class Float(pydantic.BaseModel):
     def floor(self) -> float:
         """Returns the largest integer ≤ `self`, as a float.
         Preserves the sign of `±0.0` and propagates NaN/±∞.
-        
+
         # Examples
         ```
         (3.7).floor()    // 3.0
@@ -955,7 +955,7 @@ class Float(pydantic.BaseModel):
     async def floor_async(self) -> float:
         """Returns the largest integer ≤ `self`, as a float.
         Preserves the sign of `±0.0` and propagates NaN/±∞.
-        
+
         # Examples
         ```
         (3.7).floor()    // 3.0
@@ -965,7 +965,7 @@ class Float(pydantic.BaseModel):
     def ceil(self) -> float:
         """Returns the smallest integer ≥ `self`, as a float.
         Preserves the sign of `±0.0` and propagates NaN/±∞.
-        
+
         # Examples
         ```
         (3.2).ceil()    // 4.0
@@ -974,7 +974,7 @@ class Float(pydantic.BaseModel):
     async def ceil_async(self) -> float:
         """Returns the smallest integer ≥ `self`, as a float.
         Preserves the sign of `±0.0` and propagates NaN/±∞.
-        
+
         # Examples
         ```
         (3.2).ceil()    // 4.0
@@ -983,7 +983,7 @@ class Float(pydantic.BaseModel):
     def round(self) -> float:
         """Returns the integer nearest to `self`, with ties rounded away from zero
         (so `0.5 → 1.0`, `-0.5 → -1.0`, `1.5 → 2.0`).
-        
+
         # Examples
         ```
         (1.5).round()    // 2.0
@@ -994,7 +994,7 @@ class Float(pydantic.BaseModel):
     async def round_async(self) -> float:
         """Returns the integer nearest to `self`, with ties rounded away from zero
         (so `0.5 → 1.0`, `-0.5 → -1.0`, `1.5 → 2.0`).
-        
+
         # Examples
         ```
         (1.5).round()    // 2.0
@@ -1005,7 +1005,7 @@ class Float(pydantic.BaseModel):
     def trunc(self) -> float:
         """Returns `self` truncated toward zero — i.e. the integer part with the
         fractional part discarded.
-        
+
         # Examples
         ```
         (3.7).trunc()    // 3.0
@@ -1014,7 +1014,7 @@ class Float(pydantic.BaseModel):
     async def trunc_async(self) -> float:
         """Returns `self` truncated toward zero — i.e. the integer part with the
         fractional part discarded.
-        
+
         # Examples
         ```
         (3.7).trunc()    // 3.0
@@ -1022,7 +1022,7 @@ class Float(pydantic.BaseModel):
         ```"""
     def fract(self) -> float:
         """Returns the fractional part of `self` (`self - self.trunc()`).
-        
+
         # Examples
         ```
         (3.7).fract()    // 0.7
@@ -1031,7 +1031,7 @@ class Float(pydantic.BaseModel):
         ```"""
     async def fract_async(self) -> float:
         """Returns the fractional part of `self` (`self - self.trunc()`).
-        
+
         # Examples
         ```
         (3.7).fract()    // 0.7
@@ -1041,54 +1041,54 @@ class Float(pydantic.BaseModel):
     def ifloor(self) -> int:
         """Like `floor`, but returns `int`. Throws if the floored value would not
         fit in `int` or `self` is NaN.
-        
+
         Raises:
             InvalidArgument"""
     async def ifloor_async(self) -> int:
         """Like `floor`, but returns `int`. Throws if the floored value would not
         fit in `int` or `self` is NaN.
-        
+
         Raises:
             InvalidArgument"""
     def iceil(self) -> int:
         """Like `ceil`, but returns `int`. Throws if the ceiled value would not fit
         in `int` or `self` is NaN.
-        
+
         Raises:
             InvalidArgument"""
     async def iceil_async(self) -> int:
         """Like `ceil`, but returns `int`. Throws if the ceiled value would not fit
         in `int` or `self` is NaN.
-        
+
         Raises:
             InvalidArgument"""
     def iround(self) -> int:
         """Like `round`, but returns `int`. Throws if the rounded value would not
         fit in `int` or `self` is NaN.
-        
+
         Raises:
             InvalidArgument"""
     async def iround_async(self) -> int:
         """Like `round`, but returns `int`. Throws if the rounded value would not
         fit in `int` or `self` is NaN.
-        
+
         Raises:
             InvalidArgument"""
     def itrunc(self) -> int:
         """Like `trunc`, but returns `int`. Throws if the integer part would not
         fit in `int` or `self` is NaN/±∞.
-        
+
         Raises:
             InvalidArgument"""
     async def itrunc_async(self) -> int:
         """Like `trunc`, but returns `int`. Throws if the integer part would not
         fit in `int` or `self` is NaN/±∞.
-        
+
         Raises:
             InvalidArgument"""
     def sqrt(self) -> float:
         """Returns the square root of `self`. For negative inputs returns NaN.
-        
+
         # Examples
         ```
         (4.0).sqrt()       // 2.0
@@ -1098,7 +1098,7 @@ class Float(pydantic.BaseModel):
         ```"""
     async def sqrt_async(self) -> float:
         """Returns the square root of `self`. For negative inputs returns NaN.
-        
+
         # Examples
         ```
         (4.0).sqrt()       // 2.0
@@ -1108,10 +1108,10 @@ class Float(pydantic.BaseModel):
         ```"""
     def pow(self, exp: float) -> float:
         """Returns `self ** exp` (floating-point exponentiation).
-        
+
         Returns NaN for inputs where the mathematical value is not real (e.g.
         negative base raised to a non-integer power).
-        
+
         # Examples
         ```
         (2.0).pow(10.0)         // 1024.0
@@ -1121,10 +1121,10 @@ class Float(pydantic.BaseModel):
         ```"""
     async def pow_async(self, exp: float) -> float:
         """Returns `self ** exp` (floating-point exponentiation).
-        
+
         Returns NaN for inputs where the mathematical value is not real (e.g.
         negative base raised to a non-integer power).
-        
+
         # Examples
         ```
         (2.0).pow(10.0)         // 1024.0
@@ -1135,7 +1135,7 @@ class Float(pydantic.BaseModel):
     def log(self, base: float) -> float:
         """Returns the logarithm of `self` in the given `base`. Equivalent to
         `self.ln() / base.ln()`.
-        
+
         The boundary behavior follows directly from that formula:
         - `self < 0` → NaN  (since `ln(negative) = NaN`)
         - `self == 0`, `base > 0`, `base != 1` → `-∞`
@@ -1145,7 +1145,7 @@ class Float(pydantic.BaseModel):
         - `base == 1`, `self > 0`, `self != 1` → `±∞` (sign matches `ln(self)`,
           since `ln(1) == +0.0` and `±finite / +0.0 = ±∞`)
         - `base == 1`, `self == 1` → NaN (`0 / 0`)
-        
+
         # Examples
         ```
         (1000.0).log(10.0)   // 3.0
@@ -1158,7 +1158,7 @@ class Float(pydantic.BaseModel):
     async def log_async(self, base: float) -> float:
         """Returns the logarithm of `self` in the given `base`. Equivalent to
         `self.ln() / base.ln()`.
-        
+
         The boundary behavior follows directly from that formula:
         - `self < 0` → NaN  (since `ln(negative) = NaN`)
         - `self == 0`, `base > 0`, `base != 1` → `-∞`
@@ -1168,7 +1168,7 @@ class Float(pydantic.BaseModel):
         - `base == 1`, `self > 0`, `self != 1` → `±∞` (sign matches `ln(self)`,
           since `ln(1) == +0.0` and `±finite / +0.0 = ±∞`)
         - `base == 1`, `self == 1` → NaN (`0 / 0`)
-        
+
         # Examples
         ```
         (1000.0).log(10.0)   // 3.0
@@ -1181,7 +1181,7 @@ class Float(pydantic.BaseModel):
     def hypot(self, other: float) -> float:
         """Returns the Euclidean distance `sqrt(self² + other²)`, computed in a way
         that avoids spurious overflow even when both magnitudes are large.
-        
+
         # Examples
         ```
         (3.0).hypot(4.0)    // 5.0
@@ -1190,7 +1190,7 @@ class Float(pydantic.BaseModel):
     async def hypot_async(self, other: float) -> float:
         """Returns the Euclidean distance `sqrt(self² + other²)`, computed in a way
         that avoids spurious overflow even when both magnitudes are large.
-        
+
         # Examples
         ```
         (3.0).hypot(4.0)    // 5.0
@@ -1228,7 +1228,7 @@ class Float(pydantic.BaseModel):
         """Returns the angle (in radians) of the vector `(other, self)` — i.e. the
         angle from the positive x-axis to the point `(x = other, y = self)`.
         The result is in `[-π, π]`.
-        
+
         # Examples
         ```
         (1.0).atan2(1.0)        // π/4    (45°)
@@ -1239,7 +1239,7 @@ class Float(pydantic.BaseModel):
         """Returns the angle (in radians) of the vector `(other, self)` — i.e. the
         angle from the positive x-axis to the point `(x = other, y = self)`.
         The result is in `[-π, π]`.
-        
+
         # Examples
         ```
         (1.0).atan2(1.0)        // π/4    (45°)
@@ -1285,7 +1285,7 @@ class Float(pydantic.BaseModel):
 def _trunc_to_int(value: float) -> int:
     """Truncates `value` toward zero and returns the integer part, **saturating**
     to the `int` range and mapping NaN to `0` — it never throws.
-    
+
     Private helper (leading `_`; formerly the public `baml.math.trunc`) backing
     internal retry-delay math in `baml.llm`. User code should prefer the
     range-checked, throwing `float.itrunc()` (or the float-returning
@@ -1293,7 +1293,7 @@ def _trunc_to_int(value: float) -> int:
 async def _trunc_to_int_async(value: float) -> int:
     """Truncates `value` toward zero and returns the integer part, **saturating**
     to the `int` range and mapping NaN to `0` — it never throws.
-    
+
     Private helper (leading `_`; formerly the public `baml.math.trunc`) backing
     internal retry-delay math in `baml.llm`. User code should prefer the
     range-checked, throwing `float.itrunc()` (or the float-returning
@@ -1304,14 +1304,14 @@ class Int(pydantic.BaseModel):
     @staticmethod
     def parse(text: str) -> int:
         """Parses `text` as a base-ten signed integer.
-        
+
         Accepts an optional leading `+` or `-` sign followed by one or more
         ASCII digits. No surrounding whitespace, no underscores, no other
         numeric formats. The result must fit in the `int` range (63-bit signed).
-        
+
         Throws `ParseError` if `text` is empty, contains a non-digit character,
         or represents a value outside the `int` range.
-        
+
         # Examples
         ```
         int.parse("42")       // 42
@@ -1322,20 +1322,20 @@ class Int(pydantic.BaseModel):
         int.parse(" 5 ")      // throws — whitespace not allowed; trim first
         int.parse("99999999999999999999")  // throws — out of range
         ```
-        
+
         Raises:
             ParseError"""
     @staticmethod
     async def parse_async(text: str) -> int:
         """Parses `text` as a base-ten signed integer.
-        
+
         Accepts an optional leading `+` or `-` sign followed by one or more
         ASCII digits. No surrounding whitespace, no underscores, no other
         numeric formats. The result must fit in the `int` range (63-bit signed).
-        
+
         Throws `ParseError` if `text` is empty, contains a non-digit character,
         or represents a value outside the `int` range.
-        
+
         # Examples
         ```
         int.parse("42")       // 42
@@ -1346,21 +1346,21 @@ class Int(pydantic.BaseModel):
         int.parse(" 5 ")      // throws — whitespace not allowed; trim first
         int.parse("99999999999999999999")  // throws — out of range
         ```
-        
+
         Raises:
             ParseError"""
     @staticmethod
     def random(lower: int, upper: int) -> int:
         """Returns a uniformly distributed random integer in the half-open range
         `[lower, upper)`.
-        
+
         Throws `InvalidArgument` if `lower >= upper` (the range would be empty).
         Uses the host's cryptographic entropy source — no user-supplied RNG
         handle. The largest representable half-open range is supported (e.g.
         `random(int.min_value(), int.max_value())` returns a value in
         `[int.min_value(), int.max_value())`; `int.max_value()` itself is never
         returned).
-        
+
         # Examples
         ```
         int.random(0, 10)         // some value in {0, 1, ..., 9}
@@ -1369,21 +1369,21 @@ class Int(pydantic.BaseModel):
         int.random(5, 5)          // throws — empty range
         int.random(10, 0)         // throws — lower > upper
         ```
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     async def random_async(lower: int, upper: int) -> int:
         """Returns a uniformly distributed random integer in the half-open range
         `[lower, upper)`.
-        
+
         Throws `InvalidArgument` if `lower >= upper` (the range would be empty).
         Uses the host's cryptographic entropy source — no user-supplied RNG
         handle. The largest representable half-open range is supported (e.g.
         `random(int.min_value(), int.max_value())` returns a value in
         `[int.min_value(), int.max_value())`; `int.max_value()` itself is never
         returned).
-        
+
         # Examples
         ```
         int.random(0, 10)         // some value in {0, 1, ..., 9}
@@ -1392,14 +1392,14 @@ class Int(pydantic.BaseModel):
         int.random(5, 5)          // throws — empty range
         int.random(10, 0)         // throws — lower > upper
         ```
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     def max_value() -> int:
         """Returns the largest representable `int`, equal to `2^62 - 1`
         (`4_611_686_018_427_387_903`).
-        
+
         Note: BAML integers are 63-bit signed (the runtime reserves one bit
         for the tagged-pointer Value encoding). Values outside the
         `[min_value(), max_value()]` range cannot round-trip through int."""
@@ -1407,7 +1407,7 @@ class Int(pydantic.BaseModel):
     async def max_value_async() -> int:
         """Returns the largest representable `int`, equal to `2^62 - 1`
         (`4_611_686_018_427_387_903`).
-        
+
         Note: BAML integers are 63-bit signed (the runtime reserves one bit
         for the tagged-pointer Value encoding). Values outside the
         `[min_value(), max_value()]` range cannot round-trip through int."""
@@ -1421,10 +1421,10 @@ class Int(pydantic.BaseModel):
         (`-4_611_686_018_427_387_904`). Note `int.min_value().abs()` throws."""
     def abs(self) -> int:
         """Returns the absolute value of `self`.
-        
+
         Throws `InvalidArgument` for `int.min_value()` because its absolute value
         (`2^62`) does not fit in an `int`.
-        
+
         # Examples
         ```
         (-7).abs()         // 7
@@ -1432,15 +1432,15 @@ class Int(pydantic.BaseModel):
         (0).abs()          // 0
         int.min_value().abs()  // throws — overflow
         ```
-        
+
         Raises:
             InvalidArgument"""
     async def abs_async(self) -> int:
         """Returns the absolute value of `self`.
-        
+
         Throws `InvalidArgument` for `int.min_value()` because its absolute value
         (`2^62`) does not fit in an `int`.
-        
+
         # Examples
         ```
         (-7).abs()         // 7
@@ -1448,12 +1448,12 @@ class Int(pydantic.BaseModel):
         (0).abs()          // 0
         int.min_value().abs()  // throws — overflow
         ```
-        
+
         Raises:
             InvalidArgument"""
     def min(self, other: int) -> int:
         """Returns the smaller of `self` and `other`.
-        
+
         # Examples
         ```
         (3).min(5)   // 3
@@ -1462,7 +1462,7 @@ class Int(pydantic.BaseModel):
         ```"""
     async def min_async(self, other: int) -> int:
         """Returns the smaller of `self` and `other`.
-        
+
         # Examples
         ```
         (3).min(5)   // 3
@@ -1471,7 +1471,7 @@ class Int(pydantic.BaseModel):
         ```"""
     def max(self, other: int) -> int:
         """Returns the larger of `self` and `other`.
-        
+
         # Examples
         ```
         (3).max(5)   // 5
@@ -1480,7 +1480,7 @@ class Int(pydantic.BaseModel):
         ```"""
     async def max_async(self, other: int) -> int:
         """Returns the larger of `self` and `other`.
-        
+
         # Examples
         ```
         (3).max(5)   // 5
@@ -1489,11 +1489,11 @@ class Int(pydantic.BaseModel):
         ```"""
     def clamp(self, min: int, max: int) -> int:
         """Clamps `self` into the range `[min, max]`.
-        
+
         Equivalent to `self.min(max).max(min)`. Callers should pass `min <= max`;
         if `min > max` the result is always `min` (the lower-clamp wins because
         it runs after the upper-clamp).
-        
+
         # Examples
         ```
         (5).clamp(0, 10)    // 5
@@ -1502,11 +1502,11 @@ class Int(pydantic.BaseModel):
         ```"""
     async def clamp_async(self, min: int, max: int) -> int:
         """Clamps `self` into the range `[min, max]`.
-        
+
         Equivalent to `self.min(max).max(min)`. Callers should pass `min <= max`;
         if `min > max` the result is always `min` (the lower-clamp wins because
         it runs after the upper-clamp).
-        
+
         # Examples
         ```
         (5).clamp(0, 10)    // 5
@@ -1516,9 +1516,9 @@ class Int(pydantic.BaseModel):
     def isqrt(self) -> int:
         """Returns the integer square root of `self` — that is, the largest `int`
         `r` such that `r * r <= self`.
-        
+
         Throws `InvalidArgument` if `self` is negative.
-        
+
         # Examples
         ```
         (10).isqrt()   // 3
@@ -1526,15 +1526,15 @@ class Int(pydantic.BaseModel):
         (0).isqrt()    // 0
         (-1).isqrt()   // throws
         ```
-        
+
         Raises:
             InvalidArgument"""
     async def isqrt_async(self) -> int:
         """Returns the integer square root of `self` — that is, the largest `int`
         `r` such that `r * r <= self`.
-        
+
         Throws `InvalidArgument` if `self` is negative.
-        
+
         # Examples
         ```
         (10).isqrt()   // 3
@@ -1542,21 +1542,21 @@ class Int(pydantic.BaseModel):
         (0).isqrt()    // 0
         (-1).isqrt()   // throws
         ```
-        
+
         Raises:
             InvalidArgument"""
     def pow(self, exp: int) -> int:
         """Returns `self ** exp`. Saturates on overflow (positive overflow returns
         `int.max_value()`, negative overflow returns `int.min_value()`).
-        
+
         `0 ** 0` returns `1`, by convention.
-        
+
         If `exp` is negative the result is `0`, since the mathematical value
         `self ** -n = 1 / self ** n` is in `(-1, 1)` for `|self| > 1` and rounds
         to zero. (For `self == 1` or `self == -1` the value is `±1` which rounds
         to itself; this implementation still returns `0` for negative exponents
         uniformly.)
-        
+
         # Examples
         ```
         (2).pow(10)      // 1024
@@ -1569,15 +1569,15 @@ class Int(pydantic.BaseModel):
     async def pow_async(self, exp: int) -> int:
         """Returns `self ** exp`. Saturates on overflow (positive overflow returns
         `int.max_value()`, negative overflow returns `int.min_value()`).
-        
+
         `0 ** 0` returns `1`, by convention.
-        
+
         If `exp` is negative the result is `0`, since the mathematical value
         `self ** -n = 1 / self ** n` is in `(-1, 1)` for `|self| > 1` and rounds
         to zero. (For `self == 1` or `self == -1` the value is `±1` which rounds
         to itself; this implementation still returns `0` for negative exponents
         uniformly.)
-        
+
         # Examples
         ```
         (2).pow(10)      // 1024
@@ -1590,9 +1590,9 @@ class Int(pydantic.BaseModel):
     def ilog(self, base: int) -> int:
         """Returns the integer logarithm of `self` in the given `base`, rounded
         down — i.e. the largest `n` such that `base ** n <= self`.
-        
+
         Throws `InvalidArgument` if `self <= 0` or `base < 2`.
-        
+
         # Examples
         ```
         (1000).ilog(10)   // 3
@@ -1601,15 +1601,15 @@ class Int(pydantic.BaseModel):
         (0).ilog(10)      // throws
         (10).ilog(1)      // throws
         ```
-        
+
         Raises:
             InvalidArgument"""
     async def ilog_async(self, base: int) -> int:
         """Returns the integer logarithm of `self` in the given `base`, rounded
         down — i.e. the largest `n` such that `base ** n <= self`.
-        
+
         Throws `InvalidArgument` if `self <= 0` or `base < 2`.
-        
+
         # Examples
         ```
         (1000).ilog(10)   // 3
@@ -1618,13 +1618,13 @@ class Int(pydantic.BaseModel):
         (0).ilog(10)      // throws
         (10).ilog(1)      // throws
         ```
-        
+
         Raises:
             InvalidArgument"""
     def leading_zeros(self) -> int:
         """Returns the number of leading zero bits in the 64-bit two's-complement
         representation of `self`.
-        
+
         # Examples
         ```
         (0).leading_zeros()  // 64
@@ -1634,7 +1634,7 @@ class Int(pydantic.BaseModel):
     async def leading_zeros_async(self) -> int:
         """Returns the number of leading zero bits in the 64-bit two's-complement
         representation of `self`.
-        
+
         # Examples
         ```
         (0).leading_zeros()  // 64
@@ -1644,7 +1644,7 @@ class Int(pydantic.BaseModel):
     def leading_ones(self) -> int:
         """Returns the number of leading one bits in the 64-bit two's-complement
         representation of `self`.
-        
+
         # Examples
         ```
         (0).leading_ones()   // 0
@@ -1653,7 +1653,7 @@ class Int(pydantic.BaseModel):
     async def leading_ones_async(self) -> int:
         """Returns the number of leading one bits in the 64-bit two's-complement
         representation of `self`.
-        
+
         # Examples
         ```
         (0).leading_ones()   // 0
@@ -1661,7 +1661,7 @@ class Int(pydantic.BaseModel):
         ```"""
     def trailing_zeros(self) -> int:
         """Returns the number of trailing zero bits.
-        
+
         # Examples
         ```
         (0).trailing_zeros()  // 64
@@ -1670,7 +1670,7 @@ class Int(pydantic.BaseModel):
         ```"""
     async def trailing_zeros_async(self) -> int:
         """Returns the number of trailing zero bits.
-        
+
         # Examples
         ```
         (0).trailing_zeros()  // 64
@@ -1679,7 +1679,7 @@ class Int(pydantic.BaseModel):
         ```"""
     def trailing_ones(self) -> int:
         """Returns the number of trailing one bits.
-        
+
         # Examples
         ```
         (7).trailing_ones()   // 3   (binary 111)
@@ -1688,7 +1688,7 @@ class Int(pydantic.BaseModel):
         ```"""
     async def trailing_ones_async(self) -> int:
         """Returns the number of trailing one bits.
-        
+
         # Examples
         ```
         (7).trailing_ones()   // 3   (binary 111)
@@ -1698,7 +1698,7 @@ class Int(pydantic.BaseModel):
     def count_zeros(self) -> int:
         """Returns the total number of zero bits in the 64-bit two's-complement
         representation of `self`.
-        
+
         # Examples
         ```
         (0).count_zeros()   // 64
@@ -1707,7 +1707,7 @@ class Int(pydantic.BaseModel):
     async def count_zeros_async(self) -> int:
         """Returns the total number of zero bits in the 64-bit two's-complement
         representation of `self`.
-        
+
         # Examples
         ```
         (0).count_zeros()   // 64
@@ -1717,7 +1717,7 @@ class Int(pydantic.BaseModel):
         """Returns the total number of one bits in the 64-bit two's-complement
         representation of `self`. Also known as the population count or
         "popcount".
-        
+
         # Examples
         ```
         (0).count_ones()   // 0
@@ -1728,7 +1728,7 @@ class Int(pydantic.BaseModel):
         """Returns the total number of one bits in the 64-bit two's-complement
         representation of `self`. Also known as the population count or
         "popcount".
-        
+
         # Examples
         ```
         (0).count_ones()   // 0
@@ -1745,24 +1745,24 @@ class String(pydantic.BaseModel):
     @staticmethod
     def from_(value: T, *, _types: dict[str, type]) -> str:
         """Renders any value as a human-readable string.
-        
+
         If `value`'s runtime type implements `baml.ToString`, its `to_string`
         override is used; otherwise a default structural rendering is produced.
         Never throws.
-        
+
         ```
         string.from(42)            // "42"
         string.from(true)          // "true"
         string.from([1, 2, 3])     // "[1, 2, 3]"
         ```
-        
+
         Ideally this would read:
-        
+
         ```
         if (value is baml.ToString) { value.to_string() }
         else { root._to_string_default(value) }
         ```
-        
+
         but that does not work from the stdlib today. `is <interface>` and
         interface method dispatch are resolved at *compile time* by expanding the
         interface to its known implementor classes, and that implementor set is
@@ -1772,7 +1772,7 @@ class String(pydantic.BaseModel):
         for `baml.ToString` is empty — the `is` test folds to constant `false` and
         the override never dispatches. (Same boundary `Sortable.sort`'s
         `_compare_shim` and `baml.json.to_json` work around.)
-        
+
         So dispatch is resolved on `value`'s *runtime* class via
         `baml._to_string_shim` instead. TODO: once Kai's TIR rework lands (it moves
         interface conformance checks to runtime), replace this with the literal
@@ -1780,24 +1780,24 @@ class String(pydantic.BaseModel):
     @staticmethod
     async def from_async(value: T, *, _types: dict[str, type]) -> str:
         """Renders any value as a human-readable string.
-        
+
         If `value`'s runtime type implements `baml.ToString`, its `to_string`
         override is used; otherwise a default structural rendering is produced.
         Never throws.
-        
+
         ```
         string.from(42)            // "42"
         string.from(true)          // "true"
         string.from([1, 2, 3])     // "[1, 2, 3]"
         ```
-        
+
         Ideally this would read:
-        
+
         ```
         if (value is baml.ToString) { value.to_string() }
         else { root._to_string_default(value) }
         ```
-        
+
         but that does not work from the stdlib today. `is <interface>` and
         interface method dispatch are resolved at *compile time* by expanding the
         interface to its known implementor classes, and that implementor set is
@@ -1807,7 +1807,7 @@ class String(pydantic.BaseModel):
         for `baml.ToString` is empty — the `is` test folds to constant `false` and
         the override never dispatches. (Same boundary `Sortable.sort`'s
         `_compare_shim` and `baml.json.to_json` work around.)
-        
+
         So dispatch is resolved on `value`'s *runtime* class via
         `baml._to_string_shim` instead. TODO: once Kai's TIR rework lands (it moves
         interface conformance checks to runtime), replace this with the literal
@@ -1815,46 +1815,46 @@ class String(pydantic.BaseModel):
     @staticmethod
     def from_utf8(utf8: bytes) -> str:
         """Decodes a `uint8array` of UTF-8 bytes into a string.
-        
+
         Throws `InvalidArgument` if `utf8` is not valid UTF-8. To decode bytes
         with replacement characters (lossy), use `uint8array.to_string()`
         instead, which substitutes U+FFFD for invalid sequences.
-        
+
         # Examples
         ```
         string.from_utf8(b"\\x68\\x69")          // "hi"
         string.from_utf8(b"\\xC3\\xA9")          // "é"
         string.from_utf8(b"\\xFF")              // throws — 0xFF is invalid UTF-8
         ```
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     async def from_utf8_async(utf8: bytes) -> str:
         """Decodes a `uint8array` of UTF-8 bytes into a string.
-        
+
         Throws `InvalidArgument` if `utf8` is not valid UTF-8. To decode bytes
         with replacement characters (lossy), use `uint8array.to_string()`
         instead, which substitutes U+FFFD for invalid sequences.
-        
+
         # Examples
         ```
         string.from_utf8(b"\\x68\\x69")          // "hi"
         string.from_utf8(b"\\xC3\\xA9")          // "é"
         string.from_utf8(b"\\xFF")              // throws — 0xFF is invalid UTF-8
         ```
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     def from_code_points(unicode: typing.List[int]) -> str:
         """Builds a string from an array of Unicode code points.
-        
+
         Each value in `unicode` must be in the range `[0, 0x10FFFF]` and must
         not be a UTF-16 surrogate (the range `[0xD800, 0xDFFF]`). Throws
         `InvalidArgument` on any invalid value, identifying the offending
         position in the array.
-        
+
         # Examples
         ```
         string.from_code_points([104, 105])         // "hi"
@@ -1863,18 +1863,18 @@ class String(pydantic.BaseModel):
         string.from_code_points([-1])               // throws — out of range
         string.from_code_points([55296])            // throws — surrogate (U+D800)
         ```
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     async def from_code_points_async(unicode: typing.List[int]) -> str:
         """Builds a string from an array of Unicode code points.
-        
+
         Each value in `unicode` must be in the range `[0, 0x10FFFF]` and must
         not be a UTF-16 surrogate (the range `[0xD800, 0xDFFF]`). Throws
         `InvalidArgument` on any invalid value, identifying the offending
         position in the array.
-        
+
         # Examples
         ```
         string.from_code_points([104, 105])         // "hi"
@@ -1883,16 +1883,16 @@ class String(pydantic.BaseModel):
         string.from_code_points([-1])               // throws — out of range
         string.from_code_points([55296])            // throws — surrogate (U+D800)
         ```
-        
+
         Raises:
             InvalidArgument"""
     def length(self) -> int:
         """Returns the number of **Unicode code points** (characters) in the string.
-        
+
         This is `O(1)` — the count is cached at construction time. For ASCII
         text it equals `byte_length()`, but for strings with multi-byte UTF-8
         characters they differ.
-        
+
         # Examples
         ```
         "hello".length()  // 5
@@ -1902,11 +1902,11 @@ class String(pydantic.BaseModel):
         ```"""
     async def length_async(self) -> int:
         """Returns the number of **Unicode code points** (characters) in the string.
-        
+
         This is `O(1)` — the count is cached at construction time. For ASCII
         text it equals `byte_length()`, but for strings with multi-byte UTF-8
         characters they differ.
-        
+
         # Examples
         ```
         "hello".length()  // 5
@@ -1920,10 +1920,10 @@ class String(pydantic.BaseModel):
         """Alias for `length()`."""
     def byte_length(self) -> int:
         """Returns the length of the string in **UTF-8 bytes**.
-        
+
         This is `O(1)`. Useful for serialization, network I/O, and buffer
         allocation where byte size matters.
-        
+
         # Examples
         ```
         "hello".byte_length()  // 5
@@ -1932,10 +1932,10 @@ class String(pydantic.BaseModel):
         ```"""
     async def byte_length_async(self) -> int:
         """Returns the length of the string in **UTF-8 bytes**.
-        
+
         This is `O(1)`. Useful for serialization, network I/O, and buffer
         allocation where byte size matters.
-        
+
         # Examples
         ```
         "hello".byte_length()  // 5
@@ -1952,10 +1952,10 @@ class String(pydantic.BaseModel):
         """Returns the string with all Unicode characters converted to uppercase."""
     def trim(self) -> str:
         """Returns the string with leading and trailing whitespace removed.
-        
+
         Whitespace is defined per Unicode `White_Space` and includes ASCII spaces,
         tabs, newlines, and carriage returns as well as Unicode whitespace.
-        
+
         # Examples
         ```
         "  hi  ".trim()    // "hi"
@@ -1964,10 +1964,10 @@ class String(pydantic.BaseModel):
         ```"""
     async def trim_async(self) -> str:
         """Returns the string with leading and trailing whitespace removed.
-        
+
         Whitespace is defined per Unicode `White_Space` and includes ASCII spaces,
         tabs, newlines, and carriage returns as well as Unicode whitespace.
-        
+
         # Examples
         ```
         "  hi  ".trim()    // "hi"
@@ -1977,7 +1977,7 @@ class String(pydantic.BaseModel):
     def trim_start(self) -> str:
         """Returns the string with leading whitespace removed (trailing whitespace
         is preserved). Whitespace follows Unicode `White_Space`.
-        
+
         # Examples
         ```
         "  hi  ".trim_start()  // "hi  "
@@ -1986,7 +1986,7 @@ class String(pydantic.BaseModel):
     async def trim_start_async(self) -> str:
         """Returns the string with leading whitespace removed (trailing whitespace
         is preserved). Whitespace follows Unicode `White_Space`.
-        
+
         # Examples
         ```
         "  hi  ".trim_start()  // "hi  "
@@ -1995,7 +1995,7 @@ class String(pydantic.BaseModel):
     def trim_end(self) -> str:
         """Returns the string with trailing whitespace removed (leading whitespace
         is preserved). Whitespace follows Unicode `White_Space`.
-        
+
         # Examples
         ```
         "  hi  ".trim_end()  // "  hi"
@@ -2004,7 +2004,7 @@ class String(pydantic.BaseModel):
     async def trim_end_async(self) -> str:
         """Returns the string with trailing whitespace removed (leading whitespace
         is preserved). Whitespace follows Unicode `White_Space`.
-        
+
         # Examples
         ```
         "  hi  ".trim_end()  // "  hi"
@@ -2024,7 +2024,7 @@ class String(pydantic.BaseModel):
         """Returns true if the string ends with `suffix`."""
     def split(self, delimiter: str) -> typing.List[str]:
         """Splits the string by `delimiter` and returns an array of substrings.
-        
+
         # Examples
         ```
         "a,b,c".split(",")     // ["a", "b", "c"]
@@ -2033,7 +2033,7 @@ class String(pydantic.BaseModel):
         ```"""
     async def split_async(self, delimiter: str) -> typing.List[str]:
         """Splits the string by `delimiter` and returns an array of substrings.
-        
+
         # Examples
         ```
         "a,b,c".split(",")     // ["a", "b", "c"]
@@ -2042,7 +2042,7 @@ class String(pydantic.BaseModel):
         ```"""
     def chars(self) -> typing.List[str]:
         """Returns the string's Unicode code points as one-character strings.
-        
+
         # Examples
         ```
         "hello".chars()  // ["h", "e", "l", "l", "o"]
@@ -2051,7 +2051,7 @@ class String(pydantic.BaseModel):
         ```"""
     async def chars_async(self) -> typing.List[str]:
         """Returns the string's Unicode code points as one-character strings.
-        
+
         # Examples
         ```
         "hello".chars()  // ["h", "e", "l", "l", "o"]
@@ -2062,7 +2062,7 @@ class String(pydantic.BaseModel):
         """Splits the string into lines, recognizing both `\\n` and `\\r\\n` as line
         terminators. The terminator is **not** included in the returned strings.
         A final terminator does not produce a trailing empty string.
-        
+
         # Examples
         ```
         "a\\nb\\nc".lines()    // ["a", "b", "c"]
@@ -2075,7 +2075,7 @@ class String(pydantic.BaseModel):
         """Splits the string into lines, recognizing both `\\n` and `\\r\\n` as line
         terminators. The terminator is **not** included in the returned strings.
         A final terminator does not produce a trailing empty string.
-        
+
         # Examples
         ```
         "a\\nb\\nc".lines()    // ["a", "b", "c"]
@@ -2086,12 +2086,12 @@ class String(pydantic.BaseModel):
         ```"""
     def substring(self, start: int, end: int) -> str:
         """Returns the substring between two **character** offsets `[start, end)`.
-        
+
         Both `start` and `end` are codepoint indices, matching `length()`. Negative
         indices count from the end. The resolved offsets are clamped to
         `[0, length()]`, and an `end` that resolves at or before `start` yields an
         empty string. Never throws.
-        
+
         # Examples
         ```
         "hello world".substring(0, 5)   // "hello"
@@ -2102,12 +2102,12 @@ class String(pydantic.BaseModel):
         ```"""
     async def substring_async(self, start: int, end: int) -> str:
         """Returns the substring between two **character** offsets `[start, end)`.
-        
+
         Both `start` and `end` are codepoint indices, matching `length()`. Negative
         indices count from the end. The resolved offsets are clamped to
         `[0, length()]`, and an `end` that resolves at or before `start` yields an
         empty string. Never throws.
-        
+
         # Examples
         ```
         "hello world".substring(0, 5)   // "hello"
@@ -2123,7 +2123,7 @@ class String(pydantic.BaseModel):
     def index_of(self, search: str) -> typing.Optional[int]:
         """Returns the **character index** of the first occurrence of `search`, or
         `null` if not found.
-        
+
         # Examples
         ```
         "hello world".index_of("world")  // 6
@@ -2134,7 +2134,7 @@ class String(pydantic.BaseModel):
     async def index_of_async(self, search: str) -> typing.Optional[int]:
         """Returns the **character index** of the first occurrence of `search`, or
         `null` if not found.
-        
+
         # Examples
         ```
         "hello world".index_of("world")  // 6
@@ -2149,7 +2149,7 @@ class String(pydantic.BaseModel):
     def repeat(self, count: int) -> str:
         """Returns a new string that repeats `self` the given number of times.
         Negative counts are treated as 0.
-        
+
         # Examples
         ```
         "ab".repeat(3)   // "ababab"
@@ -2159,7 +2159,7 @@ class String(pydantic.BaseModel):
     async def repeat_async(self, count: int) -> str:
         """Returns a new string that repeats `self` the given number of times.
         Negative counts are treated as 0.
-        
+
         # Examples
         ```
         "ab".repeat(3)   // "ababab"
@@ -2178,7 +2178,7 @@ class String(pydantic.BaseModel):
         """Returns true if every character is numeric per Unicode (general categories
         `Nd`, `Nl`, `No` — decimal digits, letter-numbers, and other-numbers).
         Empty string returns true.
-        
+
         # Examples
         ```
         "12345".is_numeric()  // true
@@ -2190,7 +2190,7 @@ class String(pydantic.BaseModel):
         """Returns true if every character is numeric per Unicode (general categories
         `Nd`, `Nl`, `No` — decimal digits, letter-numbers, and other-numbers).
         Empty string returns true.
-        
+
         # Examples
         ```
         "12345".is_numeric()  // true
@@ -2201,7 +2201,7 @@ class String(pydantic.BaseModel):
     def is_alphabetic(self) -> bool:
         """Returns true if every character is a Unicode letter (general category `L`).
         Empty string returns true.
-        
+
         # Examples
         ```
         "héllo".is_alphabetic()  // true
@@ -2211,7 +2211,7 @@ class String(pydantic.BaseModel):
     async def is_alphabetic_async(self) -> bool:
         """Returns true if every character is a Unicode letter (general category `L`).
         Empty string returns true.
-        
+
         # Examples
         ```
         "héllo".is_alphabetic()  // true
@@ -2222,7 +2222,7 @@ class String(pydantic.BaseModel):
         """Returns true if every character is alphabetic OR numeric per Unicode.
         Empty string returns true. Equivalent to checking each char passes
         `is_alphabetic` or `is_numeric`.
-        
+
         # Examples
         ```
         "abc123".is_alphanumeric()  // true
@@ -2233,7 +2233,7 @@ class String(pydantic.BaseModel):
         """Returns true if every character is alphabetic OR numeric per Unicode.
         Empty string returns true. Equivalent to checking each char passes
         `is_alphabetic` or `is_numeric`.
-        
+
         # Examples
         ```
         "abc123".is_alphanumeric()  // true
@@ -2245,7 +2245,7 @@ class String(pydantic.BaseModel):
         category `Lu`, plus other chars with the `Uppercase` property).
         Empty string returns true. Note: digits and most symbols are neither
         upper- nor lowercase.
-        
+
         # Examples
         ```
         "HELLO".is_uppercase()  // true
@@ -2257,7 +2257,7 @@ class String(pydantic.BaseModel):
         category `Lu`, plus other chars with the `Uppercase` property).
         Empty string returns true. Note: digits and most symbols are neither
         upper- nor lowercase.
-        
+
         # Examples
         ```
         "HELLO".is_uppercase()  // true
@@ -2268,7 +2268,7 @@ class String(pydantic.BaseModel):
         """Returns true if every character is lowercase per Unicode (general
         category `Ll`, plus other chars with the `Lowercase` property).
         Empty string returns true.
-        
+
         # Examples
         ```
         "hello".is_lowercase()  // true
@@ -2278,7 +2278,7 @@ class String(pydantic.BaseModel):
         """Returns true if every character is lowercase per Unicode (general
         category `Ll`, plus other chars with the `Lowercase` property).
         Empty string returns true.
-        
+
         # Examples
         ```
         "hello".is_lowercase()  // true
@@ -2288,7 +2288,7 @@ class String(pydantic.BaseModel):
         """Returns true if every character is whitespace per Unicode (`White_Space`
         property — includes space, tab, newline, NBSP, and other Unicode
         whitespace). Empty string returns true.
-        
+
         # Examples
         ```
         "   ".is_whitespace()      // true
@@ -2299,7 +2299,7 @@ class String(pydantic.BaseModel):
         """Returns true if every character is whitespace per Unicode (`White_Space`
         property — includes space, tab, newline, NBSP, and other Unicode
         whitespace). Empty string returns true.
-        
+
         # Examples
         ```
         "   ".is_whitespace()      // true
@@ -2309,7 +2309,7 @@ class String(pydantic.BaseModel):
     def is_control(self) -> bool:
         """Returns true if every character is a control character per Unicode
         (general category `Cc`). Empty string returns true.
-        
+
         # Examples
         ```
         "\\n\\t".is_control()  // true
@@ -2318,7 +2318,7 @@ class String(pydantic.BaseModel):
     async def is_control_async(self) -> bool:
         """Returns true if every character is a control character per Unicode
         (general category `Cc`). Empty string returns true.
-        
+
         # Examples
         ```
         "\\n\\t".is_control()  // true
@@ -2327,10 +2327,10 @@ class String(pydantic.BaseModel):
     def is_graphic(self) -> bool:
         """Returns true if every character is a "graphic" character — that is,
         not a control character and not whitespace. Empty string returns true.
-        
+
         This is a convenience predicate for "visible/printing" characters. It
         uses the Unicode definition of control and whitespace.
-        
+
         # Examples
         ```
         "abc".is_graphic()      // true
@@ -2341,10 +2341,10 @@ class String(pydantic.BaseModel):
     async def is_graphic_async(self) -> bool:
         """Returns true if every character is a "graphic" character — that is,
         not a control character and not whitespace. Empty string returns true.
-        
+
         This is a convenience predicate for "visible/printing" characters. It
         uses the Unicode definition of control and whitespace.
-        
+
         # Examples
         ```
         "abc".is_graphic()      // true
@@ -2355,7 +2355,7 @@ class String(pydantic.BaseModel):
     def is_ascii(self) -> bool:
         """Returns true if every character is ASCII (i.e. has a code point in
         `[0x00, 0x7F]`). Empty string returns true.
-        
+
         # Examples
         ```
         "hello".is_ascii()    // true
@@ -2364,7 +2364,7 @@ class String(pydantic.BaseModel):
     async def is_ascii_async(self) -> bool:
         """Returns true if every character is ASCII (i.e. has a code point in
         `[0x00, 0x7F]`). Empty string returns true.
-        
+
         # Examples
         ```
         "hello".is_ascii()    // true
@@ -2374,7 +2374,7 @@ class String(pydantic.BaseModel):
         """Returns true if every character is an ASCII decimal digit (`0`..=`9`).
         Empty string returns true. Stricter than `is_numeric`, which accepts
         non-ASCII numerals.
-        
+
         # Examples
         ```
         "12345".is_ascii_numeric()  // true
@@ -2384,7 +2384,7 @@ class String(pydantic.BaseModel):
         """Returns true if every character is an ASCII decimal digit (`0`..=`9`).
         Empty string returns true. Stricter than `is_numeric`, which accepts
         non-ASCII numerals.
-        
+
         # Examples
         ```
         "12345".is_ascii_numeric()  // true
@@ -2441,7 +2441,7 @@ class String(pydantic.BaseModel):
     def is_ascii_hex(self) -> bool:
         """Returns true if every character is an ASCII hexadecimal digit:
         `0`..=`9`, `a`..=`f`, or `A`..=`F`. Empty string returns true.
-        
+
         # Examples
         ```
         "deadBEEF".is_ascii_hex()  // true
@@ -2450,7 +2450,7 @@ class String(pydantic.BaseModel):
     async def is_ascii_hex_async(self) -> bool:
         """Returns true if every character is an ASCII hexadecimal digit:
         `0`..=`9`, `a`..=`f`, or `A`..=`F`. Empty string returns true.
-        
+
         # Examples
         ```
         "deadBEEF".is_ascii_hex()  // true
@@ -2458,10 +2458,10 @@ class String(pydantic.BaseModel):
         ```"""
     def to_utf8(self) -> bytes:
         """Returns the string encoded as a `uint8array` of UTF-8 bytes.
-        
+
         The resulting byte array has length `self.byte_length()`. Inverse of the
         static `string.from_utf8(bytes)`.
-        
+
         # Examples
         ```
         "hi".to_utf8()     // [0x68, 0x69]
@@ -2470,10 +2470,10 @@ class String(pydantic.BaseModel):
         ```"""
     async def to_utf8_async(self) -> bytes:
         """Returns the string encoded as a `uint8array` of UTF-8 bytes.
-        
+
         The resulting byte array has length `self.byte_length()`. Inverse of the
         static `string.from_utf8(bytes)`.
-        
+
         # Examples
         ```
         "hi".to_utf8()     // [0x68, 0x69]
@@ -2482,16 +2482,16 @@ class String(pydantic.BaseModel):
         ```"""
     def to_code_points(self) -> typing.List[int]:
         """Returns the string's Unicode code points as an array of `int`s.
-        
+
         This is the exact inverse of `string.from_code_points`: for any string
         `s`, `string.from_code_points(s.to_code_points())` equals `s`. The result
         has one element per character (`self.length()` elements), each in
         `[0, 0x10FFFF]`. Never throws.
-        
+
         Use this for char → integer mappings (checksums, base-N encoding, hashing,
         character classification) instead of indexing into a literal alphabet
         string.
-        
+
         # Examples
         ```
         "hi".to_code_points()    // [104, 105]
@@ -2501,16 +2501,16 @@ class String(pydantic.BaseModel):
         ```"""
     async def to_code_points_async(self) -> typing.List[int]:
         """Returns the string's Unicode code points as an array of `int`s.
-        
+
         This is the exact inverse of `string.from_code_points`: for any string
         `s`, `string.from_code_points(s.to_code_points())` equals `s`. The result
         has one element per character (`self.length()` elements), each in
         `[0, 0x10FFFF]`. Never throws.
-        
+
         Use this for char → integer mappings (checksums, base-N encoding, hashing,
         character classification) instead of indexing into a literal alphabet
         string.
-        
+
         # Examples
         ```
         "hi".to_code_points()    // [104, 105]
@@ -2537,81 +2537,81 @@ class Uint8Array(pydantic.BaseModel):
     @staticmethod
     def zeroes(size: int) -> bytes:
         """Creates a new `uint8array` of the given size, filled with zeros.
-        
+
         Throws an error if the `size` is out of range (e.g. negative).
         Panics if the allocation would cause an OOM.
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     async def zeroes_async(size: int) -> bytes:
         """Creates a new `uint8array` of the given size, filled with zeros.
-        
+
         Throws an error if the `size` is out of range (e.g. negative).
         Panics if the allocation would cause an OOM.
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     def from_array(array: typing.List[int]) -> bytes:
         """Creates a `uint8array` from an array of integers.
-        
+
         Throws `InvalidArgument` if any value is outside the range 0–255.
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     async def from_array_async(array: typing.List[int]) -> bytes:
         """Creates a `uint8array` from an array of integers.
-        
+
         Throws `InvalidArgument` if any value is outside the range 0–255.
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     def from_hex(hex: str) -> bytes:
         """Decodes a hexadecimal string (e.g. `"deadbeef"`) into bytes.
-        
+
         Throws `InvalidArgument` if the input contains non-hex characters or has an odd length.
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     async def from_hex_async(hex: str) -> bytes:
         """Decodes a hexadecimal string (e.g. `"deadbeef"`) into bytes.
-        
+
         Throws `InvalidArgument` if the input contains non-hex characters or has an odd length.
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     def from_base64(base64: str) -> bytes:
         """Decodes a standard Base64-encoded string into bytes.
-        
+
         Accepts both standard (`+/`) and URL-safe (`-_`) alphabets, with or without padding.
-        
+
         # Examples
         ```
         uint8array.from_base64("aGVsbG8=")   // [104, 101, 108, 108, 111]  ("hello")
         ```
-        
+
         Throws `InvalidArgument` if the input is not valid Base64.
-        
+
         Raises:
             InvalidArgument"""
     @staticmethod
     async def from_base64_async(base64: str) -> bytes:
         """Decodes a standard Base64-encoded string into bytes.
-        
+
         Accepts both standard (`+/`) and URL-safe (`-_`) alphabets, with or without padding.
-        
+
         # Examples
         ```
         uint8array.from_base64("aGVsbG8=")   // [104, 101, 108, 108, 111]  ("hello")
         ```
-        
+
         Throws `InvalidArgument` if the input is not valid Base64.
-        
+
         Raises:
             InvalidArgument"""
     def length(self) -> int:
@@ -2620,11 +2620,11 @@ class Uint8Array(pydantic.BaseModel):
         """Returns the number of bytes in the array."""
     def at(self, index: int) -> typing.Optional[int]:
         """Returns the byte at `index`, or `null` if out of bounds.
-        
+
         Negative indices count from the end: `-1` is the last byte."""
     async def at_async(self, index: int) -> typing.Optional[int]:
         """Returns the byte at `index`, or `null` if out of bounds.
-        
+
         Negative indices count from the end: `-1` is the last byte."""
     def push(self, item: int) -> int: ...
     async def push_async(self, item: int) -> int: ...
@@ -2647,13 +2647,13 @@ class Uint8Array(pydantic.BaseModel):
     def slice(self, start: int, end: int) -> bytes:
         """Returns a new `uint8array` with the bytes from `start` (inclusive) to
         `end` (exclusive).
-        
+
         Negative indices count from the end. Out-of-range indices are clamped, and
         an `end` that resolves at or before `start` yields an empty array."""
     async def slice_async(self, start: int, end: int) -> bytes:
         """Returns a new `uint8array` with the bytes from `start` (inclusive) to
         `end` (exclusive).
-        
+
         Negative indices count from the end. Out-of-range indices are clamped, and
         an `end` that resolves at or before `start` yields an empty array."""
     def to_array(self) -> typing.List[int]:
@@ -2666,14 +2666,14 @@ class Uint8Array(pydantic.BaseModel):
         """Encodes the bytes as a lowercase hexadecimal string (e.g. `"deadbeef"`)."""
     def to_base64(self) -> str:
         """Encodes the bytes as a standard Base64 string (with `=` padding).
-        
+
         # Examples
         ```
         "hello".to_utf8().to_base64()   // "aGVsbG8="
         ```"""
     async def to_base64_async(self) -> str:
         """Encodes the bytes as a standard Base64 string (with `=` padding).
-        
+
         # Examples
         ```
         "hello".to_utf8().to_base64()   // "aGVsbG8="

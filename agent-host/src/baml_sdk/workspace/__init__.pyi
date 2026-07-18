@@ -68,8 +68,8 @@ class WorkspacePlan(pydantic.BaseModel):
 
 class WorkspaceChange(pydantic.BaseModel):
     path: str
-    change_kind: typing.Union[typing.Literal["create"], typing.Literal["write"], typing.Literal["rename"], typing.Literal["delete"], typing.Literal["metadata"]]
-    size_bytes: typing.Optional[int]
+    kind: typing.Union[typing.Literal["create"], typing.Literal["write"], typing.Literal["delete"]]
+    size: typing.Optional[int]
 
 
 class CheckpointSelection(pydantic.BaseModel):
