@@ -22,6 +22,7 @@ impl Daemon {
         store.prune_protocol_history()?;
         Ok(Self {
             store,
+            content_cache: Default::default(),
             residents: HashMap::new(),
             process_idempotency_requests: Default::default(),
             mounts: HashMap::new(),

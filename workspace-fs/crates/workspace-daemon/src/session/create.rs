@@ -5,6 +5,7 @@ use anyhow::{Result, bail};
 
 use crate::model::{BackingBlobLocator, MemoryLocator, RecordSource, SessionCreated, WorkspaceId};
 use crate::paths::{ScratchMatcher, scratch_rules};
+use crate::resident::ContentCache;
 use crate::store::{PersistedMemorySource, PreparedMemorySource, Store};
 
 use super::scanning::scan_source;
@@ -25,12 +26,49 @@ pub fn create(
     create_with_sources(store, name, requested_id, &sources, scratch_paths)
 }
 
+#[cfg(test)]
 pub fn create_with_sources(
     store: &mut Store,
     name: &str,
     requested_id: Option<&str>,
     memory_sources: &[PreparedMemorySource],
     scratch_paths: &[PathBuf],
+) -> Result<SessionCreated> {
+    create_with_sources_impl(
+        store,
+        name,
+        requested_id,
+        memory_sources,
+        scratch_paths,
+        None,
+    )
+}
+
+pub(crate) fn create_with_sources_cached(
+    store: &mut Store,
+    name: &str,
+    requested_id: Option<&str>,
+    memory_sources: &[PreparedMemorySource],
+    scratch_paths: &[PathBuf],
+    cache: &ContentCache,
+) -> Result<SessionCreated> {
+    create_with_sources_impl(
+        store,
+        name,
+        requested_id,
+        memory_sources,
+        scratch_paths,
+        Some(cache),
+    )
+}
+
+fn create_with_sources_impl(
+    store: &mut Store,
+    name: &str,
+    requested_id: Option<&str>,
+    memory_sources: &[PreparedMemorySource],
+    scratch_paths: &[PathBuf],
+    cache: Option<&ContentCache>,
 ) -> Result<SessionCreated> {
     let id = requested_id
         .map(WorkspaceId::parse)
@@ -52,7 +90,7 @@ pub fn create_with_sources(
     }
     let scratch_paths = scratch_rules(scratch_paths)?;
     let scratch_matcher = ScratchMatcher::compile(scratch_paths.iter().map(String::as_str))?;
-    let baseline = build_baseline(memory_sources, &scratch_matcher)?;
+    let baseline = build_baseline(memory_sources, &scratch_matcher, cache)?;
 
     let worktree_guard = WorktreeGuard::create(&session_root, &worktree)?;
     if let Err(error) = store.create_workspace(
@@ -89,12 +127,13 @@ pub fn create_with_sources(
 fn build_baseline(
     memory_sources: &[PreparedMemorySource],
     scratch_matcher: &ScratchMatcher,
+    cache: Option<&ContentCache>,
 ) -> Result<BTreeMap<crate::paths::NormalizedPath, crate::model::FileRecord>> {
     let mut baseline = BTreeMap::new();
     for memory in memory_sources {
         match &memory.source {
             PersistedMemorySource::Directory(root) => {
-                for mut record in scan_source(root, scratch_matcher)? {
+                for mut record in scan_source(root, scratch_matcher, cache)? {
                     if record.source != RecordSource::Directory {
                         record.source = RecordSource::Memory(MemoryLocator {
                             memory_id: memory.id.clone(),

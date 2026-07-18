@@ -11,6 +11,8 @@ mod retention;
 mod transactions;
 mod workspaces;
 
+pub(crate) use blobs::VerifiedBlob;
+
 #[cfg(test)]
 #[path = "store/memory_tests.rs"]
 mod memory_tests;

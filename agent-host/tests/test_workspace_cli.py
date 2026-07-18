@@ -12,6 +12,7 @@ from unittest import mock
 
 from baml_sdk.workspace import WorkspacePlan
 from reframe_agent_host.commands.parser import build_parser
+from reframe_agent_host.commands.workspace_args import build_workspace_parser
 from reframe_agent_host.workspace.coordinator import WorkspaceCoordinator
 from reframe_agent_host.workspace import WorkspaceError
 from reframe_agent_host.workspace.service import (
@@ -28,6 +29,14 @@ class ShortReadStream(BytesIO):
 
 
 class WorkspaceCliParserTests(unittest.TestCase):
+    def test_workspace_help_displays_the_winfsp_notice(self) -> None:
+        stdout = StringIO()
+        with self.assertRaises(SystemExit), mock.patch("sys.stdout", stdout):
+            build_workspace_parser().parse_args(["workspace", "--help"])
+
+        self.assertIn("WinFsp - Windows File System Proxy", stdout.getvalue())
+        self.assertIn("https://github.com/winfsp/winfsp", stdout.getvalue())
+
     def test_core_commands_need_no_paths_or_session_ids(self) -> None:
         parser = build_parser()
 

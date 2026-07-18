@@ -22,6 +22,10 @@ walkdir.workspace = true
 
 [target.'cfg(windows)'.dependencies]
 windows.workspace = true
+winfsp_wrs_sys = "=0.4.1"
+
+[target.'cfg(windows)'.build-dependencies]
+winfsp_build = "=0.1.1"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 fuser.workspace = true

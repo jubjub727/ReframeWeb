@@ -7,9 +7,21 @@ use walkdir::WalkDir;
 
 use crate::model::{FileRecord, RecordSource};
 use crate::paths::{NormalizedPath, ScratchMatcher, native_path};
+use crate::resident::ContentCache;
 
-pub(super) fn scan_source(root: &Path, scratch: &ScratchMatcher) -> Result<Vec<FileRecord>> {
+mod parallel;
+#[cfg(test)]
+mod tests;
+
+use parallel::{PendingSourceFile, read_source_files};
+
+pub(super) fn scan_source(
+    root: &Path,
+    scratch: &ScratchMatcher,
+    cache: Option<&ContentCache>,
+) -> Result<Vec<FileRecord>> {
     let mut records = Vec::new();
+    let mut files = Vec::new();
     let entries = WalkDir::new(root)
         .follow_links(false)
         .sort_by_file_name()
@@ -33,27 +45,41 @@ pub(super) fn scan_source(root: &Path, scratch: &ScratchMatcher) -> Result<Vec<F
             );
         }
         if entry.file_type().is_dir() && entry.path() != root {
-            records.push(FileRecord {
+            records.push(PlannedRecord::Ready(FileRecord {
                 path: NormalizedPath::parse(entry.path().strip_prefix(root)?)?,
                 hash: String::new(),
                 size: 0,
                 source: RecordSource::Directory,
-            });
+            }));
             continue;
         }
         if !entry.file_type().is_file() {
             continue;
         }
         let path = NormalizedPath::parse(entry.path().strip_prefix(root)?)?;
-        let bytes = fs::read(entry.path())?;
-        records.push(FileRecord {
-            path,
-            hash: blake3::hash(&bytes).to_hex().to_string(),
-            size: bytes.len() as u64,
-            source: RecordSource::Overlay,
-        });
+        let file_index = files.len();
+        files.push(PendingSourceFile::new(path, entry.path().to_path_buf()));
+        records.push(PlannedRecord::File(file_index));
     }
-    Ok(records)
+    let mut files = read_source_files(&files, cache)?
+        .into_iter()
+        .map(Some)
+        .collect::<Vec<_>>();
+    records
+        .into_iter()
+        .map(|record| match record {
+            PlannedRecord::Ready(record) => Ok(record),
+            PlannedRecord::File(index) => files
+                .get_mut(index)
+                .and_then(Option::take)
+                .ok_or_else(|| anyhow::anyhow!("source scan produced an incomplete result")),
+        })
+        .collect()
+}
+
+enum PlannedRecord {
+    Ready(FileRecord),
+    File(usize),
 }
 
 pub(super) fn scan_worktree(

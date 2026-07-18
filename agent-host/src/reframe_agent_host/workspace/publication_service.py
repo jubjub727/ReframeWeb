@@ -9,17 +9,13 @@ from typing import TYPE_CHECKING
 
 from reframe_agent_host.workspace.errors import WorkspaceError
 from reframe_agent_host.workspace.models import PendingCheckpointPublication
-from reframe_memory import (
-    CheckpointFilesystemMemory,
-    FilesystemMemoryNode,
-    MemoryDatabase,
-)
 
 if TYPE_CHECKING:
     from reframe_agent_host.workspace.service import WorkspaceDaemon
+    from reframe_memory import FilesystemMemoryNode, MemoryDatabase
 
 
-DatabaseFactory = Callable[[], Awaitable[MemoryDatabase]]
+DatabaseFactory = Callable[[], Awaitable["MemoryDatabase"]]
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -129,6 +125,8 @@ class CheckpointPublisher:
         self,
         publication: CheckpointPublication,
     ) -> FilesystemMemoryNode:
+        from reframe_memory import CheckpointFilesystemMemory
+
         memory = CheckpointFilesystemMemory(
             title=f"{publication.session_name} checkpoint",
             description=_publication_description(publication.retained_count),

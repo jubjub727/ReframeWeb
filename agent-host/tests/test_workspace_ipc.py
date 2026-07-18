@@ -16,6 +16,7 @@ from reframe_agent_host.workspace.errors import (
     WorkspaceOutcomeUnknownError,
     WorkspaceTransportError,
 )
+from reframe_agent_host.workspace.models import MountedWorkspace
 from reframe_agent_host.workspace.service import WorkspaceDaemon, _read_frame, _write_frame
 from reframe_agent_host.workspace.transport import LocalConnection, encode_frame
 
@@ -46,6 +47,19 @@ class _DuplexStream:
 
 
 class WorkspaceIpcTests(unittest.TestCase):
+    def test_mounted_workspace_reports_the_provider_backend(self) -> None:
+        mounted = MountedWorkspace.model_validate(
+            {
+                "session_id": "task",
+                "mount_path": "R:/workspace",
+                "backend": "winfsp",
+                "resident_files": 3,
+                "resident_bytes": 4_096,
+            }
+        )
+
+        self.assertEqual(mounted.backend, "winfsp")
+
     def test_start_terminates_a_daemon_when_endpoint_startup_fails(self) -> None:
         process = mock.Mock()
         process.poll.return_value = None

@@ -59,6 +59,7 @@ mod tests {
     fn daemon(root: &std::path::Path) -> Result<Daemon> {
         Ok(Daemon {
             store: Store::open(root)?,
+            content_cache: Default::default(),
             residents: HashMap::new(),
             process_idempotency_requests: Default::default(),
             mounts: HashMap::new(),

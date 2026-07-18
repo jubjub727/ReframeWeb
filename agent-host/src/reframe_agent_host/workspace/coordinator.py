@@ -1,19 +1,16 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable, Sequence
-from typing import Any
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any
 
-from baml_sdk.workspace import (
-    ManualCheckpoint_async,
-    ManualWorkspacePlan_async,
+from reframe_agent_host.workspace.coordinator_services import (
+    CheckpointFunction,
+    DatabaseFactory,
+    WorkspaceCoordinatorServices,
 )
 from reframe_agent_host.workspace.execution import run_in_workspace
 from reframe_agent_host.workspace.errors import WorkspaceError
-from reframe_agent_host.workspace.memory_service import (
-    WorkspaceMemoryService,
-    WorkspacePlanFunction,
-)
 from reframe_agent_host.workspace.models import (
     DaemonCheckpointResult,
     PublishedCheckpointResult,
@@ -21,20 +18,11 @@ from reframe_agent_host.workspace.models import (
     WorkspaceStatus,
     WorkspaceSummary,
 )
-from reframe_agent_host.workspace.publication_service import (
-    CheckpointPublication,
-    CheckpointPublisher,
-)
 from reframe_agent_host.workspace.service import WorkspaceDaemon
-from reframe_memory import (
-    FilesystemMemoryNode,
-    MemoryDatabase,
-    open_memory_database,
-)
 
-
-DatabaseFactory = Callable[[], Awaitable[MemoryDatabase]]
-CheckpointFunction = Callable[..., Awaitable[Any]]
+if TYPE_CHECKING:
+    from reframe_agent_host.workspace.memory_service import WorkspacePlanFunction
+    from reframe_memory import FilesystemMemoryNode
 
 
 class WorkspaceCoordinator:
@@ -44,14 +32,17 @@ class WorkspaceCoordinator:
         self,
         daemon: WorkspaceDaemon | None = None,
         *,
-        database_factory: DatabaseFactory = open_memory_database,
-        workspace_plan: WorkspacePlanFunction = ManualWorkspacePlan_async,
-        checkpoint_selection: CheckpointFunction = ManualCheckpoint_async,
+        database_factory: DatabaseFactory | None = None,
+        workspace_plan: WorkspacePlanFunction | None = None,
+        checkpoint_selection: CheckpointFunction | None = None,
     ) -> None:
         self.daemon = daemon or WorkspaceDaemon()
-        self._publisher = CheckpointPublisher(self.daemon, database_factory)
-        self._memories = WorkspaceMemoryService(database_factory, workspace_plan)
-        self._checkpoint_selection = checkpoint_selection
+        self._services = WorkspaceCoordinatorServices(
+            self.daemon,
+            database_factory,
+            workspace_plan,
+            checkpoint_selection,
+        )
 
     async def start(self) -> None:
         await asyncio.to_thread(self.daemon.start)
@@ -60,10 +51,10 @@ class WorkspaceCoordinator:
         await asyncio.to_thread(self.daemon.close)
 
     async def create_project_memory(self) -> FilesystemMemoryNode:
-        return await self._memories.create_project_memory()
+        return await self._services.memory_service().create_project_memory()
 
     async def list_memories(self) -> list[FilesystemMemoryNode]:
-        return await self._memories.list_memories()
+        return await self._services.memory_service().list_memories()
 
     async def create_session(
         self,
@@ -75,7 +66,7 @@ class WorkspaceCoordinator:
             raise WorkspaceError("--memory cannot be combined with --continue")
         inherited = await self._continue_target(continue_session)
         selected = list(memory_ids) or inherited
-        resolved = await self._memories.resolve_plan(selected)
+        resolved = await self._services.memory_service().resolve_plan(selected)
         value = await self._daemon_call(
             "create_workspace",
             name="Agent task session",
@@ -111,7 +102,7 @@ class WorkspaceCoordinator:
         retain_all: bool,
     ) -> PublishedCheckpointResult:
         session_id = await self.select_session(requested, require_active=True)
-        selection = await self._checkpoint_selection(list(paths))
+        selection = await self._services.checkpoint_function()(list(paths))
         value = await self._daemon_call(
             "commit_checkpoint",
             session_id=session_id,
@@ -120,7 +111,9 @@ class WorkspaceCoordinator:
         )
         checkpoint = _model(DaemonCheckpointResult, value)
         try:
-            memory = await self._publisher.publish_manifest(checkpoint.manifest_id)
+            memory = await self._services.checkpoint_publisher().publish_manifest(
+                checkpoint.manifest_id
+            )
         except Exception as error:
             raise WorkspaceError(
                 f"checkpoint {checkpoint.manifest_id} committed; memory publication "
@@ -180,7 +173,7 @@ class WorkspaceCoordinator:
         raise WorkspaceError(f"workspace session does not exist: {session_id}")
 
     async def reconcile_pending_publications(self, *, strict: bool = False) -> int:
-        return await self._publisher.reconcile(strict=strict)
+        return await self._services.checkpoint_publisher().reconcile(strict=strict)
 
     async def _continue_target(self, requested: str | None) -> list[str]:
         if requested is None:
@@ -194,6 +187,10 @@ class WorkspaceCoordinator:
             raise WorkspaceError(
                 f"session has no checkpoint to continue: {summary.session_id}"
             )
+        from reframe_agent_host.workspace.publication_service import (
+            CheckpointPublication,
+        )
+
         publication = CheckpointPublication(
             session_id=summary.session_id,
             session_name=summary.name,
@@ -202,7 +199,9 @@ class WorkspaceCoordinator:
             base_memory_ids=tuple(summary.memory_ids),
             retained_count=None,
         )
-        memory = await self._publisher.publish_external(publication)
+        memory = await self._services.checkpoint_publisher().publish_external(
+            publication
+        )
         return [memory.id]
 
     async def _summaries(self) -> list[WorkspaceSummary]:

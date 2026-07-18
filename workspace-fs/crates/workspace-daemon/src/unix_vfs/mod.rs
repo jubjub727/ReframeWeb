@@ -83,6 +83,10 @@ impl Provider {
             .is_some_and(|session| !session.guard.is_finished())
     }
 
+    pub fn backend_name(&self) -> &'static str {
+        "fuse"
+    }
+
     fn remove_scratch(&self) -> Result<()> {
         if self.scratch_root.exists() {
             std::fs::remove_dir_all(&self.scratch_root).with_context(|| {

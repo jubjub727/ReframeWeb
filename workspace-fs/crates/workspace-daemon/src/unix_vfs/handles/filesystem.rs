@@ -112,7 +112,7 @@ impl ResidentFuse {
         let size = handle.len(|path| {
             self.resident
                 .file(path)
-                .map(|file| file.bytes.len() as u64)
+                .map(|file| file.len() as u64)
                 .ok_or(Errno::ENOENT)
         })?;
         Ok(self.make_attr(

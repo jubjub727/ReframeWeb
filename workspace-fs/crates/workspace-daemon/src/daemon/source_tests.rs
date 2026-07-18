@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
+use std::sync::Arc;
 
 use anyhow::Result;
 use serde_json::json;
@@ -13,10 +14,92 @@ use super::Daemon;
 fn daemon(root: &std::path::Path) -> Result<Daemon> {
     Ok(Daemon {
         store: Store::open(root)?,
+        content_cache: crate::resident::ContentCache::new(1024 * 1024),
         residents: HashMap::new(),
         process_idempotency_requests: Default::default(),
         mounts: HashMap::new(),
     })
+}
+
+#[test]
+fn workspace_creation_seeds_the_resident_cache_for_mount() -> Result<()> {
+    let root =
+        std::env::temp_dir().join(format!("reframe-memory-cache-{}", Store::next_id("test")));
+    let source = root.join("source");
+    fs::create_dir_all(&source)?;
+    fs::write(source.join("note.txt"), b"snapshot at create")?;
+    let mut daemon = daemon(&root.join("store"))?;
+
+    assert!(
+        daemon
+            .handle(create_request("first", "create-cached", &source)?)
+            .ok
+    );
+    fs::write(source.join("note.txt"), b"changed after create")?;
+
+    let resident = daemon
+        .residents
+        .get("existing")
+        .expect("workspace creation should prepare resident content");
+    assert_eq!(
+        resident
+            .file("note.txt")
+            .expect("cached file")
+            .snapshot()?
+            .as_ref(),
+        b"snapshot at create"
+    );
+
+    drop(daemon);
+    fs::remove_dir_all(root)?;
+    Ok(())
+}
+
+#[test]
+fn applying_policy_replaces_the_eager_matcher_without_losing_resident_edits() -> Result<()> {
+    let root =
+        std::env::temp_dir().join(format!("reframe-policy-refresh-{}", Store::next_id("test")));
+    let source = root.join("source");
+    fs::create_dir_all(&source)?;
+    fs::write(source.join("note.txt"), b"baseline")?;
+    let mut daemon = daemon(&root.join("store"))?;
+    assert!(
+        daemon
+            .handle(create_request("create", "create", &source)?)
+            .ok
+    );
+
+    let before = Arc::clone(daemon.residents.get("existing").expect("eager resident"));
+    before.replace("unsaved.txt", b"resident edit".to_vec())?;
+    assert!(!before.is_scratch("generated/output.txt"));
+    let applied = daemon.handle(serde_json::from_value(json!({
+        "request_id": "policy",
+        "idempotency_key": "policy",
+        "operation": "apply_policy",
+        "session_id": "existing",
+        "scratch_paths": ["generated/**"],
+    }))?);
+
+    assert!(applied.ok, "{:?}", applied.error);
+    let after = daemon
+        .residents
+        .get("existing")
+        .expect("refreshed resident");
+    assert!(!Arc::ptr_eq(&before, after));
+    assert!(after.is_scratch("generated/output.txt"));
+    assert_eq!(
+        after
+            .file("unsaved.txt")
+            .expect("uncheckpointed edit")
+            .snapshot()?
+            .as_ref(),
+        b"resident edit"
+    );
+
+    drop(before);
+    drop(daemon);
+    fs::remove_dir_all(root)?;
+    Ok(())
 }
 
 fn create_request(request_id: &str, key: &str, source_path: &std::path::Path) -> Result<Request> {
@@ -71,7 +154,7 @@ fn failed_create_cannot_remap_an_existing_workspace_baseline() -> Result<()> {
         resident
             .file("note.txt")
             .expect("projected file")
-            .bytes
+            .snapshot()?
             .as_ref(),
         b"original"
     );

@@ -34,6 +34,7 @@ impl Daemon {
             return Ok(json!({
                 "session_id":session_id,
                 "mount_path":provider.worktree.to_string_lossy(),
+                "backend":provider.backend_name(),
                 "resident_files":stats.files,
                 "resident_bytes":stats.bytes
             }));
@@ -41,7 +42,8 @@ impl Daemon {
         let resident = match self.residents.get(session_id) {
             Some(resident) => Arc::clone(resident),
             None => {
-                let resident = ResidentWorkspace::load(&self.store, session_id)?;
+                let resident =
+                    ResidentWorkspace::load_cached(&self.store, session_id, &self.content_cache)?;
                 self.residents
                     .insert(session_id.to_owned(), Arc::clone(&resident));
                 resident
@@ -50,10 +52,12 @@ impl Daemon {
         let stats = resident.stats();
         let provider = Provider::start(&self.store, session_id, resident)?;
         let worktree = provider.worktree.to_string_lossy().into_owned();
+        let backend = provider.backend_name();
         self.mounts.insert(session_id.into(), provider);
         Ok(json!({
             "session_id":session_id,
             "mount_path":worktree,
+            "backend":backend,
             "resident_files":stats.files,
             "resident_bytes":stats.bytes
         }))
@@ -104,16 +108,11 @@ impl Daemon {
         if self.mounts.contains_key(session_id) {
             bail!("unmount workspace before destroying it");
         }
-        #[cfg(windows)]
-        {
-            let resident = self
-                .residents
-                .get(session_id)
-                .cloned()
-                .unwrap_or(ResidentWorkspace::load(&self.store, session_id)?);
-            let mut provider = Provider::start(&self.store, session_id, resident)?;
-            provider.unmount()?;
-        }
+        // A mounted ProjFS provider clears its placeholders during unmount. If
+        // the daemon previously exited without unmounting, native recursive
+        // deletion can still remove the stopped virtualization root. Starting
+        // a provider here only to stop it again adds driver and resident-load
+        // latency and can accidentally select the unrelated WinFsp backend.
         session::destroy_ephemeral(&self.store, session_id)?;
         self.residents.remove(session_id);
         Ok(json!({"session_id":session_id,"destroyed":true}))
@@ -121,7 +120,7 @@ impl Daemon {
 
     pub(super) fn sync_resident_journal(&mut self, session_id: &str) -> Result<()> {
         if let Some(resident) = self.residents.get(session_id) {
-            session::replace_journal(&mut self.store, session_id, &resident.changes())?;
+            session::replace_journal(&mut self.store, session_id, &resident.changes()?)?;
         }
         Ok(())
     }
@@ -166,10 +165,60 @@ where
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
+    use std::fs;
 
     use anyhow::{Result, bail};
 
+    use crate::daemon::Daemon;
+    use crate::resident::ContentCache;
+    use crate::session;
+    use crate::store::Store;
+
     use super::{prepare_mount_slot, retain_until_unmounted};
+
+    #[test]
+    fn destroying_an_unmounted_workspace_does_not_reload_resident_content() -> Result<()> {
+        let root = std::env::temp_dir().join(format!(
+            "reframe-destroy-unmounted-{}",
+            Store::next_id("test")
+        ));
+        let memory = root.join("memory");
+        fs::create_dir_all(&memory)?;
+        fs::write(memory.join("remembered.txt"), b"content")?;
+        let mut store = Store::open(&root)?;
+        store.persist_memory_source("memory:destroy-test", &memory)?;
+        let created = session::create(
+            &mut store,
+            "workspace",
+            Some("workspace"),
+            &["memory:destroy-test".into()],
+            &[],
+        )?;
+        let worktree = std::path::PathBuf::from(&created.worktree);
+        fs::write(worktree.join("stale-projected-file"), b"content")?;
+        // Resident loading would now fail. Destroy must not read source bytes
+        // merely to remove an already-unmounted workspace.
+        fs::remove_dir_all(memory)?;
+        let session_root = worktree
+            .parent()
+            .expect("created worktree has a session parent")
+            .to_owned();
+        let mut daemon = Daemon {
+            store,
+            content_cache: ContentCache::default(),
+            residents: HashMap::new(),
+            process_idempotency_requests: Default::default(),
+            mounts: HashMap::new(),
+        };
+
+        let result = daemon.destroy("workspace")?;
+
+        assert_eq!(result["destroyed"], true);
+        assert!(!session_root.exists());
+        drop(daemon);
+        fs::remove_dir_all(root)?;
+        Ok(())
+    }
 
     #[test]
     fn failed_unmount_retains_provider_for_retry() -> Result<()> {

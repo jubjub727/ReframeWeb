@@ -92,9 +92,13 @@ pub(super) fn create(
     reply: ReplyCreate,
 ) {
     match fs.create_file_child(parent, name, OpenFlags(flags)) {
-        Ok((attr, generation, handle)) => {
-            reply.created(&TTL, &attr, generation, handle, FopenFlags::FOPEN_DIRECT_IO)
-        }
+        Ok((attr, generation, handle)) => reply.created(
+            &TTL,
+            &attr,
+            generation,
+            handle,
+            FopenFlags::FOPEN_KEEP_CACHE,
+        ),
         Err(error) => reply.error(error),
     }
 }
@@ -107,7 +111,7 @@ pub(super) fn open(
     reply: ReplyOpen,
 ) {
     match fs.open_inode(inode, flags) {
-        Ok(handle) => reply.opened(handle, FopenFlags::FOPEN_DIRECT_IO),
+        Ok(handle) => reply.opened(handle, FopenFlags::FOPEN_KEEP_CACHE),
         Err(error) => reply.error(error),
     }
 }

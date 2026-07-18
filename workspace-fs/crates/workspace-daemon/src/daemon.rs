@@ -24,7 +24,7 @@ mod source_tests;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::resident::ResidentWorkspace;
+use crate::resident::{ContentCache, ResidentWorkspace};
 use crate::store::Store;
 
 #[cfg(unix)]
@@ -36,6 +36,7 @@ pub use transport::{serve, serve_socket};
 
 struct Daemon {
     store: Store,
+    content_cache: ContentCache,
     residents: HashMap<String, Arc<ResidentWorkspace>>,
     process_idempotency_requests: idempotency::ProcessIdempotencyRequests,
     #[cfg(any(windows, unix))]

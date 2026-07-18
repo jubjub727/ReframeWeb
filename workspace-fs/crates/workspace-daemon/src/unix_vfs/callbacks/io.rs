@@ -18,11 +18,12 @@ pub(super) fn read(
     reply: ReplyData,
 ) {
     let result = fs.handle(inode, fh).and_then(|handle| {
-        handle.read(offset, size, |path| {
+        handle.read(offset, size, |path, offset, size| {
             fs.resident
                 .file(path)
-                .map(|file| file.bytes.to_vec())
-                .ok_or(Errno::ENOENT)
+                .ok_or(Errno::ENOENT)?
+                .read_range(offset, size as usize)
+                .map_err(|_| Errno::EIO)
         })
     });
     match result {

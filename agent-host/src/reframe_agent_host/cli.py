@@ -2,112 +2,107 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import Sequence
+from typing import Any, Callable, Sequence
 
-from reframe_agent_host.commands.checks import (
-    run_audio_devices,
-    run_doctor,
-    run_gpu_check,
-    run_transcription_check,
-)
-from reframe_agent_host.commands.conversation_evaluation import (
-    run_analyze_conversation_evaluation_benchmark,
-    run_benchmark_conversation_evaluation,
-)
-from reframe_agent_host.commands.control_flow import (
-    run_analyze_control_flow_benchmark,
-    run_benchmark_control_flow,
-)
-from reframe_agent_host.commands.memory_relevance import (
-    run_benchmark_memory_relevance,
-)
-from reframe_agent_host.commands.memory_browser import run_memory_browser
-from reframe_agent_host.commands.parser import build_parser
-from reframe_agent_host.commands.task_prompt import run_benchmark_task_prompt
-from reframe_agent_host.commands.audio_quality_test import run_audio_quality_test
-from reframe_agent_host.commands.task_choice import (
-    run_benchmark_task_choice,
-    run_analyze_task_choice_benchmark,
-    run_choose_task,
-    run_list_opencode_go_models,
-    run_memory_setup,
-    run_seed_core_tasks,
-    run_seed_opencode_go_providers,
-)
-from reframe_agent_host.commands.voice_turn import run_voice_turn
-from reframe_agent_host.commands.workspace import run_workspace
-from reframe_agent_host.commands.debug_wake_audio import run_debug_wake_audio
-from reframe_agent_host.commands.record_wake_audio import run_record_wake_audio
-from reframe_agent_host.memory_readiness import MemoryReadinessError
-from reframe_agent_host.workspace import WorkspaceError
+from reframe_agent_host.commands.lazy_handlers import HANDLER_MODULES, load_handler
+
+def _handler(name: str) -> Callable[..., Any]:
+    existing = globals().get(name)
+    if existing is not None:
+        return existing
+    handler = load_handler(name)
+    globals()[name] = handler
+    return handler
+
+
+def __getattr__(name: str) -> Any:
+    if name not in HANDLER_MODULES:
+        raise AttributeError(name)
+    return _handler(name)
 
 
 def main(argv: Sequence[str] | None = None) -> None:
     try:
         _main(argv)
-    except MemoryReadinessError as error:
-        print(f"[memory] {error}", file=sys.stderr)
-        raise SystemExit(5) from None
-    except WorkspaceError as error:
-        print(f"[workspace] {error}", file=sys.stderr)
-        raise SystemExit(6) from None
+    except Exception as error:
+        _raise_known_cli_error(error)
+        raise
 
 
 def _main(argv: Sequence[str] | None = None) -> None:
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    if arguments[:1] == ["workspace"]:
+        from reframe_agent_host.commands.workspace_args import build_workspace_parser
+
+        args = build_workspace_parser().parse_args(arguments)
+        raise SystemExit(_handler("run_workspace")(args))
+
+    from reframe_agent_host.commands.parser import build_parser
+
     parser = build_parser()
-    args = parser.parse_args(argv)
+    args = parser.parse_args(arguments)
 
     if args.command == "doctor":
-        raise SystemExit(run_doctor())
+        raise SystemExit(_handler("run_doctor")())
 
     if args.command == "audio-devices":
-        raise SystemExit(run_audio_devices())
+        raise SystemExit(_handler("run_audio_devices")())
 
     if args.command == "audio-quality-test":
-        raise SystemExit(run_audio_quality_test(args))
+        raise SystemExit(_handler("run_audio_quality_test")(args))
 
     if args.command == "memory-setup":
-        raise SystemExit(asyncio.run(run_memory_setup()))
+        raise SystemExit(asyncio.run(_handler("run_memory_setup")()))
 
     if args.command == "memory-browser":
-        raise SystemExit(run_memory_browser(args))
+        raise SystemExit(_handler("run_memory_browser")(args))
 
     if args.command == "seed-core-tasks":
-        raise SystemExit(asyncio.run(run_seed_core_tasks()))
+        raise SystemExit(asyncio.run(_handler("run_seed_core_tasks")()))
 
     if args.command == "seed-opencode-go-providers":
-        raise SystemExit(asyncio.run(run_seed_opencode_go_providers()))
+        raise SystemExit(
+            asyncio.run(_handler("run_seed_opencode_go_providers")())
+        )
 
     if args.command == "list-opencode-go-models":
-        raise SystemExit(run_list_opencode_go_models())
+        raise SystemExit(_handler("run_list_opencode_go_models")())
 
     if args.command == "analyze-task-choice-benchmark":
-        raise SystemExit(run_analyze_task_choice_benchmark(args.path))
+        raise SystemExit(
+            _handler("run_analyze_task_choice_benchmark")(args.path)
+        )
 
     if args.command in (
         "analyze-conversation-evaluation-benchmark",
         "analyse-conversation-evaluation-benchmark",
     ):
-        raise SystemExit(run_analyze_conversation_evaluation_benchmark(args.path))
+        raise SystemExit(
+            _handler("run_analyze_conversation_evaluation_benchmark")(
+                args.path
+            )
+        )
 
     if args.command in (
         "analyze-control-flow-benchmark",
         "analyse-control-flow-benchmark",
     ):
-        raise SystemExit(run_analyze_control_flow_benchmark(args.path))
+        raise SystemExit(
+            _handler("run_analyze_control_flow_benchmark")(args.path)
+        )
 
     if args.command == "gpu-check":
-        raise SystemExit(run_gpu_check(args.whisper_compute_type))
+        raise SystemExit(_handler("run_gpu_check")(args.whisper_compute_type))
 
     if args.command == "transcription-check":
-        raise SystemExit(run_transcription_check(args))
+        raise SystemExit(_handler("run_transcription_check")(args))
 
     if args.command == "choose-task":
         if args.conversation_id is not None and args.session_id is None:
             parser.error("--conversation-id requires --session-id")
         raise SystemExit(
             asyncio.run(
-                run_choose_task(
+                _handler("run_choose_task")(
                     transcript=args.transcript,
                     session_id=args.session_id,
                     conversation_id=args.conversation_id,
@@ -127,7 +122,7 @@ def _main(argv: Sequence[str] | None = None) -> None:
             parser.error("--provider-cooldown-seconds cannot be negative")
         raise SystemExit(
             asyncio.run(
-                run_benchmark_task_choice(
+                _handler("run_benchmark_task_choice")(
                     session_id=args.session_id,
                     runs=args.runs,
                     warmup_runs=args.warmup_runs,
@@ -153,7 +148,7 @@ def _main(argv: Sequence[str] | None = None) -> None:
             parser.error("--provider-cooldown-seconds cannot be negative")
         raise SystemExit(
             asyncio.run(
-                run_benchmark_conversation_evaluation(
+                _handler("run_benchmark_conversation_evaluation")(
                     runs=args.runs,
                     warmup_runs=args.warmup_runs,
                     delay_seconds=args.delay_seconds,
@@ -178,7 +173,7 @@ def _main(argv: Sequence[str] | None = None) -> None:
             parser.error("--provider-cooldown-seconds cannot be negative")
         raise SystemExit(
             asyncio.run(
-                run_benchmark_control_flow(
+                _handler("run_benchmark_control_flow")(
                     runs=args.runs,
                     warmup_runs=args.warmup_runs,
                     delay_seconds=args.delay_seconds,
@@ -204,7 +199,7 @@ def _main(argv: Sequence[str] | None = None) -> None:
             parser.error("--provider-cooldown-seconds cannot be negative")
         raise SystemExit(
             asyncio.run(
-                run_benchmark_memory_relevance(
+                _handler("run_benchmark_memory_relevance")(
                     runs=args.runs,
                     warmup_runs=args.warmup_runs,
                     delay_seconds=args.delay_seconds,
@@ -229,7 +224,7 @@ def _main(argv: Sequence[str] | None = None) -> None:
             parser.error("--provider-cooldown-seconds cannot be negative")
         raise SystemExit(
             asyncio.run(
-                run_benchmark_task_prompt(
+                _handler("run_benchmark_task_prompt")(
                     runs=args.runs,
                     warmup_runs=args.warmup_runs,
                     delay_seconds=args.delay_seconds,
@@ -245,22 +240,33 @@ def _main(argv: Sequence[str] | None = None) -> None:
         )
 
     if args.command == "debug-wake-audio":
-        raise SystemExit(run_debug_wake_audio(args))
+        raise SystemExit(_handler("run_debug_wake_audio")(args))
 
     if args.command == "record-wake-audio":
-        raise SystemExit(run_record_wake_audio(args))
+        raise SystemExit(_handler("run_record_wake_audio")(args))
 
     if args.command == "voice-turn":
         raise SystemExit(_run_voice_turn(args))
-
-    if args.command == "workspace":
-        raise SystemExit(run_workspace(args))
 
     parser.error(f"Unknown command: {args.command}")
 
 
 def _run_voice_turn(args) -> int:
     try:
-        return asyncio.run(run_voice_turn(args))
+        return asyncio.run(_handler("run_voice_turn")(args))
     except KeyboardInterrupt:
         return 130
+
+
+def _raise_known_cli_error(error: Exception) -> None:
+    from reframe_agent_host.workspace.errors import WorkspaceError
+
+    if isinstance(error, WorkspaceError):
+        print(f"[workspace] {error}", file=sys.stderr)
+        raise SystemExit(6) from None
+
+    from reframe_agent_host.memory_readiness import MemoryReadinessError
+
+    if isinstance(error, MemoryReadinessError):
+        print(f"[memory] {error}", file=sys.stderr)
+        raise SystemExit(5) from None

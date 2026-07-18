@@ -83,6 +83,7 @@ class PendingCheckpointPublication(WorkspaceModel):
 class MountedWorkspace(WorkspaceModel):
     session_id: str
     mount_path: str
+    backend: Literal["fuse", "projfs", "winfsp"]
     resident_files: int
     resident_bytes: int
 

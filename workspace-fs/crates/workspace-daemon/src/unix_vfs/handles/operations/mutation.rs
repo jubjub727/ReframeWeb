@@ -32,7 +32,7 @@ impl ResidentFuse {
                 |linked_path| {
                     self.resident
                         .file(linked_path)
-                        .map(|file| file.bytes.to_vec())
+                        .and_then(|file| file.snapshot().ok().map(|bytes| bytes.to_vec()))
                         .ok_or(Errno::ENOENT)
                 },
                 || {
@@ -91,7 +91,7 @@ impl ResidentFuse {
                 |path| {
                     self.resident
                         .file(path)
-                        .map(|file| file.bytes.to_vec())
+                        .and_then(|file| file.snapshot().ok().map(|bytes| bytes.to_vec()))
                         .ok_or(Errno::ENOENT)
                 },
                 || {

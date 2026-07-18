@@ -9,7 +9,10 @@ use super::index::InodeTable;
 use super::scratch::ScratchBackend;
 use crate::resident::ResidentWorkspace;
 
-pub(super) const TTL: Duration = Duration::from_millis(50);
+// Namespace mutations originate in this provider, so the kernel can retain
+// metadata between operations instead of forcing a userspace round-trip for
+// every editor stat call.
+pub(super) const TTL: Duration = Duration::from_secs(60);
 
 #[derive(Clone, Copy)]
 pub(in crate::unix_vfs) struct PathMetadata {
@@ -56,7 +59,7 @@ impl ResidentFuse {
         } else if let Some(metadata) = metadata {
             (FileType::RegularFile, metadata.len(), 0o644)
         } else if let Some(file) = (!scratch).then(|| self.resident.file(path)).flatten() {
-            (FileType::RegularFile, file.bytes.len() as u64, 0o644)
+            (FileType::RegularFile, file.len() as u64, 0o644)
         } else {
             return Err(Errno::ENOENT);
         };

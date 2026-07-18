@@ -91,7 +91,7 @@ impl OpenHandle {
         read_linked: F,
     ) -> Result<Vec<u8>, Errno>
     where
-        F: FnOnce(&str) -> Result<Vec<u8>, Errno>,
+        F: FnOnce(&str, u64, u32) -> Result<Vec<u8>, Errno>,
     {
         if !self.access.readable {
             return Err(Errno::EBADF);
@@ -101,9 +101,7 @@ impl OpenHandle {
             OpenBackend::Resident(file) => {
                 let file = file.lock().map_err(|_| Errno::EIO)?;
                 match &file.location {
-                    ResidentLocation::Linked(path) => {
-                        slice_bytes(&read_linked(path)?, offset, size)
-                    }
+                    ResidentLocation::Linked(path) => read_linked(path, offset, size),
                     ResidentLocation::Detached(bytes) => slice_bytes(bytes, offset, size),
                 }
             }

@@ -169,7 +169,7 @@ fn resident_empty_directory_survives_checkpoint_and_resume() -> Result<()> {
     create(&mut store, "first", Some("first"), &[], &[])?;
     let resident = ResidentWorkspace::load(&store, "first")?;
     resident.create_directory("results/empty")?;
-    replace_journal(&mut store, "first", &resident.changes())?;
+    replace_journal(&mut store, "first", &resident.changes()?)?;
 
     let checkpoint = checkpoint_resident(&mut store, "first", &[], true, &resident)?;
     let entries = manifest_entries(&store, &checkpoint.manifest_id)?;

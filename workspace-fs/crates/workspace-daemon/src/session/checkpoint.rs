@@ -22,7 +22,11 @@ pub fn checkpoint(
         session_id,
         includes,
         all,
-        |worktree, path| fs::read(native_path(worktree, path)).map_err(Into::into),
+        |store, worktree, path| {
+            let bytes = fs::read(native_path(worktree, path))?;
+            let size = bytes.len() as u64;
+            Ok((store.put_blob(&bytes)?, size))
+        },
         |worktree, path| native_path(worktree, path).is_dir(),
     )
 }
@@ -39,11 +43,12 @@ pub fn checkpoint_resident(
         session_id,
         includes,
         all,
-        |_worktree, path| {
-            resident
+        |store, _worktree, path| {
+            let file = resident
                 .file(path.as_str())
-                .map(|file| file.bytes.to_vec())
-                .ok_or_else(|| anyhow::anyhow!("resident checkpoint file is missing: {path}"))
+                .ok_or_else(|| anyhow::anyhow!("resident checkpoint file is missing: {path}"))?;
+            let blob = file.verified_blob()?;
+            Ok((store.put_verified_blob(&blob)?, blob.bytes().len() as u64))
         },
         |_worktree, path| resident.is_directory(path.as_str()),
     )
@@ -54,7 +59,7 @@ fn checkpoint_with_reader(
     session_id: &str,
     includes: &[PathBuf],
     all: bool,
-    read: impl Fn(&Path, &NormalizedPath) -> Result<Vec<u8>>,
+    persist_file: impl Fn(&Store, &Path, &NormalizedPath) -> Result<(String, u64)>,
     is_directory: impl Fn(&Path, &NormalizedPath) -> bool,
 ) -> Result<CheckpointResult> {
     let changes = journal(store, session_id)?;
@@ -92,7 +97,7 @@ fn checkpoint_with_reader(
         &changes,
         &selected,
         &mut retained,
-        &read,
+        &persist_file,
         &is_directory,
     )?;
 
@@ -135,7 +140,7 @@ fn apply_selected_changes(
     changes: &[crate::model::Change],
     selected: &BTreeSet<NormalizedPath>,
     retained: &mut BTreeMap<NormalizedPath, FileRecord>,
-    read: &impl Fn(&Path, &NormalizedPath) -> Result<Vec<u8>>,
+    persist_file: &impl Fn(&Store, &Path, &NormalizedPath) -> Result<(String, u64)>,
     is_directory: &impl Fn(&Path, &NormalizedPath) -> bool,
 ) -> Result<()> {
     for change in changes {
@@ -167,14 +172,13 @@ fn apply_selected_changes(
                 );
             }
             ChangeKind::Create | ChangeKind::Write => {
-                let bytes = read(worktree, &path)?;
-                let hash = store.put_blob(&bytes)?;
+                let (hash, size) = persist_file(store, worktree, &path)?;
                 retained.insert(
                     path.clone(),
                     FileRecord {
                         path,
                         hash,
-                        size: bytes.len() as u64,
+                        size,
                         source: RecordSource::Blob,
                     },
                 );

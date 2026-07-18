@@ -2,11 +2,32 @@ from __future__ import annotations
 
 import argparse
 
+from reframe_agent_host import __version__
+
+
+WINFSP_NOTICE = (
+    "WinFsp - Windows File System Proxy, Copyright (C) Bill Zissimopoulos. "
+    "https://github.com/winfsp/winfsp"
+)
+
+
+def build_workspace_parser() -> argparse.ArgumentParser:
+    """Build the workspace-only parser used by the latency-sensitive CLI path."""
+    parser = argparse.ArgumentParser(
+        prog="reframe-agent-host",
+        description="ReframeWeb Python Agent Host.",
+    )
+    parser.add_argument("--version", action="version", version=__version__)
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    add_workspace_parser(subparsers)
+    return parser
+
 
 def add_workspace_parser(subparsers) -> None:
     workspace = subparsers.add_parser(
         "workspace",
         help="Manage projected agent task workspaces.",
+        epilog=WINFSP_NOTICE,
     )
     areas = workspace.add_subparsers(dest="workspace_area", required=True)
     _add_memory_parser(areas)
