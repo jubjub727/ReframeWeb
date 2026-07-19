@@ -37,38 +37,38 @@ async def not_null_async(value: typing.Optional[typing.Any]) -> None:
 
 def format_operand(value: typing.Any) -> str:
     """Converts any assertion operand into a user-facing string.
-
+    
     Parameters:
     - `value`: The operand value to render.
-
+    
     Returns:
     - A JSON-style string representation for panic messages.
-
+    
     Errors/Panics:
     - Never throws. Falls back to a placeholder when serialization fails."""
 async def format_operand_async(value: typing.Any) -> str:
     """Converts any assertion operand into a user-facing string.
-
+    
     Parameters:
     - `value`: The operand value to render.
-
+    
     Returns:
     - A JSON-style string representation for panic messages.
-
+    
     Errors/Panics:
     - Never throws. Falls back to a placeholder when serialization fails."""
 
 
 def equal(actual: typing.Any, expected: typing.Any) -> None:
     """Asserts that `actual` equals `expected` exactly. Panics if they differ.
-
+    
     Parameters:
     - `actual`: The observed value.
     - `expected`: The expected value.
-
+    
     Returns:
     - `null` when `actual` and `expected` are exactly equal.
-
+    
     Errors/Panics:
     - Panics when `actual != expected`.
     - For floating-point values this comparison is exact; prefer
@@ -76,14 +76,14 @@ def equal(actual: typing.Any, expected: typing.Any) -> None:
       results within a tolerance."""
 async def equal_async(actual: typing.Any, expected: typing.Any) -> None:
     """Asserts that `actual` equals `expected` exactly. Panics if they differ.
-
+    
     Parameters:
     - `actual`: The observed value.
     - `expected`: The expected value.
-
+    
     Returns:
     - `null` when `actual` and `expected` are exactly equal.
-
+    
     Errors/Panics:
     - Panics when `actual != expected`.
     - For floating-point values this comparison is exact; prefer
@@ -93,30 +93,30 @@ async def equal_async(actual: typing.Any, expected: typing.Any) -> None:
 
 def approx_equal(actual: float, expected: float, eps: float) -> None:
     """Asserts that two floats are within `eps` of each other.
-
+    
     Parameters:
     - `actual`: The observed floating-point value.
     - `expected`: The expected floating-point value.
     - `eps`: The maximum allowed absolute difference (`|actual - expected|`).
-
+    
     Returns:
     - `null` when `|actual - expected| <= eps`.
-
+    
     Errors/Panics:
     - Panics when `eps` is negative or NaN.
     - Panics when the absolute difference exceeds `eps` or cannot be compared
       (for example, when `actual`/`expected` produce NaN deltas)."""
 async def approx_equal_async(actual: float, expected: float, eps: float) -> None:
     """Asserts that two floats are within `eps` of each other.
-
+    
     Parameters:
     - `actual`: The observed floating-point value.
     - `expected`: The expected floating-point value.
     - `eps`: The maximum allowed absolute difference (`|actual - expected|`).
-
+    
     Returns:
     - `null` when `|actual - expected| <= eps`.
-
+    
     Errors/Panics:
     - Panics when `eps` is negative or NaN.
     - Panics when the absolute difference exceeds `eps` or cannot be compared

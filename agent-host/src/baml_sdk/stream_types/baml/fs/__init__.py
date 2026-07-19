@@ -38,7 +38,7 @@ class DirEntry(pydantic.BaseModel):
 class File(pydantic.BaseModel):
     """
     A handle to an open file. Use `baml.fs.open` to obtain one.
-
+    
     Every `File.*` method can throw `InvalidArgument` when the underlying
     handle has already been closed (e.g. by a prior `close()`); read-string
     methods can additionally throw `ParseError` on non-UTF-8 input.

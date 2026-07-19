@@ -32,7 +32,7 @@ from baml_bridge import define_function as _define_function
 class Duration(pydantic.BaseModel):
     """
     Represents a non-localized timespan.
-
+    
     May be negative: while `Instant` represents absolute points in time, a `Duration` represents the difference between two `Instant`s.
     """
     model_config = pydantic.ConfigDict(extra="forbid")
@@ -118,7 +118,7 @@ class PlainDate(pydantic.BaseModel):
     """
     A civil date without a time or timezone, on the proleptic Gregorian
     calendar: `1979-05-27`.
-
+    
     Equivalent to `Temporal.PlainDate` (TC39).
 
     Attributes:
@@ -156,7 +156,7 @@ class PlainDateTime(pydantic.BaseModel):
     A civil ("wall-clock") date and time without a timezone, on the proleptic
     Gregorian calendar: `1979-05-27T07:32:00`. It cannot be located on the
     global timeline without supplying a timezone via `to_zoned`.
-
+    
     Equivalent to `Temporal.PlainDateTime` (TC39). The `Plain` prefix marks
     anything without a timezone, following TC39 Temporal.
 
@@ -210,7 +210,7 @@ class PlainDateTime(pydantic.BaseModel):
 class PlainTime(pydantic.BaseModel):
     """
     A civil wall-clock time without a date or timezone: `07:32:00.5`.
-
+    
     Equivalent to `Temporal.PlainTime` (TC39).
 
     Attributes:
@@ -269,7 +269,7 @@ class TimeZoneOffset(pydantic.BaseModel):
     """
     A fixed offset from UTC, with a permitted range of ±24 hours (real
     timezones currently range from -12 to +14 hours).
-
+    
     Note that unlike IANA identifiers, a `TimeZoneOffset` does not change
     based on daylight savings. Sometimes this is desirable, but other times
     it is not, so `ZonedDateTime` permits either.
@@ -365,12 +365,12 @@ class ZonedDateTime(pydantic.BaseModel):
     A timezone-aware point in time: an absolute instant plus a timezone —
     either a fixed offset (`-07:00`) or an IANA identifier
     (`America/Los_Angeles`).
-
+    
     The timezone does not affect the absolute time; it affects the
     interpretation of date/time components and string formatting. The
     internal representation is an absolute time (like `Instant`) rather than
     calendar components, so values are unambiguous across DST transitions.
-
+    
     Equivalent to `Temporal.ZonedDateTime` (TC39).
 
     Attributes:

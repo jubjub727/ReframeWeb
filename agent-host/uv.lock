@@ -204,7 +204,7 @@ wheels = [
 [[package]]
 name = "baml-bridge"
 version = "0.15.0"
-source = { git = "https://github.com/jubjub727/baml.git?subdirectory=baml_language%2Fsdks%2Fpython&rev=bbb99a793d707175663c4e9236400a9bcd830f57#bbb99a793d707175663c4e9236400a9bcd830f57" }
+source = { git = "https://github.com/jubjub727/baml.git?subdirectory=baml_language%2Fsdks%2Fpython&rev=72d8bdf340913413192d4ce1cc3095e25a18436e#72d8bdf340913413192d4ce1cc3095e25a18436e" }
 dependencies = [
     { name = "protobuf" },
     { name = "typing-extensions" },
@@ -1657,7 +1657,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "baml-bridge", git = "https://github.com/jubjub727/baml.git?subdirectory=baml_language%2Fsdks%2Fpython&rev=bbb99a793d707175663c4e9236400a9bcd830f57" },
+    { name = "baml-bridge", git = "https://github.com/jubjub727/baml.git?subdirectory=baml_language%2Fsdks%2Fpython&rev=72d8bdf340913413192d4ce1cc3095e25a18436e" },
     { name = "faster-whisper", specifier = ">=1.2.1" },
     { name = "kokoro-onnx", specifier = ">=0.5.0" },
     { name = "numpy", specifier = ">=2.0.0" },

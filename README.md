@@ -140,6 +140,14 @@ Implemented pieces include:
 
 ## Agent Host Setup
 
+On Windows, enable Git's long-path support once before resolving the pinned
+BAML fork. The fork contains deeply nested compiler snapshots that exceed
+Git's legacy 260-character checkout limit:
+
+```powershell
+git config --global core.longpaths true
+```
+
 ```shell
 cd agent-host
 uv sync

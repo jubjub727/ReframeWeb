@@ -123,7 +123,7 @@ class BamlGenerationTests(unittest.TestCase):
 
         self.assertIn(
             "baml-bridge @ git+https://github.com/jubjub727/baml.git"
-            "@bbb99a793d707175663c4e9236400a9bcd830f57"
+            "@72d8bdf340913413192d4ce1cc3095e25a18436e"
             "#subdirectory=baml_language/sdks/python",
             configuration["project"]["dependencies"],
         )

@@ -40,35 +40,35 @@ class Glob(pydantic.BaseModel):
     def scan(self, root: typing.Union[str, ScanOptions]) -> typing.List[str]:
         """Scans the filesystem and returns all paths matching this glob pattern.
         Pass a `string` root path or a `ScanOptions` object for more control.
-
+        
         Raises:
             Io"""
     async def scan_async(self, root: typing.Union[str, ScanOptions]) -> typing.List[str]:
         """Scans the filesystem and returns all paths matching this glob pattern.
         Pass a `string` root path or a `ScanOptions` object for more control.
-
+        
         Raises:
             Io"""
     def matches(self, path: str) -> bool:
         """Returns `true` if `path` matches this glob pattern.
-
+        
         Raises:
             Io"""
     async def matches_async(self, path: str) -> bool:
         """Returns `true` if `path` matches this glob pattern.
-
+        
         Raises:
             Io"""
 
 
 def new(pattern: str) -> Glob:
     """Compiles a glob `pattern` and returns a `Glob` object for scanning or matching.
-
+    
     Raises:
         Io"""
 async def new_async(pattern: str) -> Glob:
     """Compiles a glob `pattern` and returns a `Glob` object for scanning or matching.
-
+    
     Raises:
         Io"""
 

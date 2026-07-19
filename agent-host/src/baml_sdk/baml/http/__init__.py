@@ -36,7 +36,7 @@ class Request(pydantic.BaseModel):
     """
     An HTTP request — outgoing (built for `baml.http.send`/`fetch_sse`) or
     incoming (passed to an `http.Server` handler).
-
+    
     For an incoming server request: `url` is the request-target as received
     (origin-form, e.g. `/path?q=1`, on HTTP/1; the authority lives in the `host`
     header), `body` is the bytes decoded lossily as UTF-8 (non-UTF-8 bytes become
@@ -156,7 +156,7 @@ Raises:
 class Server(pydantic.BaseModel):
     """
     A minimal HTTP/HTTPS server.
-
+    
     Bind a listening socket with `Server.bind`, then call `serve` with a request
     handler to start serving:
     ```baml
@@ -184,7 +184,7 @@ class Server(pydantic.BaseModel):
 class TlsConfig(pydantic.BaseModel):
     """
     Used to convert an HTTP server into an HTTPS server for secure connections.
-
+    
     To force HTTP clients onto HTTPS, run two servers — a plaintext one on the
     HTTP port whose handler redirects, and the TLS one on the HTTPS port:
     ```baml
@@ -199,7 +199,7 @@ class TlsConfig(pydantic.BaseModel):
     Attributes:
         allow_tls1_2: Whether to allow connections using TLSv1.2.
             This is enabled by default, but may be disabled to require TLSv1.3.
-
+            
             BAML's standard HTTPS server does not provide TLS/SSL versions lower than TLSv1.2 as they are insecure.
         _certificate
         _private_key

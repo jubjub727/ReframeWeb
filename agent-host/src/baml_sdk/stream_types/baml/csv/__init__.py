@@ -35,7 +35,7 @@ T = typing.TypeVar("T")
 class CsvError(pydantic.BaseModel):
     """
     A structured CSV error with positional diagnostics.
-
+    
     `kind` is for portable handling; `line` / `record` / `field` / `column`
     make "row 41,283 has 7 fields, expected 8" diagnostics cheap.
 
@@ -96,13 +96,13 @@ class CsvReader(pydantic.BaseModel):
     """
     A streaming CSV reader. Create one with `baml.csv.open` or
     `baml.csv.reader`.
-
+    
     `CsvReader` is a lazy iterator over `CsvRecord` values: a multi-gigabyte
     file parses in constant memory, and every `baml.iter` adapter and default
     method (`map`, `filter`, `collect`, ...) works on it. There is one
     cursor; raw iteration, `rows<T>()`, and `headers()` all draw from the
     same stream.
-
+    
     A thrown record error has already consumed the offending record: the
     parser resynchronizes at the next record boundary and the next call to
     `next()` continues. One corrupt cell costs exactly one record.
@@ -117,7 +117,7 @@ class CsvReader(pydantic.BaseModel):
 class CsvRecord(pydantic.BaseModel):
     """
     One raw CSV record. Yielded by iterating a `CsvReader`.
-
+    
     Records have snapshot semantics: they remain valid after the reader
     advances. Cell access is lazy — `get<int>("amount")` converts one cell
     without touching the others.
@@ -158,7 +158,7 @@ class CsvWriter(pydantic.BaseModel):
 class ReaderOptions(pydantic.BaseModel):
     """
     Options for CSV readers. All fields are optional; `null` means default.
-
+    
     `delimiter`, `quote`, `escape`, and `comment` must be single ASCII bytes
     and mutually distinct; violations throw `CsvError { kind: Options }` at
     construction.

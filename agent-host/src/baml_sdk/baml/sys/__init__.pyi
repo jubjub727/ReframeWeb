@@ -46,36 +46,36 @@ class ShellOutput(pydantic.BaseModel):
 
 def exec(program: str, args: typing.Optional[typing.List[str]], options: typing.Optional[ProcessOptions]) -> ShellOutput:
     """Runs `program` with the given `args` and returns its output. Throws on I/O failure or timeout.
-
+    
     Raises:
         Io, Timeout"""
 async def exec_async(program: str, args: typing.Optional[typing.List[str]], options: typing.Optional[ProcessOptions]) -> ShellOutput:
     """Runs `program` with the given `args` and returns its output. Throws on I/O failure or timeout.
-
+    
     Raises:
         Io, Timeout"""
 
 
 def shell(command: str, options: typing.Optional[ProcessOptions]) -> ShellOutput:
     """Runs a shell `command` string (passed to `/bin/sh -c`) and returns its output.
-
+    
     Raises:
         Io, Timeout"""
 async def shell_async(command: str, options: typing.Optional[ProcessOptions]) -> ShellOutput:
     """Runs a shell `command` string (passed to `/bin/sh -c`) and returns its output.
-
+    
     Raises:
         Io, Timeout"""
 
 
 def sleep(delay: baml.time.Duration) -> None:
     """Suspends the current thread for `delay`.
-
+    
     Raises:
         Io"""
 async def sleep_async(delay: baml.time.Duration) -> None:
     """Suspends the current thread for `delay`.
-
+    
     Raises:
         Io"""
 
