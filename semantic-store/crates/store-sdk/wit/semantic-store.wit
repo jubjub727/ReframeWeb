@@ -1,0 +1,15 @@
+package reframe:semantic-store@1.0.0;
+
+interface store-api {
+    resource invocation {
+        next: func() -> result<option<list<u8>>, string>;
+    }
+
+    invoke: func(request: list<u8>) -> result<invocation, string>;
+}
+
+world semantic-store {
+    import wasi:http/outgoing-handler@0.2.12;
+    export store-api;
+}
+

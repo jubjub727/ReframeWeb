@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package annotated_invalid_store_service;
+
+import "reframe/semantic_store/options/v1/annotations.proto";
+
+service Store {
+  option (reframe.semantic_store.options.v1.store_service) = {
+    store_id: "Bad Store ID"
+  };
+
+  rpc Read(Input) returns (Output) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "invalid.service.read"
+      parent_topic_id: "invalid"
+      title: "Invalid service read"
+      summary: "Belongs to an invalid Store service marker."
+      guidance: { when_to_use: "Use only in an invalid fixture." }
+      resource: {}
+    };
+  }
+}
+
+message Input {}
+message Output {}

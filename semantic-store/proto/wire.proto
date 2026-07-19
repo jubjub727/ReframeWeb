@@ -1,0 +1,366 @@
+syntax = "proto3";
+
+package reframe.semantic_store.v1;
+
+import "google/protobuf/any.proto";
+import "package.proto";
+import "types.proto";
+
+message Envelope {
+  reframe.semantic_store.types.v1.ProtocolVersion protocol_version = 1;
+  string session_id = 2;
+  string request_id = 3;
+  uint64 sequence_number = 4;
+
+  oneof message {
+    OpenStoreRequest open_store_request = 10;
+    OpenStoreResponse open_store_response = 11;
+    GetStoreCardRequest get_store_card_request = 12;
+    GetStoreCardResponse get_store_card_response = 13;
+    SearchCatalogRequest search_catalog_request = 14;
+    SearchCatalogResponse search_catalog_response = 15;
+    BrowseCatalogRequest browse_catalog_request = 16;
+    BrowseCatalogResponse browse_catalog_response = 17;
+    InspectCapabilityRequest inspect_capability_request = 18;
+    InspectCapabilityResponse inspect_capability_response = 19;
+    InspectTypeRequest inspect_type_request = 20;
+    InspectTypeResponse inspect_type_response = 21;
+    GetSchemaBundleRequest get_schema_bundle_request = 22;
+    GetSchemaBundleResponse get_schema_bundle_response = 23;
+    ReadResourceRequest read_resource_request = 24;
+    SubscribeResourceRequest subscribe_resource_request = 25;
+    CallFunctionRequest call_function_request = 26;
+    InvocationEvent invocation_event = 27;
+    CancelInvocationRequest cancel_invocation_request = 28;
+    CancelInvocationResponse cancel_invocation_response = 29;
+    CloseStoreRequest close_store_request = 30;
+    CloseStoreResponse close_store_response = 31;
+    ProtocolError error = 32;
+  }
+}
+
+message OpenStoreRequest {
+  string store_id = 1;
+  reframe.semantic_store.types.v1.ProtocolVersion supported_protocol_version = 2;
+  reframe.semantic_store.types.v1.InterfaceRequirement required_interface = 3;
+}
+
+message OpenStoreResponse {
+  string store_id = 1;
+  reframe.semantic_store.types.v1.ProtocolVersion negotiated_protocol_version = 2;
+  reframe.semantic_store.types.v1.InterfaceVersion semantic_interface_version = 3;
+  bytes catalog_revision = 4;
+}
+
+message GetStoreCardRequest {}
+
+message GetStoreCardResponse {
+  string store_id = 1;
+  string display_name = 2;
+  repeated string overview_sentences = 3;
+  repeated CatalogHit top_level_topics = 4;
+  reframe.semantic_store.types.v1.InterfaceVersion semantic_interface_version = 5;
+  bytes catalog_revision = 6;
+}
+
+message SearchCatalogRequest {
+  string query = 1;
+  repeated reframe.semantic_store.package.v1.CapabilityKind kinds = 2;
+  string topic_id = 3;
+  uint32 limit = 4;
+  uint32 byte_budget = 5;
+  string cursor = 6;
+}
+
+message SearchCatalogResponse {
+  repeated CatalogHit hits = 1;
+  string next_cursor = 2;
+  bytes catalog_revision = 3;
+}
+
+message BrowseCatalogRequest {
+  string parent_topic_id = 1;
+  repeated reframe.semantic_store.package.v1.CapabilityKind kinds = 2;
+  uint32 limit = 3;
+  uint32 byte_budget = 4;
+  string cursor = 5;
+}
+
+message BrowseCatalogResponse {
+  repeated CatalogHit entries = 1;
+  string next_cursor = 2;
+  bytes catalog_revision = 3;
+}
+
+message CatalogHit {
+  string id = 1;
+  reframe.semantic_store.package.v1.CapabilityKind kind = 2;
+  string title = 3;
+  string summary = 4;
+}
+
+enum InspectionSection {
+  INSPECTION_SECTION_UNSPECIFIED = 0;
+  INSPECTION_SECTION_SUMMARY = 1;
+  INSPECTION_SECTION_WHEN_TO_USE = 2;
+  INSPECTION_SECTION_WHEN_NOT_TO_USE = 3;
+  INSPECTION_SECTION_INPUT = 4;
+  INSPECTION_SECTION_OUTPUT = 5;
+  INSPECTION_SECTION_SIDE_EFFECTS = 6;
+  INSPECTION_SECTION_ERRORS = 7;
+  INSPECTION_SECTION_EXAMPLES = 8;
+  INSPECTION_SECTION_RELATED_CAPABILITIES = 9;
+  INSPECTION_SECTION_WORKFLOW_STEPS = 10;
+}
+
+message InspectCapabilityRequest {
+  string capability_id = 1;
+  repeated InspectionSection sections = 2;
+  uint32 schema_depth = 3;
+  uint32 example_limit = 4;
+  uint32 byte_budget = 5;
+}
+
+message InspectCapabilityResponse {
+  string capability_id = 1;
+  reframe.semantic_store.package.v1.CapabilityKind kind = 2;
+  optional string summary = 3;
+  optional string when_to_use = 4;
+  optional string when_not_to_use = 5;
+  TypeView input = 6;
+  TypeView output = 7;
+  SideEffectView side_effects = 8;
+  repeated ErrorView errors = 9;
+  repeated ExampleView examples = 10;
+  repeated CatalogHit related_capabilities = 11;
+  repeated WorkflowStepView workflow_steps = 12;
+}
+
+message SideEffectView {
+  reframe.semantic_store.package.v1.SideEffect classification = 1;
+  reframe.semantic_store.package.v1.Idempotency idempotency = 2;
+}
+
+message ErrorView {
+  string code = 1;
+  string summary = 2;
+  string recovery = 3;
+}
+
+message ExampleView {
+  string title = 1;
+  string description = 2;
+  google.protobuf.Any input = 3;
+  google.protobuf.Any output = 4;
+}
+
+message WorkflowStepView {
+  string instruction = 1;
+  string capability_id = 2;
+  string condition = 3;
+}
+
+message InspectTypeRequest {
+  string type_name = 1;
+  repeated string field_paths = 2;
+  uint32 depth = 3;
+  uint32 byte_budget = 4;
+}
+
+message InspectTypeResponse {
+  TypeView type = 1;
+}
+
+message TypeView {
+  string full_name = 1;
+  TypeKind kind = 2;
+  repeated FieldView fields = 3;
+  repeated EnumValueView enum_values = 4;
+  bool recursive = 5;
+  bool truncated = 6;
+}
+
+message FieldView {
+  string name = 1;
+  uint32 number = 2;
+  string type_name = 3;
+  Cardinality cardinality = 4;
+  bool is_map = 5;
+  TypeView nested = 6;
+  FieldKind kind = 7;
+  string oneof_name = 8;
+  bool supports_presence = 9;
+  bool recursive = 10;
+  bool truncated = 11;
+}
+
+enum TypeKind {
+  TYPE_KIND_UNSPECIFIED = 0;
+  TYPE_KIND_MESSAGE = 1;
+  TYPE_KIND_ENUM = 2;
+}
+
+enum FieldKind {
+  FIELD_KIND_UNSPECIFIED = 0;
+  FIELD_KIND_SCALAR = 1;
+  FIELD_KIND_MESSAGE = 2;
+  FIELD_KIND_ENUM = 3;
+}
+
+message EnumValueView {
+  string name = 1;
+  int32 number = 2;
+}
+
+enum Cardinality {
+  CARDINALITY_UNSPECIFIED = 0;
+  CARDINALITY_OPTIONAL = 1;
+  CARDINALITY_REQUIRED = 2;
+  CARDINALITY_REPEATED = 3;
+}
+
+message GetSchemaBundleRequest {
+  bytes known_artifact_hash = 1;
+}
+
+message GetSchemaBundleResponse {
+  bytes artifact_hash = 1;
+  oneof result {
+    bytes descriptor_set = 2;
+    bool unchanged = 3;
+  }
+}
+
+message ReadResourceRequest {
+  string resource_id = 1;
+  google.protobuf.Any selector = 2;
+}
+
+message SubscribeResourceRequest {
+  string resource_id = 1;
+  google.protobuf.Any selector = 2;
+}
+
+message CallFunctionRequest {
+  string function_id = 1;
+  google.protobuf.Any input = 2;
+  string idempotency_key = 3;
+}
+
+message ComponentInvocationRequest {
+  string request_id = 1;
+  oneof operation {
+    ReadResourceRequest read_resource = 10;
+    SubscribeResourceRequest subscribe_resource = 11;
+    CallFunctionRequest call_function = 12;
+  }
+}
+
+message InvocationEvent {
+  string request_id = 1;
+  uint64 sequence_number = 2;
+  oneof event {
+    InvocationStarted started = 10;
+    InvocationData data = 11;
+    InvocationProgress progress = 12;
+    InvocationComplete complete = 13;
+    InvocationFailure failure = 14;
+  }
+}
+
+message InvocationStarted {}
+
+message InvocationData {
+  google.protobuf.Any value = 1;
+}
+
+message InvocationProgress {
+  uint64 completed = 1;
+  optional uint64 total = 2;
+  string unit = 3;
+  string message = 4;
+}
+
+message InvocationComplete {}
+
+message InvocationFailure {
+  FailureCode code = 1;
+  string message = 2;
+  bool retryable = 3;
+  google.protobuf.Any details = 4;
+}
+
+enum FailureCode {
+  FAILURE_CODE_UNSPECIFIED = 0;
+  FAILURE_CODE_INVALID_ARGUMENT = 1;
+  FAILURE_CODE_NOT_FOUND = 2;
+  FAILURE_CODE_CONFLICT = 3;
+  FAILURE_CODE_PERMISSION_DENIED = 4;
+  FAILURE_CODE_UNAUTHENTICATED = 5;
+  FAILURE_CODE_RATE_LIMITED = 6;
+  FAILURE_CODE_UNAVAILABLE = 7;
+  FAILURE_CODE_DEADLINE_EXCEEDED = 8;
+  FAILURE_CODE_CANCELLED = 9;
+  FAILURE_CODE_INTERNAL = 10;
+}
+
+message CancelInvocationRequest {
+  string target_request_id = 1;
+}
+
+message CancelInvocationResponse {
+  string target_request_id = 1;
+  CancellationState state = 2;
+}
+
+enum CancellationState {
+  CANCELLATION_STATE_UNSPECIFIED = 0;
+  CANCELLATION_STATE_CANCELLED = 1;
+  CANCELLATION_STATE_ALREADY_FINISHED = 2;
+  CANCELLATION_STATE_NOT_FOUND = 3;
+}
+
+message CloseStoreRequest {}
+
+message CloseStoreResponse {
+  bool closed = 1;
+}
+
+message ProtocolError {
+  ErrorCode code = 1;
+  string message = 2;
+  bool retryable = 3;
+  repeated FieldViolation field_violations = 4;
+  google.protobuf.Any details = 5;
+}
+
+message FieldViolation {
+  string field = 1;
+  string description = 2;
+}
+
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  ERROR_CODE_INVALID_ENVELOPE = 1;
+  ERROR_CODE_UNSUPPORTED_PROTOCOL_VERSION = 2;
+  ERROR_CODE_STORE_NOT_FOUND = 3;
+  ERROR_CODE_STORE_ID_MISMATCH = 4;
+  ERROR_CODE_INTERFACE_VERSION_MISMATCH = 5;
+  ERROR_CODE_INVALID_SESSION = 6;
+  ERROR_CODE_SESSION_CLOSED = 7;
+  ERROR_CODE_INVALID_REQUEST = 8;
+  ERROR_CODE_REQUEST_CONFLICT = 9;
+  ERROR_CODE_INVALID_CURSOR = 10;
+  ERROR_CODE_STALE_CURSOR = 11;
+  ERROR_CODE_INVALID_BUDGET = 12;
+  ERROR_CODE_BUDGET_EXCEEDED = 13;
+  ERROR_CODE_CAPABILITY_NOT_FOUND = 14;
+  ERROR_CODE_TYPE_NOT_FOUND = 15;
+  ERROR_CODE_TYPE_MISMATCH = 16;
+  ERROR_CODE_COMPONENT_ERROR = 17;
+  ERROR_CODE_COMPONENT_TRAP = 18;
+  ERROR_CODE_RUNTIME_ERROR = 19;
+  ERROR_CODE_CANCELLATION_NOT_FOUND = 20;
+  ERROR_CODE_CANCELLATION_ALREADY_FINISHED = 21;
+  ERROR_CODE_CANCELLED = 22;
+}

@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package reframe.semantic_store.options.v1;
+
+import "google/protobuf/descriptor.proto";
+
+// Declares one Semantic Store capability on a protobuf service method.
+extend google.protobuf.MethodOptions {
+  Capability capability = 51000;
+}
+
+// Marks a service as an invocation contract owned by one Store ID.
+extend google.protobuf.ServiceOptions {
+  StoreService store_service = 51001;
+}
+
+message StoreService {
+  string store_id = 1;
+}
+
+message Capability {
+  string id = 1;
+  string parent_topic_id = 2;
+  string title = 3;
+  string summary = 4;
+  repeated string intent_phrases = 5;
+  repeated string related_entry_ids = 6;
+  Guidance guidance = 7;
+
+  oneof kind {
+    Resource resource = 10;
+    Function function = 11;
+  }
+}
+
+message Resource {
+  bool supports_subscriptions = 1;
+}
+
+message Function {
+  SideEffect side_effect = 1;
+  Idempotency idempotency = 2;
+}
+
+message Guidance {
+  string when_to_use = 1;
+  string when_not_to_use = 2;
+  repeated ErrorCase errors = 3;
+}
+
+message ErrorCase {
+  string code = 1;
+  string summary = 2;
+  string recovery = 3;
+}
+
+enum SideEffect {
+  SIDE_EFFECT_UNSPECIFIED = 0;
+  SIDE_EFFECT_NONE = 1;
+  SIDE_EFFECT_READS_EXTERNAL_STATE = 2;
+  SIDE_EFFECT_WRITES_EXTERNAL_STATE = 3;
+  SIDE_EFFECT_DESTRUCTIVE = 4;
+}
+
+enum Idempotency {
+  IDEMPOTENCY_UNSPECIFIED = 0;
+  IDEMPOTENCY_NOT_IDEMPOTENT = 1;
+  IDEMPOTENCY_IDEMPOTENT = 2;
+  IDEMPOTENCY_IDEMPOTENT_WITH_KEY = 3;
+}

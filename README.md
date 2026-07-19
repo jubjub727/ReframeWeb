@@ -24,10 +24,11 @@ In ReframeWeb, the first runtime surface is the **Agent Host**: a Python process
 that receives audio, coordinates BAML, and routes work through native windows,
 transport calls, Stores, Lenses, Compute Modules, and memory.
 
-The shared substrate for those components is a transport layer spec. A
-**Semantic Store** is WebAssembly code that implements that spec, exposing
-resources, functions, schemas, permissions, and usage hints through the transport
-rather than existing as a normal application library.
+The shared substrate for those components is a typed local protocol. A
+**Semantic Store** is an installed WebAssembly Component that exposes resources,
+functions, schemas, and focused usage guidance through progressive discovery
+rather than existing as a normal application library. The reusable Rust host
+and conformance CLI live in [semantic-store](semantic-store/README.md).
 
 CEF is used as a rendering and native windowing foundation for Visual Panels. It
 is not the product's central abstraction. The goal is to build a new agent-native
@@ -48,11 +49,11 @@ workflow layer, not to preserve the browser as the underlying concept.
 - **BAML Flow**: The complete routed voice-turn orchestrator. Audio is
   transcribed and handed to one top-level BAML flow that owns agentic decisions,
   branches, retries, and task reselection.
-- **Transport Layer**: A protocol surface, similar in role to HTTP, that will
-  define routing, calls, streaming, and component interaction between Stores,
-  Lenses, Views, and Compute.
-- **Semantic Store**: WebAssembly code that implements the transport layer spec
-  and exposes resources and functions agents can discover and call.
+- **Transport Layer**: Local typed routing, framing, calls, streaming, and
+  cancellation. The Semantic Store protocol and platform IPC are implemented;
+  integration with Lenses, Views, and Compute remains future work.
+- **Semantic Store**: A locally hosted WebAssembly Component whose typed
+  resources and functions agents can progressively discover, inspect, and call.
 - **Visual Panel**: A React display surface shown in a native CEF-backed panel
   window. Users can see state and occasionally click or scroll, but required
   functionality should be exposed for agent-driven control.
@@ -91,7 +92,8 @@ with a phased delivery plan in the
   and memory I/O, persistence, and TTS playback through typed BAML boundaries.
 - **BAML** for the complete routed voice-turn flow and all agentic decisions,
   branches, loops, retries, and task reselection.
-- **WebAssembly** for Semantic Stores that implement the transport layer spec.
+- **WebAssembly Components** for portable Semantic Stores, hosted by an
+  asynchronous Rust/Wasmtime runtime with WASI HTTP.
 - **Graph database storage** for memory, including tagged memory nodes,
   descriptions, created/read/modified timestamps, relationships, and recency-aware
   retrieval.
@@ -108,11 +110,11 @@ talking without destroying the underlying work the agent was already performing.
 
 ## Current Status
 
-This repository now contains a working Agent Host prototype. The native
-The Python voice loop, graph-backed memory flow, and the first complete Windows
-Agent Workspace adapter are active code. The CEF/React Visual Panel layer,
-Semantic Store runtime, Data Lens runtime, and Compute Module runtime remain
-future-facing architecture.
+This repository now contains a working Agent Host prototype. The Python voice
+loop, graph-backed memory flow, the cross-platform Agent Workspace, and the
+presentation-independent Semantic Store host are active code. The CEF/React
+Visual Panel layer, Data Lens runtime, Compute Module runtime, and integration
+between these subsystems remain future-facing architecture.
 
 Implemented pieces include:
 
@@ -137,6 +139,11 @@ Implemented pieces include:
    The daemon is installed by `uv sync` and controlled through the existing
    `reframe-agent-host workspace` CLI over user-local IPC. See
    [Agent Workspace usage](workspace-fs/README.md).
+8. A cross-platform Rust Semantic Store workspace with a strict typed package
+   format, bounded progressive catalog, isolated Wasmtime Component execution,
+   WASI HTTP, streaming and cancellation, secure user-local IPC, a guest SDK,
+   reference Store, and conformance CLI. See the
+   [Semantic Store host guide](semantic-store/README.md).
 
 ## Agent Host Setup
 

@@ -1,0 +1,2 @@
+# Preserve the exact upstream Wasmtime WIT snapshot and documented hashes.
+*.wit -text

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package reframe.semantic_store.types.v1;
+
+message ProtocolVersion {
+  uint32 major = 1;
+  uint32 minor = 2;
+}
+
+message InterfaceVersion {
+  uint32 major = 1;
+  uint32 minor = 2;
+}
+
+message InterfaceRequirement {
+  uint32 major = 1;
+  uint32 min_minor = 2;
+  optional uint32 max_minor = 3;
+}

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package annotated_imported;
+
+import "reframe/semantic_store/options/v1/annotations.proto";
+
+service ImportedStore {
+  option (reframe.semantic_store.options.v1.store_service) = {
+    store_id: "dev.reframe.some-other-store"
+  };
+
+  rpc Read(Input) returns (Output) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "imported.read"
+      parent_topic_id: "imported"
+      title: "Imported read"
+      summary: "Must not leak into the fixture Store catalog."
+      guidance: { when_to_use: "Use only in the imported Store." }
+      resource: {}
+    };
+  }
+}
+
+message Input {}
+message Output {}

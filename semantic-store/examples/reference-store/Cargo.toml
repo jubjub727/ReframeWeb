@@ -1,0 +1,32 @@
+[package]
+name = "reframe-reference-store"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+build = "build.rs"
+
+[dependencies]
+prost.workspace = true
+prost-types.workspace = true
+reframe-store-protocol = { path = "../../crates/store-protocol" }
+reframe-store-sdk = { path = "../../crates/store-sdk" }
+thiserror.workspace = true
+url.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+anyhow.workspace = true
+reframe-store-package = { path = "../../crates/store-package" }
+wit-component.workspace = true
+
+[build-dependencies]
+prost-build = "=0.14.4"
+protoc-bin-vendored = "=3.2.0"
+reframe-store-sdk = { path = "../../crates/store-sdk" }
+
+[dev-dependencies]
+prost-reflect.workspace = true
+
+[lints]
+workspace = true

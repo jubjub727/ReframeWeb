@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package annotated_unspecified_function;
+
+import "reframe/semantic_store/options/v1/annotations.proto";
+
+service Store {
+  option (reframe.semantic_store.options.v1.store_service) = {
+    store_id: "dev.reframe.fixture"
+  };
+
+  rpc Incomplete(Input) returns (Output) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "incomplete.function"
+      parent_topic_id: "incomplete"
+      title: "Incomplete function"
+      summary: "Intentionally omits explicit function semantics."
+      guidance: { when_to_use: "Use only in an invalid fixture." }
+      function: {}
+    };
+  }
+}
+
+message Input {}
+message Output {}

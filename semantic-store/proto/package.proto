@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package reframe.semantic_store.package.v1;
+
+import "google/protobuf/any.proto";
+import "types.proto";
+
+message Manifest {
+  string store_id = 1;
+  string store_version = 2;
+  reframe.semantic_store.types.v1.InterfaceVersion semantic_interface_version = 3;
+  reframe.semantic_store.types.v1.ProtocolVersion minimum_protocol_version = 4;
+  bytes component_sha256 = 5;
+  bytes schema_sha256 = 6;
+  bytes catalog_sha256 = 7;
+}
+
+message Catalog {
+  uint32 format_version = 1;
+  string store_id = 2;
+  reframe.semantic_store.types.v1.InterfaceVersion semantic_interface_version = 3;
+  string display_name = 4;
+  repeated string overview_sentences = 5;
+  repeated string top_level_topic_ids = 6;
+  repeated CatalogEntry entries = 7;
+}
+
+message CatalogEntry {
+  string id = 1;
+  string parent_topic_id = 2;
+  string title = 3;
+  string summary = 4;
+  repeated string intent_phrases = 5;
+  repeated string related_entry_ids = 6;
+  Guidance guidance = 7;
+
+  oneof kind {
+    Topic topic = 10;
+    Resource resource = 11;
+    Function function = 12;
+    Workflow workflow = 13;
+  }
+}
+
+message Topic {}
+
+message Resource {
+  string selector_type = 1;
+  string value_type = 2;
+  bool supports_subscriptions = 3;
+  MethodBinding method = 4;
+}
+
+message Function {
+  string input_type = 1;
+  string output_type = 2;
+  SideEffect side_effect = 3;
+  Idempotency idempotency = 4;
+  MethodBinding method = 5;
+}
+
+message MethodBinding {
+  string service = 1;
+  string method = 2;
+}
+
+enum SideEffect {
+  SIDE_EFFECT_UNSPECIFIED = 0;
+  SIDE_EFFECT_NONE = 1;
+  SIDE_EFFECT_READS_EXTERNAL_STATE = 2;
+  SIDE_EFFECT_WRITES_EXTERNAL_STATE = 3;
+  SIDE_EFFECT_DESTRUCTIVE = 4;
+}
+
+enum Idempotency {
+  IDEMPOTENCY_UNSPECIFIED = 0;
+  IDEMPOTENCY_NOT_IDEMPOTENT = 1;
+  IDEMPOTENCY_IDEMPOTENT = 2;
+  IDEMPOTENCY_IDEMPOTENT_WITH_KEY = 3;
+}
+
+message Workflow {
+  repeated WorkflowStep steps = 1;
+}
+
+message WorkflowStep {
+  string instruction = 1;
+  string capability_id = 2;
+  string condition = 3;
+}
+
+message Guidance {
+  string when_to_use = 1;
+  string when_not_to_use = 2;
+  repeated ErrorCase errors = 3;
+  repeated Example examples = 4;
+}
+
+message ErrorCase {
+  string code = 1;
+  string summary = 2;
+  string recovery = 3;
+}
+
+message Example {
+  string title = 1;
+  string description = 2;
+  google.protobuf.Any input = 3;
+  google.protobuf.Any output = 4;
+}
+
+enum CapabilityKind {
+  CAPABILITY_KIND_UNSPECIFIED = 0;
+  CAPABILITY_KIND_TOPIC = 1;
+  CAPABILITY_KIND_RESOURCE = 2;
+  CAPABILITY_KIND_FUNCTION = 3;
+  CAPABILITY_KIND_WORKFLOW = 4;
+}

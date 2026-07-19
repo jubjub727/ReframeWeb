@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package annotated_missing_kind;
+
+import "reframe/semantic_store/options/v1/annotations.proto";
+
+service Store {
+  option (reframe.semantic_store.options.v1.store_service) = {
+    store_id: "dev.reframe.fixture"
+  };
+
+  rpc MissingKind(Input) returns (Output) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "missing.kind"
+      parent_topic_id: "missing"
+      title: "Missing kind"
+      summary: "Intentionally omits its capability kind."
+      guidance: { when_to_use: "Use only in an invalid fixture." }
+    };
+  }
+}
+
+message Input {}
+message Output {}

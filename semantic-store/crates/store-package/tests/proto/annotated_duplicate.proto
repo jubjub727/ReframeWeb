@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package annotated_duplicate;
+
+import "reframe/semantic_store/options/v1/annotations.proto";
+
+service Store {
+  option (reframe.semantic_store.options.v1.store_service) = {
+    store_id: "dev.reframe.fixture"
+  };
+
+  rpc First(Input) returns (Output) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "duplicate.capability"
+      parent_topic_id: "duplicate"
+      title: "First"
+      summary: "Declares the first duplicate capability."
+      guidance: { when_to_use: "Use only in an invalid fixture." }
+      resource: {}
+    };
+  }
+  rpc Second(Input) returns (Output) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "duplicate.capability"
+      parent_topic_id: "duplicate"
+      title: "Second"
+      summary: "Declares the second duplicate capability."
+      guidance: { when_to_use: "Use only in an invalid fixture." }
+      resource: {}
+    };
+  }
+}
+
+message Input {}
+message Output {}

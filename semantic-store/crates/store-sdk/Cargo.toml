@@ -1,0 +1,19 @@
+[package]
+name = "reframe-store-sdk"
+description = "Guest-side Rust helpers and canonical WIT for Reframe Semantic Stores"
+documentation = "https://docs.rs/reframe-store-sdk"
+include = ["/src/**", "/tests/**", "/wit/**", "/README.md"]
+repository.workspace = true
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+prost.workspace = true
+prost-types.workspace = true
+reframe-store-protocol = { path = "../store-protocol", version = "0.1.0" }
+thiserror.workspace = true
+
+[lints]
+workspace = true

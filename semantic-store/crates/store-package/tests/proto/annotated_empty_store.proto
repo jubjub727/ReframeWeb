@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package annotated_empty_store;
+
+import "reframe/semantic_store/options/v1/annotations.proto";
+
+service Store {
+  option (reframe.semantic_store.options.v1.store_service) = {
+    store_id: "dev.reframe.fixture"
+  };
+}

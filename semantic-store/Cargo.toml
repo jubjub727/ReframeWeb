@@ -1,0 +1,58 @@
+[workspace]
+members = [
+    "crates/store-protocol",
+    "crates/store-package",
+    "crates/store-catalog",
+    "crates/store-sdk",
+    "crates/store-runtime",
+    "crates/store-transport",
+    "crates/store-host",
+    "examples/reference-store",
+    "examples/reference-store/component",
+]
+resolver = "3"
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/jubjub727/ReframeWeb"
+rust-version = "1.94"
+version = "0.1.0"
+
+[workspace.dependencies]
+anyhow = "1.0"
+async-trait = "0.1"
+bytes = "1.10"
+clap = { version = "4.5", features = ["derive"] }
+dashmap = "6.1"
+hex = "0.4"
+prost = "=0.14.4"
+prost-reflect = "=0.16.5"
+prost-types = "=0.14.4"
+semver = "1.0"
+sha2 = "0.10"
+subtle = "2.6"
+tempfile = "3.20"
+thiserror = "2.0"
+tokio = { version = "1.53", features = ["fs", "io-util", "macros", "net", "rt-multi-thread", "signal", "sync", "time"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+unicode-normalization = "0.1"
+url = "2.5"
+uuid = "1.17"
+wasmtime = { version = "=46.0.1", default-features = false, features = ["async", "component-model", "cranelift", "runtime", "std", "wat"] }
+wasmtime-wasi = { version = "=46.0.1", default-features = false, features = ["p2"] }
+wasmtime-wasi-http = { version = "=46.0.1", default-features = false, features = ["default-send-request", "p2"] }
+wit-bindgen = "=0.59.0"
+wit-component = "=0.253.0"
+zip = { version = "=7.2.0", default-features = false, features = ["deflate-flate2-zlib-rs"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+
+[profile.release]
+lto = "thin"

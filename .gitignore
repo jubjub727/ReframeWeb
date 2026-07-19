@@ -17,6 +17,7 @@ agent-host/.venv/
 .reframe-workspace/
 .reframe-workspace-*/
 workspace-fs/target/
+semantic-store/target/
 /Agent Sessions
 /Agent Sessions.lnk
 

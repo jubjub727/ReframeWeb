@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package annotated_unannotated_method;
+
+import "reframe/semantic_store/options/v1/annotations.proto";
+
+service Store {
+  option (reframe.semantic_store.options.v1.store_service) = {
+    store_id: "dev.reframe.fixture"
+  };
+
+  rpc Hidden(Input) returns (Output);
+}
+
+message Input {}
+message Output {}

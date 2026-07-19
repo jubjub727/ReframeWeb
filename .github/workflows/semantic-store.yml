@@ -1,0 +1,86 @@
+name: Semantic Store
+
+on:
+  push:
+    paths:
+      - ".github/workflows/semantic-store.yml"
+      - "README.md"
+      - "docs/semantic-store-*.md"
+      - "semantic-store/**"
+  pull_request:
+    paths:
+      - ".github/workflows/semantic-store.yml"
+      - "README.md"
+      - "docs/semantic-store-*.md"
+      - "semantic-store/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: semantic-store-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cross-platform:
+    name: ${{ matrix.os }} / Rust 1.94
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    defaults:
+      run:
+        working-directory: semantic-store
+
+    env:
+      CARGO_TERM_COLOR: always
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Rust 1.94's wasm32-wasip2 sysroot imports WASI 0.2.6. The Store world
+      # pins wasi:http@0.2.12, so the packager componentizes an unknown-unknown
+      # core module against the canonical WIT instead.
+      - name: Install Rust 1.94 and WebAssembly target
+        run: rustup toolchain install 1.94.0 --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
+
+      - name: Check formatting
+        run: cargo +1.94.0 fmt --all -- --check
+
+      - name: Lint all native targets
+        run: cargo +1.94.0 clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Test all native targets
+        run: cargo +1.94.0 test --workspace --all-targets --locked
+
+      - name: Test Rust documentation
+        run: cargo +1.94.0 test --workspace --doc --locked
+
+      - name: Build reference component module
+        run: cargo +1.94.0 build --locked -p reframe-reference-store-component --target wasm32-unknown-unknown --release
+
+      - name: Run real Store conformance over local IPC, loopback HTTP, and ordinary HTTPS
+        run: cargo +1.94.0 test --locked -p reframe-store-host --test reference_conformance -- --ignored --nocapture
+
+      - name: Package reference Store
+        run: cargo +1.94.0 run --locked -p reframe-reference-store --bin package-reference-store -- target/wasm32-unknown-unknown/release/reframe_reference_store_component.wasm target/reference-store.rstore
+
+      - name: Verify reference Store package
+        run: cargo +1.94.0 run --locked -p reframe-store-host -- verify target/reference-store.rstore
+
+      - name: Check package compatibility command
+        run: cargo +1.94.0 run --locked -p reframe-store-host -- check-compat --previous target/reference-store.rstore --candidate target/reference-store.rstore
+
+      # Registry verification requires reframe-store-protocol to be published
+      # first. Explicit Cargo include rules make this content listing the
+      # deterministic pre-release check for the SDK's canonical WIT assets.
+      - name: Verify SDK package contents include canonical WIT
+        run: cargo +1.94.0 package --locked -p reframe-store-sdk --list --allow-dirty

@@ -1,0 +1,25 @@
+[package]
+name = "reframe-store-package"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+hex.workspace = true
+prost.workspace = true
+prost-reflect.workspace = true
+prost-types.workspace = true
+semver.workspace = true
+sha2.workspace = true
+subtle.workspace = true
+thiserror.workspace = true
+zip.workspace = true
+reframe-store-protocol = { path = "../store-protocol", features = ["reflection"] }
+
+[dev-dependencies]
+protoc-bin-vendored = "=3.2.0"
+tempfile.workspace = true
+
+[lints]
+workspace = true

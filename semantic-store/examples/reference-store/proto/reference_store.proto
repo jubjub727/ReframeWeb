@@ -1,0 +1,157 @@
+syntax = "proto3";
+
+package reframe.examples.reference.v1;
+
+import "reframe/semantic_store/options/v1/annotations.proto";
+
+service ReferenceStore {
+  option (reframe.semantic_store.options.v1.store_service) = {
+    store_id: "dev.reframe.reference-store"
+  };
+
+  rpc ReadLoopbackSnapshot(LoopbackSelector) returns (LoopbackSnapshot) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "reference.http.loopback_snapshot"
+      parent_topic_id: "reference.http"
+      title: "Loopback snapshot"
+      summary: "Fetch one bounded HTTP response from localhost or a loopback IP."
+      intent_phrases: "fetch localhost HTTP"
+      intent_phrases: "read loopback endpoint"
+      intent_phrases: "test WASI HTTP"
+      guidance: {
+        when_to_use: "Use Loopback snapshot when its narrow typed result is required."
+        when_not_to_use: "Do not use it for unrelated application data."
+      }
+      resource: { supports_subscriptions: false }
+    };
+  }
+
+  rpc ReadHttpSnapshot(HttpSnapshotSelector) returns (HttpSnapshot) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "reference.http.snapshot"
+      parent_topic_id: "reference.http"
+      title: "HTTP snapshot"
+      summary: "Fetch one bounded response from an HTTP or HTTPS URL."
+      intent_phrases: "fetch a public HTTPS URL"
+      intent_phrases: "read a bounded HTTP response"
+      intent_phrases: "snapshot a web endpoint"
+      guidance: {
+        when_to_use: "Use HTTP snapshot for a small typed response from a specific HTTP or HTTPS URL."
+        when_not_to_use: "Do not use it for downloads, unbounded bodies, or non-HTTP protocols."
+        errors: {
+          code: "INVALID_ARGUMENT"
+          summary: "The URL or body limit is invalid."
+          recovery: "Provide an absolute HTTP or HTTPS URL and a body limit no larger than 1 MiB."
+        }
+      }
+      resource: { supports_subscriptions: false }
+    };
+  }
+
+  rpc ReadCounter(CounterSelector) returns (CounterSample) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "reference.streams.counter"
+      parent_topic_id: "reference.streams"
+      title: "Counter stream"
+      summary: "Read one or subscribe to several deterministic typed counter samples."
+      intent_phrases: "stream counter values"
+      intent_phrases: "test subscription"
+      intent_phrases: "receive progress events"
+      guidance: {
+        when_to_use: "Use Counter stream when its narrow typed result is required."
+        when_not_to_use: "Do not use it for unrelated application data."
+      }
+      resource: { supports_subscriptions: true }
+    };
+  }
+
+  rpc NormalizeLabel(NormalizeLabelInput) returns (NormalizeLabelOutput) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "reference.text.normalize_label"
+      parent_topic_id: "reference.text"
+      title: "Normalize label"
+      summary: "Trim a label and collapse each run of whitespace to one ASCII space."
+      intent_phrases: "normalize a text label"
+      intent_phrases: "trim repeated whitespace"
+      intent_phrases: "canonicalize label spacing"
+      guidance: {
+        when_to_use: "Use Normalize label to produce stable display-label spacing without changing letter case."
+        when_not_to_use: "Do not use it for case folding, transliteration, or locale-sensitive text processing."
+        errors: {
+          code: "INVALID_ARGUMENT"
+          summary: "The label is blank or exceeds 256 UTF-8 bytes."
+          recovery: "Provide a non-blank label of at most 256 UTF-8 bytes."
+        }
+      }
+      function: {
+        side_effect: SIDE_EFFECT_NONE
+        idempotency: IDEMPOTENCY_IDEMPOTENT
+      }
+    };
+  }
+
+  rpc RunDiagnosticTrap(DiagnosticTrapInput) returns (DiagnosticTrapOutput) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "reference.diagnostics.trap"
+      parent_topic_id: "reference.diagnostics"
+      title: "Diagnostic trap"
+      summary: "Intentionally trap after Started to verify host fault isolation."
+      intent_phrases: "test component trap isolation"
+      intent_phrases: "run diagnostic guest failure"
+      guidance: {
+        when_to_use: "Use Diagnostic trap only to verify runtime isolation and recovery."
+        when_not_to_use: "Do not use it for application work or expected validation failures."
+      }
+      function: {
+        side_effect: SIDE_EFFECT_NONE
+        idempotency: IDEMPOTENCY_IDEMPOTENT
+      }
+    };
+  }
+}
+
+message LoopbackSelector {
+  string url = 1;
+  uint32 max_body_bytes = 2;
+}
+
+message LoopbackSnapshot {
+  string url = 1;
+  uint32 status_code = 2;
+  string content_type = 3;
+  bytes body = 4;
+}
+
+message HttpSnapshotSelector {
+  string url = 1;
+  uint32 max_body_bytes = 2;
+}
+
+message HttpSnapshot {
+  string url = 1;
+  uint32 status_code = 2;
+  string content_type = 3;
+  bytes body = 4;
+}
+
+message CounterSelector {
+  uint32 sample_count = 1;
+  string label = 2;
+}
+
+message CounterSample {
+  uint32 index = 1;
+  string label = 2;
+}
+
+message NormalizeLabelInput {
+  string label = 1;
+}
+
+message NormalizeLabelOutput {
+  string normalized_label = 1;
+}
+
+message DiagnosticTrapInput {}
+
+message DiagnosticTrapOutput {}

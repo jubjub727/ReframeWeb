@@ -1,0 +1,20 @@
+[package]
+name = "reframe-store-catalog"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+prost.workspace = true
+prost-reflect.workspace = true
+prost-types.workspace = true
+reframe-store-protocol = { path = "../store-protocol", features = ["reflection"] }
+sha2.workspace = true
+subtle.workspace = true
+thiserror.workspace = true
+unicode-normalization.workspace = true
+uuid = { workspace = true, features = ["v4"] }
+
+[lints]
+workspace = true

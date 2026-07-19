@@ -1,0 +1,29 @@
+[package]
+name = "reframe-store-protocol"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+build = "build.rs"
+
+[dependencies]
+prost.workspace = true
+prost-reflect = { workspace = true, optional = true }
+prost-types.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+
+[features]
+reflection = ["dep:prost-reflect"]
+
+[build-dependencies]
+prost-build = "=0.14.4"
+protoc-bin-vendored = "=3.2.0"
+
+[dev-dependencies]
+hex.workspace = true
+prost-reflect.workspace = true
+uuid = { workspace = true, features = ["v4"] }
+
+[lints]
+workspace = true

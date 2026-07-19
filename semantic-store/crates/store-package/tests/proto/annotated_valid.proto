@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package annotated_fixture;
+
+import "reframe/semantic_store/options/v1/annotations.proto";
+import "annotated_imported.proto";
+
+service Store {
+  option (reframe.semantic_store.options.v1.store_service) = {
+    store_id: "dev.reframe.fixture"
+  };
+
+  rpc Read(Selector) returns (Value) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "fixture.read"
+      parent_topic_id: "fixture"
+      title: "Read fixture"
+      summary: "Reads deterministic fixture data."
+      intent_phrases: "read deterministic data"
+      guidance: {
+        when_to_use: "Use for deterministic reads."
+        when_not_to_use: "Do not use for mutable production data."
+      }
+      resource: { supports_subscriptions: true }
+    };
+  }
+
+  rpc Call(Input) returns (Output) {
+    option (reframe.semantic_store.options.v1.capability) = {
+      id: "fixture.call"
+      parent_topic_id: "fixture"
+      title: "Call fixture"
+      summary: "Runs one deterministic fixture function."
+      intent_phrases: "call deterministic function"
+      guidance: {
+        when_to_use: "Use for deterministic function tests."
+        when_not_to_use: "Do not use for production mutations."
+      }
+      function: {
+        side_effect: SIDE_EFFECT_NONE
+        idempotency: IDEMPOTENCY_IDEMPOTENT
+      }
+    };
+  }
+
+}
+
+service Helper {
+  rpc Legacy(Selector) returns (Value);
+}
+
+message Selector {
+  annotated_imported.Input imported = 1;
+}
+message Value {}
+message Input {}
+message Output {}

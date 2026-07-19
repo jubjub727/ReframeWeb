@@ -1,0 +1,37 @@
+[package]
+name = "reframe-store-host"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+async-trait.workspace = true
+clap.workspace = true
+hex.workspace = true
+prost.workspace = true
+reframe-store-catalog = { path = "../store-catalog" }
+reframe-store-package = { path = "../store-package" }
+reframe-store-protocol = { path = "../store-protocol" }
+reframe-store-runtime = { path = "../store-runtime" }
+reframe-store-transport = { path = "../store-transport" }
+tokio.workspace = true
+tokio-util.workspace = true
+thiserror.workspace = true
+tempfile.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+prost-types.workspace = true
+reframe-reference-store = { path = "../../examples/reference-store" }
+reframe-store-sdk = { path = "../store-sdk" }
+uuid = { workspace = true, features = ["v4"] }
+
+[[bin]]
+name = "reframe-store-host"
+path = "src/main.rs"

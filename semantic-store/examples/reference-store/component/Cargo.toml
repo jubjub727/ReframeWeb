@@ -1,0 +1,30 @@
+[package]
+name = "reframe-reference-store-component"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+build = "build.rs"
+
+[lib]
+crate-type = ["cdylib"]
+test = false
+doctest = false
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+reframe-reference-store = { path = ".." }
+reframe-store-sdk = { path = "../../../crates/store-sdk" }
+wit-bindgen.workspace = true
+
+[build-dependencies]
+reframe-store-sdk = { path = "../../../crates/store-sdk" }
+
+# wit-bindgen's generated Canonical ABI exports necessarily contain unsafe
+# shims. This crate contains glue only; the Store SDK and implementation keep
+# the workspace-wide `forbid(unsafe_code)` policy.
+[lints.rust]
+unsafe_code = "allow"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
