@@ -89,22 +89,22 @@ SummariseActionHistory_stream_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-CheckTaskCompletion       = _define_function("user.task.CheckTaskCompletion", "sync",  ["completion_string", "output_summary"], ["client"])
+CheckTaskCompletion       = _define_function("user.task.CheckTaskCompletion", "sync",  ["completion_string", "output_summary"], ["current_conversation", "client"])
 CheckTaskCompletion.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-CheckTaskCompletion_async = _define_function("user.task.CheckTaskCompletion", "async", ["completion_string", "output_summary"], ["client"])
+CheckTaskCompletion_async = _define_function("user.task.CheckTaskCompletion", "async", ["completion_string", "output_summary"], ["current_conversation", "client"])
 CheckTaskCompletion_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-CheckTaskCompletion__build_request       = _define_function("user.task.CheckTaskCompletion$build_request", "sync",  ["completion_string", "output_summary"], ["client"])
+CheckTaskCompletion__build_request       = _define_function("user.task.CheckTaskCompletion$build_request", "sync",  ["completion_string", "output_summary"], ["current_conversation", "client"])
 CheckTaskCompletion__build_request.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-CheckTaskCompletion__build_request_async = _define_function("user.task.CheckTaskCompletion$build_request", "async", ["completion_string", "output_summary"], ["client"])
+CheckTaskCompletion__build_request_async = _define_function("user.task.CheckTaskCompletion$build_request", "async", ["completion_string", "output_summary"], ["current_conversation", "client"])
 CheckTaskCompletion__build_request_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-CheckTaskCompletion__build_request_stream       = _define_function("user.task.CheckTaskCompletion$build_request_stream", "sync",  ["completion_string", "output_summary"], ["client"])
+CheckTaskCompletion__build_request_stream       = _define_function("user.task.CheckTaskCompletion$build_request_stream", "sync",  ["completion_string", "output_summary"], ["current_conversation", "client"])
 CheckTaskCompletion__build_request_stream.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-CheckTaskCompletion__build_request_stream_async = _define_function("user.task.CheckTaskCompletion$build_request_stream", "async", ["completion_string", "output_summary"], ["client"])
+CheckTaskCompletion__build_request_stream_async = _define_function("user.task.CheckTaskCompletion$build_request_stream", "async", ["completion_string", "output_summary"], ["current_conversation", "client"])
 CheckTaskCompletion__build_request_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
 CheckTaskCompletion__parse       = _define_function("user.task.CheckTaskCompletion$parse", "sync",  ["json"], ["client"])
@@ -119,16 +119,16 @@ CheckTaskCompletion__parse_stream.__doc__ = """Raises:
 CheckTaskCompletion__parse_stream_async = _define_function("user.task.CheckTaskCompletion$parse_stream", "async", ["sse"], ["client"])
 CheckTaskCompletion__parse_stream_async.__doc__ = """Raises:
     InvalidArgument, LlmClient"""
-CheckTaskCompletion__render_prompt       = _define_function("user.task.CheckTaskCompletion$render_prompt", "sync",  ["completion_string", "output_summary"], ["client"])
+CheckTaskCompletion__render_prompt       = _define_function("user.task.CheckTaskCompletion$render_prompt", "sync",  ["completion_string", "output_summary"], ["current_conversation", "client"])
 CheckTaskCompletion__render_prompt.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-CheckTaskCompletion__render_prompt_async = _define_function("user.task.CheckTaskCompletion$render_prompt", "async", ["completion_string", "output_summary"], ["client"])
+CheckTaskCompletion__render_prompt_async = _define_function("user.task.CheckTaskCompletion$render_prompt", "async", ["completion_string", "output_summary"], ["current_conversation", "client"])
 CheckTaskCompletion__render_prompt_async.__doc__ = """Raises:
     InvalidArgument, LlmClient, RenderPrompt"""
-CheckTaskCompletion_stream       = _define_function("user.task.CheckTaskCompletion$stream", "sync",  ["completion_string", "output_summary"], ["client"])
+CheckTaskCompletion_stream       = _define_function("user.task.CheckTaskCompletion$stream", "sync",  ["completion_string", "output_summary"], ["current_conversation", "client"])
 CheckTaskCompletion_stream.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-CheckTaskCompletion_stream_async = _define_function("user.task.CheckTaskCompletion$stream", "async", ["completion_string", "output_summary"], ["client"])
+CheckTaskCompletion_stream_async = _define_function("user.task.CheckTaskCompletion$stream", "async", ["completion_string", "output_summary"], ["current_conversation", "client"])
 CheckTaskCompletion_stream_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 

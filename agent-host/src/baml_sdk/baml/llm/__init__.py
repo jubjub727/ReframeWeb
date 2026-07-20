@@ -271,7 +271,7 @@ class Context(pydantic.BaseModel):
     Carries the same per-attempt data BAML's Jinja runtime injects today
     (client info, runtime tags, output-format schema), resolved AFTER the
     orchestrator picks the client for this attempt — preserving lazy eval.
-
+    
     `output_format` is the default-rendered schema string for the call's return
     type — the dominant `${ctx.output_format}` usage, byte-equivalent to Jinja's
     `{{ ctx.output_format }}`. `output_format_with(...)` re-renders the schema
@@ -397,7 +397,7 @@ class AnthropicOptions(pydantic.BaseModel):
 class GoogleAiOptions(pydantic.BaseModel):
     """
     Provider-specific options for `google-ai` clients.
-
+    
     The Google Cloud fields are ignored while the client uses the Gemini API.
     When `enterprise` or a `GOOGLE_GENAI_USE_*` environment flag selects the
     Vertex backend, they have exactly the same meaning as on `VertexAiOptions`.
@@ -478,7 +478,7 @@ class StreamCache(pydantic.BaseModel, typing.Generic[TStream, TFinal]):
     """
     DO NOT USE FROM USER CODE
     Cached data for a stream. Contains type information, assert check cache, etc.
-
+    
     Intended for use in `baml.llm.Stream`
     """
     model_config = pydantic.ConfigDict(extra="forbid")

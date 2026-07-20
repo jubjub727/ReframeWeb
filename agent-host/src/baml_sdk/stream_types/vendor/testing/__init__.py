@@ -91,7 +91,7 @@ SerializedTestDef: typing.TypeAlias = typing.Union[SerializedTest, SerializedTes
 class FlatTestReport(pydantic.BaseModel):
     """
     Aggregated, already-flattened report returned to the CLI driver.
-
+    
     `outcome` is the aggregate verdict (honors testset runners). Counts are
     leaf-level: `failed` = hard failures, `tolerated` = failing leaves whose
     enclosing testset runner still passed (e.g. under `PassRate`), `passed` and

@@ -34,6 +34,8 @@ class TaskFailureFlowOwnershipTests(unittest.TestCase):
         positions = [source.index(step) for step in steps]
         self.assertEqual(positions, sorted(positions))
         self.assertIn("CheckTaskCompletion(", source)
+        self.assertIn("task_completion_conversation = TaskConversation(", source)
+        self.assertIn("current_conversation = task_completion_conversation", source)
         self.assertIn("if (task_complete)", source)
         self.assertIn("CheckRequestCompletion(", source)
         self.assertIn('if (selected_task.model_id == "magic:do-nothing")', source)
@@ -47,7 +49,7 @@ class TaskFailureFlowOwnershipTests(unittest.TestCase):
         self.assertGreaterEqual(source.count("while ("), 2)
         self.assertIn("while (!voice_request_complete)", source)
         self.assertEqual(source.count("ReviewMemories("), 1)
-        self.assertIn("if (check_request)", source)
+        self.assertIn("if (should_check)", source)
         self.assertEqual(source.count("if (request_complete)"), 1)
         self.assertIn("if (memories_selected)", source)
         self.assertNotIn("if (consecutive_no_action_count < 3)", source)

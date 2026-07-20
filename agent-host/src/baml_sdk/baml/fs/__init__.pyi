@@ -30,148 +30,148 @@ class File(pydantic.BaseModel):
     _handle: _BamlPyHandle
     def text(self) -> str:
         """Reads the entire remaining file contents as a UTF-8 string.
-
+        
         Raises:
             Io, InvalidArgument, ParseError"""
     async def text_async(self) -> str:
         """Reads the entire remaining file contents as a UTF-8 string.
-
+        
         Raises:
             Io, InvalidArgument, ParseError"""
     def bytes(self) -> bytes:
         """Reads the entire remaining file contents as raw bytes.
-
+        
         Raises:
             Io, InvalidArgument"""
     async def bytes_async(self) -> bytes:
         """Reads the entire remaining file contents as raw bytes.
-
+        
         Raises:
             Io, InvalidArgument"""
     def read(self, n: int) -> str:
         """Reads up to `n` bytes from the file and returns them as a UTF-8 string.
-
+        
         Raises:
             Io, InvalidArgument, ParseError"""
     async def read_async(self, n: int) -> str:
         """Reads up to `n` bytes from the file and returns them as a UTF-8 string.
-
+        
         Raises:
             Io, InvalidArgument, ParseError"""
     def read_bytes(self, n: int) -> bytes:
         """Reads up to `n` bytes from the file and returns them as raw bytes.
-
+        
         Raises:
             Io, InvalidArgument"""
     async def read_bytes_async(self, n: int) -> bytes:
         """Reads up to `n` bytes from the file and returns them as raw bytes.
-
+        
         Raises:
             Io, InvalidArgument"""
     def close(self) -> None:
         """Closes the file handle, flushing any pending writes.
-
+        
         Raises:
             Io, InvalidArgument"""
     async def close_async(self) -> None:
         """Closes the file handle, flushing any pending writes.
-
+        
         Raises:
             Io, InvalidArgument"""
     def seek_from(self, whence: typing.Union[typing.Literal["start"], typing.Literal["current"], typing.Literal["end"]], offset: int) -> int:
         """Moves the file cursor. `whence` is `"start"`, `"current"`, or `"end"`. Returns the new cursor position in bytes.
-
+        
         Throws `InvalidArgument` if `offset` is negative when paired with
         `whence="start"` (the underlying syscall takes an unsigned offset).
-
+        
         Raises:
             Io, InvalidArgument"""
     async def seek_from_async(self, whence: typing.Union[typing.Literal["start"], typing.Literal["current"], typing.Literal["end"]], offset: int) -> int:
         """Moves the file cursor. `whence` is `"start"`, `"current"`, or `"end"`. Returns the new cursor position in bytes.
-
+        
         Throws `InvalidArgument` if `offset` is negative when paired with
         `whence="start"` (the underlying syscall takes an unsigned offset).
-
+        
         Raises:
             Io, InvalidArgument"""
     def write(self, data: str) -> int:
         """Writes `data` to the file at the current cursor position. Returns the number of bytes written.
-
+        
         Raises:
             Io, InvalidArgument"""
     async def write_async(self, data: str) -> int:
         """Writes `data` to the file at the current cursor position. Returns the number of bytes written.
-
+        
         Raises:
             Io, InvalidArgument"""
     def write_bytes(self, data: bytes) -> int:
         """Writes raw bytes `data` to the file at the current cursor position. Returns the number of bytes written.
-
+        
         Raises:
             Io, InvalidArgument"""
     async def write_bytes_async(self, data: bytes) -> int:
         """Writes raw bytes `data` to the file at the current cursor position. Returns the number of bytes written.
-
+        
         Raises:
             Io, InvalidArgument"""
 
 
 def open(path: str, mode: typing.Union[typing.Literal["r"], typing.Literal["r+"], typing.Literal["w"], typing.Literal["w+"], typing.Literal["a"], typing.Literal["a+"]]) -> File:
     """Opens the file at `path` with the given `mode`.
-
+    
     Mode values: `"r"` (read), `"r+"` (read/write), `"w"` (write/truncate),
     `"w+"` (read/write/truncate), `"a"` (append), `"a+"` (read/append).
-
+    
     Raises:
         Io, InvalidArgument"""
 async def open_async(path: str, mode: typing.Union[typing.Literal["r"], typing.Literal["r+"], typing.Literal["w"], typing.Literal["w+"], typing.Literal["a"], typing.Literal["a+"]]) -> File:
     """Opens the file at `path` with the given `mode`.
-
+    
     Mode values: `"r"` (read), `"r+"` (read/write), `"w"` (write/truncate),
     `"w+"` (read/write/truncate), `"a"` (append), `"a+"` (read/append).
-
+    
     Raises:
         Io, InvalidArgument"""
 
 
 def exists(path: str) -> bool:
     """Returns `true` if a file or directory exists at `path`.
-
+    
     Raises:
         Io"""
 async def exists_async(path: str) -> bool:
     """Returns `true` if a file or directory exists at `path`.
-
+    
     Raises:
         Io"""
 
 
 def remove(path: str) -> None:
     """Removes the file at `path`. Throws `Io` if the file does not exist or cannot be deleted.
-
+    
     This handles regular files only. To delete a directory use `remove_dir`
     (empty directories) or `remove_dir_all` (directory trees).
-
+    
     Raises:
         Io"""
 async def remove_async(path: str) -> None:
     """Removes the file at `path`. Throws `Io` if the file does not exist or cannot be deleted.
-
+    
     This handles regular files only. To delete a directory use `remove_dir`
     (empty directories) or `remove_dir_all` (directory trees).
-
+    
     Raises:
         Io"""
 
 
 def size(path: str) -> int:
     """Returns the size of the file at `path` in bytes.
-
+    
     Raises:
         Io"""
 async def size_async(path: str) -> int:
     """Returns the size of the file at `path` in bytes.
-
+    
     Raises:
         Io"""
 
@@ -179,37 +179,37 @@ async def size_async(path: str) -> int:
 def read(path: str) -> str:
     """Reads the entire contents of the file at `path` as a UTF-8 string.
     Throws `ParseError` if the file's bytes are not valid UTF-8.
-
+    
     Raises:
         Io, ParseError"""
 async def read_async(path: str) -> str:
     """Reads the entire contents of the file at `path` as a UTF-8 string.
     Throws `ParseError` if the file's bytes are not valid UTF-8.
-
+    
     Raises:
         Io, ParseError"""
 
 
 def write(path: str, content: str) -> int:
     """Writes `content` to the file at `path`, creating or truncating it. Returns the number of bytes written.
-
+    
     Raises:
         Io"""
 async def write_async(path: str, content: str) -> int:
     """Writes `content` to the file at `path`, creating or truncating it. Returns the number of bytes written.
-
+    
     Raises:
         Io"""
 
 
 def write_bytes(path: str, content: bytes) -> int:
     """Writes raw bytes `content` to the file at `path`, creating or truncating it. Returns the number of bytes written.
-
+    
     Raises:
         Io"""
 async def write_bytes_async(path: str, content: bytes) -> int:
     """Writes raw bytes `content` to the file at `path`, creating or truncating it. Returns the number of bytes written.
-
+    
     Raises:
         Io"""
 
@@ -227,24 +227,24 @@ class MkdirOptions(pydantic.BaseModel):
 
 def read_dir(path: str) -> typing.List[DirEntry]:
     """Returns an array of directory entries for the directory at `path`.
-
+    
     Raises:
         Io"""
 async def read_dir_async(path: str) -> typing.List[DirEntry]:
     """Returns an array of directory entries for the directory at `path`.
-
+    
     Raises:
         Io"""
 
 
 def mkdir(path: str, options: MkdirOptions) -> None:
     """Creates the directory at `path`. Pass `MkdirOptions { recursive: true }` to create parent directories.
-
+    
     Raises:
         Io"""
 async def mkdir_async(path: str, options: MkdirOptions) -> None:
     """Creates the directory at `path`. Pass `MkdirOptions { recursive: true }` to create parent directories.
-
+    
     Raises:
         Io"""
 
@@ -252,13 +252,13 @@ async def mkdir_async(path: str, options: MkdirOptions) -> None:
 def remove_dir(path: str) -> None:
     """Removes the empty directory at `path`. Throws `Io` if `path` is not a
     directory, is not empty, or does not exist. Mirrors Bun's `fs.promises.rmdir`.
-
+    
     Raises:
         Io"""
 async def remove_dir_async(path: str) -> None:
     """Removes the empty directory at `path`. Throws `Io` if `path` is not a
     directory, is not empty, or does not exist. Mirrors Bun's `fs.promises.rmdir`.
-
+    
     Raises:
         Io"""
 
@@ -269,7 +269,7 @@ def remove_dir_all(path: str) -> None:
     `fs.promises.rm(path, { recursive: true, force: true })` for directory trees
     and missing paths — but, unlike `rm -rf`, it targets directories only and
     throws `Io` if `path` is a regular file.
-
+    
     Raises:
         Io"""
 async def remove_dir_all_async(path: str) -> None:
@@ -278,7 +278,7 @@ async def remove_dir_all_async(path: str) -> None:
     `fs.promises.rm(path, { recursive: true, force: true })` for directory trees
     and missing paths — but, unlike `rm -rf`, it targets directories only and
     throws `Io` if `path` is a regular file.
-
+    
     Raises:
         Io"""
 

@@ -212,7 +212,14 @@ function RunVoiceTurn(
                 let task_execution = execution.task_execution ?? root.task.TaskExecutionResult { returns: [] };
                 //# Check completion
                 let completion_started_at = baml.time.Instant.now();
-                let completion = root.task.CheckTaskCompletion(selected_task.output, output_summary);
+                let task_completion_conversation = TaskConversation(load_request_conversation(), task_conversation_scope);
+                let completion = root
+                    .task
+                    .CheckTaskCompletion(
+                        selected_task.output,
+                        output_summary,
+                        current_conversation = task_completion_conversation,
+                    );
                 let completion_ms = completion_started_at.elapsed().to_milliseconds();
                 task_completion_ms += completion_ms;
                 completion_reviews

@@ -43,7 +43,7 @@ class Future(pydantic.BaseModel, typing.Generic[T, E]):
         settled, this is a no-op and returns `false`. Otherwise the
         future's cancel token fires; the spawned thread will throw
         `baml.panics.Cancelled` at its next `await` point.
-
+        
         Returns `true` if a transition to the Cancelled state was
         performed, `false` if the future was already settled."""
     async def cancel_async(self) -> bool:
@@ -51,7 +51,7 @@ class Future(pydantic.BaseModel, typing.Generic[T, E]):
         settled, this is a no-op and returns `false`. Otherwise the
         future's cancel token fires; the spawned thread will throw
         `baml.panics.Cancelled` at its next `await` point.
-
+        
         Returns `true` if a transition to the Cancelled state was
         performed, `false` if the future was already settled."""
     def is_settled(self) -> bool:
@@ -105,7 +105,7 @@ def all(futures: typing.List[None], *, _types: dict[str, type]) -> None:
     `all_complete`, but on the FIRST failure the remaining futures are
     cancelled before the error is re-thrown (JS `Promise.all`). Use
     `all_complete` instead when losers have side effects that must finish.
-
+    
     Note: failures are observed in input order (not strictly first-to-fail in
     wall-clock time); the value contract — every value, or one error — is the
     same either way."""
@@ -114,7 +114,7 @@ async def all_async(futures: typing.List[None], *, _types: dict[str, type]) -> N
     `all_complete`, but on the FIRST failure the remaining futures are
     cancelled before the error is re-thrown (JS `Promise.all`). Use
     `all_complete` instead when losers have side effects that must finish.
-
+    
     Note: failures are observed in input order (not strictly first-to-fail in
     wall-clock time); the value contract — every value, or one error — is the
     same either way."""

@@ -74,21 +74,21 @@ V = typing.TypeVar("V")
 class Bigint(pydantic.BaseModel):
     """
     Arbitrary-precision signed integer.
-
+    
     # Bitwise on negatives
-
+    
     `&`, `|`, `^` use two's-complement semantics — bigints are treated as if
     they had an infinite sign-extended bit string. So `(-1n) & 1n == 1n`,
     `(-1n) | 0n == -1n`, `(-1n) ^ 0n == -1n`. This matches JavaScript `BigInt`
     and Python `int`.
-
+    
     # Panics
-
+    
     Bigint operators and methods can raise the following unrecoverable
     panics. These are not declared via `throws` because they signal that
     the program tried to do something invalid (rather than a recoverable
     runtime condition):
-
+    
     - `baml.panics.DivisionByZero` — `a / 0n` or `a % 0n`.
     - `baml.panics.NegativeBitShift` — `a << -1n` or `a >> -1n`. The shift
       count must be non-negative.
@@ -306,7 +306,7 @@ deep_equals_async = _define_function("baml.deep_equals", "async", ["a", "b"], ty
 class TaggedString(pydantic.BaseModel):
     """
     The structured value a tagged template literal produces.
-
+    
     BEP-049 §10. A `tag` ` `…` ` call site lowers to `tag(body = () -> TaggedString { … })`;
     when `body()` runs it returns this struct. The invariant is
     `parts.length == values.length + 1` (literals and values alternate, starting and
@@ -326,7 +326,7 @@ class TaggedString(pydantic.BaseModel):
 class Float(pydantic.BaseModel):
     """
     A 64-bit IEEE 754 floating-point number (f64).
-
+    
     Note: division by zero (`x / 0.0`) does not follow raw IEEE — it throws a
     catchable `baml.panics.DivisionByZero` rather than yielding `±inf`/`NaN`,
     matching integer division. `inf` and `NaN` still arise from `float.inf()` /
@@ -428,11 +428,11 @@ class Int(pydantic.BaseModel):
     """
     A 63-bit signed integer. Range: -2^62 to 2^62-1
     (`-4_611_686_018_427_387_904` to `4_611_686_018_427_387_903`).
-
+    
     The value is stored in a 64-bit machine word with one bit reserved for the
     runtime's pointer/value tag, so the usable range is 63-bit, not 64-bit. Use
     `bigint` for arbitrary-precision integers.
-
+    
     Arithmetic (`+`, `-`, `*`, `/`, unary `-`) that would leave this range
     throws a catchable `baml.panics.IntegerOverflow` rather than wrapping or
     crashing; `/` and `%` by zero throw `baml.panics.DivisionByZero`.
@@ -482,7 +482,7 @@ class Null(pydantic.BaseModel):
 class String(pydantic.BaseModel):
     """
     A UTF-8 encoded string.
-
+    
     String literals use double quotes: `"hello"`. Multiline strings use the `#"..."#` syntax.
     All methods returning a new string do not mutate `self` unless noted otherwise.
     """
@@ -582,11 +582,11 @@ class String(pydantic.BaseModel):
 class TypeValue(pydantic.BaseModel):
     """
     Companion class for the built-in `type` primitive.
-
+    
     The BAML `type` primitive represents a runtime type value returned by
     `reflect.type_of<T>()`. This class provides methods on `type` values,
     mirroring how `class String` provides methods on `string`.
-
+    
     Users never construct `Type` directly; they receive `type` values via
     `reflect.type_of<User>()` and call methods on them.
     """
@@ -606,7 +606,7 @@ class TypeValue(pydantic.BaseModel):
 class Uint8Array(pydantic.BaseModel):
     """
     A mutable, growable array of bytes (u8 values in the range 0–255).
-
+    
     Used for binary data such as file contents, network payloads, and encoded strings.
     `push` silently masks values to u8; `from_array` throws `InvalidArgument` for out-of-range values.
     """

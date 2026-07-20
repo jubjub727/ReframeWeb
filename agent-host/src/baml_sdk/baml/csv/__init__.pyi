@@ -117,36 +117,36 @@ class CsvRecord(pydantic.BaseModel):
     _handle: _BamlPyHandle
     def get(self, column: str, *, _types: dict[str, type]) -> typing.Optional[T]:
         """Converts the cell under header `column` to `T`.
-
+        
         Returns `null` for a column name absent from the headers, a missing
         cell, or a null cell. Throws `CsvError { kind: Decode }` when a cell
         exists but cannot convert to `T`, and `CsvError { kind: Header }` when
         the name is duplicated in the header or when name-based access is used
         with no headers at all.
-
+        
         Raises:
             CsvError"""
     async def get_async(self, column: str, *, _types: dict[str, type]) -> typing.Optional[T]:
         """Converts the cell under header `column` to `T`.
-
+        
         Returns `null` for a column name absent from the headers, a missing
         cell, or a null cell. Throws `CsvError { kind: Decode }` when a cell
         exists but cannot convert to `T`, and `CsvError { kind: Header }` when
         the name is duplicated in the header or when name-based access is used
         with no headers at all.
-
+        
         Raises:
             CsvError"""
     def get_at(self, index: int, *, _types: dict[str, type]) -> typing.Optional[T]:
         """Converts the cell at `index` to `T`. Returns `null` for a missing or
         null cell; throws `CsvError { kind: Decode }` on conversion failure.
-
+        
         Raises:
             CsvError"""
     async def get_at_async(self, index: int, *, _types: dict[str, type]) -> typing.Optional[T]:
         """Converts the cell at `index` to `T`. Returns `null` for a missing or
         null cell; throws `CsvError { kind: Decode }` on conversion failure.
-
+        
         Raises:
             CsvError"""
     def fields(self) -> typing.List[str]: ...
@@ -159,14 +159,14 @@ class CsvRecord(pydantic.BaseModel):
         """Applies the full typed-decode rules to this one record — useful for
         routing heterogeneous rows. Always throws on failure, regardless of
         the reader's `on_error` policy.
-
+        
         Raises:
             CsvError"""
     async def decode_async(self, *, _types: dict[str, type]) -> T:
         """Applies the full typed-decode rules to this one record — useful for
         routing heterogeneous rows. Always throws on failure, regardless of
         the reader's `on_error` policy.
-
+        
         Raises:
             CsvError"""
     def to_map(self) -> typing.Dict[str, str]:
@@ -193,45 +193,45 @@ class CsvReader(pydantic.BaseModel):
     def headers(self) -> typing.Optional[typing.List[str]]:
         """The column names: the `headers` option when set, the file's header row
         when `has_header = true` (consumed on first call), and `null` otherwise.
-
+        
         Parse errors in the header record (`Quote`, `Encoding`) surface from
         this call (or from whichever call reads the header first), and they
         exhaust the reader: without a trustworthy header every subsequent
         name-to-column mapping would be silently wrong, so the stream ends
         rather than mis-mapping a million rows.
-
+        
         Raises:
             CsvError, Io"""
     async def headers_async(self) -> typing.Optional[typing.List[str]]:
         """The column names: the `headers` option when set, the file's header row
         when `has_header = true` (consumed on first call), and `null` otherwise.
-
+        
         Parse errors in the header record (`Quote`, `Encoding`) surface from
         this call (or from whichever call reads the header first), and they
         exhaust the reader: without a trustworthy header every subsequent
         name-to-column mapping would be silently wrong, so the stream ends
         rather than mis-mapping a million rows.
-
+        
         Raises:
             CsvError, Io"""
     def rows(self, *, _types: dict[str, type]) -> typing.Any:
         """A typed iterator over the remaining records, decoding each into `T`.
-
+        
         Validates eagerly: reads the header if necessary and checks that every
         non-optional field of `T` is satisfiable, throwing
         `CsvError { kind: Header }` at the call site rather than on the
         millionth row.
-
+        
         Raises:
             CsvError, Io"""
     async def rows_async(self, *, _types: dict[str, type]) -> typing.Any:
         """A typed iterator over the remaining records, decoding each into `T`.
-
+        
         Validates eagerly: reads the header if necessary and checks that every
         non-optional field of `T` is satisfiable, throwing
         `CsvError { kind: Header }` at the call site rather than on the
         millionth row.
-
+        
         Raises:
             CsvError, Io"""
     def skipped(self) -> typing.List[CsvError]: ...
@@ -248,7 +248,7 @@ class CsvReader(pydantic.BaseModel):
         `CsvError { kind: Closed }`; `skipped()`, `skipped_count()`, and
         `position()` remain valid. As with `baml.fs.File`, closing is optional:
         the GC reclaims unreferenced readers.
-
+        
         Raises:
             Io"""
     async def close_async(self) -> None:
@@ -259,7 +259,7 @@ class CsvReader(pydantic.BaseModel):
         `CsvError { kind: Closed }`; `skipped()`, `skipped_count()`, and
         `position()` remain valid. As with `baml.fs.File`, closing is optional:
         the GC reclaims unreferenced readers.
-
+        
         Raises:
             Io"""
     def _poll(self) -> typing.Union[CsvRecord, CsvSkip, CsvNeedData, baml.iter.Done]:
@@ -287,7 +287,7 @@ class CsvReader(pydantic.BaseModel):
         in-memory sources. IO errors are stream-scoped and fatal: the reader is
         marked exhausted before the throw, so subsequent `next()` calls return
         `baml.iter.Done`.
-
+        
         Raises:
             CsvError, Io"""
     async def _read_chunk_async(self) -> None:
@@ -295,7 +295,7 @@ class CsvReader(pydantic.BaseModel):
         in-memory sources. IO errors are stream-scoped and fatal: the reader is
         marked exhausted before the throw, so subsequent `next()` calls return
         `baml.iter.Done`.
-
+        
         Raises:
             CsvError, Io"""
 
@@ -318,12 +318,12 @@ class CsvWriter(pydantic.BaseModel):
     _owns_file: bool
     def write_record(self, record: typing.List[typing.Union[bool, int, int, float, str, None]]) -> None:
         """Writes one raw record. Never triggers an automatic header.
-
+        
         Raises:
             CsvError, Io"""
     async def write_record_async(self, record: typing.List[typing.Union[bool, int, int, float, str, None]]) -> None:
         """Writes one raw record. Never triggers an automatic header.
-
+        
         Raises:
             CsvError, Io"""
     def write_row(self, row: T, *, _types: dict[str, type]) -> None:
@@ -331,7 +331,7 @@ class CsvWriter(pydantic.BaseModel):
         `write_header` is enabled (default) and no header has been written yet,
         the header derived from `T`'s field names (or `WriterOptions.headers`)
         is emitted first.
-
+        
         Raises:
             CsvError, Io"""
     async def write_row_async(self, row: T, *, _types: dict[str, type]) -> None:
@@ -339,33 +339,33 @@ class CsvWriter(pydantic.BaseModel):
         `write_header` is enabled (default) and no header has been written yet,
         the header derived from `T`'s field names (or `WriterOptions.headers`)
         is emitted first.
-
+        
         Raises:
             CsvError, Io"""
     def write_rows(self, rows: typing.List[T], *, _types: dict[str, type]) -> None:
         """Writes many typed rows, as one atomic batch: on a thrown error nothing
         from the batch is emitted or counted. Otherwise equivalent to
         `write_row<T>` in a loop.
-
+        
         Raises:
             CsvError, Io"""
     async def write_rows_async(self, rows: typing.List[T], *, _types: dict[str, type]) -> None:
         """Writes many typed rows, as one atomic batch: on a thrown error nothing
         from the batch is emitted or counted. Otherwise equivalent to
         `write_row<T>` in a loop.
-
+        
         Raises:
             CsvError, Io"""
     def write_header(self, names: typing.List[str]) -> None:
         """Writes an explicit header record. Throws `CsvError { kind: Header }`
         after data has been written.
-
+        
         Raises:
             CsvError, Io"""
     async def write_header_async(self, names: typing.List[str]) -> None:
         """Writes an explicit header record. Throws `CsvError { kind: Header }`
         after data has been written.
-
+        
         Raises:
             CsvError, Io"""
     def records_written(self) -> int: ...
@@ -388,7 +388,7 @@ class CsvWriter(pydantic.BaseModel):
         handle passed to `writer(file)` stays open — its lifecycle belongs to
         the caller. Writes after close throw `CsvError { kind: Closed }`;
         `records_written()` remains valid.
-
+        
         Raises:
             Io"""
     async def close_async(self) -> None:
@@ -397,7 +397,7 @@ class CsvWriter(pydantic.BaseModel):
         handle passed to `writer(file)` stays open — its lifecycle belongs to
         the caller. Writes after close throw `CsvError { kind: Closed }`;
         `records_written()` remains valid.
-
+        
         Raises:
             Io"""
     def _encode_record(self, record: typing.List[typing.Union[bool, int, int, float, str, None]]) -> str:
@@ -419,89 +419,89 @@ class CsvWriter(pydantic.BaseModel):
     def _emit(self, out: str) -> None:
         """(internal) Write encoded text to the backing file, if any. Buffer
         writers accumulate natively and receive `""` here.
-
+        
         Raises:
             Io"""
     async def _emit_async(self, out: str) -> None:
         """(internal) Write encoded text to the backing file, if any. Buffer
         writers accumulate natively and receive `""` here.
-
+        
         Raises:
             Io"""
 
 
 def reader(source: typing.Union[str, bytes, baml.fs.File], *, options: typing.Union[ReaderOptions, None, UNSET] = None) -> CsvReader:
     """A streaming reader over in-memory text/bytes or an open file handle.
-
+    
     A `string` or `uint8array` source is CSV content, parsed in place. A
     `baml.fs.File` source is streamed from its current cursor to EOF; from
     construction until the reader is exhausted or closed, the reader owns
     that cursor.
-
+    
     Raises:
         CsvError"""
 async def reader_async(source: typing.Union[str, bytes, baml.fs.File], *, options: typing.Union[ReaderOptions, None, UNSET] = None) -> CsvReader:
     """A streaming reader over in-memory text/bytes or an open file handle.
-
+    
     A `string` or `uint8array` source is CSV content, parsed in place. A
     `baml.fs.File` source is streamed from its current cursor to EOF; from
     construction until the reader is exhausted or closed, the reader owns
     that cursor.
-
+    
     Raises:
         CsvError"""
 
 
 def open(path: str, *, options: typing.Union[ReaderOptions, None, UNSET] = None) -> CsvReader:
     """Opens the file at `path` via `baml.fs` and streams it.
-
+    
     Raises:
         CsvError, Io"""
 async def open_async(path: str, *, options: typing.Union[ReaderOptions, None, UNSET] = None) -> CsvReader:
     """Opens the file at `path` via `baml.fs` and streams it.
-
+    
     Raises:
         CsvError, Io"""
 
 
 def read(path: str, *, options: typing.Union[ReaderOptions, None, UNSET] = None, _types: dict[str, type]) -> typing.List[T]:
     """Eager typed read of a whole file: `open(path).rows<T>().collect()`.
-
+    
     If the file might not fit in memory, `open` it and stream instead — the
     options are the same; the streaming spelling is a verb swap away.
-
+    
     Raises:
         CsvError, Io"""
 async def read_async(path: str, *, options: typing.Union[ReaderOptions, None, UNSET] = None, _types: dict[str, type]) -> typing.List[T]:
     """Eager typed read of a whole file: `open(path).rows<T>().collect()`.
-
+    
     If the file might not fit in memory, `open` it and stream instead — the
     options are the same; the streaming spelling is a verb swap away.
-
+    
     Raises:
         CsvError, Io"""
 
 
 def parse(source: typing.Union[str, bytes], *, options: typing.Union[ReaderOptions, None, UNSET] = None) -> typing.List[typing.List[str]]:
     """Eager untyped parse of in-memory input: records as string arrays.
-
+    
     Raises:
         CsvError"""
 async def parse_async(source: typing.Union[str, bytes], *, options: typing.Union[ReaderOptions, None, UNSET] = None) -> typing.List[typing.List[str]]:
     """Eager untyped parse of in-memory input: records as string arrays.
-
+    
     Raises:
         CsvError"""
 
 
 def decode(source: typing.Union[str, bytes], *, options: typing.Union[ReaderOptions, None, UNSET] = None, _types: dict[str, type]) -> typing.List[T]:
     """Eager typed parse of in-memory input.
-
+    
     Raises:
         CsvError"""
 async def decode_async(source: typing.Union[str, bytes], *, options: typing.Union[ReaderOptions, None, UNSET] = None, _types: dict[str, type]) -> typing.List[T]:
     """Eager typed parse of in-memory input.
-
+    
     Raises:
         CsvError"""
 
@@ -509,13 +509,13 @@ async def decode_async(source: typing.Union[str, bytes], *, options: typing.Unio
 def decode_optional(source: typing.Union[str, bytes], *, options: typing.Union[ReaderOptions, None, UNSET] = None, _types: dict[str, type]) -> typing.Optional[T]:
     """Typed parse of an input with zero or one data record. Extra records
     throw `CsvError { kind: TooManyRows }`.
-
+    
     Raises:
         CsvError"""
 async def decode_optional_async(source: typing.Union[str, bytes], *, options: typing.Union[ReaderOptions, None, UNSET] = None, _types: dict[str, type]) -> typing.Optional[T]:
     """Typed parse of an input with zero or one data record. Extra records
     throw `CsvError { kind: TooManyRows }`.
-
+    
     Raises:
         CsvError"""
 
@@ -524,22 +524,22 @@ def decode_one(source: typing.Union[str, bytes], *, options: typing.Union[Reader
     """Typed parse of an input with exactly one data record. Zero records throw
     `CsvError { kind: NotFound }`; extra records throw
     `CsvError { kind: TooManyRows }`.
-
+    
     Fits LLM output that was requested as exactly one row — with
     `has_header: false` for a bare row (positional decode), or default
     options when the model was asked to emit a header plus one data row.
-
+    
     Raises:
         CsvError"""
 async def decode_one_async(source: typing.Union[str, bytes], *, options: typing.Union[ReaderOptions, None, UNSET] = None, _types: dict[str, type]) -> T:
     """Typed parse of an input with exactly one data record. Zero records throw
     `CsvError { kind: NotFound }`; extra records throw
     `CsvError { kind: TooManyRows }`.
-
+    
     Fits LLM output that was requested as exactly one row — with
     `has_header: false` for a bare row (positional decode), or default
     options when the model was asked to emit a header plus one data row.
-
+    
     Raises:
         CsvError"""
 
@@ -547,13 +547,13 @@ async def decode_one_async(source: typing.Union[str, bytes], *, options: typing.
 def writer(file: baml.fs.File, *, options: typing.Union[WriterOptions, None, UNSET] = None) -> CsvWriter:
     """A streaming writer to an open file handle. Emits from the file's current
     cursor and never truncates; for fresh output files, use `create`.
-
+    
     Raises:
         CsvError"""
 async def writer_async(file: baml.fs.File, *, options: typing.Union[WriterOptions, None, UNSET] = None) -> CsvWriter:
     """A streaming writer to an open file handle. Emits from the file's current
     cursor and never truncates; for fresh output files, use `create`.
-
+    
     Raises:
         CsvError"""
 
@@ -561,25 +561,25 @@ async def writer_async(file: baml.fs.File, *, options: typing.Union[WriterOption
 def create(path: str, *, options: typing.Union[WriterOptions, None, UNSET] = None) -> CsvWriter:
     """Creates or truncates the file at `path` (auto-creating parent
     directories, like `baml.fs.write`) and stream-writes to it.
-
+    
     Raises:
         CsvError, Io"""
 async def create_async(path: str, *, options: typing.Union[WriterOptions, None, UNSET] = None) -> CsvWriter:
     """Creates or truncates the file at `path` (auto-creating parent
     directories, like `baml.fs.write`) and stream-writes to it.
-
+    
     Raises:
         CsvError, Io"""
 
 
 def buffer(*, options: typing.Union[WriterOptions, None, UNSET] = None) -> CsvWriter:
     """An in-memory writer; retrieve the accumulated CSV with `text()`.
-
+    
     Raises:
         CsvError"""
 async def buffer_async(*, options: typing.Union[WriterOptions, None, UNSET] = None) -> CsvWriter:
     """An in-memory writer; retrieve the accumulated CSV with `text()`.
-
+    
     Raises:
         CsvError"""
 
@@ -587,51 +587,51 @@ async def buffer_async(*, options: typing.Union[WriterOptions, None, UNSET] = No
 def write(path: str, rows: typing.List[T], *, options: typing.Union[WriterOptions, None, UNSET] = None, _types: dict[str, type]) -> int:
     """One-shot typed file write; returns bytes written, mirroring
     `baml.fs.write` (creates or truncates).
-
+    
     Raises:
         CsvError, Io"""
 async def write_async(path: str, rows: typing.List[T], *, options: typing.Union[WriterOptions, None, UNSET] = None, _types: dict[str, type]) -> int:
     """One-shot typed file write; returns bytes written, mirroring
     `baml.fs.write` (creates or truncates).
-
+    
     Raises:
         CsvError, Io"""
 
 
 def stringify(rows: typing.List[T], *, options: typing.Union[WriterOptions, None, UNSET] = None, _types: dict[str, type]) -> str:
     """Serializes rows of `T` to CSV text.
-
+    
     Raises:
         CsvError"""
 async def stringify_async(rows: typing.List[T], *, options: typing.Union[WriterOptions, None, UNSET] = None, _types: dict[str, type]) -> str:
     """Serializes rows of `T` to CSV text.
-
+    
     Raises:
         CsvError"""
 
 
 def stringify_records(records: typing.List[typing.List[typing.Union[bool, int, int, float, str, None]]], *, options: typing.Union[WriterOptions, None, UNSET] = None) -> str:
     """Serializes raw records to CSV text.
-
+    
     Raises:
         CsvError"""
 async def stringify_records_async(records: typing.List[typing.List[typing.Union[bool, int, int, float, str, None]]], *, options: typing.Union[WriterOptions, None, UNSET] = None) -> str:
     """Serializes raw records to CSV text.
-
+    
     Raises:
         CsvError"""
 
 
 def to_markdown(rows: typing.List[T], *, max_rows: typing.Union[int, UNSET] = 100, _types: dict[str, type]) -> str:
     """Renders rows of `T` as a GitHub-style Markdown table for prompt context.
-
+    
     Headers come from `T`'s field names. `|` is escaped and embedded newlines
     become spaces; non-finite floats render as `NaN` / `inf` (prompt text is
     not meant to round-trip). Beyond `max_rows`, output is truncated with a
     final `… (N more rows)` line."""
 async def to_markdown_async(rows: typing.List[T], *, max_rows: typing.Union[int, UNSET] = 100, _types: dict[str, type]) -> str:
     """Renders rows of `T` as a GitHub-style Markdown table for prompt context.
-
+    
     Headers come from `T`'s field names. `|` is escaped and embedded newlines
     become spaces; non-finite floats render as `NaN` / `inf` (prompt text is
     not meant to round-trip). Beyond `max_rows`, output is truncated with a

@@ -35,6 +35,13 @@ testset "task conversation" {
                     role: "agent_reply",
                     content: "resolved answer",
                 },
+                root.turn_context.ConversationHistoryMessage {
+                    created_at: "validation",
+                    updated_at: "updated",
+                    read_at: "read",
+                    role: "validation_reply",
+                    content: "Previous retry guidance",
+                },
             ],
         };
         let scoped = TaskConversation(
@@ -46,10 +53,12 @@ testset "task conversation" {
         );
         assert.not_null(scoped);
         if let task_conversation: root.turn_context.ConversationHistory = scoped {
-            assert.equal(task_conversation.messages.length(), 3);
+            assert.equal(task_conversation.messages.length(), 4);
             assert.equal(task_conversation.messages.at(0)?.content, "resolved request");
             assert.equal(task_conversation.messages.at(1)?.content, "this request");
-            assert.equal(task_conversation.messages.at(2)?.content, "resolved answer")
+            assert.equal(task_conversation.messages.at(2)?.content, "resolved answer");
+            assert.equal(task_conversation.messages.at(3)?.role, "validation_reply");
+            assert.equal(task_conversation.messages.at(3)?.content, "Previous retry guidance")
         }
     }
 

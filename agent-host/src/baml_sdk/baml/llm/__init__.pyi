@@ -62,7 +62,7 @@ def prompt_template_for(function_name: str, prompt_closure: typing.Optional[typi
     The Jinja template to render for `function_name`. New-mode (BEP-049 M5)
     functions have no template registered — their compiled `prompt`…`` closure
     renders the prompt — so only look one up for the legacy `#"..."#` path.
-
+    
     Raises:
         InvalidArgument"""
 async def prompt_template_for_async(function_name: str, prompt_closure: typing.Optional[typing.Callable[[Context], PromptAst]]) -> str:
@@ -71,7 +71,7 @@ async def prompt_template_for_async(function_name: str, prompt_closure: typing.O
     The Jinja template to render for `function_name`. New-mode (BEP-049 M5)
     functions have no template registered — their compiled `prompt`…`` closure
     renders the prompt — so only look one up for the legacy `#"..."#` path.
-
+    
     Raises:
         InvalidArgument"""
 
@@ -102,11 +102,11 @@ async def build_request_stream_async(client: Client, function_name: str, args: t
 
 def parse(json: str, *, _types: dict[str, type]) -> TFinal:
     """UNSAFE: do not call from user code
-
+    
     Used by LLM function `$parse` companions, which pass
     `<STREAM_EXPANDED, ORIGINAL>` as explicit type args.
     Only parses full responses, not partials.
-
+    
     `$parse` is a purely local, network-free parse of an existing JSON string
     into the function's return type, so a schema mismatch (e.g. an out-of-enum
     value) is a *parse* failure — not an LLM/client failure. The underlying
@@ -115,16 +115,16 @@ def parse(json: str, *, _types: dict[str, type]) -> TFinal:
     intact); remap it to the parse-flavored `ParseError` here so the surfaced
     error name matches the operation and the documented
     `catch (baml.errors.ParseError)` pattern is reachable (no E0063).
-
+    
     Raises:
         ParseError"""
 async def parse_async(json: str, *, _types: dict[str, type]) -> TFinal:
     """UNSAFE: do not call from user code
-
+    
     Used by LLM function `$parse` companions, which pass
     `<STREAM_EXPANDED, ORIGINAL>` as explicit type args.
     Only parses full responses, not partials.
-
+    
     `$parse` is a purely local, network-free parse of an existing JSON string
     into the function's return type, so a schema mismatch (e.g. an out-of-enum
     value) is a *parse* failure — not an LLM/client failure. The underlying
@@ -133,43 +133,43 @@ async def parse_async(json: str, *, _types: dict[str, type]) -> TFinal:
     intact); remap it to the parse-flavored `ParseError` here so the surfaced
     error name matches the operation and the documented
     `catch (baml.errors.ParseError)` pattern is reachable (no E0063).
-
+    
     Raises:
         ParseError"""
 
 
 def call_llm_function(client: Client, function_name: str, args: typing.Dict[str, typing.Any], *, prompt_closure: typing.Union[typing.Callable[[Context], PromptAst], None, UNSET] = None, _types: dict[str, type]) -> T:
     """UNSAFE: do not call from user code
-
+    
     Call an LLM function and return its full result.
-
+    
     Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 async def call_llm_function_async(client: Client, function_name: str, args: typing.Dict[str, typing.Any], *, prompt_closure: typing.Union[typing.Callable[[Context], PromptAst], None, UNSET] = None, _types: dict[str, type]) -> T:
     """UNSAFE: do not call from user code
-
+    
     Call an LLM function and return its full result.
-
+    
     Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
 def stream_llm_function(client: Client, function_name: str, args: typing.Dict[str, typing.Any], *, prompt_closure: typing.Union[typing.Callable[[Context], PromptAst], None, UNSET] = None, _types: dict[str, type]) -> Stream[TStream, TFinal]:
     """UNSAFE: do not call from user code
-
+    
     The streaming counterpart of `call_llm_function`.
-
+    
     Sends the request and returns a `Stream<TStream, TFinal>` which can be used to consume the data as it arrives.
-
+    
     Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 async def stream_llm_function_async(client: Client, function_name: str, args: typing.Dict[str, typing.Any], *, prompt_closure: typing.Union[typing.Callable[[Context], PromptAst], None, UNSET] = None, _types: dict[str, type]) -> Stream[TStream, TFinal]:
     """UNSAFE: do not call from user code
-
+    
     The streaming counterpart of `call_llm_function`.
-
+    
     Sends the request and returns a `Stream<TStream, TFinal>` which can be used to consume the data as it arrives.
-
+    
     Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
@@ -265,26 +265,26 @@ class Client(pydantic.BaseModel):
     counter: int
     def to_primitive_client(self, *, lenient: typing.Union[bool, UNSET] = False) -> PrimitiveClient:
         """Build the primitive client this client resolves to.
-
+        
         `lenient` controls how the generated constructor reads `env.X` client
         options: when true, a missing variable yields "" instead of panicking.
         Only the offline `render_prompt` path passes `true` — it needs the
         client's provider/role metadata to render a prompt but never its
         credentials. Every network path keeps the default `false`, so a missing
         `api_key` env var still panics for `$call` / `$build_request`.
-
+        
         Raises:
             InvalidArgument"""
     async def to_primitive_client_async(self, *, lenient: typing.Union[bool, UNSET] = False) -> PrimitiveClient:
         """Build the primitive client this client resolves to.
-
+        
         `lenient` controls how the generated constructor reads `env.X` client
         options: when true, a missing variable yields "" instead of panicking.
         Only the offline `render_prompt` path passes `true` — it needs the
         client's provider/role metadata to render a prompt but never its
         credentials. Every network path keeps the default `false`, so a missing
         `api_key` env var still panics for `$call` / `$build_request`.
-
+        
         Raises:
             InvalidArgument"""
     def get_constructor(self) -> typing.Callable[[bool], PrimitiveClient]: ...
@@ -327,12 +327,12 @@ class Client(pydantic.BaseModel):
             DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
     def __make_stream(self, sse: baml.http.SseStream, *, _types: dict[str, type]) -> Stream[TStream, TFinal]:
         """DO NOT CALL FROM USER CODE
-
+        
         Raises:
             InvalidArgument, LlmClient"""
     async def __make_stream_async(self, sse: baml.http.SseStream, *, _types: dict[str, type]) -> Stream[TStream, TFinal]:
         """DO NOT CALL FROM USER CODE
-
+        
         Raises:
             InvalidArgument, LlmClient"""
     def execute_oneshot(self, context: ExecutionContext, inherited_delay_ms: int, *, _types: dict[str, type]) -> T:
@@ -497,7 +497,7 @@ class PrimitiveClient(pydantic.BaseModel):
         orchestrator (`execute_once_oneshot` / `execute_stream`) and the static
         `render_prompt` / `build_request` companions both call it, so the playground
         preview/cURL and actual execution render byte-identically.
-
+        
         Raises:
             RenderPrompt, LlmClient"""
     async def render_specialized_prompt_async(self, template: str, args: typing.Dict[str, typing.Any], return_type: None, prompt_closure: typing.Optional[typing.Callable[[Context], PromptAst]]) -> PromptAst:
@@ -509,7 +509,7 @@ class PrimitiveClient(pydantic.BaseModel):
         orchestrator (`execute_once_oneshot` / `execute_stream`) and the static
         `render_prompt` / `build_request` companions both call it, so the playground
         preview/cURL and actual execution render byte-identically.
-
+        
         Raises:
             RenderPrompt, LlmClient"""
     def build_request(self, prompt: PromptAst, return_type: None) -> baml.http.Request:
@@ -539,21 +539,21 @@ class PrimitiveClient(pydantic.BaseModel):
     def parse(self, http_response_body: str, *, _types: dict[str, type]) -> T:
         """DO NOT CALL FROM USER CODE
         Requires the response to be done (no partials).
-
+        
         The `type_def` parameter is automatically threaded by the compiler from
         the call-site type argument `<T>` — callers write `primitive.parse<T>(body)`
         without passing an explicit type value.
-
+        
         Raises:
             LlmClient"""
     async def parse_async(self, http_response_body: str, *, _types: dict[str, type]) -> T:
         """DO NOT CALL FROM USER CODE
         Requires the response to be done (no partials).
-
+        
         The `type_def` parameter is automatically threaded by the compiler from
         the call-site type argument `<T>` — callers write `primitive.parse<T>(body)`
         without passing an explicit type value.
-
+        
         Raises:
             LlmClient"""
 
@@ -672,24 +672,24 @@ async def get_return_type_async(function_name: str) -> None:
 
 def __sap_parse_final(json: str, cache: StreamCache[TStream, TFinal], *, _types: dict[str, type]) -> TFinal:
     """DO NOT CALL FROM USER CODE
-
+    
     Raises:
         LlmClient"""
 async def __sap_parse_final_async(json: str, cache: StreamCache[TStream, TFinal], *, _types: dict[str, type]) -> TFinal:
     """DO NOT CALL FROM USER CODE
-
+    
     Raises:
         LlmClient"""
 
 
 def __sap_parse_partial(json: str, cache: StreamCache[TStream, TFinal], *, _types: dict[str, type]) -> typing.Union[TStream, baml.stream.StreamNoYield]:
     """DO NOT CALL FROM USER CODE
-
+    
     Raises:
         LlmClient"""
 async def __sap_parse_partial_async(json: str, cache: StreamCache[TStream, TFinal], *, _types: dict[str, type]) -> typing.Union[TStream, baml.stream.StreamNoYield]:
     """DO NOT CALL FROM USER CODE
-
+    
     Raises:
         LlmClient"""
 
