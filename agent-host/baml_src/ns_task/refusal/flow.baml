@@ -39,6 +39,12 @@ function WriteValidationReply(
           and what outcome is still needed.
         - Write validation_reply as self-contained corrective context for the
           next task attempt or task selection.
+        - Keep validation_reply strictly diagnostic. Identify the requirement,
+          claim, or action whose validation failed and the kind of correction or
+          independent verification the next attempt needs.
+        - Do not provide or suggest a replacement answer or exact response
+          content. The next task attempt owns solution generation and factual
+          derivation from the original task prompt.
         - can_refine indicates whether another attempt with the same selected
           task is a sensible next step. Use false when task selection would be
           more useful.

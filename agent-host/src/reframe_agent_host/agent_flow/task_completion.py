@@ -17,11 +17,13 @@ class TaskCompletionChecker:
         *,
         completion_string: str,
         output_summary: str,
+        current_user_request: str = "",
         prompt_layer_debug: PromptLayerDebugSession | None = None,
     ) -> baml_task.CompletionResult:
         inputs = {
             "completion_string": completion_string,
             "output_summary": output_summary,
+            "current_user_request": current_user_request,
         }
         request = None
         if prompt_layer_debug is not None:

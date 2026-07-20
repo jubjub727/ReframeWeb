@@ -36,6 +36,7 @@ class TaskFailureFlowOwnershipTests(unittest.TestCase):
         self.assertIn("CheckTaskCompletion(", source)
         self.assertIn("task_completion_conversation = TaskConversation(", source)
         self.assertIn("current_conversation = task_completion_conversation", source)
+        self.assertIn("current_user_request = current_user_request", source)
         self.assertIn("if (task_complete)", source)
         self.assertIn("CheckRequestCompletion(", source)
         self.assertIn('if (selected_task.model_id == "magic:do-nothing")', source)

@@ -79,22 +79,22 @@ async def SummariseActionHistory_stream_async(recorded_action_history: str, *, c
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-def CheckTaskCompletion(completion_string: str, output_summary: str, *, current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CompletionResult:
+def CheckTaskCompletion(completion_string: str, output_summary: str, *, current_user_request: typing.Union[str, UNSET] = "", current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CompletionResult:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def CheckTaskCompletion_async(completion_string: str, output_summary: str, *, current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CompletionResult:
+async def CheckTaskCompletion_async(completion_string: str, output_summary: str, *, current_user_request: typing.Union[str, UNSET] = "", current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CompletionResult:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-def CheckTaskCompletion__build_request(completion_string: str, output_summary: str, *, current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def CheckTaskCompletion__build_request(completion_string: str, output_summary: str, *, current_user_request: typing.Union[str, UNSET] = "", current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def CheckTaskCompletion__build_request_async(completion_string: str, output_summary: str, *, current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def CheckTaskCompletion__build_request_async(completion_string: str, output_summary: str, *, current_user_request: typing.Union[str, UNSET] = "", current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def CheckTaskCompletion__build_request_stream(completion_string: str, output_summary: str, *, current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+def CheckTaskCompletion__build_request_stream(completion_string: str, output_summary: str, *, current_user_request: typing.Union[str, UNSET] = "", current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def CheckTaskCompletion__build_request_stream_async(completion_string: str, output_summary: str, *, current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+async def CheckTaskCompletion__build_request_stream_async(completion_string: str, output_summary: str, *, current_user_request: typing.Union[str, UNSET] = "", current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
 def CheckTaskCompletion__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CompletionResult:
@@ -109,16 +109,16 @@ def CheckTaskCompletion__parse_stream(sse: baml.http.SseStream, *, client: typin
 async def CheckTaskCompletion__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[CompletionResult], CompletionResult]:
     """Raises:
         InvalidArgument, LlmClient"""
-def CheckTaskCompletion__render_prompt(completion_string: str, output_summary: str, *, current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+def CheckTaskCompletion__render_prompt(completion_string: str, output_summary: str, *, current_user_request: typing.Union[str, UNSET] = "", current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-async def CheckTaskCompletion__render_prompt_async(completion_string: str, output_summary: str, *, current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+async def CheckTaskCompletion__render_prompt_async(completion_string: str, output_summary: str, *, current_user_request: typing.Union[str, UNSET] = "", current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
     """Raises:
         InvalidArgument, LlmClient, RenderPrompt"""
-def CheckTaskCompletion_stream(completion_string: str, output_summary: str, *, current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[CompletionResult], CompletionResult]:
+def CheckTaskCompletion_stream(completion_string: str, output_summary: str, *, current_user_request: typing.Union[str, UNSET] = "", current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[CompletionResult], CompletionResult]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def CheckTaskCompletion_stream_async(completion_string: str, output_summary: str, *, current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[CompletionResult], CompletionResult]:
+async def CheckTaskCompletion_stream_async(completion_string: str, output_summary: str, *, current_user_request: typing.Union[str, UNSET] = "", current_conversation: typing.Union[turn_context.ConversationHistory, None, UNSET] = None, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[CompletionResult], CompletionResult]:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 

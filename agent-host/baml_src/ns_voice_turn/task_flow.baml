@@ -218,6 +218,7 @@ function RunVoiceTurn(
                     .CheckTaskCompletion(
                         selected_task.output,
                         output_summary,
+                        current_user_request = current_user_request,
                         current_conversation = task_completion_conversation,
                     );
                 let completion_ms = completion_started_at.elapsed().to_milliseconds();

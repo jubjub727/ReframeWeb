@@ -4,6 +4,7 @@ import unittest
 from baml_sdk import task as baml_task
 from baml_sdk import baml as baml_std
 from baml_sdk import turn_context as baml_turn_context
+from baml_sdk import voice_turn as baml_voice_turn
 from reframe_agent_host.agent_flow.provider_clients import (
     client_kwargs,
     compiled_client,
@@ -86,6 +87,7 @@ class ProviderClientTests(unittest.IsolatedAsyncioTestCase):
             ],
         )
         request = await baml_task.CheckTaskCompletion__build_request_async(
+            current_user_request="what is 46 to the power of 3 times 252 plus 5?",
             completion_string=(
                 "The user received a useful spoken reply that answered or "
                 "responded to their message."
@@ -100,6 +102,11 @@ class ProviderClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(body["reasoning_effort"], "none")
         self.assertIn("You are a task completion checker.", prompt_text)
         self.assertIn("Completion requirement", prompt_text)
+        self.assertIn("Active user request", prompt_text)
+        self.assertIn("primary specification for result quality", prompt_text)
+        self.assertIn("candidate result is the newest task attempt", prompt_text)
+        self.assertIn("Earlier agent replies are superseded history", prompt_text)
+        self.assertIn("than treating retry guidance as an answer key", prompt_text)
         self.assertIn("Current filtered conversation after task dispatch", prompt_text)
         self.assertIn("Task output summary", prompt_text)
         self.assertIn("Return exactly one token", prompt_text)
@@ -140,9 +147,33 @@ class ProviderClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("can_refine", prompt_text)
         self.assertIn("Earlier refusal replies from this task session", prompt_text)
         self.assertIn("Include the missing answer", prompt_text)
+        self.assertIn("Keep validation_reply strictly diagnostic", prompt_text)
+        self.assertIn("Do not provide or suggest a replacement answer", prompt_text)
+        self.assertIn("next task attempt owns solution generation", prompt_text)
         self.assertNotIn("reconsider", prompt_text.lower())
         self.assertNotIn("do not mention", prompt_text.lower())
         self.assertNotIn("bool or null", prompt_text)
+
+    async def test_request_completion_checks_coverage_without_revalidating_tasks(self):
+        request = await baml_voice_turn.CheckRequestCompletion__build_request_async(
+            current_user_request="Answer the calculation.",
+            current_conversation=None,
+            successful_tasks=[
+                baml_voice_turn.SuccessfulVoiceTaskResult(
+                    task_name="Reply to user",
+                    completion_requirement="The user received a useful reply.",
+                    output_summary="The reply was posted.",
+                )
+            ],
+        )
+        body = json.loads(request.body)
+        prompt_text = json.dumps(body["messages"])
+
+        self.assertIn("request-coverage check", prompt_text)
+        self.assertIn("Treat those confirmations as authoritative", prompt_text)
+        self.assertIn("not re-check their correctness", prompt_text)
+        self.assertIn("another distinct task is still needed", prompt_text)
+        self.assertNotIn("accurate and appropriate response", prompt_text)
 
 
 if __name__ == "__main__":

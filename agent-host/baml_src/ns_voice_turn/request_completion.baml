@@ -9,17 +9,23 @@ function CheckRequestCompletion(
     prompt: #"
         {{ _.role("system") }}
 
-        You are checking whether the user's original request has been appropriately resolved.
+        You are checking whether the user's original request is covered by the
+        confirmed successful tasks or whether distinct work is still needed.
 
-        Judge the complete exchange and the confirmed task results together.
+        This is a request-coverage check, not a task-result validator. Each item
+        under Confirmed task results has already passed its own completion and
+        quality validation. Treat those confirmations as authoritative here. Do
+        not re-check their correctness, truthfulness, wording, or execution quality.
 
-        A resolved request gives the user an accurate and appropriate response. This can include completed work, a truthful answer, a focused request for information required to continue, or a clear explanation of a limitation.
+        Use the original request and conversation only to determine whether the
+        confirmed tasks cover what the user asked for. A request can be covered by
+        completed work, a reply, a necessary question, or a limitation response.
 
-        Confirmed task results provide evidence for completed actions.
+        Return PASS when the confirmed tasks cover the original request and no
+        separate requested outcome remains.
 
-        Return PASS when the user has received an appropriate resolution.
-
-        Return FAIL when another response or task is still needed to appropriately resolve the request.
+        Return FAIL only when part of the original request has no corresponding
+        confirmed task result and another distinct task is still needed.
 
         {{ _.role("user") }}
 
