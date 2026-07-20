@@ -7,3 +7,5 @@ There will be a graph db for memory storage as well. There will be nodes for var
 Don't make large files. Files should be named by intent and be small enough to view on a 1080p monitor without lots of scrolling.
 
 Don't give me python venv commands that you can run, give me uv commands that I can run.
+
+When writing BAML make sure to use graph view comments such that the flow of the program is accurately described in a way that's easy to navigate and understand in graph view. Don't comment everything but do make sure that the program can be properly understood by looking at graph view.

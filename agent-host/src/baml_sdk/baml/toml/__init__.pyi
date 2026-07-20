@@ -61,32 +61,32 @@ def table_from_json(j: baml.json.json) -> Table:
     """Decodes a JSON object into a `Table`, skipping null values. Returns a
     concrete `Table` so arm-reachability over the recursive `json` map pattern
     is analyzed without the abstract `Self` of `Table`'s `baml.FromJson` impl.
-    
+
     Raises:
         JsonDecodeError"""
 async def table_from_json_async(j: baml.json.json) -> Table:
     """Decodes a JSON object into a `Table`, skipping null values. Returns a
     concrete `Table` so arm-reachability over the recursive `json` map pattern
     is analyzed without the abstract `Self` of `Table`'s `baml.FromJson` impl.
-    
+
     Raises:
         JsonDecodeError"""
 
 
 def item_to_json(item: Item) -> baml.json.json:
     """Converts a TOML item to a JSON value.
-    
+
     This is lossy: TOML datetime values are converted to JSON strings
     (`ZonedDateTime` as RFC 3339, the `Plain*` types as zoneless ISO 8601).
-    
+
     Raises:
         JsonSerializationError"""
 async def item_to_json_async(item: Item) -> baml.json.json:
     """Converts a TOML item to a JSON value.
-    
+
     This is lossy: TOML datetime values are converted to JSON strings
     (`ZonedDateTime` as RFC 3339, the `Plain*` types as zoneless ISO 8601).
-    
+
     Raises:
         JsonSerializationError"""
 
@@ -94,13 +94,13 @@ async def item_to_json_async(item: Item) -> baml.json.json:
 def item_from_json(json: baml.json.json) -> Item:
     """Errors if the JSON value is `null`.
     Usually `Table.from_json` is a better entrypoint, as it will skip null values without erroring.
-    
+
     Raises:
         JsonDecodeError"""
 async def item_from_json_async(json: baml.json.json) -> Item:
     """Errors if the JSON value is `null`.
     Usually `Table.from_json` is a better entrypoint, as it will skip null values without erroring.
-    
+
     Raises:
         JsonDecodeError"""
 

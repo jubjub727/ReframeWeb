@@ -16,6 +16,7 @@ class TaskFailureFlowOwnershipTests(unittest.TestCase):
             "//# Task selection",
             "//# Load context",
             "//# Choose task",
+            "//# Run selected task",
             "//# Plan memory search",
             "//# Set search depth",
             "//# Retrieve memories",
@@ -24,6 +25,7 @@ class TaskFailureFlowOwnershipTests(unittest.TestCase):
             "//# Task attempts",
             "//# Execute task",
             "//# Check completion",
+            "//# Complete task",
             "//# Retry or reselect",
             "//# Retry task",
             "//# Select another task",
@@ -32,15 +34,30 @@ class TaskFailureFlowOwnershipTests(unittest.TestCase):
         positions = [source.index(step) for step in steps]
         self.assertEqual(positions, sorted(positions))
         self.assertIn("CheckTaskCompletion(", source)
+        self.assertIn("if (task_complete)", source)
+        self.assertIn("CheckRequestCompletion(", source)
         self.assertIn('if (selected_task.model_id == "magic:do-nothing")', source)
-        self.assertIn("//# Complete without action", source)
+        self.assertIn("//# Check request completion", source)
         self.assertLess(
             source.index('if (selected_task.model_id == "magic:do-nothing")'),
             source.index("//# Plan memory search"),
         )
         self.assertIn("ResolveTaskFailure(", source)
         self.assertIn("if (resolution.can_refine)", source)
-        self.assertGreaterEqual(source.count("while (true)"), 2)
+        self.assertGreaterEqual(source.count("while ("), 2)
+        self.assertIn("while (!voice_request_complete)", source)
+        self.assertEqual(source.count("ReviewMemories("), 1)
+        self.assertIn("if (check_request)", source)
+        self.assertEqual(source.count("if (request_complete)"), 1)
+        self.assertIn("if (memories_selected)", source)
+        self.assertNotIn("if (consecutive_no_action_count < 3)", source)
+        self.assertNotIn("if (RequestIsComplete(", source)
+        self.assertNotIn("if (root.memory.", source)
+        self.assertIn("//# Return result", source)
+        self.assertEqual(source.count("//# Check request completion"), 1)
+        self.assertIn("//# Skip completion model", source)
+        self.assertIn("//# Choose another task", source)
+        self.assertIn("//# Finish without saving", source)
 
     def test_python_agent_turn_contains_no_agentic_loop_or_failure_branch(self) -> None:
         source = (ROOT / "src/reframe_agent_host/voice/agent_turn.py").read_text()

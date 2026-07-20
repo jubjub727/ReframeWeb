@@ -30,6 +30,7 @@ def __getattr__(name):
         return importlib.import_module(f".{name}", __name__)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
+import enum
 import typing
 import pydantic
 
@@ -40,6 +41,115 @@ if typing.TYPE_CHECKING:
     from .. import turn_context
 
 from baml_bridge import define_function as _define_function
+
+
+EmptyCandidateMemoryGroups       = _define_function("user.memory.EmptyCandidateMemoryGroups", "sync",  [])
+EmptyCandidateMemoryGroups_async = _define_function("user.memory.EmptyCandidateMemoryGroups", "async", [])
+
+
+AddCandidateMemory       = _define_function("user.memory.AddCandidateMemory", "sync",  ["groups", "layer", "candidate"])
+AddCandidateMemory_async = _define_function("user.memory.AddCandidateMemory", "async", ["groups", "layer", "candidate"])
+
+
+SelectCandidateMemories       = _define_function("user.memory.SelectCandidateMemories", "sync",  ["purpose", "candidates", "stored_memories"], ["client"])
+SelectCandidateMemories.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+SelectCandidateMemories_async = _define_function("user.memory.SelectCandidateMemories", "async", ["purpose", "candidates", "stored_memories"], ["client"])
+SelectCandidateMemories_async.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+SelectCandidateMemories__build_request       = _define_function("user.memory.SelectCandidateMemories$build_request", "sync",  ["purpose", "candidates", "stored_memories"], ["client"])
+SelectCandidateMemories__build_request.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SelectCandidateMemories__build_request_async = _define_function("user.memory.SelectCandidateMemories$build_request", "async", ["purpose", "candidates", "stored_memories"], ["client"])
+SelectCandidateMemories__build_request_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SelectCandidateMemories__build_request_stream       = _define_function("user.memory.SelectCandidateMemories$build_request_stream", "sync",  ["purpose", "candidates", "stored_memories"], ["client"])
+SelectCandidateMemories__build_request_stream.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SelectCandidateMemories__build_request_stream_async = _define_function("user.memory.SelectCandidateMemories$build_request_stream", "async", ["purpose", "candidates", "stored_memories"], ["client"])
+SelectCandidateMemories__build_request_stream_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SelectCandidateMemories__parse       = _define_function("user.memory.SelectCandidateMemories$parse", "sync",  ["json"], ["client"])
+SelectCandidateMemories__parse.__doc__ = """Raises:
+    ParseError"""
+SelectCandidateMemories__parse_async = _define_function("user.memory.SelectCandidateMemories$parse", "async", ["json"], ["client"])
+SelectCandidateMemories__parse_async.__doc__ = """Raises:
+    ParseError"""
+SelectCandidateMemories__parse_stream       = _define_function("user.memory.SelectCandidateMemories$parse_stream", "sync",  ["sse"], ["client"])
+SelectCandidateMemories__parse_stream.__doc__ = """Raises:
+    InvalidArgument, LlmClient"""
+SelectCandidateMemories__parse_stream_async = _define_function("user.memory.SelectCandidateMemories$parse_stream", "async", ["sse"], ["client"])
+SelectCandidateMemories__parse_stream_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient"""
+SelectCandidateMemories__render_prompt       = _define_function("user.memory.SelectCandidateMemories$render_prompt", "sync",  ["purpose", "candidates", "stored_memories"], ["client"])
+SelectCandidateMemories__render_prompt.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SelectCandidateMemories__render_prompt_async = _define_function("user.memory.SelectCandidateMemories$render_prompt", "async", ["purpose", "candidates", "stored_memories"], ["client"])
+SelectCandidateMemories__render_prompt_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+SelectCandidateMemories_stream       = _define_function("user.memory.SelectCandidateMemories$stream", "sync",  ["purpose", "candidates", "stored_memories"], ["client"])
+SelectCandidateMemories_stream.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+SelectCandidateMemories_stream_async = _define_function("user.memory.SelectCandidateMemories$stream", "async", ["purpose", "candidates", "stored_memories"], ["client"])
+SelectCandidateMemories_stream_async.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+class CandidateMemoryLayer(str, enum.Enum):
+    TASK_CHOICE = "TASK_CHOICE"
+    CONVERSATION_EVALUATION = "CONVERSATION_EVALUATION"
+    SEARCH_DEPTH = "SEARCH_DEPTH"
+    RELEVANCE = "RELEVANCE"
+    TASK_PROMPT = "TASK_PROMPT"
+
+
+class CandidateMemoryEntry(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    id: str
+    title: str
+    description: str
+
+
+class CandidateMemoryGroups(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_choice: typing.List[CandidateMemoryEntry]
+    conversation_evaluation: typing.List[CandidateMemoryEntry]
+    search_depth: typing.List[CandidateMemoryEntry]
+    relevance: typing.List[CandidateMemoryEntry]
+    task_prompt: typing.List[CandidateMemoryEntry]
+
+
+class StoredCandidateMemory(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    title: str
+    description: str
+    tags: typing.List[str]
+    created_at: str
+    updated_at: str
+    read_at: str
+
+
+class CandidateMemoryReviewContext(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_choice: typing.List[StoredCandidateMemory]
+    conversation_evaluation: typing.List[StoredCandidateMemory]
+    search_depth: typing.List[StoredCandidateMemory]
+    relevance: typing.List[StoredCandidateMemory]
+    task_prompt: typing.List[StoredCandidateMemory]
+
+
+class CandidateMemoryReviewDecision(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    kept_candidate_ids: typing.List[str]
+
+
+class CandidateMemoryWriteBatch(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_choice: typing.List[CandidateMemoryEntry]
+    conversation_evaluation: typing.List[CandidateMemoryEntry]
+    search_depth: typing.List[CandidateMemoryEntry]
+    relevance: typing.List[CandidateMemoryEntry]
+    task_prompt: typing.List[CandidateMemoryEntry]
 
 
 class RetrievedTaskNode(pydantic.BaseModel):
@@ -365,6 +475,31 @@ class RelevantMemoryDecision(pydantic.BaseModel):
 
 
 __all__ = [
+    "EmptyCandidateMemoryGroups",
+    "EmptyCandidateMemoryGroups_async",
+    "AddCandidateMemory",
+    "AddCandidateMemory_async",
+    "SelectCandidateMemories",
+    "SelectCandidateMemories_async",
+    "SelectCandidateMemories__build_request",
+    "SelectCandidateMemories__build_request_async",
+    "SelectCandidateMemories__build_request_stream",
+    "SelectCandidateMemories__build_request_stream_async",
+    "SelectCandidateMemories__parse",
+    "SelectCandidateMemories__parse_async",
+    "SelectCandidateMemories__parse_stream",
+    "SelectCandidateMemories__parse_stream_async",
+    "SelectCandidateMemories__render_prompt",
+    "SelectCandidateMemories__render_prompt_async",
+    "SelectCandidateMemories_stream",
+    "SelectCandidateMemories_stream_async",
+    "CandidateMemoryLayer",
+    "CandidateMemoryEntry",
+    "CandidateMemoryGroups",
+    "StoredCandidateMemory",
+    "CandidateMemoryReviewContext",
+    "CandidateMemoryReviewDecision",
+    "CandidateMemoryWriteBatch",
     "RetrievedTaskNode",
     "RetrievedSessionNode",
     "RetrievedSessionMemoryNode",

@@ -38,6 +38,7 @@ class VoiceTaskFlowHost:
             name: self._sync(getattr(self, name))
             for name in (
                 "load_context",
+                "load_request_conversation",
                 "load_task_conversation_scope",
                 "report_task_choice",
                 "retrieve_memories",
@@ -45,6 +46,7 @@ class VoiceTaskFlowHost:
                 "dispatch_task_outputs",
                 "summarize_task_actions",
                 "record_validation_reply",
+                "write_candidate_memories",
             )
         }
 
@@ -59,6 +61,9 @@ class VoiceTaskFlowHost:
             },
         )
         return baml_voice_turn.VoiceTaskFlowContext(cycle_id=cycle_id, **inputs)
+
+    async def load_request_conversation(self):
+        return await self.turn_flow.current_conversation()
 
     async def report_task_choice(
         self,
@@ -228,6 +233,11 @@ class VoiceTaskFlowHost:
 
     async def record_validation_reply(self, _attempt_id, reply) -> bool:
         await self.side_effects.record_validation_reply(reply, self.on_event)
+        await self._checkpoint()
+        return True
+
+    async def write_candidate_memories(self, batch) -> bool:
+        await self.turn_flow.write_candidate_memories(batch)
         await self._checkpoint()
         return True
 

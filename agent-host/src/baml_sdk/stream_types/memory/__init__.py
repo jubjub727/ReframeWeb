@@ -20,8 +20,67 @@
 
 from __future__ import annotations
 
+_LAZY_CHILDREN = frozenset({
+    "internal",
+})
+
+def __getattr__(name):
+    if name in _LAZY_CHILDREN:
+        import importlib
+        return importlib.import_module(f".{name}", __name__)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 import typing
 import pydantic
+
+
+class CandidateMemoryEntry(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    id: typing.Optional[str]
+    title: typing.Optional[str]
+    description: typing.Optional[str]
+
+
+class CandidateMemoryGroups(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_choice: typing.List[CandidateMemoryEntry]
+    conversation_evaluation: typing.List[CandidateMemoryEntry]
+    search_depth: typing.List[CandidateMemoryEntry]
+    relevance: typing.List[CandidateMemoryEntry]
+    task_prompt: typing.List[CandidateMemoryEntry]
+
+
+class CandidateMemoryReviewContext(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_choice: typing.List[StoredCandidateMemory]
+    conversation_evaluation: typing.List[StoredCandidateMemory]
+    search_depth: typing.List[StoredCandidateMemory]
+    relevance: typing.List[StoredCandidateMemory]
+    task_prompt: typing.List[StoredCandidateMemory]
+
+
+class CandidateMemoryReviewDecision(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    kept_candidate_ids: typing.List[str]
+
+
+class CandidateMemoryWriteBatch(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_choice: typing.List[CandidateMemoryEntry]
+    conversation_evaluation: typing.List[CandidateMemoryEntry]
+    search_depth: typing.List[CandidateMemoryEntry]
+    relevance: typing.List[CandidateMemoryEntry]
+    task_prompt: typing.List[CandidateMemoryEntry]
+
+
+class StoredCandidateMemory(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    title: typing.Optional[str]
+    description: typing.Optional[str]
+    tags: typing.List[str]
+    created_at: typing.Optional[str]
+    updated_at: typing.Optional[str]
+    read_at: typing.Optional[str]
 
 
 class RetrievedConversationGraph(pydantic.BaseModel):
@@ -203,6 +262,12 @@ class RetrievedMemoryCandidate(pydantic.BaseModel):
 
 
 __all__ = [
+    "CandidateMemoryEntry",
+    "CandidateMemoryGroups",
+    "CandidateMemoryReviewContext",
+    "CandidateMemoryReviewDecision",
+    "CandidateMemoryWriteBatch",
+    "StoredCandidateMemory",
     "RetrievedConversationGraph",
     "RetrievedConversationMessageNode",
     "RetrievedConversationNode",

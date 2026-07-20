@@ -22,6 +22,7 @@ from __future__ import annotations
 
 from . import internal
 
+import enum
 import typing
 import pydantic
 
@@ -31,6 +32,109 @@ if typing.TYPE_CHECKING:
     from .. import task_catalog
     from .. import turn_context
     from ..baml import UNSET as UNSET
+
+
+def EmptyCandidateMemoryGroups() -> CandidateMemoryGroups: ...
+async def EmptyCandidateMemoryGroups_async() -> CandidateMemoryGroups: ...
+
+
+def AddCandidateMemory(groups: CandidateMemoryGroups, layer: CandidateMemoryLayer, candidate: typing.Optional[CandidateMemory]) -> None: ...
+async def AddCandidateMemory_async(groups: CandidateMemoryGroups, layer: CandidateMemoryLayer, candidate: typing.Optional[CandidateMemory]) -> None: ...
+
+
+def SelectCandidateMemories(purpose: str, candidates: typing.List[CandidateMemoryEntry], stored_memories: typing.List[StoredCandidateMemory], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CandidateMemoryReviewDecision:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def SelectCandidateMemories_async(purpose: str, candidates: typing.List[CandidateMemoryEntry], stored_memories: typing.List[StoredCandidateMemory], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CandidateMemoryReviewDecision:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+def SelectCandidateMemories__build_request(purpose: str, candidates: typing.List[CandidateMemoryEntry], stored_memories: typing.List[StoredCandidateMemory], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def SelectCandidateMemories__build_request_async(purpose: str, candidates: typing.List[CandidateMemoryEntry], stored_memories: typing.List[StoredCandidateMemory], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def SelectCandidateMemories__build_request_stream(purpose: str, candidates: typing.List[CandidateMemoryEntry], stored_memories: typing.List[StoredCandidateMemory], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def SelectCandidateMemories__build_request_stream_async(purpose: str, candidates: typing.List[CandidateMemoryEntry], stored_memories: typing.List[StoredCandidateMemory], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def SelectCandidateMemories__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CandidateMemoryReviewDecision:
+    """Raises:
+        ParseError"""
+async def SelectCandidateMemories__parse_async(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> CandidateMemoryReviewDecision:
+    """Raises:
+        ParseError"""
+def SelectCandidateMemories__parse_stream(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.memory.CandidateMemoryReviewDecision], CandidateMemoryReviewDecision]:
+    """Raises:
+        InvalidArgument, LlmClient"""
+async def SelectCandidateMemories__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.memory.CandidateMemoryReviewDecision], CandidateMemoryReviewDecision]:
+    """Raises:
+        InvalidArgument, LlmClient"""
+def SelectCandidateMemories__render_prompt(purpose: str, candidates: typing.List[CandidateMemoryEntry], stored_memories: typing.List[StoredCandidateMemory], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def SelectCandidateMemories__render_prompt_async(purpose: str, candidates: typing.List[CandidateMemoryEntry], stored_memories: typing.List[StoredCandidateMemory], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def SelectCandidateMemories_stream(purpose: str, candidates: typing.List[CandidateMemoryEntry], stored_memories: typing.List[StoredCandidateMemory], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.memory.CandidateMemoryReviewDecision], CandidateMemoryReviewDecision]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def SelectCandidateMemories_stream_async(purpose: str, candidates: typing.List[CandidateMemoryEntry], stored_memories: typing.List[StoredCandidateMemory], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[stream_types.memory.CandidateMemoryReviewDecision], CandidateMemoryReviewDecision]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+class CandidateMemoryLayer(str, enum.Enum):
+    TASK_CHOICE = "TASK_CHOICE"
+    CONVERSATION_EVALUATION = "CONVERSATION_EVALUATION"
+    SEARCH_DEPTH = "SEARCH_DEPTH"
+    RELEVANCE = "RELEVANCE"
+    TASK_PROMPT = "TASK_PROMPT"
+
+
+class CandidateMemoryEntry(pydantic.BaseModel):
+    id: str
+    title: str
+    description: str
+
+
+class CandidateMemoryGroups(pydantic.BaseModel):
+    task_choice: typing.List[CandidateMemoryEntry]
+    conversation_evaluation: typing.List[CandidateMemoryEntry]
+    search_depth: typing.List[CandidateMemoryEntry]
+    relevance: typing.List[CandidateMemoryEntry]
+    task_prompt: typing.List[CandidateMemoryEntry]
+
+
+class StoredCandidateMemory(pydantic.BaseModel):
+    title: str
+    description: str
+    tags: typing.List[str]
+    created_at: str
+    updated_at: str
+    read_at: str
+
+
+class CandidateMemoryReviewContext(pydantic.BaseModel):
+    task_choice: typing.List[StoredCandidateMemory]
+    conversation_evaluation: typing.List[StoredCandidateMemory]
+    search_depth: typing.List[StoredCandidateMemory]
+    relevance: typing.List[StoredCandidateMemory]
+    task_prompt: typing.List[StoredCandidateMemory]
+
+
+class CandidateMemoryReviewDecision(pydantic.BaseModel):
+    kept_candidate_ids: typing.List[str]
+
+
+class CandidateMemoryWriteBatch(pydantic.BaseModel):
+    task_choice: typing.List[CandidateMemoryEntry]
+    conversation_evaluation: typing.List[CandidateMemoryEntry]
+    search_depth: typing.List[CandidateMemoryEntry]
+    relevance: typing.List[CandidateMemoryEntry]
+    task_prompt: typing.List[CandidateMemoryEntry]
 
 
 class RetrievedTaskNode(pydantic.BaseModel):
@@ -336,6 +440,31 @@ class RelevantMemoryDecision(pydantic.BaseModel):
 
 
 __all__ = [
+    "EmptyCandidateMemoryGroups",
+    "EmptyCandidateMemoryGroups_async",
+    "AddCandidateMemory",
+    "AddCandidateMemory_async",
+    "SelectCandidateMemories",
+    "SelectCandidateMemories_async",
+    "SelectCandidateMemories__build_request",
+    "SelectCandidateMemories__build_request_async",
+    "SelectCandidateMemories__build_request_stream",
+    "SelectCandidateMemories__build_request_stream_async",
+    "SelectCandidateMemories__parse",
+    "SelectCandidateMemories__parse_async",
+    "SelectCandidateMemories__parse_stream",
+    "SelectCandidateMemories__parse_stream_async",
+    "SelectCandidateMemories__render_prompt",
+    "SelectCandidateMemories__render_prompt_async",
+    "SelectCandidateMemories_stream",
+    "SelectCandidateMemories_stream_async",
+    "CandidateMemoryLayer",
+    "CandidateMemoryEntry",
+    "CandidateMemoryGroups",
+    "StoredCandidateMemory",
+    "CandidateMemoryReviewContext",
+    "CandidateMemoryReviewDecision",
+    "CandidateMemoryWriteBatch",
     "RetrievedTaskNode",
     "RetrievedSessionNode",
     "RetrievedSessionMemoryNode",

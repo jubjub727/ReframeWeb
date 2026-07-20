@@ -31,7 +31,7 @@ T = typing.TypeVar("T")
 def call_host_value(handle: HostValue, args: typing.List[typing.Any], *, _types: dict[str, type]) -> T:
     """Internal: invoked only by compiler-synthesized host-callable wrapper
     closures. Not directly callable by user code.
-    
+
     `T` is the expected return type and `E` the declared error contract,
     both delivered to the native handler at runtime via the type-arg channel
     (`type_arg_0` / `type_arg_1`). The completion site validates the host's
@@ -41,7 +41,7 @@ def call_host_value(handle: HostValue, args: typing.List[typing.Any], *, _types:
     throw rides the VM's normal exception unwinder. A host value left
     untyped at the boundary erases `E` to `unknown`, which accepts any
     thrown value — including an opaque `baml.errors.HostCallable`.
-    
+
     `args` is a two-element pack the VM builds in `host_closure_call_sysop`:
     `[positional_required_args, { optional_name: value }]`. The VM has already
     split the call by the callable's declared params (using the captured
@@ -51,7 +51,7 @@ def call_host_value(handle: HostValue, args: typing.List[typing.Any], *, _types:
 async def call_host_value_async(handle: HostValue, args: typing.List[typing.Any], *, _types: dict[str, type]) -> T:
     """Internal: invoked only by compiler-synthesized host-callable wrapper
     closures. Not directly callable by user code.
-    
+
     `T` is the expected return type and `E` the declared error contract,
     both delivered to the native handler at runtime via the type-arg channel
     (`type_arg_0` / `type_arg_1`). The completion site validates the host's
@@ -61,7 +61,7 @@ async def call_host_value_async(handle: HostValue, args: typing.List[typing.Any]
     throw rides the VM's normal exception unwinder. A host value left
     untyped at the boundary erases `E` to `unknown`, which accepts any
     thrown value — including an opaque `baml.errors.HostCallable`.
-    
+
     `args` is a two-element pack the VM builds in `host_closure_call_sysop`:
     `[positional_required_args, { optional_name: value }]`. The VM has already
     split the call by the callable's declared params (using the captured

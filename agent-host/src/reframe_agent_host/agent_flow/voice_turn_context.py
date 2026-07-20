@@ -43,13 +43,7 @@ class VoiceTurnContext:
 
     async def understanding_inputs(self, current_user_request: str) -> dict:
         database = await self._get_database()
-        conversation = self._merge_live_conversation(
-            await current_conversation_history(
-                database,
-                self.session_id,
-                self.conversation_id,
-            )
-        )
+        conversation = await self.current_conversation()
         return {
             "current_timestamp": current_timestamp(),
             "current_user_request": current_user_request,
@@ -74,13 +68,7 @@ class VoiceTurnContext:
         retrieved_memories: RetrievedMemoryContext,
     ) -> dict:
         database = await self._get_database()
-        conversation = self._merge_live_conversation(
-            await current_conversation_history(
-                database,
-                self.session_id,
-                self.conversation_id,
-            )
-        )
+        conversation = await self.current_conversation()
         return {
             "current_user_request": current_user_request,
             "current_conversation": conversation,
@@ -112,6 +100,21 @@ class VoiceTurnContext:
     async def task_name(self, task_id: str) -> str | None:
         task = await (await self._get_database()).tasks.get(task_id)
         return None if task is None else task.content.name
+
+    async def current_conversation(
+        self,
+    ) -> baml_turn_context.ConversationHistory | None:
+        database = await self._get_database()
+        return self._merge_live_conversation(
+            await current_conversation_history(
+                database,
+                self.session_id,
+                self.conversation_id,
+            )
+        )
+
+    async def memory_database(self) -> MemoryDatabase:
+        return await self._get_database()
 
     def task_conversation_scope(self) -> dict:
         active = (

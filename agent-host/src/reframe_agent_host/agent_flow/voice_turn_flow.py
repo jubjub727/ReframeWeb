@@ -6,6 +6,9 @@ from typing import Any, Mapping
 
 from baml_sdk import task_catalog as baml_task_catalog
 from baml_sdk import voice_turn as baml_voice_turn
+from reframe_agent_host.agent_flow.candidate_memory_writeback import (
+    write_candidate_memories,
+)
 from reframe_agent_host.agent_flow.live_conversation import LiveConversationContext
 from reframe_agent_host.agent_flow.machine_state import MachineStateProvider
 from reframe_agent_host.agent_flow.prompt_layer_debug import PromptLayerDebugSession
@@ -100,6 +103,15 @@ class BamlVoiceTurnFlow:
 
     def task_conversation_scope(self) -> dict:
         return self._context.task_conversation_scope()
+
+    async def current_conversation(self):
+        return await self._context.current_conversation()
+
+    async def write_candidate_memories(self, batch) -> None:
+        await write_candidate_memories(
+            await self._context.memory_database(),
+            batch,
+        )
 
     async def record_task_choice(self, inputs, task_choice, task_choice_ms) -> None:
         if self._prompt_debug is not None:

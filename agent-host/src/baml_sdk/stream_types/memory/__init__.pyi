@@ -20,8 +20,53 @@
 
 from __future__ import annotations
 
+from . import internal
+
 import typing
 import pydantic
+
+
+class CandidateMemoryEntry(pydantic.BaseModel):
+    id: typing.Optional[str]
+    title: typing.Optional[str]
+    description: typing.Optional[str]
+
+
+class CandidateMemoryGroups(pydantic.BaseModel):
+    task_choice: typing.List[CandidateMemoryEntry]
+    conversation_evaluation: typing.List[CandidateMemoryEntry]
+    search_depth: typing.List[CandidateMemoryEntry]
+    relevance: typing.List[CandidateMemoryEntry]
+    task_prompt: typing.List[CandidateMemoryEntry]
+
+
+class CandidateMemoryReviewContext(pydantic.BaseModel):
+    task_choice: typing.List[StoredCandidateMemory]
+    conversation_evaluation: typing.List[StoredCandidateMemory]
+    search_depth: typing.List[StoredCandidateMemory]
+    relevance: typing.List[StoredCandidateMemory]
+    task_prompt: typing.List[StoredCandidateMemory]
+
+
+class CandidateMemoryReviewDecision(pydantic.BaseModel):
+    kept_candidate_ids: typing.List[str]
+
+
+class CandidateMemoryWriteBatch(pydantic.BaseModel):
+    task_choice: typing.List[CandidateMemoryEntry]
+    conversation_evaluation: typing.List[CandidateMemoryEntry]
+    search_depth: typing.List[CandidateMemoryEntry]
+    relevance: typing.List[CandidateMemoryEntry]
+    task_prompt: typing.List[CandidateMemoryEntry]
+
+
+class StoredCandidateMemory(pydantic.BaseModel):
+    title: typing.Optional[str]
+    description: typing.Optional[str]
+    tags: typing.List[str]
+    created_at: typing.Optional[str]
+    updated_at: typing.Optional[str]
+    read_at: typing.Optional[str]
 
 
 class RetrievedConversationGraph(pydantic.BaseModel):
@@ -183,6 +228,12 @@ class RetrievedMemoryCandidate(pydantic.BaseModel):
 
 
 __all__ = [
+    "CandidateMemoryEntry",
+    "CandidateMemoryGroups",
+    "CandidateMemoryReviewContext",
+    "CandidateMemoryReviewDecision",
+    "CandidateMemoryWriteBatch",
+    "StoredCandidateMemory",
     "RetrievedConversationGraph",
     "RetrievedConversationMessageNode",
     "RetrievedConversationNode",

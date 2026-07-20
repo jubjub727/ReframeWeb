@@ -45,6 +45,13 @@ class VoiceTaskFlowResult {
 
 type VoiceTaskRunResult = VoiceTaskFlowResult | VoiceTaskNoActionResult;
 
+class PendingVoiceRequestResult {
+}
+
+type VoiceRequestResultState = PendingVoiceRequestResult
+    | VoiceTaskFlowResult
+    | VoiceTaskNoActionResult;
+
 class VoiceTaskCompletionReview {
     attempt_id: string,
     completion_string: string,
@@ -61,4 +68,19 @@ class VoiceTaskFailureReview {
     earlier_refusal_reply_text: string,
     decision: root.task.TaskFailureDecision,
     elapsed_ms: bigint,
+}
+
+class SuccessfulVoiceTaskResult {
+    task_name: string,
+    completion_requirement: string,
+    output_summary: string,
+}
+
+class CompletedVoiceTaskCycle {
+    cycle_id: string,
+    understanding: VoicePromptUnderstanding,
+    retrieved_memories: root.memory.RetrievedMemoryGraph,
+    continuation: VoicePromptContinuation,
+    attempt_id: string,
+    task_completion: root.task.CompletionResult,
 }

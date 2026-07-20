@@ -24,10 +24,20 @@ import typing
 import pydantic
 
 if typing.TYPE_CHECKING:
+    from .. import baml
     from .. import memory
     from .. import task
     from .. import task_catalog
     from .. import turn_context
+    from ..baml import UNSET as UNSET
+
+
+def MemoryReviewContext(context: VoiceTaskFlowContext) -> memory.CandidateMemoryReviewContext: ...
+async def MemoryReviewContext_async(context: VoiceTaskFlowContext) -> memory.CandidateMemoryReviewContext: ...
+
+
+def StoredCandidateMemory(title: str, description: str, tags: typing.List[str], created_at: str, updated_at: str, read_at: str) -> memory.StoredCandidateMemory: ...
+async def StoredCandidateMemory_async(title: str, description: str, tags: typing.List[str], created_at: str, updated_at: str, read_at: str) -> memory.StoredCandidateMemory: ...
 
 
 def UnderstandVoicePrompt(current_timestamp: str, current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], session_memories: typing.List[turn_context.SessionMemoryContext], user_preferences: typing.List[turn_context.UserPreferenceMemoryContext], available_tasks: typing.List[task_catalog.AvailableTask], task_choice_memories: typing.List[task.TaskChoiceMemoryContext], conversation_evaluation_memories: typing.List[memory.ConversationEvaluationMemoryContext], search_depth_memories: typing.List[memory.SearchDepthMemoryContext], machine_state: turn_context.MachineStateContext) -> VoicePromptUnderstanding:
@@ -46,12 +56,84 @@ async def ContinueVoicePrompt_async(current_user_request: str, current_conversat
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-def RunVoiceTurn(current_user_request: str, load_context: typing.Callable[[], VoiceTaskFlowContext], load_task_conversation_scope: typing.Callable[[], VoiceTaskConversationScope], report_task_choice: typing.Callable[[str, task.TaskChoiceDecision, task_catalog.SelectedTaskContext, int], bool], retrieve_memories: typing.Callable[[str, VoicePromptUnderstanding], memory.RetrievedMemoryGraph], execute_task: typing.Callable[[str, task.TaskChoiceDecision, str, VoicePromptContinuation], VoiceTaskExecutionBoundaryResult], dispatch_task_outputs: typing.Callable[[str], bool], summarize_task_actions: typing.Callable[[str, task.TaskChoiceDecision], typing.Optional[str]], record_validation_reply: typing.Callable[[str, str], bool]) -> typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]:
+def ReviewMemories(candidates: memory.CandidateMemoryGroups, context: memory.CandidateMemoryReviewContext) -> memory.CandidateMemoryWriteBatch: ...
+async def ReviewMemories_async(candidates: memory.CandidateMemoryGroups, context: memory.CandidateMemoryReviewContext) -> memory.CandidateMemoryWriteBatch: ...
+
+
+def CheckRequestCompletion(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], successful_tasks: typing.List[SuccessfulVoiceTaskResult], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> task.CompletionResult:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-async def RunVoiceTurn_async(current_user_request: str, load_context: typing.Callable[[], VoiceTaskFlowContext], load_task_conversation_scope: typing.Callable[[], VoiceTaskConversationScope], report_task_choice: typing.Callable[[str, task.TaskChoiceDecision, task_catalog.SelectedTaskContext, int], bool], retrieve_memories: typing.Callable[[str, VoicePromptUnderstanding], memory.RetrievedMemoryGraph], execute_task: typing.Callable[[str, task.TaskChoiceDecision, str, VoicePromptContinuation], VoiceTaskExecutionBoundaryResult], dispatch_task_outputs: typing.Callable[[str], bool], summarize_task_actions: typing.Callable[[str, task.TaskChoiceDecision], typing.Optional[str]], record_validation_reply: typing.Callable[[str, str], bool]) -> typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]:
+async def CheckRequestCompletion_async(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], successful_tasks: typing.List[SuccessfulVoiceTaskResult], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> task.CompletionResult:
     """Raises:
         DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+def CheckRequestCompletion__build_request(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], successful_tasks: typing.List[SuccessfulVoiceTaskResult], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def CheckRequestCompletion__build_request_async(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], successful_tasks: typing.List[SuccessfulVoiceTaskResult], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def CheckRequestCompletion__build_request_stream(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], successful_tasks: typing.List[SuccessfulVoiceTaskResult], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def CheckRequestCompletion__build_request_stream_async(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], successful_tasks: typing.List[SuccessfulVoiceTaskResult], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.http.Request:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def CheckRequestCompletion__parse(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> task.CompletionResult:
+    """Raises:
+        ParseError"""
+async def CheckRequestCompletion__parse_async(json: str, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> task.CompletionResult:
+    """Raises:
+        ParseError"""
+def CheckRequestCompletion__parse_stream(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[task.CompletionResult], task.CompletionResult]:
+    """Raises:
+        InvalidArgument, LlmClient"""
+async def CheckRequestCompletion__parse_stream_async(sse: baml.http.SseStream, *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[task.CompletionResult], task.CompletionResult]:
+    """Raises:
+        InvalidArgument, LlmClient"""
+def CheckRequestCompletion__render_prompt(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], successful_tasks: typing.List[SuccessfulVoiceTaskResult], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+async def CheckRequestCompletion__render_prompt_async(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], successful_tasks: typing.List[SuccessfulVoiceTaskResult], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.PromptAst:
+    """Raises:
+        InvalidArgument, LlmClient, RenderPrompt"""
+def CheckRequestCompletion_stream(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], successful_tasks: typing.List[SuccessfulVoiceTaskResult], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[task.CompletionResult], task.CompletionResult]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def CheckRequestCompletion_stream_async(current_user_request: str, current_conversation: typing.Optional[turn_context.ConversationHistory], successful_tasks: typing.List[SuccessfulVoiceTaskResult], *, client: typing.Union[baml.llm.Client, UNSET] = UNSET) -> baml.llm.Stream[typing.Optional[task.CompletionResult], task.CompletionResult]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+def NextConsecutiveNoActionCount(selected_task: task_catalog.SelectedTaskContext, current_count: int) -> int: ...
+async def NextConsecutiveNoActionCount_async(selected_task: task_catalog.SelectedTaskContext, current_count: int) -> int: ...
+
+
+def RequestIsComplete(consecutive_no_action_count: int, completion: typing.Optional[task.CompletionResult]) -> bool: ...
+async def RequestIsComplete_async(consecutive_no_action_count: int, completion: typing.Optional[task.CompletionResult]) -> bool: ...
+
+
+def RequestStateTask(model_id: str) -> task_catalog.SelectedTaskContext: ...
+async def RequestStateTask_async(model_id: str) -> task_catalog.SelectedTaskContext: ...
+
+
+def RunVoiceTurn(current_user_request: str, load_context: typing.Callable[[], VoiceTaskFlowContext], load_request_conversation: typing.Callable[[], typing.Optional[turn_context.ConversationHistory]], load_task_conversation_scope: typing.Callable[[], VoiceTaskConversationScope], report_task_choice: typing.Callable[[str, task.TaskChoiceDecision, task_catalog.SelectedTaskContext, int], bool], retrieve_memories: typing.Callable[[str, VoicePromptUnderstanding], memory.RetrievedMemoryGraph], execute_task: typing.Callable[[str, task.TaskChoiceDecision, str, VoicePromptContinuation], VoiceTaskExecutionBoundaryResult], dispatch_task_outputs: typing.Callable[[str], bool], summarize_task_actions: typing.Callable[[str, task.TaskChoiceDecision], typing.Optional[str]], record_validation_reply: typing.Callable[[str, str], bool], write_candidate_memories: typing.Callable[[memory.CandidateMemoryWriteBatch], bool]) -> typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+async def RunVoiceTurn_async(current_user_request: str, load_context: typing.Callable[[], VoiceTaskFlowContext], load_request_conversation: typing.Callable[[], typing.Optional[turn_context.ConversationHistory]], load_task_conversation_scope: typing.Callable[[], VoiceTaskConversationScope], report_task_choice: typing.Callable[[str, task.TaskChoiceDecision, task_catalog.SelectedTaskContext, int], bool], retrieve_memories: typing.Callable[[str, VoicePromptUnderstanding], memory.RetrievedMemoryGraph], execute_task: typing.Callable[[str, task.TaskChoiceDecision, str, VoicePromptContinuation], VoiceTaskExecutionBoundaryResult], dispatch_task_outputs: typing.Callable[[str], bool], summarize_task_actions: typing.Callable[[str, task.TaskChoiceDecision], typing.Optional[str]], record_validation_reply: typing.Callable[[str, str], bool], write_candidate_memories: typing.Callable[[memory.CandidateMemoryWriteBatch], bool]) -> typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]:
+    """Raises:
+        DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+def VoiceRequestResultAfterNoAction(completed_tasks: typing.List[CompletedVoiceTaskCycle], no_action: VoiceTaskNoActionResult, task_completion_ms: int, completion_reviews: typing.List[VoiceTaskCompletionReview], failure_reviews: typing.List[VoiceTaskFailureReview]) -> typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]: ...
+async def VoiceRequestResultAfterNoAction_async(completed_tasks: typing.List[CompletedVoiceTaskCycle], no_action: VoiceTaskNoActionResult, task_completion_ms: int, completion_reviews: typing.List[VoiceTaskCompletionReview], failure_reviews: typing.List[VoiceTaskFailureReview]) -> typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]: ...
+
+
+def FinishedVoiceRequestResult(state: typing.Union[PendingVoiceRequestResult, VoiceTaskFlowResult, VoiceTaskNoActionResult]) -> typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]: ...
+async def FinishedVoiceRequestResult_async(state: typing.Union[PendingVoiceRequestResult, VoiceTaskFlowResult, VoiceTaskNoActionResult]) -> typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]: ...
+
+
+def CompletedVoiceTaskResult(completed: CompletedVoiceTaskCycle, task_completion_ms: int, completion_reviews: typing.List[VoiceTaskCompletionReview], failure_reviews: typing.List[VoiceTaskFailureReview]) -> VoiceTaskFlowResult: ...
+async def CompletedVoiceTaskResult_async(completed: CompletedVoiceTaskCycle, task_completion_ms: int, completion_reviews: typing.List[VoiceTaskCompletionReview], failure_reviews: typing.List[VoiceTaskFailureReview]) -> VoiceTaskFlowResult: ...
 
 
 def TaskConversation(conversation: typing.Optional[turn_context.ConversationHistory], scope: VoiceTaskConversationScope) -> typing.Optional[turn_context.ConversationHistory]: ...
@@ -106,6 +188,13 @@ class VoiceTaskFlowResult(pydantic.BaseModel):
 VoiceTaskRunResult: typing.TypeAlias = typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]
 
 
+class PendingVoiceRequestResult(pydantic.BaseModel):
+    ...
+
+
+VoiceRequestResultState: typing.TypeAlias = typing.Union[PendingVoiceRequestResult, VoiceTaskFlowResult, VoiceTaskNoActionResult]
+
+
 class VoiceTaskCompletionReview(pydantic.BaseModel):
     attempt_id: str
     completion_string: str
@@ -122,6 +211,21 @@ class VoiceTaskFailureReview(pydantic.BaseModel):
     earlier_refusal_reply_text: str
     decision: task.TaskFailureDecision
     elapsed_ms: int
+
+
+class SuccessfulVoiceTaskResult(pydantic.BaseModel):
+    task_name: str
+    completion_requirement: str
+    output_summary: str
+
+
+class CompletedVoiceTaskCycle(pydantic.BaseModel):
+    cycle_id: str
+    understanding: VoicePromptUnderstanding
+    retrieved_memories: memory.RetrievedMemoryGraph
+    continuation: VoicePromptContinuation
+    attempt_id: str
+    task_completion: task.CompletionResult
 
 
 class VoicePromptUnderstanding(pydantic.BaseModel):
@@ -152,12 +256,44 @@ class VoicePromptContinuationTimings(pydantic.BaseModel):
 
 
 __all__ = [
+    "MemoryReviewContext",
+    "MemoryReviewContext_async",
+    "StoredCandidateMemory",
+    "StoredCandidateMemory_async",
     "UnderstandVoicePrompt",
     "UnderstandVoicePrompt_async",
     "ContinueVoicePrompt",
     "ContinueVoicePrompt_async",
+    "ReviewMemories",
+    "ReviewMemories_async",
+    "CheckRequestCompletion",
+    "CheckRequestCompletion_async",
+    "CheckRequestCompletion__build_request",
+    "CheckRequestCompletion__build_request_async",
+    "CheckRequestCompletion__build_request_stream",
+    "CheckRequestCompletion__build_request_stream_async",
+    "CheckRequestCompletion__parse",
+    "CheckRequestCompletion__parse_async",
+    "CheckRequestCompletion__parse_stream",
+    "CheckRequestCompletion__parse_stream_async",
+    "CheckRequestCompletion__render_prompt",
+    "CheckRequestCompletion__render_prompt_async",
+    "CheckRequestCompletion_stream",
+    "CheckRequestCompletion_stream_async",
+    "NextConsecutiveNoActionCount",
+    "NextConsecutiveNoActionCount_async",
+    "RequestIsComplete",
+    "RequestIsComplete_async",
+    "RequestStateTask",
+    "RequestStateTask_async",
     "RunVoiceTurn",
     "RunVoiceTurn_async",
+    "VoiceRequestResultAfterNoAction",
+    "VoiceRequestResultAfterNoAction_async",
+    "FinishedVoiceRequestResult",
+    "FinishedVoiceRequestResult_async",
+    "CompletedVoiceTaskResult",
+    "CompletedVoiceTaskResult_async",
     "TaskConversation",
     "TaskConversation_async",
     "VoiceTaskFlowContext",
@@ -166,8 +302,12 @@ __all__ = [
     "VoiceTaskNoActionResult",
     "VoiceTaskFlowResult",
     "VoiceTaskRunResult",
+    "PendingVoiceRequestResult",
+    "VoiceRequestResultState",
     "VoiceTaskCompletionReview",
     "VoiceTaskFailureReview",
+    "SuccessfulVoiceTaskResult",
+    "CompletedVoiceTaskCycle",
     "VoicePromptUnderstanding",
     "VoicePromptContinuation",
     "VoicePromptUnderstandingTimings",

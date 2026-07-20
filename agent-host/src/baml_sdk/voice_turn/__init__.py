@@ -28,7 +28,18 @@ from .. import task
 from .. import task_catalog
 from .. import turn_context
 
+if typing.TYPE_CHECKING:
+    from .. import baml
+
 from baml_bridge import define_function as _define_function
+
+
+MemoryReviewContext       = _define_function("user.voice_turn.MemoryReviewContext", "sync",  ["context"])
+MemoryReviewContext_async = _define_function("user.voice_turn.MemoryReviewContext", "async", ["context"])
+
+
+StoredCandidateMemory       = _define_function("user.voice_turn.StoredCandidateMemory", "sync",  ["title", "description", "tags", "created_at", "updated_at", "read_at"])
+StoredCandidateMemory_async = _define_function("user.voice_turn.StoredCandidateMemory", "async", ["title", "description", "tags", "created_at", "updated_at", "read_at"])
 
 
 UnderstandVoicePrompt       = _define_function("user.voice_turn.UnderstandVoicePrompt", "sync",  ["current_timestamp", "current_user_request", "current_conversation", "session_memories", "user_preferences", "available_tasks", "task_choice_memories", "conversation_evaluation_memories", "search_depth_memories", "machine_state"])
@@ -47,12 +58,84 @@ ContinueVoicePrompt_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
 
 
-RunVoiceTurn       = _define_function("user.voice_turn.RunVoiceTurn", "sync",  ["current_user_request", "load_context", "load_task_conversation_scope", "report_task_choice", "retrieve_memories", "execute_task", "dispatch_task_outputs", "summarize_task_actions", "record_validation_reply"])
+ReviewMemories       = _define_function("user.voice_turn.ReviewMemories", "sync",  ["candidates", "context"])
+ReviewMemories_async = _define_function("user.voice_turn.ReviewMemories", "async", ["candidates", "context"])
+
+
+CheckRequestCompletion       = _define_function("user.voice_turn.CheckRequestCompletion", "sync",  ["current_user_request", "current_conversation", "successful_tasks"], ["client"])
+CheckRequestCompletion.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+CheckRequestCompletion_async = _define_function("user.voice_turn.CheckRequestCompletion", "async", ["current_user_request", "current_conversation", "successful_tasks"], ["client"])
+CheckRequestCompletion_async.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+CheckRequestCompletion__build_request       = _define_function("user.voice_turn.CheckRequestCompletion$build_request", "sync",  ["current_user_request", "current_conversation", "successful_tasks"], ["client"])
+CheckRequestCompletion__build_request.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+CheckRequestCompletion__build_request_async = _define_function("user.voice_turn.CheckRequestCompletion$build_request", "async", ["current_user_request", "current_conversation", "successful_tasks"], ["client"])
+CheckRequestCompletion__build_request_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+CheckRequestCompletion__build_request_stream       = _define_function("user.voice_turn.CheckRequestCompletion$build_request_stream", "sync",  ["current_user_request", "current_conversation", "successful_tasks"], ["client"])
+CheckRequestCompletion__build_request_stream.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+CheckRequestCompletion__build_request_stream_async = _define_function("user.voice_turn.CheckRequestCompletion$build_request_stream", "async", ["current_user_request", "current_conversation", "successful_tasks"], ["client"])
+CheckRequestCompletion__build_request_stream_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+CheckRequestCompletion__parse       = _define_function("user.voice_turn.CheckRequestCompletion$parse", "sync",  ["json"], ["client"])
+CheckRequestCompletion__parse.__doc__ = """Raises:
+    ParseError"""
+CheckRequestCompletion__parse_async = _define_function("user.voice_turn.CheckRequestCompletion$parse", "async", ["json"], ["client"])
+CheckRequestCompletion__parse_async.__doc__ = """Raises:
+    ParseError"""
+CheckRequestCompletion__parse_stream       = _define_function("user.voice_turn.CheckRequestCompletion$parse_stream", "sync",  ["sse"], ["client"])
+CheckRequestCompletion__parse_stream.__doc__ = """Raises:
+    InvalidArgument, LlmClient"""
+CheckRequestCompletion__parse_stream_async = _define_function("user.voice_turn.CheckRequestCompletion$parse_stream", "async", ["sse"], ["client"])
+CheckRequestCompletion__parse_stream_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient"""
+CheckRequestCompletion__render_prompt       = _define_function("user.voice_turn.CheckRequestCompletion$render_prompt", "sync",  ["current_user_request", "current_conversation", "successful_tasks"], ["client"])
+CheckRequestCompletion__render_prompt.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+CheckRequestCompletion__render_prompt_async = _define_function("user.voice_turn.CheckRequestCompletion$render_prompt", "async", ["current_user_request", "current_conversation", "successful_tasks"], ["client"])
+CheckRequestCompletion__render_prompt_async.__doc__ = """Raises:
+    InvalidArgument, LlmClient, RenderPrompt"""
+CheckRequestCompletion_stream       = _define_function("user.voice_turn.CheckRequestCompletion$stream", "sync",  ["current_user_request", "current_conversation", "successful_tasks"], ["client"])
+CheckRequestCompletion_stream.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+CheckRequestCompletion_stream_async = _define_function("user.voice_turn.CheckRequestCompletion$stream", "async", ["current_user_request", "current_conversation", "successful_tasks"], ["client"])
+CheckRequestCompletion_stream_async.__doc__ = """Raises:
+    DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+NextConsecutiveNoActionCount       = _define_function("user.voice_turn.NextConsecutiveNoActionCount", "sync",  ["selected_task", "current_count"])
+NextConsecutiveNoActionCount_async = _define_function("user.voice_turn.NextConsecutiveNoActionCount", "async", ["selected_task", "current_count"])
+
+
+RequestIsComplete       = _define_function("user.voice_turn.RequestIsComplete", "sync",  ["consecutive_no_action_count", "completion"])
+RequestIsComplete_async = _define_function("user.voice_turn.RequestIsComplete", "async", ["consecutive_no_action_count", "completion"])
+
+
+RequestStateTask       = _define_function("user.voice_turn.RequestStateTask", "sync",  ["model_id"])
+RequestStateTask_async = _define_function("user.voice_turn.RequestStateTask", "async", ["model_id"])
+
+
+RunVoiceTurn       = _define_function("user.voice_turn.RunVoiceTurn", "sync",  ["current_user_request", "load_context", "load_request_conversation", "load_task_conversation_scope", "report_task_choice", "retrieve_memories", "execute_task", "dispatch_task_outputs", "summarize_task_actions", "record_validation_reply", "write_candidate_memories"])
 RunVoiceTurn.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
-RunVoiceTurn_async = _define_function("user.voice_turn.RunVoiceTurn", "async", ["current_user_request", "load_context", "load_task_conversation_scope", "report_task_choice", "retrieve_memories", "execute_task", "dispatch_task_outputs", "summarize_task_actions", "record_validation_reply"])
+RunVoiceTurn_async = _define_function("user.voice_turn.RunVoiceTurn", "async", ["current_user_request", "load_context", "load_request_conversation", "load_task_conversation_scope", "report_task_choice", "retrieve_memories", "execute_task", "dispatch_task_outputs", "summarize_task_actions", "record_validation_reply", "write_candidate_memories"])
 RunVoiceTurn_async.__doc__ = """Raises:
     DevOther, InvalidArgument, Io, LlmClient, RenderPrompt, Timeout"""
+
+
+VoiceRequestResultAfterNoAction       = _define_function("user.voice_turn.VoiceRequestResultAfterNoAction", "sync",  ["completed_tasks", "no_action", "task_completion_ms", "completion_reviews", "failure_reviews"])
+VoiceRequestResultAfterNoAction_async = _define_function("user.voice_turn.VoiceRequestResultAfterNoAction", "async", ["completed_tasks", "no_action", "task_completion_ms", "completion_reviews", "failure_reviews"])
+
+
+FinishedVoiceRequestResult       = _define_function("user.voice_turn.FinishedVoiceRequestResult", "sync",  ["state"])
+FinishedVoiceRequestResult_async = _define_function("user.voice_turn.FinishedVoiceRequestResult", "async", ["state"])
+
+
+CompletedVoiceTaskResult       = _define_function("user.voice_turn.CompletedVoiceTaskResult", "sync",  ["completed", "task_completion_ms", "completion_reviews", "failure_reviews"])
+CompletedVoiceTaskResult_async = _define_function("user.voice_turn.CompletedVoiceTaskResult", "async", ["completed", "task_completion_ms", "completion_reviews", "failure_reviews"])
 
 
 TaskConversation       = _define_function("user.voice_turn.TaskConversation", "sync",  ["conversation", "scope"])
@@ -112,6 +195,13 @@ class VoiceTaskFlowResult(pydantic.BaseModel):
 VoiceTaskRunResult: typing.TypeAlias = typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]
 
 
+class PendingVoiceRequestResult(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+
+
+VoiceRequestResultState: typing.TypeAlias = typing.Union[PendingVoiceRequestResult, VoiceTaskFlowResult, VoiceTaskNoActionResult]
+
+
 class VoiceTaskCompletionReview(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     attempt_id: str
@@ -130,6 +220,23 @@ class VoiceTaskFailureReview(pydantic.BaseModel):
     earlier_refusal_reply_text: str
     decision: task.TaskFailureDecision
     elapsed_ms: int
+
+
+class SuccessfulVoiceTaskResult(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_name: str
+    completion_requirement: str
+    output_summary: str
+
+
+class CompletedVoiceTaskCycle(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    cycle_id: str
+    understanding: VoicePromptUnderstanding
+    retrieved_memories: memory.RetrievedMemoryGraph
+    continuation: VoicePromptContinuation
+    attempt_id: str
+    task_completion: task.CompletionResult
 
 
 class VoicePromptUnderstanding(pydantic.BaseModel):
@@ -164,12 +271,44 @@ class VoicePromptContinuationTimings(pydantic.BaseModel):
 
 
 __all__ = [
+    "MemoryReviewContext",
+    "MemoryReviewContext_async",
+    "StoredCandidateMemory",
+    "StoredCandidateMemory_async",
     "UnderstandVoicePrompt",
     "UnderstandVoicePrompt_async",
     "ContinueVoicePrompt",
     "ContinueVoicePrompt_async",
+    "ReviewMemories",
+    "ReviewMemories_async",
+    "CheckRequestCompletion",
+    "CheckRequestCompletion_async",
+    "CheckRequestCompletion__build_request",
+    "CheckRequestCompletion__build_request_async",
+    "CheckRequestCompletion__build_request_stream",
+    "CheckRequestCompletion__build_request_stream_async",
+    "CheckRequestCompletion__parse",
+    "CheckRequestCompletion__parse_async",
+    "CheckRequestCompletion__parse_stream",
+    "CheckRequestCompletion__parse_stream_async",
+    "CheckRequestCompletion__render_prompt",
+    "CheckRequestCompletion__render_prompt_async",
+    "CheckRequestCompletion_stream",
+    "CheckRequestCompletion_stream_async",
+    "NextConsecutiveNoActionCount",
+    "NextConsecutiveNoActionCount_async",
+    "RequestIsComplete",
+    "RequestIsComplete_async",
+    "RequestStateTask",
+    "RequestStateTask_async",
     "RunVoiceTurn",
     "RunVoiceTurn_async",
+    "VoiceRequestResultAfterNoAction",
+    "VoiceRequestResultAfterNoAction_async",
+    "FinishedVoiceRequestResult",
+    "FinishedVoiceRequestResult_async",
+    "CompletedVoiceTaskResult",
+    "CompletedVoiceTaskResult_async",
     "TaskConversation",
     "TaskConversation_async",
     "VoiceTaskFlowContext",
@@ -178,8 +317,12 @@ __all__ = [
     "VoiceTaskNoActionResult",
     "VoiceTaskFlowResult",
     "VoiceTaskRunResult",
+    "PendingVoiceRequestResult",
+    "VoiceRequestResultState",
     "VoiceTaskCompletionReview",
     "VoiceTaskFailureReview",
+    "SuccessfulVoiceTaskResult",
+    "CompletedVoiceTaskCycle",
     "VoicePromptUnderstanding",
     "VoicePromptContinuation",
     "VoicePromptUnderstandingTimings",

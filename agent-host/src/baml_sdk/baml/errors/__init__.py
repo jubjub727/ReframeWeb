@@ -35,7 +35,7 @@ class ErrorContext(pydantic.BaseModel):
     was thrown, and the error it superseded while the scope was unwinding (its
     `cause`), if any. Bound by the second parameter of a `catch (e, ctx)`
     handler.
-    
+
     The chain runs newest → oldest through `cause`; `root_cause` walks to the
     original failure at the tail, and `to_string` renders the whole chain
     Python-style ("During handling of the above error, another error occurred").

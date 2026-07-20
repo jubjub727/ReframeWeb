@@ -21,12 +21,69 @@
 from __future__ import annotations
 
 import typing
+import pydantic
+
+from ... import memory
 
 if typing.TYPE_CHECKING:
-    from ... import memory
     from ... import turn_context
 
 from baml_bridge import define_function as _define_function
+
+
+EmptyCandidateMemoryWriteBatch       = _define_function("user.memory.internal.EmptyCandidateMemoryWriteBatch", "sync",  [])
+EmptyCandidateMemoryWriteBatch_async = _define_function("user.memory.internal.EmptyCandidateMemoryWriteBatch", "async", [])
+
+
+CandidateMemoryCount       = _define_function("user.memory.internal.CandidateMemoryCount", "sync",  ["groups"])
+CandidateMemoryCount_async = _define_function("user.memory.internal.CandidateMemoryCount", "async", ["groups"])
+
+
+AddCandidateMemoryToGroup       = _define_function("user.memory.internal.AddCandidateMemoryToGroup", "sync",  ["group", "layer", "candidate"])
+AddCandidateMemoryToGroup_async = _define_function("user.memory.internal.AddCandidateMemoryToGroup", "async", ["group", "layer", "candidate"])
+
+
+HasSelectedCandidates       = _define_function("user.memory.internal.HasSelectedCandidates", "sync",  ["batch"])
+HasSelectedCandidates_async = _define_function("user.memory.internal.HasSelectedCandidates", "async", ["batch"])
+
+
+CandidateMemoryReviewInputs       = _define_function("user.memory.internal.CandidateMemoryReviewInputs", "sync",  ["groups", "context"])
+CandidateMemoryReviewInputs_async = _define_function("user.memory.internal.CandidateMemoryReviewInputs", "async", ["groups", "context"])
+
+
+AddCandidateMemoryReviewInput       = _define_function("user.memory.internal.AddCandidateMemoryReviewInput", "sync",  ["inputs", "layer", "candidates", "stored_memories"])
+AddCandidateMemoryReviewInput_async = _define_function("user.memory.internal.AddCandidateMemoryReviewInput", "async", ["inputs", "layer", "candidates", "stored_memories"])
+
+
+KeptCandidateMemories       = _define_function("user.memory.internal.KeptCandidateMemories", "sync",  ["candidates", "decision"])
+KeptCandidateMemories_async = _define_function("user.memory.internal.KeptCandidateMemories", "async", ["candidates", "decision"])
+
+
+CandidateMemoryWriteBatchFromReviews       = _define_function("user.memory.internal.CandidateMemoryWriteBatchFromReviews", "sync",  ["reviews"])
+CandidateMemoryWriteBatchFromReviews_async = _define_function("user.memory.internal.CandidateMemoryWriteBatchFromReviews", "async", ["reviews"])
+
+
+CandidateMemoryPurpose       = _define_function("user.memory.internal.CandidateMemoryPurpose", "sync",  ["layer"])
+CandidateMemoryPurpose_async = _define_function("user.memory.internal.CandidateMemoryPurpose", "async", ["layer"])
+
+
+EmptyCandidateMemoryReviewContext       = _define_function("user.memory.internal.EmptyCandidateMemoryReviewContext", "sync",  [])
+EmptyCandidateMemoryReviewContext_async = _define_function("user.memory.internal.EmptyCandidateMemoryReviewContext", "async", [])
+
+
+class CandidateMemoryReviewInput(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    layer: memory.CandidateMemoryLayer
+    purpose: str
+    candidates: typing.List[memory.CandidateMemoryEntry]
+    stored_memories: typing.List[memory.StoredCandidateMemory]
+
+
+class CandidateMemoryReview(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    layer: memory.CandidateMemoryLayer
+    candidates: typing.List[memory.CandidateMemoryEntry]
+    kept_candidates: typing.List[memory.CandidateMemoryEntry]
 
 
 TaskCandidate       = _define_function("user.memory.internal.TaskCandidate", "sync",  ["task"])
@@ -78,6 +135,28 @@ RelevantConversationGraph_async = _define_function("user.memory.internal.Relevan
 
 
 __all__ = [
+    "EmptyCandidateMemoryWriteBatch",
+    "EmptyCandidateMemoryWriteBatch_async",
+    "CandidateMemoryCount",
+    "CandidateMemoryCount_async",
+    "AddCandidateMemoryToGroup",
+    "AddCandidateMemoryToGroup_async",
+    "HasSelectedCandidates",
+    "HasSelectedCandidates_async",
+    "CandidateMemoryReviewInputs",
+    "CandidateMemoryReviewInputs_async",
+    "AddCandidateMemoryReviewInput",
+    "AddCandidateMemoryReviewInput_async",
+    "KeptCandidateMemories",
+    "KeptCandidateMemories_async",
+    "CandidateMemoryWriteBatchFromReviews",
+    "CandidateMemoryWriteBatchFromReviews_async",
+    "CandidateMemoryPurpose",
+    "CandidateMemoryPurpose_async",
+    "EmptyCandidateMemoryReviewContext",
+    "EmptyCandidateMemoryReviewContext_async",
+    "CandidateMemoryReviewInput",
+    "CandidateMemoryReview",
     "TaskCandidate",
     "TaskCandidate_async",
     "CurrentSessionMemoryCandidate",

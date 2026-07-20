@@ -21,10 +21,64 @@
 from __future__ import annotations
 
 import typing
+import pydantic
 
 if typing.TYPE_CHECKING:
     from ... import memory
     from ... import turn_context
+
+
+def EmptyCandidateMemoryWriteBatch() -> memory.CandidateMemoryWriteBatch: ...
+async def EmptyCandidateMemoryWriteBatch_async() -> memory.CandidateMemoryWriteBatch: ...
+
+
+def CandidateMemoryCount(groups: memory.CandidateMemoryGroups) -> int: ...
+async def CandidateMemoryCount_async(groups: memory.CandidateMemoryGroups) -> int: ...
+
+
+def AddCandidateMemoryToGroup(group: typing.List[memory.CandidateMemoryEntry], layer: memory.CandidateMemoryLayer, candidate: memory.CandidateMemory) -> None: ...
+async def AddCandidateMemoryToGroup_async(group: typing.List[memory.CandidateMemoryEntry], layer: memory.CandidateMemoryLayer, candidate: memory.CandidateMemory) -> None: ...
+
+
+def HasSelectedCandidates(batch: memory.CandidateMemoryWriteBatch) -> bool: ...
+async def HasSelectedCandidates_async(batch: memory.CandidateMemoryWriteBatch) -> bool: ...
+
+
+def CandidateMemoryReviewInputs(groups: memory.CandidateMemoryGroups, context: memory.CandidateMemoryReviewContext) -> typing.List[CandidateMemoryReviewInput]: ...
+async def CandidateMemoryReviewInputs_async(groups: memory.CandidateMemoryGroups, context: memory.CandidateMemoryReviewContext) -> typing.List[CandidateMemoryReviewInput]: ...
+
+
+def AddCandidateMemoryReviewInput(inputs: typing.List[CandidateMemoryReviewInput], layer: memory.CandidateMemoryLayer, candidates: typing.List[memory.CandidateMemoryEntry], stored_memories: typing.List[memory.StoredCandidateMemory]) -> None: ...
+async def AddCandidateMemoryReviewInput_async(inputs: typing.List[CandidateMemoryReviewInput], layer: memory.CandidateMemoryLayer, candidates: typing.List[memory.CandidateMemoryEntry], stored_memories: typing.List[memory.StoredCandidateMemory]) -> None: ...
+
+
+def KeptCandidateMemories(candidates: typing.List[memory.CandidateMemoryEntry], decision: memory.CandidateMemoryReviewDecision) -> typing.List[memory.CandidateMemoryEntry]: ...
+async def KeptCandidateMemories_async(candidates: typing.List[memory.CandidateMemoryEntry], decision: memory.CandidateMemoryReviewDecision) -> typing.List[memory.CandidateMemoryEntry]: ...
+
+
+def CandidateMemoryWriteBatchFromReviews(reviews: typing.List[CandidateMemoryReview]) -> memory.CandidateMemoryWriteBatch: ...
+async def CandidateMemoryWriteBatchFromReviews_async(reviews: typing.List[CandidateMemoryReview]) -> memory.CandidateMemoryWriteBatch: ...
+
+
+def CandidateMemoryPurpose(layer: memory.CandidateMemoryLayer) -> str: ...
+async def CandidateMemoryPurpose_async(layer: memory.CandidateMemoryLayer) -> str: ...
+
+
+def EmptyCandidateMemoryReviewContext() -> memory.CandidateMemoryReviewContext: ...
+async def EmptyCandidateMemoryReviewContext_async() -> memory.CandidateMemoryReviewContext: ...
+
+
+class CandidateMemoryReviewInput(pydantic.BaseModel):
+    layer: memory.CandidateMemoryLayer
+    purpose: str
+    candidates: typing.List[memory.CandidateMemoryEntry]
+    stored_memories: typing.List[memory.StoredCandidateMemory]
+
+
+class CandidateMemoryReview(pydantic.BaseModel):
+    layer: memory.CandidateMemoryLayer
+    candidates: typing.List[memory.CandidateMemoryEntry]
+    kept_candidates: typing.List[memory.CandidateMemoryEntry]
 
 
 def TaskCandidate(task: memory.RetrievedTaskNode) -> memory.RetrievedMemoryCandidate: ...
@@ -76,6 +130,28 @@ async def RelevantConversationGraph_async(conversation: memory.RetrievedConversa
 
 
 __all__ = [
+    "EmptyCandidateMemoryWriteBatch",
+    "EmptyCandidateMemoryWriteBatch_async",
+    "CandidateMemoryCount",
+    "CandidateMemoryCount_async",
+    "AddCandidateMemoryToGroup",
+    "AddCandidateMemoryToGroup_async",
+    "HasSelectedCandidates",
+    "HasSelectedCandidates_async",
+    "CandidateMemoryReviewInputs",
+    "CandidateMemoryReviewInputs_async",
+    "AddCandidateMemoryReviewInput",
+    "AddCandidateMemoryReviewInput_async",
+    "KeptCandidateMemories",
+    "KeptCandidateMemories_async",
+    "CandidateMemoryWriteBatchFromReviews",
+    "CandidateMemoryWriteBatchFromReviews_async",
+    "CandidateMemoryPurpose",
+    "CandidateMemoryPurpose_async",
+    "EmptyCandidateMemoryReviewContext",
+    "EmptyCandidateMemoryReviewContext_async",
+    "CandidateMemoryReviewInput",
+    "CandidateMemoryReview",
     "TaskCandidate",
     "TaskCandidate_async",
     "CurrentSessionMemoryCandidate",

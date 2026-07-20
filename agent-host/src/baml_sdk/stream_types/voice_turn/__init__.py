@@ -27,6 +27,27 @@ from ... import stream_types
 from ... import task
 
 
+class CompletedVoiceTaskCycle(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    cycle_id: typing.Optional[str]
+    understanding: typing.Optional[VoicePromptUnderstanding]
+    retrieved_memories: typing.Optional[stream_types.memory.RetrievedMemoryGraph]
+    continuation: typing.Optional[VoicePromptContinuation]
+    attempt_id: typing.Optional[str]
+    task_completion: typing.Optional[task.CompletionResult]
+
+
+class PendingVoiceRequestResult(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+
+
+class SuccessfulVoiceTaskResult(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid")
+    task_name: typing.Optional[str]
+    completion_requirement: typing.Optional[str]
+    output_summary: typing.Optional[str]
+
+
 class VoiceTaskCompletionReview(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
     attempt_id: typing.Optional[str]
@@ -97,6 +118,9 @@ class VoiceTaskNoActionResult(pydantic.BaseModel):
     task_choice_ms: typing.Optional[int]
 
 
+VoiceRequestResultState: typing.TypeAlias = typing.Union[PendingVoiceRequestResult, VoiceTaskFlowResult, VoiceTaskNoActionResult]
+
+
 VoiceTaskRunResult: typing.TypeAlias = typing.Union[VoiceTaskFlowResult, VoiceTaskNoActionResult]
 
 
@@ -132,6 +156,9 @@ class VoicePromptUnderstandingTimings(pydantic.BaseModel):
 
 
 __all__ = [
+    "CompletedVoiceTaskCycle",
+    "PendingVoiceRequestResult",
+    "SuccessfulVoiceTaskResult",
     "VoiceTaskCompletionReview",
     "VoiceTaskConversationScope",
     "VoiceTaskExecutionBoundaryResult",
@@ -139,6 +166,7 @@ __all__ = [
     "VoiceTaskFlowContext",
     "VoiceTaskFlowResult",
     "VoiceTaskNoActionResult",
+    "VoiceRequestResultState",
     "VoiceTaskRunResult",
     "VoicePromptContinuation",
     "VoicePromptContinuationTimings",
