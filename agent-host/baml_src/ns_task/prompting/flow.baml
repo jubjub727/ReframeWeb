@@ -28,8 +28,20 @@ function ComposeTaskInput(
           easier to read.
         - Write for the task runner using human-meaningful context rather than
           source bookkeeping.
-        - Set candidate_memory only when this composition step reveals durable
-          guidance for future prompt composition.
+        - candidate_memory belongs only to the behavior of task-input composition.
+          It must describe a reusable lesson about how this layer should assemble
+          task_input in future requests.
+        - The request, conversation, memories, selected task, and machine state
+          are composition inputs. Never copy, paraphrase, consolidate, infer, or
+          promote their contents into candidate_memory.
+        - A user fact, user preference, formatting preference, request detail,
+          task instruction, task result, or composed task_input is never a
+          candidate memory from this layer.
+        - Return candidate_memory only when this composition exposed a new,
+          durable prompt-composition lesson not already stated here or in
+          task_prompt_memories. Otherwise return null. If the candidate could be
+          read as something to remember about the user or task instead of the
+          prompt composer, return null.
         - Keep a list of exact memories when their contents as memories are directly related to the user request.
         - When keeping exact memories make sure to keep their parent context memory as well so the structure/origin of the memory is kept even if its siblings aren't.
 

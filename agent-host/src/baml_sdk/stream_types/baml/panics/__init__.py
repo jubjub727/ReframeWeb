@@ -55,7 +55,7 @@ class DivisionByZero(pydantic.BaseModel):
 class Exit(pydantic.BaseModel):
     """
     A clean process-termination request from `baml.sys.exit(code)`.
-    
+
     Catchable like any other panic; if left unhandled, the engine
     terminates the process with this code. Patterned after Python's
     `SystemExit`.

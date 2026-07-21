@@ -25,32 +25,32 @@ import typing
 
 def get(key: str) -> typing.Optional[str]:
     """Returns the value of the environment variable `key`, or `null` if not set.
-    
+
     Throws `ParseError` if the variable is set but its value is not valid
     UTF-8 (the native bridge surfaces `std::env::VarError::NotUnicode` as a
     catchable parse error).
-    
+
     Raises:
         Io, ParseError"""
 async def get_async(key: str) -> typing.Optional[str]:
     """Returns the value of the environment variable `key`, or `null` if not set.
-    
+
     Throws `ParseError` if the variable is set but its value is not valid
     UTF-8 (the native bridge surfaces `std::env::VarError::NotUnicode` as a
     catchable parse error).
-    
+
     Raises:
         Io, ParseError"""
 
 
 def get_or_panic(key: str) -> str:
     """Returns the value of the environment variable `key`. Panics if not set.
-    
+
     Raises:
         Io, ParseError"""
 async def get_or_panic_async(key: str) -> str:
     """Returns the value of the environment variable `key`. Panics if not set.
-    
+
     Raises:
         Io, ParseError"""
 
@@ -58,25 +58,25 @@ async def get_or_panic_async(key: str) -> str:
 def get_or_panic_lenient(key: str, lenient: bool) -> str:
     """Like `get_or_panic`, but tolerant of a missing variable when `lenient` is
     true: a missing variable yields the empty string instead of panicking.
-    
+
     Used by generated client constructors so that offline prompt rendering
     (`<Fn>$render_prompt`) can build a client for its provider/role metadata
     without requiring credentials. The network paths (`<Fn>$call`,
     `<Fn>$build_request`) construct with `lenient = false`, so a missing
     `api_key` env var still panics for them, exactly as before.
-    
+
     Raises:
         Io, ParseError"""
 async def get_or_panic_lenient_async(key: str, lenient: bool) -> str:
     """Like `get_or_panic`, but tolerant of a missing variable when `lenient` is
     true: a missing variable yields the empty string instead of panicking.
-    
+
     Used by generated client constructors so that offline prompt rendering
     (`<Fn>$render_prompt`) can build a client for its provider/role metadata
     without requiring credentials. The network paths (`<Fn>$call`,
     `<Fn>$build_request`) construct with `lenient = false`, so a missing
     `api_key` env var still panics for them, exactly as before.
-    
+
     Raises:
         Io, ParseError"""
 

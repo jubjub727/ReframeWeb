@@ -37,8 +37,22 @@ function ChooseMemorySearchDepths(
         - updated_after: lower-bound cutoff for updated_at.
 
         Optional output:
-        - candidate_memory: a remembered observation about choosing timestamp
-          cutoffs that could be useful later.
+        - candidate_memory: a durable observation about how this layer should
+          choose timestamp cutoffs in future searches.
+        - candidate_memory belongs only to the behavior of timestamp-cutoff
+          selection. It must describe a reusable lesson about choosing time
+          ranges for search domains.
+        - The request, conversation, memories, task, search hints, domains, and
+          machine state are cutoff-selection inputs. Never copy, paraphrase,
+          consolidate, infer, or promote their contents into candidate_memory.
+        - A user fact, user preference, formatting preference, request detail,
+          task instruction, task result, search subject, or chosen timestamp is
+          never a candidate memory from this layer.
+        - Return candidate_memory only when this decision exposed a new, durable
+          cutoff-selection lesson not already stated here or in cutoff memories.
+          Otherwise return null. If the candidate could be read as something to
+          remember about the user, request, searched content, or current cutoff
+          instead of the cutoff selector, return null.
 
         {{ _.role("user") }}
 
@@ -68,8 +82,6 @@ function ChooseMemorySearchDepths(
         strings:
           contains: {{ memory_search_hints.strings.contains }}
           equals: {{ memory_search_hints.strings.equals }}
-        candidate_memory:
-        {{ memory_search_hints.candidate_memory }}
 
         Search domains:
         {% for domain in search_domains %}

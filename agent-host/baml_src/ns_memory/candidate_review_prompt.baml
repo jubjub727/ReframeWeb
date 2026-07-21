@@ -13,6 +13,17 @@ function SelectCandidateMemories(
 
         Build a compact selection where every kept candidate contributes a distinct insight.
 
+        Keep a candidate only when the observation itself describes a reusable
+        lesson about the decision behavior named by the stated purpose.
+
+        Reject candidates that store, paraphrase, consolidate, infer, or promote
+        user facts, user preferences, formatting preferences, request content,
+        task instructions, task results, or the contents of this layer's inputs.
+        Their usefulness elsewhere does not make them guidance for this purpose.
+        Do not rescue or reinterpret a misplaced candidate. If it could be read
+        as something to remember about the user or task instead of the decision
+        layer, reject it.
+
         {{ _.role("user") }}
 
         Stored guidance:

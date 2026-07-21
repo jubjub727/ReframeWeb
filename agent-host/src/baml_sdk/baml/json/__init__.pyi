@@ -49,12 +49,12 @@ class JsonSerializationError(pydantic.BaseModel):
 
 def parse(s: str) -> json:
     """Parses a JSON string `s` and returns a `json` value. Throws `JsonParseError` on invalid JSON.
-    
+
     Raises:
         JsonParseError"""
 async def parse_async(s: str) -> json:
     """Parses a JSON string `s` and returns a `json` value. Throws `JsonParseError` on invalid JSON.
-    
+
     Raises:
         JsonParseError"""
 
@@ -90,7 +90,7 @@ async def to_json_async(v: T, *, _types: dict[str, type]) -> json:
 def from_(value: T, *, _types: dict[str, type]) -> json:
     """Serialize any BAML value `value` of type `T` to its `json` representation,
     honoring user-defined `baml.ToJson` overrides on classes at every depth.
-    
+
     The json analog of `string.from`: a structural conversion that renders
     primitives, lists, maps, class instances (as `{"field": value}`), enums (as
     their variant name), and media (as the tagged form) to their natural json
@@ -99,16 +99,16 @@ def from_(value: T, *, _types: dict[str, type]) -> json:
     `baml._to_json_shim` native), for the same package-boundary reason
     `string.from` uses `_to_string_shim` rather than the literal `is baml.ToJson`
     match form.
-    
+
     Throws `JsonSerializationError` for non-representable values (`uint8array`
     without explicit encoding, function values, etc.).
-    
+
     Raises:
         JsonSerializationError"""
 async def from_async(value: T, *, _types: dict[str, type]) -> json:
     """Serialize any BAML value `value` of type `T` to its `json` representation,
     honoring user-defined `baml.ToJson` overrides on classes at every depth.
-    
+
     The json analog of `string.from`: a structural conversion that renders
     primitives, lists, maps, class instances (as `{"field": value}`), enums (as
     their variant name), and media (as the tagged form) to their natural json
@@ -117,10 +117,10 @@ async def from_async(value: T, *, _types: dict[str, type]) -> json:
     `baml._to_json_shim` native), for the same package-boundary reason
     `string.from` uses `_to_string_shim` rather than the literal `is baml.ToJson`
     match form.
-    
+
     Throws `JsonSerializationError` for non-representable values (`uint8array`
     without explicit encoding, function values, etc.).
-    
+
     Raises:
         JsonSerializationError"""
 
@@ -156,12 +156,12 @@ async def field_async(j: json, key: str) -> json: ...
 def serialize(v: T, *, _types: dict[str, type]) -> str:
     """Serialize `v` to JSON text, honoring user-defined `to_json` overrides on
     classes (via [`to_json<T>`]). Equivalent to `stringify(to_json<T>(v))`.
-    
+
     Use this from a host that wants to print a target's return value as JSON
     while still respecting class-level `to_json` overrides. The structural
     path is [`to_string<T>`], which walks fields directly and bypasses
     overrides — appropriate when override behavior would be a problem.
-    
+
     HACK: this is a thin shim that only exists so `baml_exec::dispatch`
     has a stable named entry point to call from Rust (via
     `engine.call_function("baml.json.serialize", ...)`). The composition
@@ -170,18 +170,18 @@ def serialize(v: T, *, _types: dict[str, type]) -> str:
     instead of two, and a place to evolve the override semantics if they
     drift. Remove this if the host gains a direct way to invoke generic
     compositions without a named landing pad.
-    
+
     Raises:
         JsonSerializationError"""
 async def serialize_async(v: T, *, _types: dict[str, type]) -> str:
     """Serialize `v` to JSON text, honoring user-defined `to_json` overrides on
     classes (via [`to_json<T>`]). Equivalent to `stringify(to_json<T>(v))`.
-    
+
     Use this from a host that wants to print a target's return value as JSON
     while still respecting class-level `to_json` overrides. The structural
     path is [`to_string<T>`], which walks fields directly and bypasses
     overrides — appropriate when override behavior would be a problem.
-    
+
     HACK: this is a thin shim that only exists so `baml_exec::dispatch`
     has a stable named entry point to call from Rust (via
     `engine.call_function("baml.json.serialize", ...)`). The composition
@@ -190,7 +190,7 @@ async def serialize_async(v: T, *, _types: dict[str, type]) -> str:
     instead of two, and a place to evolve the override semantics if they
     drift. Remove this if the host gains a direct way to invoke generic
     compositions without a named landing pad.
-    
+
     Raises:
         JsonSerializationError"""
 
@@ -199,38 +199,38 @@ def deserialize(s: str, *, _types: dict[str, type]) -> T:
     """Parse JSON text into a value of type `T`, honoring user-defined
     `from_json` overrides on classes (via [`from_json<T>`]). Equivalent to
     `from_json<T>(parse(s))`.
-    
+
     Use this from a host that wants to coerce a JSON-shaped input (such as
     `--json-args`) into a typed BAML value while respecting class-level
     `from_json` overrides. The structural path is [`from_string<T>`], which
     decodes structurally and bypasses overrides.
-    
+
     HACK: same story as [`serialize<T>`] — this wrapper exists so
     `baml_exec::dispatch::build_args_from_signature` can resolve a single
     stable name (`baml.json.deserialize`) to coerce `--json-args` payloads
     through `from_json<T>(parse(s))`. Inlining the composition into the
     Rust caller would mean threading two generic engine calls + their
     throws-types instead of one, so the wrapper pays for itself.
-    
+
     Raises:
         JsonParseError, JsonDecodeError"""
 async def deserialize_async(s: str, *, _types: dict[str, type]) -> T:
     """Parse JSON text into a value of type `T`, honoring user-defined
     `from_json` overrides on classes (via [`from_json<T>`]). Equivalent to
     `from_json<T>(parse(s))`.
-    
+
     Use this from a host that wants to coerce a JSON-shaped input (such as
     `--json-args`) into a typed BAML value while respecting class-level
     `from_json` overrides. The structural path is [`from_string<T>`], which
     decodes structurally and bypasses overrides.
-    
+
     HACK: same story as [`serialize<T>`] — this wrapper exists so
     `baml_exec::dispatch::build_args_from_signature` can resolve a single
     stable name (`baml.json.deserialize`) to coerce `--json-args` payloads
     through `from_json<T>(parse(s))`. Inlining the composition into the
     Rust caller would mean threading two generic engine calls + their
     throws-types instead of one, so the wrapper pays for itself.
-    
+
     Raises:
         JsonParseError, JsonDecodeError"""
 

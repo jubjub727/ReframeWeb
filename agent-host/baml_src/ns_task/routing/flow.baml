@@ -33,8 +33,8 @@ function ChooseTask(
           monitor resolutions, and IP geolocation.
 
         Optional output available in this step:
-        - candidate_memory: a vague remembered observation that could be useful to
-          preserve. Only include observations not commentary.
+        - candidate_memory: a durable observation about how this routing layer
+          should choose among available tasks in future requests.
 
         Rules:
         - Select exactly one task from Available tasks.
@@ -42,6 +42,20 @@ function ChooseTask(
         - Do not invent task ids.
         - Do not perform the task. Only choose the task.
         - Use optional outputs only when they are useful.
+        - candidate_memory belongs only to the behavior of task routing. It must
+          describe a reusable lesson about deciding which available task to
+          select.
+        - The request, conversation, memories, preferences, available tasks, and
+          machine state are routing inputs. Never copy, paraphrase, consolidate,
+          infer, or promote their contents into candidate_memory.
+        - A user fact, user preference, formatting preference, request detail,
+          response instruction, task result, or summary of an available task is
+          never a candidate memory from this layer.
+        - Return candidate_memory only when this routing decision exposed a new,
+          durable routing lesson not already stated here or in task-choice
+          memories. Otherwise return null. If the candidate could be read as
+          something to remember about the user, request, or selected task instead
+          of the router, return null.
         - User request may be related to memories that this layer is not yet aware of, simply finish your task without thinking too much if that seems to be the case.
 
         {{ _.role("user") }}

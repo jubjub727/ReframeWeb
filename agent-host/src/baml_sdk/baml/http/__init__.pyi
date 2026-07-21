@@ -45,13 +45,13 @@ class Response(pydantic.BaseModel):
     @staticmethod
     def new(status_code: int, headers: typing.Dict[str, str], body: bytes) -> Response:
         """Builds a response to return from an `http.Server` handler.
-        
+
         `body` is sent verbatim as the response body. `headers` should include a
         `Content-Type` if the client needs one; `Content-Length` is set for you."""
     @staticmethod
     async def new_async(status_code: int, headers: typing.Dict[str, str], body: bytes) -> Response:
         """Builds a response to return from an `http.Server` handler.
-        
+
         `body` is sent verbatim as the response body. `headers` should include a
         `Content-Type` if the client needs one; `Content-Length` is set for you."""
     @staticmethod
@@ -63,7 +63,7 @@ class Response(pydantic.BaseModel):
         flushed to the client as its own chunk — a slow producer streams in real
         time (e.g. for Server-Sent Events). Do not set `Content-Length`; it is
         omitted for a streamed body.
-        
+
         Because hyper only reads the response body *after* the handler returns, the
         writes must run after the handler hands the response back — typically from a
         `spawn`ed task that captures it, mirroring hyper's channel-backed body:
@@ -85,7 +85,7 @@ class Response(pydantic.BaseModel):
         flushed to the client as its own chunk — a slow producer streams in real
         time (e.g. for Server-Sent Events). Do not set `Content-Length`; it is
         omitted for a streamed body.
-        
+
         Because hyper only reads the response body *after* the handler returns, the
         writes must run after the handler hands the response back — typically from a
         `spawn`ed task that captures it, mirroring hyper's channel-backed body:
@@ -100,22 +100,22 @@ class Response(pydantic.BaseModel):
         ```"""
     def text(self) -> str:
         """Returns the response body as a UTF-8 string.
-        
+
         Raises:
             Io"""
     async def text_async(self) -> str:
         """Returns the response body as a UTF-8 string.
-        
+
         Raises:
             Io"""
     def bytes(self) -> bytes:
         """Returns the response body as raw bytes.
-        
+
         Raises:
             Io"""
     async def bytes_async(self) -> bytes:
         """Returns the response body as raw bytes.
-        
+
         Raises:
             Io"""
     def ok(self) -> bool:
@@ -128,7 +128,7 @@ class Response(pydantic.BaseModel):
         previous chunk has been accepted by the connection. Raises `Io` if the
         response was not created with `new_streaming`, if it has been `end`ed, or
         if the client has hung up.
-        
+
         Raises:
             Io"""
     async def write_async(self, data: bytes) -> None:
@@ -137,21 +137,21 @@ class Response(pydantic.BaseModel):
         previous chunk has been accepted by the connection. Raises `Io` if the
         response was not created with `new_streaming`, if it has been `end`ed, or
         if the client has hung up.
-        
+
         Raises:
             Io"""
     def end(self) -> None:
         """Ends a streaming response body (see `new_streaming`), signaling
         end-of-stream to the client so the chunked response completes. Subsequent
         `write` calls raise `Io`. A no-op on an already-ended response.
-        
+
         Raises:
             Io"""
     async def end_async(self) -> None:
         """Ends a streaming response body (see `new_streaming`), signaling
         end-of-stream to the client so the chunked response completes. Subsequent
         `write` calls raise `Io`. A no-op on an already-ended response.
-        
+
         Raises:
             Io"""
 
@@ -162,13 +162,13 @@ class SseStream(pydantic.BaseModel):
     def next(self) -> typing.Optional[str]:
         """Only returns `null` if the stream is done/closed.
         Otherwise, waits until a new event is available.
-        
+
         Raises:
             Io"""
     async def next_async(self) -> typing.Optional[str]:
         """Only returns `null` if the stream is done/closed.
         Otherwise, waits until a new event is available.
-        
+
         Raises:
             Io"""
     def close(self) -> None:
@@ -189,20 +189,20 @@ async def _timeout_nanos_async(timeout: typing.Optional[baml.time.Duration]) -> 
 
 def fetch(url: str, *, timeout: typing.Union[baml.time.Duration, None, UNSET] = None) -> Response:
     """Sends a GET request to `url` and returns the response.
-    
+
     `timeout` is the total deadline for the request (connection + response
     headers + body). `null` (the default) imposes no deadline. On expiry this
     throws `root.errors.Timeout`.
-    
+
     Raises:
         Io, Timeout"""
 async def fetch_async(url: str, *, timeout: typing.Union[baml.time.Duration, None, UNSET] = None) -> Response:
     """Sends a GET request to `url` and returns the response.
-    
+
     `timeout` is the total deadline for the request (connection + response
     headers + body). `null` (the default) imposes no deadline. On expiry this
     throws `root.errors.Timeout`.
-    
+
     Raises:
         Io, Timeout"""
 
@@ -217,18 +217,18 @@ async def _fetch_async(url: str, timeout_nanos: int) -> Response:
 
 def send(request: Request, *, timeout: typing.Union[baml.time.Duration, None, UNSET] = None) -> Response:
     """Sends an HTTP request and returns the response.
-    
+
     `timeout` is the total deadline for the request, as in `fetch`. `null` (the
     default) imposes no deadline.
-    
+
     Raises:
         Io, Timeout"""
 async def send_async(request: Request, *, timeout: typing.Union[baml.time.Duration, None, UNSET] = None) -> Response:
     """Sends an HTTP request and returns the response.
-    
+
     `timeout` is the total deadline for the request, as in `fetch`. `null` (the
     default) imposes no deadline.
-    
+
     Raises:
         Io, Timeout"""
 
@@ -243,12 +243,12 @@ async def _send_async(request: Request, timeout_nanos: int) -> Response:
 
 def fetch_sse(request: Request) -> SseStream:
     """Sends an HTTP request and returns a Server-Sent Events stream for streaming responses.
-    
+
     Raises:
         Io, Timeout"""
 async def fetch_sse_async(request: Request) -> SseStream:
     """Sends an HTTP request and returns a Server-Sent Events stream for streaming responses.
-    
+
     Raises:
         Io, Timeout"""
 
@@ -262,10 +262,10 @@ class Server(pydantic.BaseModel):
         `":0"` (e.g. `"127.0.0.1:0"`) asks the OS for an ephemeral port; the chosen
         address is available as `.addr`. The socket starts queuing incoming
         connections immediately, so a client may connect before `serve` is called.
-        
+
         # Parameters
         - `addr`: The address to bind. E.g. `"127.0.0.1:8080"` or `"127.0.0.1:0"`.
-        
+
         Raises:
             Io"""
     @staticmethod
@@ -274,28 +274,28 @@ class Server(pydantic.BaseModel):
         `":0"` (e.g. `"127.0.0.1:0"`) asks the OS for an ephemeral port; the chosen
         address is available as `.addr`. The socket starts queuing incoming
         connections immediately, so a client may connect before `serve` is called.
-        
+
         # Parameters
         - `addr`: The address to bind. E.g. `"127.0.0.1:8080"` or `"127.0.0.1:0"`.
-        
+
         Raises:
             Io"""
     def serve(self, handler: typing.Callable[[Request], Response], *, tls_config: typing.Union[TlsConfig, None, UNSET] = None, allow_http1: typing.Union[bool, UNSET] = True, allow_http2: typing.Union[bool, UNSET] = True, max_body_size: typing.Union[int, UNSET] = 104857600, max_connections: typing.Union[int, UNSET] = 1024, header_read_timeout: typing.Union[baml.time.Duration, UNSET] = UNSET) -> None:
         """Serves requests with `handler`, blocking the current thread until it is
         cancelled. To run it in the background, use `spawn { server.serve(...) }`.
-        
+
         Each incoming request is dispatched on its own BAML thread, so requests are
         handled concurrently (including multiplexed HTTP/2 streams on one
         connection). Each request is isolated: if the `handler` panics or its
         response can't be written (e.g. a client that hung up early), only that
         request fails — the client receives a `500` and the server keeps serving.
-        
+
         A `Server` serves one handler at a time: calling `serve` while it is already
         serving raises `Io`. Once a serve ends (its thread is cancelled), the same
         `Server` may be served again — with a different `handler`, `tls_config`, or
         protocol set if desired. The bound port is held until the `Server` itself is
         dropped, not when a serve ends.
-        
+
         # Parameters
         - `handler`: Turns each incoming `Request` into a `Response`.
         - `tls_config`: Optional TLS configuration. If provided, the server behaves as an HTTPS server.
@@ -309,30 +309,30 @@ class Server(pydantic.BaseModel):
         - `header_read_timeout`: How long a client has to send the complete request
           headers before the connection is closed (default 30s) — a Slowloris defense.
           A non-positive duration disables it. (HTTP/1 only; HTTP/2 frames its headers.)
-        
+
         # Panics
         - Calling `serve` on an unsupported platform (e.g. in the browser) will panic.
         - If the serving thread is cancelled, `serve` ends with a
           `baml.panics.Cancelled` panic and any in-flight connections are dropped.
-        
+
         Raises:
             Io"""
     async def serve_async(self, handler: typing.Callable[[Request], Response], *, tls_config: typing.Union[TlsConfig, None, UNSET] = None, allow_http1: typing.Union[bool, UNSET] = True, allow_http2: typing.Union[bool, UNSET] = True, max_body_size: typing.Union[int, UNSET] = 104857600, max_connections: typing.Union[int, UNSET] = 1024, header_read_timeout: typing.Union[baml.time.Duration, UNSET] = UNSET) -> None:
         """Serves requests with `handler`, blocking the current thread until it is
         cancelled. To run it in the background, use `spawn { server.serve(...) }`.
-        
+
         Each incoming request is dispatched on its own BAML thread, so requests are
         handled concurrently (including multiplexed HTTP/2 streams on one
         connection). Each request is isolated: if the `handler` panics or its
         response can't be written (e.g. a client that hung up early), only that
         request fails — the client receives a `500` and the server keeps serving.
-        
+
         A `Server` serves one handler at a time: calling `serve` while it is already
         serving raises `Io`. Once a serve ends (its thread is cancelled), the same
         `Server` may be served again — with a different `handler`, `tls_config`, or
         protocol set if desired. The bound port is held until the `Server` itself is
         dropped, not when a serve ends.
-        
+
         # Parameters
         - `handler`: Turns each incoming `Request` into a `Response`.
         - `tls_config`: Optional TLS configuration. If provided, the server behaves as an HTTPS server.
@@ -346,12 +346,12 @@ class Server(pydantic.BaseModel):
         - `header_read_timeout`: How long a client has to send the complete request
           headers before the connection is closed (default 30s) — a Slowloris defense.
           A non-positive duration disables it. (HTTP/1 only; HTTP/2 frames its headers.)
-        
+
         # Panics
         - Calling `serve` on an unsupported platform (e.g. in the browser) will panic.
         - If the serving thread is cancelled, `serve` ends with a
           `baml.panics.Cancelled` panic and any in-flight connections are dropped.
-        
+
         Raises:
             Io"""
     def _serve(self, handler: typing.Callable[[Request], Response], tls_config: typing.Optional[TlsConfig], allow_http1: bool, allow_http2: bool, max_body_size: int, max_connections: int, header_read_timeout_nanos: int) -> None:
@@ -370,27 +370,27 @@ class TlsConfig(pydantic.BaseModel):
     @staticmethod
     def new(cert_pem: bytes, key_pem: bytes, *, allow_tls1_2: typing.Union[bool, UNSET] = True, handshake_timeout: typing.Union[baml.time.Duration, UNSET] = UNSET) -> TlsConfig:
         """Parses a PEM-encoded certificate chain and private key into a TLS configuration.
-        
+
         # Parameters
         - `cert_pem`: PEM-encoded certificate chain (leaf certificate first).
         - `key_pem`: PEM-encoded private key (PKCS#8, PKCS#1/RSA, or SEC1/EC).
         - `handshake_timeout`: How long a TLS handshake may take before the
           connection is dropped (default 10s), bounding a client that opens a
           socket then stalls mid-handshake. A non-positive duration disables it.
-        
+
         Raises:
             Io"""
     @staticmethod
     async def new_async(cert_pem: bytes, key_pem: bytes, *, allow_tls1_2: typing.Union[bool, UNSET] = True, handshake_timeout: typing.Union[baml.time.Duration, UNSET] = UNSET) -> TlsConfig:
         """Parses a PEM-encoded certificate chain and private key into a TLS configuration.
-        
+
         # Parameters
         - `cert_pem`: PEM-encoded certificate chain (leaf certificate first).
         - `key_pem`: PEM-encoded private key (PKCS#8, PKCS#1/RSA, or SEC1/EC).
         - `handshake_timeout`: How long a TLS handshake may take before the
           connection is dropped (default 10s), bounding a client that opens a
           socket then stalls mid-handshake. A non-positive duration disables it.
-        
+
         Raises:
             Io"""
     @staticmethod

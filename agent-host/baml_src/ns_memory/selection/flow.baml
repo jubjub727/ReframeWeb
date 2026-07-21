@@ -19,14 +19,27 @@ function SelectRelevantMemories(
         Make sure to include all relevant memories in a timely manner. This task should be both quick and thorough.
 
         Optional output:
-        - candidate_memory: an observational memory to create when something seems
-          interesting or useful enough to remember.
+        - candidate_memory: a durable observation about how this relevance
+          selector should judge retrieved memory candidates in future tasks.
 
         Rules:
         - Return only the ids of candidate memories that are relevant.
         - A memory is relevant when it would materially affect how the task should
           be performed for this request.
         - Return an empty kept_memory_ids array when no memory is relevant.
+        - candidate_memory belongs only to the behavior of relevance selection.
+          It must describe a reusable lesson about deciding which retrieved
+          candidates to keep or discard.
+        - The request, conversation, session memories, and retrieved candidates
+          are selection inputs. Never copy, paraphrase, consolidate, infer, or
+          promote their contents into candidate_memory.
+        - A user fact, user preference, formatting preference, task instruction,
+          task result, or summary of selected content is never a candidate memory
+          from this layer.
+        - Return candidate_memory only when this selection exposed a durable
+          relevance-selection lesson not already stated here. Otherwise return
+          null. If the candidate could be read as something to remember about the
+          user or task instead of the selector, return null.
 
         {{ _.role("user") }}
 

@@ -26,8 +26,8 @@ function ChooseMemorySearch(
           equality against searchable memory content.
 
         Optional outputs available in this step:
-        - candidate_memory: a vague remembered observation that could be useful to
-          preserve.
+        - candidate_memory: a durable observation about how this layer should
+          plan memory-search hints in future requests.
 
         Rules:
         - Return only search hints and optional candidate_memory.
@@ -43,6 +43,20 @@ function ChooseMemorySearch(
         - Prefer a small set of high-signal hints over broad keyword stuffing.
         - Return empty arrays when no useful search hint is available.
         - Use optional outputs only when they are useful.
+        - candidate_memory belongs only to the behavior of search-hint planning.
+          It must describe a reusable lesson about choosing effective retrieval
+          tags or strings.
+        - The request, conversation, memories, selected task, and machine state
+          are search-planning inputs. Never copy, paraphrase, consolidate, infer,
+          or promote their contents into candidate_memory.
+        - A user fact, user preference, formatting preference, request detail,
+          task instruction, task result, or proposed search subject is never a
+          candidate memory from this layer.
+        - Return candidate_memory only when this decision exposed a new, durable
+          search-planning lesson not already stated here or in search-planning
+          memories. Otherwise return null. If the candidate could be read as
+          something to remember about the user, request, or searched content
+          instead of the search planner, return null.
 
         {{ _.role("user") }}
 
