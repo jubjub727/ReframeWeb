@@ -28,8 +28,8 @@ function WriteValidationReply(
     earlier_refusal_reply_text: string,
 ) -> TaskFailureDecision {
     client: TaskCompletionModel
-    prompt: #"
-        {{ _.role("system") }}
+    prompt: `
+        ${role("system")}
 
         Produce concise validation guidance for this unsuccessful task attempt
         and decide whether the same selected task can sensibly be refined.
@@ -77,18 +77,18 @@ function WriteValidationReply(
         is a sensible next step. Use false when task selection would be more
         useful.
 
-        {{ _.role("user") }}
+        ${role("user")}
 
         Selected task prompt:
-        {{ task_prompt }}
+        ${task_prompt}
 
         Failed task output summary:
-        {{ output_summary }}
+        ${output_summary}
 
         Earlier refusal replies from this task session:
-        {{ earlier_refusal_reply_text }}
+        ${earlier_refusal_reply_text}
 
-        {{ _.role("system") }}
+        ${role("system")}
 
         Return guidance, not a solution. Before responding, remove every resolved
         target, replacement output, partial answer, solved sub-result, identifying
@@ -97,9 +97,9 @@ function WriteValidationReply(
         Name the kind of correction abstractly; do not introduce illustrative
         answer content after phrases such as "for example" or "e.g.".
 
-        {{ _.role("user") }}
+        ${role("user")}
 
         Return the corrective failure decision.
-        {{ ctx.output_format }}
-    "#
+        ${ctx.output_format}
+    `
 }

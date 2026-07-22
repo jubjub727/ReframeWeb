@@ -6,8 +6,8 @@ function CheckRequestCompletion(
     successful_tasks: SuccessfulVoiceTaskResult[],
 ) -> root.task.CompletionResult {
     client: RequestCompletionModel
-    prompt: #"
-        {{ _.role("system") }}
+    prompt: `
+        ${role("system")}
 
         You are checking whether the user's original request is covered by the
         confirmed successful tasks or whether distinct work is still needed.
@@ -27,26 +27,28 @@ function CheckRequestCompletion(
         Return FAIL only when part of the original request has no corresponding
         confirmed task result and another distinct task is still needed.
 
-        {{ _.role("user") }}
+        ${role("user")}
 
         Original user request:
-        {{ current_user_request }}
+        ${current_user_request}
 
         Current conversation:
-        {% if current_conversation %}
-        {{ current_conversation }}
-        {% endif %}
+        ${if (current_conversation != null) {
+            current_conversation
+        } else {
+            ""
+        }}
 
         Confirmed task results:
-        {% for task in successful_tasks %}
-        - Task: {{ task.task_name }}
-          Completion requirement: {{ task.completion_requirement }}
-          Result: {{ task.output_summary }}
-        {% endfor %}
+        ${successful_tasks.map((task) -> {
+            `- Task: ${task.task_name}
+          Completion requirement: ${task.completion_requirement}
+          Result: ${task.output_summary}`
+        }).join("\n")}
 
         Return exactly one token:
         PASS or FAIL
 
-        {{ ctx.output_format }}
-    "#
+        ${ctx.output_format}
+    `
 }

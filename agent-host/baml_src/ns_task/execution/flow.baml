@@ -2,8 +2,8 @@
 
 function PerformTask(full_task_prompt: string) -> TaskExecutionResult {
     client: TaskExecutionModel
-    prompt: #"
-        {{ _.role("system") }}
+    prompt: `
+        ${role("system")}
 
         Complete the task according to the task prompt and any guidance included in
         it.
@@ -22,12 +22,12 @@ function PerformTask(full_task_prompt: string) -> TaskExecutionResult {
           response item.
         - Do not put any extra fields in the payload that is not specified in the return item layout.
 
-        {{ _.role("user") }}
+        ${role("user")}
 
         Task prompt:
-        {{ full_task_prompt }}
+        ${full_task_prompt}
 
         Return the task execution result.
-        {{ ctx.output_format }}
-    "#
+        ${ctx.output_format}
+    `
 }

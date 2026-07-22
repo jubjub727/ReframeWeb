@@ -2,8 +2,8 @@
 
 function SummariseActionHistory(recorded_action_history: string) -> string {
     client: ActionHistorySummaryModel
-    prompt: #"
-        {{ _.role("system") }}
+    prompt: `
+        ${role("system")}
 
         Summarize what the recorded actions for this task attempt did and what changed.
 
@@ -19,12 +19,12 @@ function SummariseActionHistory(recorded_action_history: string) -> string {
           request context is outside this summary's scope.
         - Keep the summary compact while preserving the details needed to understand the current state.
 
-        {{ _.role("user") }}
+        ${role("user")}
 
         Recorded actions for this task attempt:
-        {{ recorded_action_history }}
+        ${recorded_action_history}
 
         Return the summary.
-        {{ ctx.output_format }}
-    "#
+        ${ctx.output_format}
+    `
 }

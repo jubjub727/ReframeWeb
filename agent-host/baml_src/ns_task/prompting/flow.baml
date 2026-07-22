@@ -10,8 +10,8 @@ function ComposeTaskInput(
     machine_state: root.turn_context.MachineStateContext,
 ) -> TaskPromptComposition {
     client: TaskPromptModel
-    prompt: #"
-        {{ _.role("system") }}
+    prompt: `
+        ${role("system")}
 
         Prepare the input text that will be stitched under the selected task
         prompt before it is sent to the selected task.
@@ -45,70 +45,72 @@ function ComposeTaskInput(
         - Keep a list of exact memories when their contents as memories are directly related to the user request.
         - When keeping exact memories make sure to keep their parent context memory as well so the structure/origin of the memory is kept even if its siblings aren't.
 
-        {{ _.role("user") }}
+        ${role("user")}
 
         Selected task prompt:
-        {{ selected_task.prompt }}
+        ${selected_task.prompt}
 
         Current request:
-        {{ current_user_request }}
+        ${current_user_request}
 
         Conversation history:
-        {% if current_conversation %}
-        Conversation:
-        {{ current_conversation }}
-        {% endif %}
+        ${if (current_conversation != null) {
+            `Conversation:
+        ${current_conversation}`
+        } else {
+            ""
+        }}
 
         Remembered context from this session:
-        {% for memory in session_memories %}
-        - {{ memory.title }}
-          Tags: {{ memory.tags }}
-          {{ memory.description }}
-        {% endfor %}
+        ${session_memories.map((memory) -> {
+            `- ${memory.title}
+          Tags: ${memory.tags}
+          ${memory.description}`
+        }).join("\n")}
 
         Other relevant remembered context:
-        {% for memory in selected_memories %}
-        - {{ memory.title }}
-          Tags: {{ memory.tags }}
-          {{ memory.description }}
-        {% endfor %}
+        ${selected_memories.map((memory) -> {
+            `- ${memory.title}
+          Tags: ${memory.tags}
+          ${memory.description}`
+        }).join("\n")}
 
         Prompt composition guidance:
-        {% for memory in task_prompt_memories %}
-        - {{ memory.title }}
-          Tags: {{ memory.tags }}
-          {{ memory.description }}
-        {% endfor %}
+        ${task_prompt_memories.map((memory) -> {
+            `- ${memory.title}
+          Tags: ${memory.tags}
+          ${memory.description}`
+        }).join("\n")}
 
         Machine state:
-          captured_at_utc: {{ machine_state.captured_at_utc }}
-          current_local_time: {{ machine_state.current_local_time }}
-          current_utc_time: {{ machine_state.current_utc_time }}
-          timezone_name: {{ machine_state.timezone_name }}
-          utc_offset: {{ machine_state.utc_offset }}
-          os_architecture: {{ machine_state.os_architecture }}
-          monitor_count: {{ machine_state.monitor_count }}
+          captured_at_utc: ${machine_state.captured_at_utc}
+          current_local_time: ${machine_state.current_local_time}
+          current_utc_time: ${machine_state.current_utc_time}
+          timezone_name: ${machine_state.timezone_name}
+          utc_offset: ${machine_state.utc_offset}
+          os_architecture: ${machine_state.os_architecture}
+          monitor_count: ${machine_state.monitor_count}
           monitors:
-        {% for monitor in machine_state.monitors %}
-          - horizontal_resolution: {{ monitor.horizontal_resolution }}
-            vertical_resolution: {{ monitor.vertical_resolution }}
-        {% endfor %}
-          geolocation_status: {{ machine_state.geolocation_status }}
-          geolocation_source: {{ machine_state.geolocation_source }}
-          ip_address: {{ machine_state.ip_address }}
-          country: {{ machine_state.country }}
-          country_code: {{ machine_state.country_code }}
-          region: {{ machine_state.region }}
-          city: {{ machine_state.city }}
-          postal_code: {{ machine_state.postal_code }}
-          latitude: {{ machine_state.latitude }}
-          longitude: {{ machine_state.longitude }}
-          geolocation_timezone: {{ machine_state.geolocation_timezone }}
-          organization: {{ machine_state.organization }}
-          asn: {{ machine_state.asn }}
-          geolocation_error: {{ machine_state.geolocation_error }}
+        ${machine_state.monitors.map((monitor) -> {
+            `  - horizontal_resolution: ${monitor.horizontal_resolution}
+            vertical_resolution: ${monitor.vertical_resolution}`
+        }).join("\n")}
+          geolocation_status: ${machine_state.geolocation_status}
+          geolocation_source: ${machine_state.geolocation_source}
+          ip_address: ${machine_state.ip_address}
+          country: ${machine_state.country}
+          country_code: ${machine_state.country_code}
+          region: ${machine_state.region}
+          city: ${machine_state.city}
+          postal_code: ${machine_state.postal_code}
+          latitude: ${machine_state.latitude}
+          longitude: ${machine_state.longitude}
+          geolocation_timezone: ${machine_state.geolocation_timezone}
+          organization: ${machine_state.organization}
+          asn: ${machine_state.asn}
+          geolocation_error: ${machine_state.geolocation_error}
 
         Return the task prompt composition.
-        {{ ctx.output_format }}
-    "#
+        ${ctx.output_format}
+    `
 }
